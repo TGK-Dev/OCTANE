@@ -33,7 +33,7 @@ class Moderator(commands.Cog):
 
 			embed.add_field(name='Top:', value=', '.join(role.mention for role in hsorted_roles), inline=False)
 			embed.add_field(name='Roles', value=', '.join(role.mention for role in sorted_roles))
-			embed.set_footer(text='ID {member.id}', icon_url=ctx.author.avatar_url)
+			embed.set_footer(text=f'ID {member.id}', icon_url=ctx.author.avatar_url)
 			await ctx.send(embed=embed)
 		else:
 			await ctx.send(f'{ctx.author.mention} You dont have permissions to use this command!')
