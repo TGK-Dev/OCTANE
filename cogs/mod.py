@@ -100,6 +100,19 @@ class Moderator(commands.Cog):
 		else:
 			await ctx.send(f'Nick Name changed')
 
+	@commands.command(aliases=['av'])
+	async def avatar(self, ctx, member: discord.Member = None):
+		if ctx.author.guild_permissions.manage_messages:
+
+			member = member if member else ctx.author
+
+			embed = discord.Embed(color=0x00ffff)
+			embed.set_image(url=member.avatar_url)
+			await ctx.send(embed=embed)
+		else:
+			await ctx.send(f'{ctx.author.mention} you dont have permission to use this command')
+
+
 
 
 

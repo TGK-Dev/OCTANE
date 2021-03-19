@@ -43,9 +43,9 @@ async def em(ctx):
 async def help(ctx):
 
 	embed = discord.Embed(title='Help', color=0x02ff06, description='This Bot Help command, You can see the All bot command Category')
-	embed.add_field(name='Basics', value='List of the commands: \n 1.Bot Info \n 2.ping \n 3.verify', inline=False)
+	embed.add_field(name='Basics', value='List of the commands: \n 1.Bot Info \n 2.ping \n 3.verify \n 4.8ball', inline=False)
 	embed.add_field(name='Donate', value='List of the commands: \n 1.sgive \n 2.sheist', inline=False)
-	embed.add_field(name='Moderator: ', value='List of the commands: \n 1.Ban \n 2.unban \n 3.kick \n 4.purge \n 5. whois \n 6. setnick', inline=False)
+	embed.add_field(name='Moderator: ', value='List of the commands: \n 1.Ban \n 2.unban \n 3.kick \n 4.purge \n 5. whois \n 6. setnick \n 7.avatar', inline=False)
 	embed.add_field(name='Channels Management: ', value='List of the commands: \n 1.hide \n 2.ubhide \n 3.lock \n 4.unlock \n 5.slowmod', inline=False)
 	embed.add_field(name='Administrator: ', value='List of the commands: \n 1.activity \n 2.status \n 3.logout', inline=False)
 
@@ -72,6 +72,13 @@ async def verify(ctx):
 
 	em = discord.Embed(title='verify', color=0x02ff06, description='Only ca used when joining server first time')
 	em.add_field(name='***Sytax***', value='>verify')
+	await ctx.send(embed=em)
+
+@help.command()
+async def _8ball(ctx):
+
+	em = discord.Embed(title='8 ball Game', value='An classic 8 ball Game')
+	em.add_field(name='***Sytax***', value='>8ball <question>')
 
 	await ctx.send(embed=em)
 
@@ -171,6 +178,14 @@ async def unhide(ctx):
 
 	em = discord.Embed(title='Unhide The Channel for Member', color=0x02ff06, description='give member ability to Viwe the Channel')
 	em.add_field(name='***Sytax***', value='>unhide <channel>')
+
+	await ctx.send(embed=em)
+
+@help.command()
+async def avatar(ctx):
+
+	em = discord.Embed(title='Show mentioned Avatar', description='can be use full to check the serer Member Avatar')
+	em.add_field(name='***Sytax***', value='>avatar/av <user_id & mention>')
 
 	await ctx.send(embed=em)
 #admins

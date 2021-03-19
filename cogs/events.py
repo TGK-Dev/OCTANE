@@ -23,15 +23,7 @@ class events(commands.Cog):
 	   embed.set_footer(text='Once again, a warm welcome Have a great time!', icon_url=member.avatar_url)
 	   await channel.send(f'{member.mention}', embed=embed)
 	   await member.send(embed=embed)
-
-
-	@commands.Cog.listener()
-	async def on_member_remove(self, member):
-	   channel =  self.client.get_channel(785847439579676672)
-
-	   embed = discord.Embed(color=0x00ffff)
-	   embed.set_thumbnail(url=member.avatar_url)
-	   await channel.send(embed=embed)
+	   
 	
 	@commands.Cog.listener()
 	async def on_message(self, message):
