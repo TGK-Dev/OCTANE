@@ -1,1 +1,1 @@
-worker: python Gambler.py
+worker: python TGK.pys
