@@ -98,7 +98,7 @@ class Moderator(commands.Cog):
 			await ctx.message.delete()
 			await ctx.send(f'Nickname was changed for {nick} ')
 		else:
-			await ctx.send(f'{ctx.author.mention} you dont have permission to use this command')
+			await ctx.send(f'Nick Name changed')
 
 
 

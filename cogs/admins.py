@@ -48,5 +48,15 @@ class Admins(commands.Cog):
 		else:
 			await ctx.send(f'{ctx.author.mention} You not an **ADMINISTRATOR** in server!')
 
+	@commands.command()
+	async def say(self,ctx, *, say):
+		if ctx.author.guild_permissions.administrator:
+			await ctx.message.delete()
+			await send(f'{say}')
+		else:
+			return
+
+
+
 def setup(client):
 	client.add_cog(Admins(client))
