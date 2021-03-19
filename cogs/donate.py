@@ -13,7 +13,7 @@ class Donate(commands.Cog):
 
 	@commands.command()
 	async def sgive(self, ctx, price, winner, req, game):
-		channel = self.client.get_channel(812711254790897714)
+		channel = self.client.get_channel(819968735557189666)
 		
 		if channel == ctx.channel:
 
@@ -30,7 +30,7 @@ class Donate(commands.Cog):
 
 	@commands.command()
 	async def sheist(self, ctx, price, req):
-		channel = self.client.get_channel(812711254790897714)
+		channel = self.client.get_channel(819968735557189666)
 		
 		if channel == ctx.channel:
 

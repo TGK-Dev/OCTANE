@@ -12,8 +12,8 @@ class events(commands.Cog):
 
 	@commands.Cog.listener()
 	async def on_member_join(self, member):
-	   channel =  self.client.get_channel(821624212534984726)
-	   guild = self.client.get_guild(797920317871357972)
+	   channel =  self.client.get_channel(785847439579676672)
+	   guild = self.client.get_guild(785839283847954433)
 	   embed = discord.Embed(title=f'<a:celeyay:821818380406882315> WELCOME TO TGK {member.name} <a:celeyay:821818380406882315> ', color=0xff00ff)
 	   embed.set_thumbnail(url=member.avatar_url)
 	   embed.add_field(name='Info Counter:', value='➻ Read our [Rules](https://discord.com/channels/785839283847954433/785841560918163501) \n ➻ Get your roles from [:sparkles:。self-roles](https://discord.com/channels/785839283847954433/785882615202316298/795729352062140537), and say Hi to everyone at [:speech_balloon:。general](https://discord.com/channels/785839283847954433/785847439579676672/817100365665009684)!', inline=False)
@@ -27,13 +27,11 @@ class events(commands.Cog):
 
 	@commands.Cog.listener()
 	async def on_member_remove(self, member):
-	   channel =  self.client.get_channel(821624212534984726)
+	   channel =  self.client.get_channel(785847439579676672)
 
-	   embed = discord.Embed(title=f'Member Left {member.name}', color=0x00ffff)
+	   embed = discord.Embed(color=0x00ffff)
 	   embed.set_thumbnail(url=member.avatar_url)
-	   embed.add_field(name=f'{member} Left', value=f'The user Left the Server ')
 	   await channel.send(embed=embed)
-	   await member.send(embed=embed)
 	
 	@commands.Cog.listener()
 	async def on_message(self, message):

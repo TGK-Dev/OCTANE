@@ -2,6 +2,8 @@ import discord
 from datetime import datetime
 from discord.ext import commands
 
+
+
 class Channels(commands.Cog):
 	"""docstring for Example"""
 	def __init__(self, client):
@@ -24,8 +26,7 @@ class Channels(commands.Cog):
 			await ctx.message.delete()			
 			await channel.set_permissions(ctx.guild.default_role, overwrite=overwrite)
 			
-			embed = discord.Embed(color=0xff0000)
-			embed.description('The {channel.name} is lock for {role.name}')
+			embed = discord.Embed(color=0xff0000, description=f'The {channel.name} is lock for {role.name}')
 			await ctx.send(embed=embed)
 		else:
 			await ctx.send(f'{ctx.author.mention} You dont have permissions to use this commands')
@@ -43,7 +44,7 @@ class Channels(commands.Cog):
 			await ctx.message.delete()			
 			await channel.set_permissions(ctx.guild.default_role, overwrite=overwrite)
 
-			embed = discord.Embed(color=0x02ff06, titel=f'The {channel.name} is unlock for {role.name}')
+			embed = discord.Embed(color=0x02ff06, description=f'The {channel.name} is unlock for {role.name}')
 			await ctx.send(embed=embed)
 		else:
 			await ctx.send(f'{ctx.author.mention} You dont have permissions to use this command')
@@ -52,7 +53,7 @@ class Channels(commands.Cog):
 	async def slowmode(self, ctx,channel:discord.TextChannel, Sec: int):
 		if ctx.author.guild_permissions.manage_messages:
 
-			channel = channel if channel else ctx.author
+			channel = channel if channel else ctx.channel
 			await ctx.channel.edit(slowmode_delay=Sec)
 
 			await ctx.send(f'The {ctx.channel.mention} channel slowmode iS now *{Sec}* Seconds')
@@ -63,31 +64,36 @@ class Channels(commands.Cog):
 	async def hide(self, ctx, channel: discord.TextChannel = None):
 		if ctx.author.guild_permissions.ban_members:
 
-			channel = channel if channel else ctx.author
-			role = discord.utils.get(ctx.guild.roles, name="Test bot")
+			channel = channel if channel else ctx.channel
+			role = discord.utils.get(ctx.guild.roles, name="࿐ NEWBIE 〢 0")
 			overwrite = channel.overwrites_for(role)
 			overwrite.view_channel = False
 			await channel.set_permissions(role, overwrite=overwrite)
+
+
+			embed = discord.Embed(color=0x02ff06, description=f'The {channel.name} is Now Hidded for for {role.mention}')
+			await ctx.send(embed=embed)
 			await ctx.message.delete()
 
-			await ctx.send(f'The {channel.mention} Is now Hidded for the {role.name}')
+			await ctx.send(embed=embed)
 		else:
-			await ctx.send(f'This commands is only for server ADMINISTRATOR')
+			await ctx.send(f'This commands is only for server Moderator')
 
 	@commands.command(aliases=['uhide'])
 	async def unhide(self, ctx, channel: discord.TextChannel = None):
 		if ctx.author.guild_permissions.ban_members:
 
-			channel = channel if channel else ctx.author
-			role = discord.utils.get(ctx.guild.roles, name="Test bot")
+			channel = channel if channel else ctx.channel
+			role = discord.utils.get(ctx.guild.roles, name="࿐ NEWBIE 〢 0")
 			overwrite = channel.overwrites_for(role)
-			overwrite.view_channel = None 
+			overwrite.view_channel = True
 			await channel.set_permissions(role, overwrite=overwrite)
 			await ctx.message.delete()
 
-			await ctx.send(f'The {channel.mention} Is now Visibal for the {role.name}')
+			embed = discord.Embed(color=0x02ff06, description=f'The {channel.name} is Now Not Hidded for for {role.mention}')
+			await ctx.send(embed=embed)
 		else:
-			await ctx.send(f'This commands is only for server ADMINISTRATOR')
+			await ctx.send(f'This commands is only for server Moderator')
 
 
 

@@ -11,6 +11,21 @@ class Basic(commands.Cog):
 	async def on_ready(self):
 		print(f'Basic Cogs is Loaded')
 
+	@commands.command(aliases=['sinfo'])
+	async def serverinfo(self, ctx):
+		usercolor = ctx.author.color
+		guild = self.client.get_guild(785839283847954433)
+		booter= int(guild.premium_subscription_count)
+
+		em = discord.Embed(title='Info for The Gamblers Kingdom', color=usercolor)
+		em.set_thumbnail(url=guild.icon_url)
+		em.add_field(name='Owners', value='utki007#007, JAY#0138', inline=True)
+		em.add_field(name='Booster Count', value=f'The Total booster {booter} \n booster Role <@&786477872029892639>', inline=False)
+		em.add_field(name='Server Member Count: ', value=f'{guild.member_count}', inline=False)
+		em.set_footer(text='ID: 785839283847954433, Created•12/08/2020', icon_url=guild.icon_url)
+		await ctx.send(embed=em)
+
+
 	@commands.command()
 	async def ping(self, ctx):
 		await ctx.send(f'Ping ``{round(self.client.latency * 1000)}``ms') 
@@ -19,10 +34,10 @@ class Basic(commands.Cog):
 	async def botinfo(self, ctx):
 		embed = discord.Embed(color=0xffd700, title='Bots Infomation')
 		embed.add_field(name='Bot Name', value=f'{self.client.user.name}')
-		embed.add_field(name='Bot Owner', value=f'JAY 2404', )
+		embed.add_field(name='Bot Owner', value=f'<@301657045248114690>, <@488614633670967307>')
 		embed.add_field(name='Bot language', value="Python")
-		embed.add_field(name='Bot Version', value="1.5")
-		embed.set_footer(text=f'Requested by {ctx.author.name}')
+		embed.add_field(name='Bot Version', value="2")
+		embed.set_footer(text=f'Requested by ID: {ctx.author.id} | Name: {ctx.author.name}')
 
 		await ctx.send(embed=embed)
 
