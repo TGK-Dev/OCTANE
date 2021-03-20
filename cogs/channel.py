@@ -70,6 +70,7 @@ class Channels(commands.Cog):
             cd = int(time) if time else 0
 
         if ctx.author.guild_permissions.manage_messages:
+            await ctx.message.delete()
             if cd > 21600:
                 await ctx.send(f"Slowmode interval can't be greater than 6 hours.")
             elif cd == 0:
@@ -78,11 +79,11 @@ class Channels(commands.Cog):
             else:
                 await ctx.channel.edit(slowmode_delay=cd)
                 if unit == 'h' or unit == 'H':
-                	await ctx.send(f'Slowmode interval is now **{int(cd/3600)} hours**.')
+                    await ctx.send(f'Slowmode interval is now **{int(cd/3600)} hours**.')
                 elif unit == 'm' or unit == 'M':
-                	await ctx.send(f'Slowmode interval is now **{int(cd/60)} mins**.')
+                    await ctx.send(f'Slowmode interval is now **{int(cd/60)} mins**.')
                 else:
-                	await ctx.send(f'Slowmode interval is now **{cd} secs**.')
+                    await ctx.send(f'Slowmode interval is now **{cd} secs**.')
         else:
             await ctx.send(f"⚠ {ctx.author.mention}, you are __**unauthorized**__ to use this command ⚠")
 
