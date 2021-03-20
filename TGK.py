@@ -161,7 +161,7 @@ async def unlock(ctx):
 async def slowmod(ctx):
 
 	em = discord.Embed(title='Change The Channels slowmod', color=0x02ff06, description='Set slowmod in channel max 6 hour 0s = none')
-	em.add_field(name='***Sytax***', value='>slowmod <#channel>')
+	em.add_field(name='***Sytax***', value='>slowmod <slowmode time only seconds for now>')
 
 	await ctx.send(embed=em)
 
