@@ -72,7 +72,7 @@ class Channels(commands.Cog):
 
 
 			embed = discord.Embed(color=0x02ff06, description=f'The {channel.name} is Now Hidded for for {role.mention}')
-			await ctx.send(embed=embed)
+			await ctx.send(embed=embed, delete_after=10)
 			await ctx.message.delete()
 
 			await ctx.send(embed=embed)
@@ -91,7 +91,7 @@ class Channels(commands.Cog):
 			await ctx.message.delete()
 
 			embed = discord.Embed(color=0x02ff06, description=f'The {channel.name} is Now Not Hidded for for {role.mention}')
-			await ctx.send(embed=embed)
+			await ctx.send(embed=embed, delete_after=10)
 		else:
 			await ctx.send(f'This commands is only for server Moderator')
 

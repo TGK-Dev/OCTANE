@@ -108,7 +108,7 @@ class Moderator(commands.Cog):
 
 			embed = discord.Embed(color=0x00ffff)
 			embed.set_image(url=member.avatar_url)
-			await ctx.send(embed=embed)
+			await ctx.send(embed=embed, delete_after=30)
 		else:
 			await ctx.send(f'{ctx.author.mention} you dont have permission to use this command')
 

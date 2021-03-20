@@ -80,7 +80,7 @@ class Basic(commands.Cog):
 	            "My sources say no.",
 	            "Outlook not so good.",
 	            "Very doubtful."]
-	  await ctx.send(f'Question: {question}\nAnswer: {random.choice(responses)}')
+	  await ctx.reply(f'Question: {question}\nAnswer: {random.choice(responses)}')
 
 
 def setup(client):

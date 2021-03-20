@@ -16,10 +16,10 @@ class Admins(commands.Cog):
 	async def logout(self, ctx):
 		if ctx.author.guild_permissions.administrator:
 
-			await ctx.send(f'Bye Loging out from discord taking some Sleep commands used by {ctx.author.mention}')
+			await ctx.reply(f'Shuting Down Bot \n logout command used By {ctx.author.name}')
 			await ctx.bot.logout()
 		else:
-			await ctx.send(f'{ctx.author.mention} Why you think you a administrator of the Server')
+			await ctx.reply(f'Your Not an ADMINISTRATOR')
 
 	@commands.command()
 	async def activity(self, ctx, *, activity):
