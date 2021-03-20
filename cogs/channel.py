@@ -52,7 +52,7 @@ class Channels(commands.Cog):
             await ctx.send(f'{ctx.author.mention} You dont have permissions to use this command')
 
     @commands.command(aliases=['sm'])
-    async def slowmode(self, ctx, time: str = 0):
+    async def slowmode(self, ctx, time: str = '0'):
 
         unit = ['h', 'H', 'm', 'M', 's', 'S']
 
