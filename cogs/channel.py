@@ -50,15 +50,15 @@ class Channels(commands.Cog):
 			await ctx.send(f'{ctx.author.mention} You dont have permissions to use this command')
 
 	@commands.command(aliases=['sm'])
-	async def slowmode(self, ctx, channel: discord.TextChannel = None, Sec: int):
-		if ctx.author.guild_permissions.manage_messages:
+	async def slowmode(self, ctx, seconds: int):
+	    
+	    if  ctx.author.guild_permissions.manage_messages:
+	    	channel = channel if channel else ctx.channel
 
-			channel = channel if channel else ctx.channel
-			await ctx.channel.edit(slowmode_delay=Sec)
-
-			await ctx.send(f'The {ctx.channel.mention} channel slowmode iS now *{Sec}* Seconds')
-		else:
-			await ctx.send(f'The {ctx.author.mention} You Cant Use This Command.')
+	    	await ctx.channel.edit(slowmode_delay=seconds)
+	    	await ctx.send(f"Set the slowmode delay in this channel to {seconds} seconds!")
+	    else:
+	    	await ctx.send(f'{ctx.author.mention} You dont have permission to use this command')
 
 	@commands.command()
 	async def hide(self, ctx, channel: discord.TextChannel = None):

@@ -35,8 +35,26 @@ class events(commands.Cog):
 				if word in messageContent:
 					return await message.reply('Please Vote us here, <https://top.gg/servers/785839283847954433/vote>, Thanks For Support ^0^')
 
-
-
+	#@commands.Cog.listener()
+	#async def on_message(self, message):
+	#	heist = ['Time is up to join ']
+	#	channel = message.channel
+	#	guild = self.client.get_guild(785839283847954433)
+	#	if message.author.id == 488614633670967307:
+	#		
+	#		messageContent = message.content
+	#		if len(messageContent) > 0:
+	#			for word in heist:
+	#				if word in messageContent:
+	#					
+	#					overwrite = channel.overwrites_for(message.guild.default_role)
+	#					overwrite.send_messages = False
+	#					await channel.set_permissions(guild.default_role, overwrite=overwrite)
+	#					
+	#					await message.reply('The Channels is Lock for ``everyone``')
+	#					return
+	#	else:
+	#		return
 
 
 		

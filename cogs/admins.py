@@ -52,7 +52,7 @@ class Admins(commands.Cog):
 	async def say(self,ctx, *, say):
 		if ctx.author.guild_permissions.administrator:
 			await ctx.message.delete()
-			await send(f'{say}')
+			await ctx.send(f'{say}')
 		else:
 			return
 
