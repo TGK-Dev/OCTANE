@@ -50,7 +50,7 @@ class Channels(commands.Cog):
 			await ctx.send(f'{ctx.author.mention} You dont have permissions to use this command')
 
 	@commands.command(aliases=['sm'])
-	async def slowmode(self, ctx, channel:discord.TextChannel, Sec: int):
+	async def slowmode(self, ctx, channel: discord.TextChannel, Sec: int):
 		if ctx.author.guild_permissions.manage_messages:
 
 			channel = channel if channel else ctx.channel
