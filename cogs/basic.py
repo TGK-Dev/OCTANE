@@ -29,7 +29,7 @@ class Basic(commands.Cog):
 
 	@commands.command()
 	async def ping(self, ctx):
-		await ctx.send(f'Ping ``{round(self.client.latency * 1000)}``ms') 
+		await ctx.reply(f'Ping ``{round(self.client.latency * 1000)}``ms') 
 
 	@commands.command()
 	async def botinfo(self, ctx):
