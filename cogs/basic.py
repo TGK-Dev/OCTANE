@@ -63,7 +63,7 @@ class Basic(commands.Cog):
 	            "It is certain.",
 	            "It is decidedly so.",
 	            "Without a doubt.",
-	            "Yes - definitely.",
+	            "|Yes| - definitely.",
 	            "You may rely on it.",
 	            "As I see it, yes.",
 	            "Most likely.",
@@ -79,7 +79,19 @@ class Basic(commands.Cog):
 	            "My reply is no.",
 	            "My sources say no.",
 	            "Outlook not so good.",
-	            "Very doubtful."]
+	            "Very doubtful.",
+	            "My reply is no.",
+	            "Why don't we partner",
+	            "Well i know but Won't Tell",
+	            "Why you like this type of question",
+	            "No.",
+	            "|No| - definitely.",
+	            "If you don't know about this how did you pass the School",
+	            "You Stupid",
+	            "I have doubt that your human or ....",
+	            "Your genius|Not Jk|",
+	            "Your genius |JK  |",
+	            ]
 	  await ctx.reply(f'Question: {question}\nAnswer: {random.choice(responses)}')
 
 
