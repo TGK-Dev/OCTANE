@@ -87,7 +87,7 @@ class Moderator(commands.Cog):
 	
 			await ctx.message.delete()	
 			await ctx.channel.purge(limit=amount)
-			await ctx.send(f"Last {amount} Message Are Purged", delete_after=10)
+			await ctx.send(f"Last {amount} Message Are Purged", delete_after=3)
 		else:
 			await ctx.send(f'{ctx.author.mention} you dont have permission to use this command')
 
