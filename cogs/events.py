@@ -34,6 +34,11 @@ class events(commands.Cog):
 			for word in word_list:
 				if word in messageContent:
 					return await message.reply('Please Vote us here, <https://top.gg/servers/785839283847954433/vote>, Thanks For Support ^0^')
+
+
+
+
+
 		
 def setup(client):
 	client.add_cog(events(client))
