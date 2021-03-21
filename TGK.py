@@ -49,7 +49,8 @@ async def help(ctx):
 	embed.add_field(name='Channels Management: ', value='List of the commands: \n 1.hide \n 2.ubhide \n 3.lock \n 4.unlock \n 5.slowmod', inline=False)
 	embed.add_field(name='Administrator: ', value='List of the commands: \n 1.activity \n 2.status \n 3.logout', inline=False)
 
-	await ctx.send(embed=embed)
+	await ctx.author.send(embed=embed)
+	await ctx.send('check your Dms!')
 #info commands
 @help.command()
 async def botinfo(ctx):
