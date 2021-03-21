@@ -91,6 +91,10 @@ class Basic(commands.Cog):
 	            "I have doubt that your human or ....",
 	            "Your genius||Not Jk||",
 	            "Your genius ||JK||",
+	            "oh no you , not you again!",
+	            "why should i even tell you that?",
+	            "you are so dumb duh!",
+	            "Bruh",
 	            ]
 	  await ctx.reply(f'Question: {question}\nAnswer: {random.choice(responses)}')
 
