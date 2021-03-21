@@ -85,12 +85,12 @@ class Basic(commands.Cog):
 	            "Well i know but Won't Tell",
 	            "Why you like this type of question",
 	            "No.",
-	            "|No| - definitely.",
+	            "||No|| - definitely.",
 	            "If you don't know about this how did you pass the School",
 	            "You Stupid",
 	            "I have doubt that your human or ....",
-	            "Your genius|Not Jk|",
-	            "Your genius |JK  |",
+	            "Your genius||Not Jk||",
+	            "Your genius ||JK||",
 	            ]
 	  await ctx.reply(f'Question: {question}\nAnswer: {random.choice(responses)}')
 
