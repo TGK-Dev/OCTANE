@@ -28,17 +28,6 @@ for filename in os.listdir('./cogs'):
 	if filename.endswith('.py'):
 		client.load_extension(f'cogs.{filename[:-3]}')
 
-@client.command()
-async def em(ctx):
-	embed = discord.Embed(title=f'<a:celeyay:821818380406882315> WELCOME TO TGK {ctx.author.name} <a:celeyay:821818380406882315> ', color=0xff00ff, description=f'<a:celeyay:821818380406882315> WELCOME TO TGK {ctx.author.name} <a:celeyay:821818380406882315>') 
-	embed.set_thumbnail(url=ctx.author.avatar_url)
-	embed.add_field(name='information:', value='➻ Read our [Rules](https://discord.com/channels/785839283847954433/785841560918163501) \n ➻ Get your roles from [:sparkles:。self-roles](https://discord.com/channels/785839283847954433/785882615202316298/795729352062140537), and say Hi to everyone at [:speech_balloon:。general](https://discord.com/channels/785839283847954433/785847439579676672/817100365665009684)!', inline=False)
-	embed.add_field(name='Server Games:', value='➻ To access specific sections, simply follow: \n ◉ :frog:[。dank-bifröst](https://discord.com/channels/785839283847954433/801394407521517578/812654537873162261) for Dank Memer Channels \n       ◉ :dragon:[。poke-bifröst](https://discord.com/channels/785839283847954433/802195590208421908/802538839838556170) for Pokémon Channels \n       ◉ :game_die:[:。casino-bifrost](https://discord.com/channels/785839283847954433/804042634011738112/804051999879462982) for Casino Channels', inline=False)
-	embed.add_field(name='Server Support', value='To get in touch with staff, simply raise a ticket fromv [:love_letter:。server-support](https://discord.com/channels/785839283847954433/785901543349551104/815993563594358816)', inline=False)
-	embed.set_footer(text='Once again, a warm welcome Have a great time!', icon_url=ctx.author.avatar_url)
-	await ctx.send(f'{ctx.author.mention}', embed=embed)
-	await ctx.author.send(embed=embed)
-
 @client.group(invoke_without_command=True)
 async def help(ctx):
 
