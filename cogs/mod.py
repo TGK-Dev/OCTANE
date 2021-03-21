@@ -98,7 +98,7 @@ class Moderator(commands.Cog):
 			await ctx.message.delete()
 			await ctx.send(f'Nickname was changed for {nick} ')
 		else:
-			await ctx.send(f'Nick Name changed')
+			await ctx.send(f'Nick Name changed for {member.name} to {nick}')
 
 	@commands.command(aliases=['av'])
 	async def avatar(self, ctx, member: discord.Member = None):
