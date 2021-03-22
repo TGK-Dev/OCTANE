@@ -27,12 +27,10 @@ class Moderator(commands.Cog):
 			embed.add_field(name='Created at:', value=fomat_time(member.created_at))
 			embed.add_field(name='Joined at', value=fomat_time(member.joined_at))
 
-			sorted_roles = sorted([role for role in member.roles[1:]], key=lambda x: x.position, reverse=True)
 			hsorted_roles = sorted([role for role in member.roles[-1:]], key=lambda x: x.position, reverse=True)
 			
 
 			embed.add_field(name='Top:', value=', '.join(role.mention for role in hsorted_roles), inline=False)
-			embed.add_field(name='Roles', value=', '.join(role.mention for role in sorted_roles))
 			embed.set_footer(text=f'ID {member.id}', icon_url=member.avatar_url)
 			await ctx.send(embed=embed)
 		else:
