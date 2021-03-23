@@ -20,7 +20,7 @@ class events(commands.Cog):
 	   embed.add_field(name='Server Games:', value='➻ To access specific sections, simply follow: \n ◉ :frog:[。dank-bifröst](https://discord.com/channels/785839283847954433/801394407521517578/812654537873162261) for Dank Memer Channels \n       ◉ :dragon:[。poke-bifröst](https://discord.com/channels/785839283847954433/802195590208421908/802538839838556170) for Pokémon Channels \n       ◉ :game_die:[:。casino-bifrost](https://discord.com/channels/785839283847954433/804042634011738112/804051999879462982) for Casino Channels', inline=False)
 	   embed.add_field(name='Server Support', value='To get in touch with staff, simply raise a ticket fromv :love_letter:[。server-support](https://discord.com/channels/785839283847954433/785901543349551104/815993563594358816)', inline=False)
 	   embed.add_field(name='Server Member Count: ', value=f'{guild.member_count}', inline=False)
-	   embed.set_footer(text='Once again, a warm welcome Have a great time!', icon_url=member.avatar_url)
+	   embed.set_footer(text='Once again, a warm welcome. Have a great time!', icon_url=member.avatar_url)
 	   await channel.send(f'{member.mention}', embed=embed)
 	   await member.send(embed=embed)
 	   

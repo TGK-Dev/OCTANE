@@ -41,34 +41,46 @@ class Moderator(commands.Cog):
 	@commands.command()
 	async def kick(self, ctx, member: discord.Member, *, reason=None):
 
-		if ctx.author.guild_permissions.kick_members:
-			
-			await member.send(f'You Have Kicked From the The Gamblers Kingdom | {reason}')
-			await ctx.message.delete()
-			await member.kick(reason=reason)
-			await ctx.send(f'<:allow:819194696874197004> | ***The {member.name} Is Now Kicked From Server***')
+		if member.guild_permissions.manage_messages:
+			em = discord.Embed(color=0xff0000, description="can't ban user is Mod/admin")
+
+			await ctx.reply(embed=em)
+			return
 		else:
-			await ctx.send(f'{ctx.author.mention} You Cant Use This Command.')
+			if ctx.author.guild_permissions.kick_members:
+				
+				await member.send(f'You Have Kicked From the The Gamblers Kingdom | {reason}')
+				await ctx.message.delete()
+				await member.kick(reason=reason)
+				await ctx.send(f'<:allow:819194696874197004> | ***The {member.name} Is Now Kicked From Server***')
+			else:
+				await ctx.send(f'{ctx.author.mention} You Cant Use This Command.')
 
 	@commands.command()
 	async def ban(self, ctx, member: discord.Member, *, reason=None):
 
-		if ctx.author.guild_permissions.ban_members:
-			
-			await member.send(f'You Have Benned From the The Gamblers Kingdom | {reason}')
-			await ctx.message.delete()
-			await member.ban(reason=reason)
-			await ctx.send(f'<:allow:819194696874197004> | ***The {member.name} Is Now Banned From Server***')
+		if member.guild_permissions.manage_messages:
+			em = discord.Embed(color=0xff0000, description="can't ban user is Mod/admin")
 
-			channel = self.client.get_channel(821802944235700234)
-
-			eembed = discord.Embed(titel=f'Member Banned', color=0xff0000)
-			eembed.add_field(name=f'Mamber Name: ', value=f'{member.name}')
-			eembed.add_field(name=f'Reason: ', value=reason)
-
-			await channel.send(embed=eembed)
+			await ctx.reply(embed=em)
+			return
 		else:
-			await ctx.send(f'{ctx.author.mention} You cant Use This Command.')
+			if ctx.author.guild_permissions.ban_members:
+
+				await member.send(f'You Have Benned From the The Gamblers Kingdom | {reason}')
+				await ctx.message.delete()
+				await member.ban(reason=reason)
+				await ctx.send(f'<:allow:819194696874197004> | ***The {member.name} Is Now Banned From Server***')
+
+				channel = self.client.get_channel(821802944235700234)
+
+				eembed = discord.Embed(titel=f'Member Banned', color=0xff0000)
+				eembed.add_field(name=f'Mamber Name: ', value=f'{member.name}')
+				eembed.add_field(name=f'Reason: ', value=reason)
+				
+				await channel.send(embed=eembed)
+			else:
+				await ctx.send(f'{ctx.author.mention} You cant Use This Command.')
 
 
 	@commands.command()

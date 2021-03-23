@@ -219,6 +219,14 @@ async def logout(ctx):
 
 	await ctx.send(embed=em)
 
+@client.command()
+async def test(ctx, member:discord.Member):
+	
+	if member.guild_permissions.manage_messages:
+		await ctx.send('member is staff')
+	else:
+		await ctx.send('member is not staff')
+
 
 
 client.run(f'ODE2Njk5MTY3ODI0MjgxNjIx.YD-wXw.ZwQEyvDMWayQJdFeA9AXXgOxcyw')
