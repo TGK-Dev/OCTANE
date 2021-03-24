@@ -20,11 +20,11 @@ class Channels(commands.Cog):
             channel = channel if channel else ctx.channel
             role = role if role else ctx.guild.default_role
 
-            overwrite = channel.overwrites_for(ctx.guild.default_role)
+            overwrite = channel.overwrites_for(role)
             overwrite.send_messages = False
 
             await ctx.message.delete()
-            await channel.set_permissions(ctx.guild.default_role, overwrite=overwrite)
+            await channel.set_permissions(role, overwrite=overwrite)
 
             embed = discord.Embed(
                 color=0xff0000, description=f'The {channel.name} is lock for {role.name}')
