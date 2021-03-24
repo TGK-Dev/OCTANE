@@ -27,8 +27,8 @@ class Channels(commands.Cog):
             await channel.set_permissions(role, overwrite=overwrite)
 
             embed = discord.Embed(
-                color=0xff0000, description=f'The {channel.name} is lock for {role.name}')
-            await ctx.send(embed=embed)
+                color=0xff0000, description=f'The {channel.name} is lock for {role.mention}')
+            await channel.send(embed=embed)
         else:
             await ctx.send(f'{ctx.author.mention} You dont have permissions to use this commands')
 
@@ -46,8 +46,8 @@ class Channels(commands.Cog):
             await channel.set_permissions(role, overwrite=overwrite)
 
             embed = discord.Embed(
-                color=0x02ff06, description=f'The {channel.name} is unlock for {role.name}')
-            await ctx.send(embed=embed)
+                color=0x02ff06, description=f'The {channel.name} is unlock for {role.mention}')
+            await channel.send(embed=embed)
         else:
             await ctx.send(f'{ctx.author.mention} You dont have permissions to use this command')
 
