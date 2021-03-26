@@ -8,6 +8,20 @@ intents.members = True
 client = commands.Bot(command_prefix=commands.when_mentioned_or('>'), case_insensitive=True, intents=intents)
 client.remove_command('help')
 
+@client.event
+async def on_command_error(ctx,error):
+    if isinstance(error, commands.CommandOnCooldown):
+        m, s = divmod(error.retry_after, 60)
+        h, m = divmod(m, 60)
+        if int(h) == 0 and int(m) == 0:
+            await ctx.message.reply(f' You must wait {int(s)} seconds to use this command!')
+        elif int(h) == 0 and int(m) != 0:
+            await ctx.message.reply(f' You must wait {int(m)} minutes and {int(s)} seconds to use this command!')
+        else:
+            await ctx.message.reply(f' You must wait {int(h)} hours, {int(m)} minutes and {int(s)} seconds to use this command!') 
+    else:
+        raise error
+
 
 
 @client.command()
@@ -32,14 +46,14 @@ for filename in os.listdir('./cogs'):
 async def help(ctx):
 
 	embed = discord.Embed(title='Help', color=0x02ff06, description='This Bot Help command, You can see the All bot command Category')
-	embed.add_field(name='Basics', value='List of the commands: \n 1.Bot Info \n 2.ping \n 3.verify \n 4.8ball', inline=False)
+	embed.add_field(name='Basics', value='List of the commands: \n 1.Bot Info \n 2.ping \n 3.verify \n ', inline=False)
+	embed.add_field(name='Funs', value='1. 8ball<question> \n2. There are many many different commands to Expres your Feeling \npossitive:\n ```cheer, thunbsup, ,happy.``` \nNeutral:\n ```bonk, dab, sleep, yes```\nNegative:\n``` sad, angry, cay```')
 	embed.add_field(name='Donate', value='List of the commands: \n 1.sgive \n 2.sheist', inline=False)
 	embed.add_field(name='Moderator: ', value='List of the commands: \n 1.Ban \n 2.unban \n 3.kick \n 4.purge \n 5. whois \n 6. setnick \n 7.avatar', inline=False)
 	embed.add_field(name='Channels Management: ', value='List of the commands: \n 1.hide \n 2.ubhide \n 3.lock \n 4.unlock \n 5.slowmod', inline=False)
 	embed.add_field(name='Administrator: ', value='List of the commands: \n 1.activity \n 2.status \n 3.logout', inline=False)
 
-	await ctx.author.send(embed=embed)
-	await ctx.send('check your Dms!')
+	await ctx.message.reply(embed=embed, delete_after=300)
 #info commands
 @help.command()
 async def botinfo(ctx):
@@ -218,15 +232,6 @@ async def logout(ctx):
 	em.add_field(name='***Sytax***', value='>loged')
 
 	await ctx.send(embed=em)
-
-@client.command()
-async def test(ctx, member:discord.Member):
-	
-	if member.guild_permissions.manage_messages:
-		await ctx.send('member is staff')
-	else:
-		await ctx.send('member is not staff')
-
 
 
 

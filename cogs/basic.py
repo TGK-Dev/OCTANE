@@ -57,47 +57,6 @@ class Basic(commands.Cog):
 		else:
 			await ctx.send(f"{ctx.author.mention} You are verifed or either in worng channel which is not possibal time to ban you")
 
-	@commands.command(aliases=['8ball'])
-	async def _8ball(self, ctx, *, question):
-	  responses = [
-	            "It is certain.",
-	            "It is decidedly so.",
-	            "Without a doubt.",
-	            "|Yes| - definitely.",
-	            "You may rely on it.",
-	            "As I see it, yes.",
-	            "Most likely.",
-	            "Outlook good.",
-	            "Yes.",
-	            "Signs point to yes.",
-	            "Reply hazy, try again.",
-	            "Ask again later.",
-	            "Better not tell you now.",
-	            "Cannot predict now.",
-	            "Concentrate and ask again.",
-	            "Don't count on it.",
-	            "My reply is no.",
-	            "My sources say no.",
-	            "Outlook not so good.",
-	            "Very doubtful.",
-	            "My reply is no.",
-	            "Why don't we partner",
-	            "Well i know but Won't Tell",
-	            "Why you like this type of question",
-	            "No.",
-	            "||No|| - definitely.",
-	            "If you don't know about this how did you pass the School",
-	            "You Stupid",
-	            "I have doubt that your human or ....",
-	            "Your genius||Not Jk||",
-	            "Your genius ||JK||",
-	            "oh no you , not you again!",
-	            "why should i even tell you that?",
-	            "you are so dumb duh!",
-	            "Bruh",
-	            ]
-	  await ctx.reply(f'Question: {question}\nAnswer: {random.choice(responses)}')
-
 
 def setup(client):
 	client.add_cog(Basic(client))
