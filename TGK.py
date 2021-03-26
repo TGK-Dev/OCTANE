@@ -229,7 +229,7 @@ async def test(ctx, member:discord.Member):
 
 
 
-client.run(f'ODE2Njk5MTY3ODI0MjgxNjIx.YD-wXw.ZwQEyvDMWayQJdFeA9AXXgOxcyw')
+client.run(f'ODE2Njk5MTY3ODI0MjgxNjIx.YD-wXw.CE18KDWlS2fvjyBDNw_fRvonw_s')
 #ODE2Njk5MTY3ODI0MjgxNjIx.YD-wXw.ZwQEyvDMWayQJdFeA9AXXgOxcyw	
 
 #<a:celeyay:821818380406882315>
