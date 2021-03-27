@@ -11,31 +11,28 @@ class Moderator(commands.Cog):
 		print(f'Moderator Cog Is Loaded')
 
 	@commands.command()
+	@commands.has_permissions(manage_messages=True)
 	async def whois(self, ctx, member: discord.Member = None):
-		if ctx.author.guild_permissions.manage_messages:
+		
+		def fomat_time(time):
+		  return time.strftime('%d-%B-%Y %I:%m %p')
 
-			def fomat_time(time):
-			  return time.strftime('%d-%B-%Y %I:%m %p')
+		member = member if member else ctx.author
+		usercolor = member.color
 
-			member = member if member else ctx.author
-			usercolor = member.color
+		
+		embed = discord.Embed(title=f'{member.name}', color=usercolor)
+		embed.set_thumbnail(url=member.avatar_url)
+		embed.add_field(name='Account Name:', value=f'{member.name}', inline=False)
+		embed.add_field(name='Created at:', value=fomat_time(member.created_at))
+		embed.add_field(name='Joined at', value=fomat_time(member.joined_at))
 
-			
-			embed = discord.Embed(title=f'{member.name}', color=usercolor)
-			embed.set_thumbnail(url=member.avatar_url)
-			embed.add_field(name='Account Name:', value=f'{member.name}', inline=False)
-			embed.add_field(name='Created at:', value=fomat_time(member.created_at))
-			embed.add_field(name='Joined at', value=fomat_time(member.joined_at))
+		hsorted_roles = sorted([role for role in member.roles[-1:]], key=lambda x: x.position, reverse=True)
+		
 
-			hsorted_roles = sorted([role for role in member.roles[-1:]], key=lambda x: x.position, reverse=True)
-			
-
-			embed.add_field(name='Top:', value=', '.join(role.mention for role in hsorted_roles), inline=False)
-			embed.set_footer(text=f'ID {member.id}', icon_url=member.avatar_url)
-			await ctx.send(embed=embed)
-		else:
-			await ctx.send(f'{ctx.author.mention} You dont have permissions to use this command!')
-
+		embed.add_field(name='Top:', value=', '.join(role.mention for role in hsorted_roles), inline=False)
+		embed.set_footer(text=f'ID {member.id}', icon_url=member.avatar_url)
+		await ctx.send(embed=embed)
 
 
 	@commands.command()
@@ -84,46 +81,34 @@ class Moderator(commands.Cog):
 
 
 	@commands.command()
+	@commands.has_permissions(administrator=True)
 	async def unban(self, ctx, user: discord.User):
-		if ctx.author.guild_permissions.administrator:
 		    await ctx.guild.unban(user)
-		    await ctx.send(f"Successfully unbanned user with id {user.name}")
-		else:
-			await ctx.send("You Dont have permission to use ths Command")
+		    await ctx.send(f"Successfully Removed the Ban from {user.name}")
 	
 	@commands.command()
+	@commands.has_permissions(manage_messages=True)
 	async def purge(self, ctx, amount=5):
-		if ctx.author.guild_permissions.manage_messages:
-	
-			await ctx.message.delete()	
-			await ctx.channel.purge(limit=amount)
-			await ctx.send(f"Last {amount} Message Are Purged", delete_after=3)
-		else:
-			await ctx.send(f'{ctx.author.mention} you dont have permission to use this command')
-
+		await ctx.message.delete()	
+		await ctx.channel.purge(limit=amount)
+		await ctx.send(f"Last {amount} Message Are Purged", delete_after=3)
+		
 	@commands.command(pass_context=True)
+	@commands.has_permissions(manage_messages=True)
 	async def setnick(self, ctx, member: discord.Member, *, nick):
-		if ctx.author.guild_permissions.manage_messages:
-			await member.edit(nick=nick)
-			await ctx.message.delete()
-			await ctx.send(f'Nickname was changed for {nick} ')
-		else:
-			await ctx.send(f'Nick Name changed for {member.name} to {nick}')
+		await member.edit(nick=nick)
+		await ctx.message.delete()
+		await ctx.send(f'Nickname was changed for {nick} ')
 
 	@commands.command(aliases=['av'])
+	@commands.has_permissions(manage_messages=True)
 	async def avatar(self, ctx, member: discord.Member = None):
-		if ctx.author.guild_permissions.manage_messages:
 
-			member = member if member else ctx.author
+		member = member if member else ctx.author
 
-			embed = discord.Embed(color=0x00ffff)
-			embed.set_image(url=member.avatar_url)
-			await ctx.send(embed=embed, delete_after=30)
-		else:
-			await ctx.send(f'{ctx.author.mention} you dont have permission to use this command')
-
-
-
+		embed = discord.Embed(color=0x00ffff)
+		embed.set_image(url=member.avatar_url)
+		await ctx.send(embed=embed, delete_after=30)
 
 
 def setup(client):

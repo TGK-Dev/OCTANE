@@ -1,4 +1,4 @@
-import discord 
+import discord
 import os
 from discord.ext import commands
 from datetime import datetime
@@ -7,21 +7,6 @@ intents = discord.Intents.default()
 intents.members = True
 client = commands.Bot(command_prefix=commands.when_mentioned_or('>'), case_insensitive=True, intents=intents)
 client.remove_command('help')
-
-@client.event
-async def on_command_error(ctx,error):
-    if isinstance(error, commands.CommandOnCooldown):
-        m, s = divmod(error.retry_after, 60)
-        h, m = divmod(m, 60)
-        if int(h) == 0 and int(m) == 0:
-            await ctx.message.reply(f' You must wait {int(s)} seconds to use this command!')
-        elif int(h) == 0 and int(m) != 0:
-            await ctx.message.reply(f' You must wait {int(m)} minutes and {int(s)} seconds to use this command!')
-        else:
-            await ctx.message.reply(f' You must wait {int(h)} hours, {int(m)} minutes and {int(s)} seconds to use this command!') 
-    else:
-        raise error
-
 
 
 @client.command()
@@ -149,15 +134,15 @@ async def setnick(ctx):
 async def lock(ctx):
 
 	em = discord.Embed(title='Lock The Channels', color=0x02ff06, description='Lock the mention channel,\n if channel id not given current channel get lock')
-	em.add_field(name='***Sytax***', value='>lock <#channel>')
+	em.add_field(name='***Sytax***', value='>lock <#channel> <@role.id>')
 
 	await ctx.send(embed=em)
-	
+
 @help.command()
 async def unlock(ctx):
 
 	em = discord.Embed(title='Unlock The Channels', color=0x02ff06, description='Unlock the Lock Channel')
-	em.add_field(name='***Sytax***', value='>unlock <#channel>')
+	em.add_field(name='***Sytax***', value='>unlock <#channel> <@role.id>')
 
 	await ctx.send(embed=em)
 
