@@ -37,7 +37,7 @@ class Basic(commands.Cog):
 		embed.add_field(name='Bot Name', value=f'{self.client.user.name}')
 		embed.add_field(name='Bot Owner', value=f'<@301657045248114690>, <@488614633670967307>')
 		embed.add_field(name='Bot language', value="Python")
-		embed.add_field(name='Bot Version', value="2")
+		embed.add_field(name='Bot Version', value="2.2")
 		embed.set_footer(text=f'Requested by ID: {ctx.author.id} | Name: {ctx.author.name}')
 
 		await ctx.send(embed=embed)
