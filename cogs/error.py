@@ -37,8 +37,6 @@ class error(commands.Cog):
 	    	await ctx.message.reply(f'The {name} is Already UnLoaded')
 	    elif isinstance(error, commands.ExtensionNotFound):
 	    	await ctx.message.reply(f'The Extension not Found')
-	    elif isinstance(error, commands.Forbidden):
-	    	return
 	    else:
 	    	raise error
 
