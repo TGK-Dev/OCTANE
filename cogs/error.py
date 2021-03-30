@@ -30,13 +30,15 @@ class error(commands.Cog):
 	    elif isinstance(error, commands.RoleNotFound):
 	    	await ctx.message.reply('Role Not Found')
 	    elif isinstance(error, commands.MissingPermissions):
-	    	await ctx.message.reply(f'You are missing {MissingPermissions}')
+	    	await ctx.message.reply(f'You are missing Permissions')
 	    elif isinstance(error, commands.ExtensionAlreadyLoaded):
 	    	await ctx.message.reply(f'The {name} is Already Loaded')
 	    elif isinstance(error, commands.ExtensionNotFound):
 	    	await ctx.message.reply(f'The {name} is Already UnLoaded')
 	    elif isinstance(error, commands.ExtensionNotFound):
 	    	await ctx.message.reply(f'The Extension not Found')
+	    elif isinstance(error, commands.Forbidden):
+	    	return
 	    else:
 	    	raise error
 
