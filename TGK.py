@@ -28,7 +28,7 @@ async def on_ready():
     print(f"-----\nLogged in as: {bot.user.name} : {bot.user.id}\n-----\nMy current prefix is: -\n-----")
     data = read_json("blacklist")
     bot.blacklisted_users = data["blacklistedUsers"]
-    await bot.change_presence(activity=discord.Game(name=f"Hi, my names {bot.user.name}.\nUse - to interact with me!")) # This changes the bots 'activity'
+    await bot.change_presence(activity=discord.Game(name=f"Hi, my names {bot.user.name}.\nUse > to interact with me!")) # This changes the bots 'activity'
 
 
 @bot.event
