@@ -1,5 +1,4 @@
 import discord
-import asynco 
 from discord.ext import commands
 
 class dank(commands.Cog):
