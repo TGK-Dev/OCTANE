@@ -3,25 +3,19 @@ from discord.ext import commands
 
 class events(commands.Cog):
 	"""docstring for Example"""
-	def __init__(self, client):
-		self.client = client
+	def __init__(self, bot):
+		self.bot = bot
 
 	@commands.Cog.listener()
 	async def on_ready(self):
 		print(f'Events Cogs are Loaded')
 
-	@commands.Cog.listener()
-	async def on_member_ban(member):
-		if member.guild_id == 785847439579676672:
-			channel = self.client.get_channel(806107399005667349)
-			em = discord.Embed(color=0x02ff06, description=f'{member.name} was banned')
-			await channel.send(embed=embed)
 
 	@commands.Cog.listener()
 	async def on_member_join(self, member):
 		guild = member.guild.id 
-		channel =  self.client.get_channel(785847439579676672)
-		guild = self.client.get_guild(785839283847954433)
+		channel =  self.bot.get_channel(785847439579676672)
+		guild = self.bot.get_guild(785839283847954433)
 
 		if member.guild.id == 785839283847954433:
 			embed = discord.Embed(title=f'<a:celeyay:821818380406882315> WELCOME TO TGK {member.name} <a:celeyay:821818380406882315> ', color=0xff00ff)
@@ -53,7 +47,7 @@ class events(commands.Cog):
 	#async def on_message(self, message):
 	#	heist = ['Time is up to join ']
 	#	channel = message.channel
-	#	guild = self.client.get_guild(785839283847954433)
+	#	guild = self.bot.get_guild(785839283847954433)
 	#	if message.author.id == 488614633670967307:
 	#		
 	#		messageContent = message.content
@@ -72,9 +66,9 @@ class events(commands.Cog):
 
 
 		
-def setup(client):
-	client.add_cog(events(client))
+def setup(bot):
+	bot.add_cog(events(bot))
 
 		   
-#	   channel =  self.client.get_channel(785847439579676672)
-#	   guild = self.client.get_guild(785839283847954433)
+#	   channel =  self.bot.get_channel(785847439579676672)
+#	   guild = self.bot.get_guild(785839283847954433)

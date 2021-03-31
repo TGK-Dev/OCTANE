@@ -5,8 +5,8 @@ from discord.ext import commands
 
 class Admins(commands.Cog):
 	"""docstring for Example"""
-	def __init__(self, client):
-		self.client = client
+	def __init__(self, bot):
+		self.bot = bot
 
 	@commands.Cog.listener()
 	async def on_ready(self):
@@ -23,20 +23,20 @@ class Admins(commands.Cog):
 	@commands.has_permissions(administrator=True)
 	async def activity(self, ctx, *, activity):
 		
-		await self.client.change_presence(activity=discord.Game(name=f"{activity}")) # This changes the bots 'activity'
+		await self.bot.change_presence(activity=discord.Game(name=f"{activity}")) # This changes the bots 'activity'
 		await ctx.send('Bot activity is Updated')
 	
 	@commands.command()
 	@commands.has_permissions(administrator=True)
 	async def status(self,ctx, arg):
 		if arg == 'dnd':
-			await self.client.change_presence(status=discord.Status.dnd)
+			await self.bot.change_presence(status=discord.Status.dnd)
 			await ctx.send('Bot status is Updated')
 		elif arg == 'online':
-			await self.client.change_presence(status=discord.Status.online)
+			await self.bot.change_presence(status=discord.Status.online)
 			await ctx.send('Bot status is Updated')
 		elif arg == 'idle' :
-			await self.client.change_presence(status=discord.Status.idle)
+			await self.bot.change_presence(status=discord.Status.idle)
 			await ctx.send('Bot status is Updated')
 		else: 
 			await ctx.send(f'{ctx.author.mention} Plsease Provide The vaild Status')
@@ -49,5 +49,5 @@ class Admins(commands.Cog):
 		await ctx.send(f'{say}')
 
 
-def setup(client):
-	client.add_cog(Admins(client))
+def setup(bot):
+	bot.add_cog(Admins(bot))

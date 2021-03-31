@@ -4,8 +4,8 @@ from discord.ext import commands
 
 class Donate(commands.Cog):
 	"""docstring for Example"""
-	def __init__(self, client):
-		self.client = client
+	def __init__(self, bot):
+		self.bot = bot
 
 	@commands.Cog.listener()
 	async def on_ready(self):
@@ -13,7 +13,7 @@ class Donate(commands.Cog):
 
 	@commands.command()
 	async def sgive(self, ctx, price, winner, req, game):
-		channel = self.client.get_channel(819968735557189666)
+		channel = self.bot.get_channel(819968735557189666)
 		
 		if channel == ctx.channel:
 
@@ -30,7 +30,7 @@ class Donate(commands.Cog):
 
 	@commands.command()
 	async def sheist(self, ctx, price, req):
-		channel = self.client.get_channel(819968735557189666)
+		channel = self.bot.get_channel(819968735557189666)
 		
 		if channel == ctx.channel:
 
@@ -43,7 +43,7 @@ class Donate(commands.Cog):
 		else:
 			await ctx.send(f'{ctx.author.mention} your in worng channel! Try in this channel <#812711254790897714>')
 
-def setup(client):
-	client.add_cog(Donate(client))
+def setup(bot):
+	bot.add_cog(Donate(bot))
 
 

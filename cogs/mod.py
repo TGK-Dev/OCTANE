@@ -3,8 +3,8 @@ from discord.ext import commands
 
 class Moderator(commands.Cog):
 	"""docstring for Example"""
-	def __init__(self, client):
-		self.client = client
+	def __init__(self, bot):
+		self.bot = bot
 
 	@commands.Cog.listener()
 	async def on_ready(self):
@@ -50,7 +50,7 @@ class Moderator(commands.Cog):
 
 	@commands.command()
 	@commands.has_permissions(ban_members=True)
-	async def ban(self, ctx, member: discord.User, *, reason=None):
+	async def ban(self, ctx, member: discord.Member, *, reason=None):
 		try:
 			await member.send(f'You Have Benned From the The Gamblers Kingdom | {reason}')
 			await ctx.message.delete()
@@ -90,14 +90,14 @@ class Moderator(commands.Cog):
 		await ctx.send(embed=embed, delete_after=30)
 
 
-def setup(client):
-	client.add_cog(Moderator(client))
+def setup(bot):
+	bot.add_cog(Moderator(bot))
 
 
 
 
 """
-channel = self.client.get_channel(821802944235700234)
+channel = self.bot.get_channel(821802944235700234)
 
 eembed = discord.Embed(titel=f'Member Banned', color=0xff0000)
 eembed.add_field(name=f'Mamber Name: ', value=f'{member.name}')

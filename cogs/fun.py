@@ -17,8 +17,8 @@ responses = ["It is certain.", "It is decidedly so.", "Without a doubt.", "||Yes
 
 class fun(commands.Cog):
 	"""docstring for Example"""
-	def __init__(self, client):
-		self.client = client
+	def __init__(self, bot):
+		self.bot = bot
 
 	@commands.Cog.listener()
 	async def on_ready(self):
@@ -130,5 +130,5 @@ class fun(commands.Cog):
 	async def _8ball(self, ctx, *, question):
 		await ctx.reply(f'Question: {question}\nAnswer: {random.choice(responses)}')
 
-def setup(client):
-	client.add_cog(fun(client))
+def setup(bot):
+	bot.add_cog(fun(bot))

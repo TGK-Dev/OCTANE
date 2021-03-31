@@ -3,8 +3,8 @@ from discord.ext import commands
 
 class error(commands.Cog):
 	"""docstring for error"""
-	def __init__(self, client):
-		self.client = client
+	def __init__(self, bot):
+		self.bot = bot
 
 	@commands.Cog.listener()
 	async def on_command_error(self, ctx, error):
@@ -40,5 +40,5 @@ class error(commands.Cog):
 	    else:
 	    	raise error
 
-def setup(client):
-	client.add_cog(error(client))
+def setup(bot):
+	bot.add_cog(error(bot))

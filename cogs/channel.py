@@ -7,8 +7,8 @@ from discord.ext import commands
 class Channels(commands.Cog):
     """docstring for Example"""
 
-    def __init__(self, client):
-        self.client = client
+    def __init__(self, bot):
+        self.bot = bot
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -112,6 +112,6 @@ class Channels(commands.Cog):
 
 
  
-def setup(client):
-    client.add_cog(Channels(client))
+def setup(bot):
+    bot.add_cog(Channels(bot))
 #role = discord.utils.get(ctx.guild.roles, name="")

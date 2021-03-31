@@ -5,8 +5,8 @@ from discord.ext import commands
 
 class Basic(commands.Cog):
 	"""docstring for Example"""
-	def __init__(self, client):
-		self.client = client
+	def __init__(self, bot):
+		self.bot = bot
 
 	@commands.Cog.listener()
 	async def on_ready(self):
@@ -15,7 +15,7 @@ class Basic(commands.Cog):
 	@commands.command(aliases=['sinfo'])
 	async def serverinfo(self, ctx):
 		usercolor = ctx.author.color
-		guild = self.client.get_guild(785839283847954433)
+		guild = self.bot.get_guild(785839283847954433)
 		booter= int(guild.premium_subscription_count)
 
 		em = discord.Embed(title='Info for The Gamblers Kingdom', color=usercolor)
@@ -29,23 +29,23 @@ class Basic(commands.Cog):
 
 	@commands.command()
 	async def ping(self, ctx):
-		await ctx.reply(f'Ping ``{round(self.client.latency * 1000)}``ms') 
+		await ctx.reply(f'Ping ``{round(self.bot.latency * 1000)}``ms') 
 
 	@commands.command()
 	async def botinfo(self, ctx):
 		embed = discord.Embed(color=0xffd700, title='Bots Infomation')
-		embed.add_field(name='Bot Name', value=f'{self.client.user.name}')
+		embed.add_field(name='Bot Name', value=f'{self.bot.user.name}')
 		embed.add_field(name='Bot Owner', value=f'<@301657045248114690>, <@488614633670967307>')
 		embed.add_field(name='Bot language', value="Python")
-		embed.add_field(name='Bot Version', value="2.2")
+		embed.add_field(name='Bot Version', value="2.5")
 		embed.set_footer(text=f'Requested by ID: {ctx.author.id} | Name: {ctx.author.name}')
 
 		await ctx.send(embed=embed)
 
 	@commands.command()
 	async def verify(self, ctx):
-		channel = self.client.get_channel(812906607301099520)
-		channel1 = self.client.get_channel(786098255448375296)
+		channel = self.bot.get_channel(812906607301099520)
+		channel1 = self.bot.get_channel(786098255448375296)
 		verify=discord.utils.get(ctx.guild.roles, name="࿐ NEWBIE 〢 0")
 		member = ctx.author
 		await ctx.message.delete()
@@ -58,7 +58,7 @@ class Basic(commands.Cog):
 			await ctx.send(f"{ctx.author.mention} You are verifed or either in worng channel which is not possibal time to ban you")
 
 
-def setup(client):
-	client.add_cog(Basic(client))
+def setup(bot):
+	bot.add_cog(Basic(bot))
 
 

@@ -5,8 +5,8 @@ from discord.ext import commands
 
 class help(commands.Cog):
 	"""docstring for Example"""
-	def __init__(self, client):
-		self.client = client
+	def __init__(self, bot):
+		self.bot = bot
 
 
 	@commands.Cog.listener()
@@ -204,5 +204,5 @@ class help(commands.Cog):
 
 		await ctx.send(embed=em)
 
-def setup(client):
-	client.add_cog(help(client))
+def setup(bot):
+	bot.add_cog(help(bot))
