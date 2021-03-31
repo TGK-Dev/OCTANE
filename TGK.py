@@ -28,7 +28,7 @@ async def on_ready():
     print(f"-----\nLogged in as: {bot.user.name} : {bot.user.id}\n-----\nMy current prefix is: -\n-----")
     data = read_json("blacklist")
     bot.blacklisted_users = data["blacklistedUsers"]
-    await bot.change_presence(activity=discord.Game(name=f"Hi, my names {bot.user.name}.\nUse - to interact with me!")) # This changes the bots 'activity'
+    await bot.change_presence(activity=discord.Game(name=f"Hi, my names {bot.user.name}.\nUse > to interact with me!")) # This changes the bots 'activity'
 
 
 @bot.event
@@ -40,12 +40,11 @@ async def on_message(message):
     # A way to blacklist users from the bot by not processing commands
     # if the author is in the blacklisted_users list
     if message.author.id in bot.blacklisted_users:
-        return await message.reply("You are blacklist From the Bot")
+        if message.content.startswith(">"):
+            return await message.reply( "Your blacklisted")
 
 
     await bot.process_commands(message)
-
-
 
 @bot.command()
 async def blacklist(ctx, user: discord.Member):
