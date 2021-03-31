@@ -18,13 +18,13 @@ class error(commands.Cog):
 	        else:
 	            await ctx.message.reply(f' You must wait {int(h)} hours, {int(m)} minutes and {int(s)} seconds to use this command!') 
 	    elif isinstance(error, commands.MissingRequiredArgument):
-	    	await ctx.message.reply(f'Please Enter all theRequird Argument')
+	    	await ctx.message.reply(f'Please Enter all the Requird Argument')
 	    elif isinstance(error, commands.CommandNotFound):
-	    	await ctx.message.reply('Command not found', delete_after=10)
+	    	return
 	    elif isinstance(error, commands.MemberNotFound):
-	    	await ctx.message.reply('Please Check the Member mention/id beause Member is Not Found in Server')
+	    	await ctx.message.reply('Member not Found')
 	    elif isinstance(error, commands.UserNotFound):
-	    	await ctx.message.reply('User not Found on discord')
+	    	await ctx.message.reply('User not Found')
 	    elif isinstance(error, commands.ChannelNotFound):
 	    	await ctx.message.reply('Channel Not Found')
 	    elif isinstance(error, commands.RoleNotFound):
@@ -37,8 +37,6 @@ class error(commands.Cog):
 	    	await ctx.message.reply(f'The {name} is Already UnLoaded')
 	    elif isinstance(error, commands.ExtensionNotFound):
 	    	await ctx.message.reply(f'The Extension not Found')
-	    elif isinstance(error, commands.Forbidden):
-	    	return
 	    else:
 	    	raise error
 

@@ -11,6 +11,13 @@ class events(commands.Cog):
 		print(f'Events Cogs are Loaded')
 
 	@commands.Cog.listener()
+	async def on_member_ban(member):
+		if member.guild_id == 785847439579676672:
+			channel = self.client.get_channel(806107399005667349)
+			em = discord.Embed(color=0x02ff06, description=f'{member.name} was banned')
+			await channel.send(embed=embed)
+
+	@commands.Cog.listener()
 	async def on_member_join(self, member):
 		guild = member.guild.id 
 		channel =  self.client.get_channel(785847439579676672)
@@ -38,7 +45,9 @@ class events(commands.Cog):
 		if len(messageContent) > 0:
 			for word in word_list:
 				if word in messageContent:
-					return await message.reply('Please Vote us here, <https://top.gg/servers/785839283847954433/vote>, Thanks For Support ^0^')
+					return await message.reply('Please Vote us here, <https://top.gg/servers/785839283847954433/vote>, Thanks For Support ^0^', )
+
+
 
 	#@commands.Cog.listener()
 	#async def on_message(self, message):

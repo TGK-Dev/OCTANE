@@ -1,4 +1,5 @@
 import discord
+import typing 
 from datetime import datetime
 from discord.ext import commands
 
@@ -79,9 +80,9 @@ class Channels(commands.Cog):
        
     @commands.command()
     @commands.has_permissions(ban_members=True)
-    async def hide(self, ctx, channel: discord.TextChannel = None):
+    async def hide(self, ctx, channel: discord.TextChannel = None, role: discord.Role = None):
         channel = channel if channel else ctx.channel
-        role = discord.utils.get(ctx.guild.roles, name="࿐ NEWBIE 〢 0")
+        role = role if role else discord.utils.get(ctx.guild.roles, name="࿐ NEWBIE 〢 0")
         overwrite = channel.overwrites_for(role)
         overwrite.view_channel = False
         await channel.set_permissions(role, overwrite=overwrite)
@@ -96,9 +97,9 @@ class Channels(commands.Cog):
 
     @commands.command(aliases=['uhide'])
     @commands.has_permissions(ban_members=True)
-    async def unhide(self, ctx, channel: discord.TextChannel = None):
+    async def unhide(self, ctx, channel: discord.TextChannel = None, role: discord.Role = None):
         channel = channel if channel else ctx.channel
-        role = discord.utils.get(ctx.guild.roles, name="࿐ NEWBIE 〢 0")
+        role = role if role else discord.utils.get(ctx.guild.roles, name="࿐ NEWBIE 〢 0")
         overwrite = channel.overwrites_for(role)
         overwrite.view_channel = True
         await channel.set_permissions(role, overwrite=overwrite)
@@ -107,6 +108,8 @@ class Channels(commands.Cog):
         embed = discord.Embed(
             color=0x02ff06, description=f'The {channel.name} is Now Not Hidded for for {role.mention}')
         await ctx.send(embed=embed, delete_after=10)
+
+
 
  
 def setup(client):

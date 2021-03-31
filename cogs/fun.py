@@ -12,8 +12,7 @@ yes_list = ['https://cdn.discordapp.com/attachments/825090204741402705/825090217
 angry_list = ['https://cdn.discordapp.com/attachments/825091988046348308/825092015154659379/dX3CcmGpLwb.gif', 'https://cdn.discordapp.com/attachments/825091988046348308/825092013673283584/JV3tNhf_e7Z.gif', 'https://cdn.discordapp.com/attachments/825091988046348308/825092012218646528/HoAGtevPyXp.gif', 'https://cdn.discordapp.com/attachments/825091988046348308/825092010662428713/Gdz8hUHVnBh.gif']
 cry_list = ['https://cdn.discordapp.com/attachments/825090653729456169/825090684099887184/YHFftYClBP-.gif', 'https://cdn.discordapp.com/attachments/825090653729456169/825090683928313926/t4i74GvRfnJ.gif', 'https://cdn.discordapp.com/attachments/825090653729456169/825090683765260388/3i9SyGnxMvL.gif', 'https://cdn.discordapp.com/attachments/825090653729456169/825090689800208384/g3fGIw70ZeB.gif', 'https://cdn.discordapp.com/attachments/825090653729456169/825090691684106270/nDchF0vJs3M.gif']
 sad_list = ['https://cdn.discordapp.com/attachments/825091183234908200/825091270028034048/6NCYiaXakn5.gif', 'https://cdn.discordapp.com/attachments/825091183234908200/825091268970807346/1MPH4xL6wyM.gif', 'https://cdn.discordapp.com/attachments/825091183234908200/825091261806542889/zmRtMflCtAV.gif', 'https://cdn.discordapp.com/attachments/825091183234908200/825091258409811978/KYl87iM4Vbz.gif', 'https://cdn.discordapp.com/attachments/825091183234908200/825091255499096104/sLLhw_KTXzW.gif']
-responses = [
-	            "It is certain.", "It is decidedly so.", "Without a doubt.", "||Yes|| - definitely.", "You may rely on it.", "As I see it, yes.", "Most likely.", "Outlook good.", "Yes.", "Signs point to yes.", "Reply hazy, try again.", "Ask again later.", "Better not tell you now.", "Cannot predict now.", "Concentrate and ask again.", "Don't count on it.", "My reply is no.", "My sources say no.", "Outlook not so good.", "Very doubtful.", "My reply is no.", "Why don't we partner", "Well i know but Won't Tell", "Why you like this type of question","No.", "||No|| - definitely.", "If you don't know about this how did you pass the School", "You Stupid", "I have doubt that your human or ....", "Your genius||Not Jk||", "Your genius ||JK||", "oh no you , not you again!", "why should i even tell you that?", "you are so dumb duh!", "Bruh"]
+responses = ["It is certain.", "It is decidedly so.", "Without a doubt.", "||Yes|| - definitely.", "You may rely on it.", "As I see it, yes.", "Most likely.", "Outlook good.", "Yes.", "Signs point to yes.", "Reply hazy, try again.", "Ask again later.", "Better not tell you now.", "Cannot predict now.", "Concentrate and ask again.", "Don't count on it.", "My reply is no.", "My sources say no.", "Outlook not so good.", "Very doubtful.", "My reply is no.", "Why don't we partner", "Well i know but Won't Tell", "Why you like this type of question","No.", "||No|| - definitely.", "If you don't know about this how did you pass the School", "You Stupid", "I have doubt that your human or ....", "Your genius||Not Jk||", "Your genius ||JK||", "oh no you , not you again!", "why should i even tell you that?", "you are so dumb duh!", "Bruh"]
 
 
 class fun(commands.Cog):
@@ -100,9 +99,9 @@ class fun(commands.Cog):
 	@commands.cooldown(3, 60, commands.BucketType.user)
 	async def cry(self, ctx, member: discord.Member=None):
 		usercolor = ctx.author.color
-		rc = random.choice(cry_list)
+		rcc = random.choice(cry_list)
 		em = discord.Embed(color=usercolor, description=f"**{ctx.author.name}** is crying")
-		em.set_image(url=rc)
+		em.set_image(url=rcc)
 
 		await ctx.message.reply(embed=em)
 
@@ -110,9 +109,9 @@ class fun(commands.Cog):
 	@commands.cooldown(3, 60, commands.BucketType.user)
 	async def sad(self, ctx):
 		usercolor = ctx.author.color
-		rc = random.choice(sad_list)
+		sl = random.choice(sad_list)
 		em = discord.Embed(color=usercolor, description=f"**{ctx.author.name}** is crying")
-		em.set_image(url=rc)
+		em.set_image(url=sl)
 
 		await ctx.message.reply(embed=em)
 

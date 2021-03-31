@@ -28,8 +28,6 @@ for filename in os.listdir('./cogs'):
 		client.load_extension(f'cogs.{filename[:-3]}')
 
 
-
-
 client.run(f'ODE2Njk5MTY3ODI0MjgxNjIx.YD-wXw.CE18KDWlS2fvjyBDNw_fRvonw_s')
 
 #ODE2Njk5MTY3ODI0MjgxNjIx.YD-wXw.ZwQEyvDMWayQJdFeA9AXXgOxcyw	
