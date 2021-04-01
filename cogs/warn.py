@@ -49,7 +49,7 @@ class Warns(commands.Cog):
             emb = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **The User {member.name} Has Been Warned I couldn't DM them.**")
             await ctx.send(embed=emb)
 
-        log_channel = self.bot.get_channel(827245906331566180)
+        log_channel = self.bot.get_channel(803687264110247987)
 
         embed = discord.Embed(color=0x06f79e, title=f"Warned | {member.name}")
         embed.add_field(name="User", value=f"{member.name}", inline=False)

@@ -117,7 +117,7 @@ class Moderation(commands.Cog):
         except discord.HTTPException:
             emb = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **The User {member.name} Muted I couldn't DM them.**")
             await ctx.send(embed=emb)
-        log_channel = self.bot.get_channel(8036724110247987)
+        log_channel = self.bot.get_channel(803687264110247987)
         embed = discord.Embed(title=f"Muted | {member.name}", inlin=True)
         embed.add_field(name="User", value=f"{member.mention}", inlin=True)
         embed.add_field(name="Moderator", value=f"{ctx.author.mention}", inlin=True)
@@ -170,7 +170,7 @@ class Moderation(commands.Cog):
             emb = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **The User {member.name} Has Been kicked I couldn't DM them.**")
             await ctx.send(embed=emb)
 
-        log_channel = self.bot.get_channel(8036724110247987)
+        log_channel = self.bot.get_channel(803687264110247987)
 
         embed = discord.Embed(title=f"kicked | {member.name}")
         embed.add_field(name="User", value=f"{member.name}", inline=False)
@@ -181,11 +181,7 @@ class Moderation(commands.Cog):
         await log_channel.send(embed=embed)
 
 
-    @commands.command(
-        name="ban",
-        description="A command which bans a given user",
-        usage="<user> [reason]",
-    )
+    @commands.command(name="ban",description="A command which bans a given user",usage="<user> [reason]",)
     @commands.guild_only()
     @commands.has_guild_permissions(ban_members=True)
     async def ban(self, ctx, member: discord.Member, *, reason=None):
@@ -201,7 +197,7 @@ class Moderation(commands.Cog):
             emb = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **The User {member.name} Has Been kicked I couldn't DM them.**")
             await ctx.send(embed=emb)
 
-        log_channel = self.bot.get_channel(8036724110247987)
+        log_channel = self.bot.get_channel(803687264110247987)
 
         embed = discord.Embed(color=0x06f79e, title=f"Banned | {member.name}")
         embed.add_field(name="User", value=f"{member.name}", inline=False)
@@ -210,11 +206,7 @@ class Moderation(commands.Cog):
         embed.set_footer(text=f"{member.id}", icon_url=member.avatar_url)
 
         await log_channel.send(embed=embed)
-    @commands.command(
-        name="unban",
-        description="A command which unbans a given user",
-        usage="<user> [reason]",
-    )
+    @commands.command(name="unban", description="A command which unbans a given user", usage="<user> [reason]")
     @commands.guild_only()
     @commands.has_guild_permissions(ban_members=True)
     async def unban(self, ctx, member, *, reason=None):
