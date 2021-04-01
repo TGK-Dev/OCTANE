@@ -51,9 +51,6 @@ bot = commands.Bot(
 )  # change command_prefix='-' to command_prefix=get_prefix for custom prefixes
 bot.config_token = secret_file["token"]
 bot.connection_url = secret_file["mongo"]
-bot.joke_api_key = secret_file["x-rapidapi-key"]
-
-
 
 logging.basicConfig(level=logging.INFO)
 
@@ -182,6 +179,7 @@ if __name__ == "__main__":
     bot.db = bot.mongo["tgk_database"]
     bot.config = Document(bot.db, "config")
     bot.mutes = Document(bot.db, "mutes")
+    bot.warns = Document(bot.db, "warns")
     bot.invites = Document(bot.db, "invites")
     bot.command_usage = Document(bot.db, "command_usage")
     bot.reaction_roles = Document(bot.db, "reaction_roles")
@@ -191,4 +189,4 @@ if __name__ == "__main__":
             bot.load_extension(f"cogs.{file[:-3]}")
 
     bot.run(bot.config_token)
-#ODE2Njk5MTY3ODI0MjgxNjIx.YD-wXw.3rtJg9Os78CSFFU5j_CXPY27c2U
+#ODE2Njk5MTY3ODI0MjgxNjIx.YD-wXw.3rtJg9Os78CSFFU5j_CXPY27c2U9

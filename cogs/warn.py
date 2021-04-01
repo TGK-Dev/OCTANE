@@ -1,16 +1,9 @@
 import discord
 from discord.ext import commands
-from discord.ext.buttons import Paginator
 
+from utils.util import Pag
 
-class Pag(Paginator):
-    async def teardown(self):
-        try:
-            await self.page.clear_reactions()
-        except discord.HTTPException:
-            pass
-
-
+from utils.mongo import Document
 
 class Warns(commands.Cog):
     def __init__(self, bot):
@@ -20,9 +13,10 @@ class Warns(commands.Cog):
     @commands.guild_only()
     @commands.has_permissions(manage_messages=True)
     async def warn(self, ctx, member: discord.Member, *, reason):
-        
         if member.id in [ctx.author.id, self.bot.user.id]:
             return await ctx.send("You cannot warn yourself or the bot!")
+        await ctx.message.delete()
+
         
         current_warn_count = len(
             await self.bot.warns.find_many_by_custom(
@@ -48,27 +42,28 @@ class Warns(commands.Cog):
         embed.set_footer(text=f"Warn: {current_warn_count}")
         
         try:
-            await member.send(f"You Have been Warned | {reason}\nWarns: {current_warn_count}")
-            em = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **{member.name} Has been warned.**\nWarnings Count: {current_warn_count}")
+            await member.send(f"You Have Been Warned | {reason} | Warnings Count {current_warn_count}")
+            em = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **{member.name} Has been Warned | Warnings Count {current_warn_count}")
             await ctx.send(embed=em)
         except discord.HTTPException:
-            emb = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **Warning Logged For {member.name}  I couldn't DM them.** Warnings Count: {current_warn_count}")
+            emb = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **The User {member.name} Has Been Warned I couldn't DM them.**")
             await ctx.send(embed=emb)
 
         log_channel = self.bot.get_channel(827245906331566180)
 
-        embed = discord.Embed(title=f"Warn | {member.name}")
-        embed.add_field(name="User", value=f"{member.mention}")
-        embed.add_field(name="Moderator", value=f"{ctx.author.mention}")
-        embed.add_field(name="Reason", value=f"{reason}")
+        embed = discord.Embed(color=0x06f79e, title=f"Warned | {member.name}")
+        embed.add_field(name="User", value=f"{member.name}", inline=False)
+        embed.add_field(name="Moderator", value=f"{ctx.author.mention}", inline=False)
+        embed.add_field(name="Reason", value=f"{reason}", inline=False)
         embed.set_footer(text=f"{member.id}", icon_url=member.avatar_url)
 
-        await channel.send(embed=embed)
-            
+        await log_channel.send(embed=embed)
+
+
     @commands.command()
     @commands.guild_only()
     @commands.has_permissions(manage_messages=True)
-    async def warnings(self, ctx, member: discord.Member):
+    async def Warnings(self, ctx, member: discord.Member):
         warn_filter = {"user_id": member.id, "guild_id": member.guild.id}
         warns = await self.bot.warns.find_many_by_custom(warn_filter)
         
