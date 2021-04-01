@@ -163,7 +163,7 @@ class Moderation(commands.Cog):
         try:
             await member.send(f"You Have Been kicked")
             await ctx.guild.kick(user=member, reason=reason)
-            em = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **{member.name} Has been kicked")
+            em = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **{member.name}** Has been kicked")
             await ctx.send(embed=em)
         except discord.HTTPException:
             await ctx.guild.kick(user=member, reason=reason)
@@ -181,30 +181,33 @@ class Moderation(commands.Cog):
         await log_channel.send(embed=embed)
 
 
-    @commands.command(name="ban",description="A command which bans a given user",usage="<user> [reason]",)
+    @commands.command(
+        name="Ban",
+        description="A command which kicks a given user",
+        usage="<user> [reason]",
+    )
     @commands.guild_only()
     @commands.has_guild_permissions(ban_members=True)
     async def ban(self, ctx, member: discord.Member, *, reason=None):
-        await ctx.message.delete()
-
         try:
-            await member.send(f"You Have Been Banned")
-            await ctx.guild.ban(user=member, reason=reason)
-            em = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **{member.name} Has been Banned")
+            await member.send(f"You Have Been Banned | {reason}")
+            await ctx.guild.kick(user=member, reason=reason)
+            em = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **{member.name}** Has been Banned")
             await ctx.send(embed=em)
         except discord.HTTPException:
-            await ctx.guild.ban(user=member, reason=reason)
-            emb = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **The User {member.name} Has Been kicked I couldn't DM them.**")
+            await ctx.guild.kick(user=member, reason=reason)
+            emb = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **The User {member.name} Has Been Banned.**")
             await ctx.send(embed=emb)
 
         log_channel = self.bot.get_channel(803687264110247987)
 
-        embed = discord.Embed(color=0x06f79e, title=f"Banned | {member.name}")
+        embed = discord.Embed(title=f"kicked | {member.name}")
         embed.add_field(name="User", value=f"{member.name}", inline=False)
         embed.add_field(name="Moderator", value=f"{ctx.author.mention}", inline=False)
         embed.add_field(name="Reason", value=f"{reason}", inline=False)
         embed.set_footer(text=f"{member.id}", icon_url=member.avatar_url)
 
+        await log_channel.send(embed=embed)
         await log_channel.send(embed=embed)
     @commands.command(name="unban", description="A command which unbans a given user", usage="<user> [reason]")
     @commands.guild_only()
