@@ -41,12 +41,8 @@ class Invites(commands.Cog):
         data["userInvited"].append(member.id)
         await self.bot.invites.upsert(data)
 
-        channel = discord.utils.get(member.guild.text_channels, name="invite-check ")
-        embed = discord.Embed(
-            title=f"**Member Information: {member.display_name}**",
-            description=f"Name: {member.name}\nMemeber ID: {member.id}\n\n**Inviter Information: Invited by: {inviter.mention}**\nInviter Name:{inviter.name}\nInviter ID: {inviter.id}\nTotal Invites: {data['count']}",
-            timestamp=member.joined_at
-        )
+        channel =  self.bot.get_channel(819999483793506315)
+        embed = discord.Embed(title=f"**Member Information: {member.display_name}**", description=f"Name: {member.name}\nMemeber ID: {member.id}\n\n**Inviter Information: Invited by: {inviter.mention}**\nInviter Name:{inviter.name}\nInviter ID: {inviter.id}\nTotal Invites: {data['count']}", timestamp=member.joined_at)
         embed.set_thumbnail(url=member.avatar_url)
         embed.set_footer(text=member.guild.name, icon_url=member.guild.icon_url)
         await channel.send(embed=embed)
