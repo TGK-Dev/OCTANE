@@ -43,7 +43,7 @@ class Warns(commands.Cog):
         
         try:
             await member.send(f"You Have Been Warned | {reason} | Warnings Count {current_warn_count}")
-            em = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **{member.name} Has been Warned | Warnings Count {current_warn_count}")
+            em = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **{member.name} Has been Warned | Warnings Count {current_warn_count}**")
             await ctx.send(embed=em)
         except discord.HTTPException:
             emb = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **The User {member.name} Has Been Warned I couldn't DM them.**")

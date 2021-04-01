@@ -41,7 +41,7 @@ class Invites(commands.Cog):
         data["userInvited"].append(member.id)
         await self.bot.invites.upsert(data)
 
-        channel = discord.utils.get(member.guild.text_channels, name="invites")
+        channel = discord.utils.get(member.guild.text_channels, name="invite-check ")
         embed = discord.Embed(
             title=f"**Member Information: {member.display_name}**",
             description=f"Name: {member.name}\nMemeber ID: {member.id}\n\n**Inviter Information: Invited by: {inviter.mention}**\nInviter Name:{inviter.name}\nInviter ID: {inviter.id}\nTotal Invites: {data['count']}",
