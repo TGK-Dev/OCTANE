@@ -227,7 +227,7 @@ class fun(commands.Cog):
 			await ctx.reply(embed=em)
 		else:
 			em = discord.Embed(color=usercolor, description=f"**{ctx.author.name}** is murdering **{member.name}**")
-			em.set_image(url=kill_list)
+			em.set_image(url=kill)
 			await ctx.reply(embed=em)
 
 	@commands.command(name="8Ball", description="Ask you question to bot", usage="[question]", aliases=['8b'])
