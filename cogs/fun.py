@@ -24,58 +24,82 @@ class fun(commands.Cog):
 	async def on_ready(self):
 		print(f"{self.__class__.__name__} Cog has been loaded\n-----")
 
-	@commands.command(name="Cheer", description="send cheer full gif", usage="only send command")
+	@commands.command(name="Cheer", description="send cheer full gif", usage="cheer [optional: member]")
 	@commands.cooldown(3, 60, commands.BucketType.user)
-	async def cheer(self, ctx):
+	async def cheer(self, ctx, member: discord.Member=None):
+		member = member if member else ctx.author
 		usercolor = ctx.author.color
 		rc = random.choice(cheer_list)
-		em = discord.Embed(color=usercolor, description=f"**{ctx.author.name}** is cheering")
-		em.set_image(url=rc)
+		if member == ctx.author:
+			em = discord.Embed(color=usercolor, description=f"**{ctx.author.name}** is cheering")
+			em.set_image(url=rc)
+			await ctx.reply(embed=em)
+		else:
+			emm = discord.Embed(color=usercolor, description=f"**{ctx.author.name}** is cheering for **{member.name}**")
+			emm.set_image(url=rc)
+			await ctx.reply(embed=emm)
 
-		await ctx.message.reply(embed=em)
-
-	@commands.command(name="Happy", description="Send happy gif", usage="only send command")
+	@commands.command(name="Happy", description="Send happy gif", usage="happy [optional: member]")
 	@commands.cooldown(3, 60, commands.BucketType.user)
-	async def happy(self, ctx):
+	async def happy(self, ctx, member: discord.Member):
+		member = member if member else ctx.author
 		usercolor = ctx.author.color
 		rh = random.choice(happy_list)
-		em = discord.Embed(color=usercolor, description=f"**{ctx.author.name}** is happy")
-		em.set_image(url=rh)
+		if member == ctx.author:
+			em = discord.Embed(color=usercolor, description=f"**{ctx.author.name}** is happy")
+			em.set_image(url=rh)
+			await ctx.reply(embed=em)
+		else:
+			emm = discord.Embed(color=usercolor, description=f"**{member.mention}** Made **{ctx.author.name}**")
+			emm.set_image(url=rh)
+			await ctx.reply(embed=emm)
 
-		await ctx.message.reply(embed=em)
-
-	@commands.command(name="Thumbsup", description="send thumbsup gif", usage="only send command", aliases=['thunbs up'])
+	@commands.command(name="Thumbsup", description="send thumbsup gif", usage="thumbsup [optional: member]", aliases=['thunbs up'])
 	@commands.cooldown(3, 60, commands.BucketType.user)
-	async def thumbsup(self, ctx):
+	async def thumbsup(self, ctx, member: discord.Member=None):
+		member = member if member else ctx.author
 		usercolor = ctx.author.gxf9q_J_cO9lor
 		rhh = random.choice(thunbs_list)
-		em = discord.Embed(color=usercolor, description=f"**{ctx.author.name}** is giving a thumbsup")
-		em.set_image(url=rhh)
+		if member == ctx.author:
 
-		await ctx.message.reply(embed=em)
+			em = discord.Embed(color=usercolor, description=f"**{ctx.author.name}** is giving a thumbsup")
+			em.set_image(url=rhh)
+			await ctx.reply(embed=em)
+		else:
+			emm = discord.Embed(color=usercolor, description=f"**{ctx.author.name}** is giving **{member.name}** a thumbsup")
+			emm.set_image(url=rhh)
+			await ctx.reply(embed=emm)
 
-	@commands.command(name="Bonk", description="Bonk Some one's Head", usage="[mention member]")
+	@commands.command(name="Bonk", description="Bonk Some one's Head", usage="bonk [member]")
 	@commands.cooldown(3, 60, commands.BucketType.user)
 	async def bonk(self, ctx, member: discord.Member=None):
 		member = member if member else ctx.author
 		usercolor = ctx.author.color
 		rb = random.choice(bonk_list)
-		em = discord.Embed(color=usercolor, description=f"**{member.name}** got their head bonked by **{ctx.author}**")
-		em.set_image(url=rb)
+		if member == ctx.author:
+			await ctx.reply("You can't bonk your self")
+		else:
+			emm = discord.Embed(color=usercolor, description=f"**{member.name}** got their head bonked by **{ctx.author}**")
+			emm.set_image(url=rb)
+			await ctx.message.reply(embed=emm)
 
-		await ctx.message.reply(embed=em)
-
-	@commands.command(name="Dab", description="send Dab gif", usage="only send command")
+	@commands.command(name="Dab", description="send Dab gif", usage="dab [optional: member]")
 	@commands.cooldown(3, 60, commands.BucketType.user)
-	async def dab(self, ctx):
+	async def dab(self, ctx, member: discord.Member=None):
+		member = member if member else ctx.author
+
 		usercolor = ctx.author.color
 		rd = random.choice(dab_list)
-		em = discord.Embed(color=usercolor, description=f"**{ctx.author.name}** is dabbing")
-		em.set_image(url=rd)
+		if member == ctx.author:
+			em = discord.Embed(color=usercolor, description=f"**{ctx.author.name}** is dabbing")
+			em.set_image(url=rd)
+			await ctx.reply(embed=em)
+		else:
+			emm = discord.Embed(color=usercolor, description=f"**{ctx.author.name}** is dabbing With **{member.name}**")
+			emm.set_image(url=rd)
+			await ctx.reply(embed=em)
 
-		await ctx.message.reply(embed=em)
-
-	@commands.command(name="Sleep", description="send Sleepy gif", usage="only send command")
+	@commands.command(name="Sleep", description="send Sleepy gif", usage="Sleep")
 	@commands.cooldown(3, 60, commands.BucketType.user)
 	async def sleep(self, ctx):
 		usercolor = ctx.author.color
@@ -85,45 +109,68 @@ class fun(commands.Cog):
 
 		await ctx.message.reply(embed=em)
 
-	@commands.command(name="Yes", description="send Yes gif", usage="only send command")
+	@commands.command(name="Yes", description="send Yes gif", usage="yes [optional: member]")
 	@commands.cooldown(3, 60, commands.BucketType.user)
-	async def yes(self, ctx):
+	async def yes(self, ctx, member: discord.Member=None):
+		member = member if member else ctx.author
 		usercolor = ctx.author.color
 		ry = random.choice(yes_list)
-		em = discord.Embed(color=usercolor, description=f"**{ctx.author.name}** is Sleepy")
-		em.set_image(url=ry)
+		if member == ctx.author:
+			em = discord.Embed(color=usercolor, description=f"**{ctx.author.name}** Agrees")
+			em.set_image(url=ry)
+			await ctx.reply(embed=em)
+		else:
+			em = discord.Embed(color=usercolor, description=f"**{ctx.author.name}** agrees with **{member.name}**")
+			em.set_image(url=ry)
+			await ctx.reply(embed=em)
 
-		await ctx.message.reply(embed=em)
 
-	@commands.command(name="Cry", description="Send Crying Gif", usage="only send command")
+	@commands.command(name="Cry", description="Send Crying Gif", usage="cry [optional: member]")
 	@commands.cooldown(3, 60, commands.BucketType.user)
 	async def cry(self, ctx, member: discord.Member=None):
 		usercolor = ctx.author.color
 		rcc = random.choice(cry_list)
-		em = discord.Embed(color=usercolor, description=f"**{ctx.author.name}** is crying")
-		em.set_image(url=rcc)
+		if member == ctx.author:
+			em = discord.Embed(color=usercolor, description=f"**{ctx.author.name}** is crying")
+			em.set_image(url=sl)
+			await ctx.reply(embed=em)
+		else:
+			emm = discord.Embed(color=usercolor, description=f"**{member.name}** Made **{ctx.author.name}** cry")
+			emm.set_image(url=rcc)
+			await ctx.reply(embed=emm)
 
 		await ctx.message.reply(embed=em)
 
-	@commands.command(name="Sad", description="send Sad gif", usage="only send command")
+	@commands.command(name="Sad", description="send Sad gif", usage="sad [optional: member] ")
 	@commands.cooldown(3, 60, commands.BucketType.user)
-	async def sad(self, ctx):
+	async def sad(self, ctx, member: discord.Member=None):
 		usercolor = ctx.author.color
+		member = member if member else ctx.author
 		sl = random.choice(sad_list)
-		em = discord.Embed(color=usercolor, description=f"**{ctx.author.name}** is crying")
-		em.set_image(url=sl)
+		if member == ctx.author:
+			em = discord.Embed(color=usercolor, description=f"**{ctx.author.name}** is crying")
+			em.set_image(url=sl)
+			await ctx.reply(embed=em)
+		else:
+			emm = discord.Embed(color=usercolor, description=f"**{member.name}** Made **{ctx.author.name}** Sad")
+			emm.set_image(url=sl)
+			await ctx.reply(embed=emm)
 
-		await ctx.message.reply(embed=em)
-
-	@commands.command(name="Angry", description="Send Angry list", usage="only send command")
+	@commands.command(name="Angry", description="Send Angry list", usage="angry [optional: member]")
 	@commands.cooldown(3, 60, commands.BucketType.user)
-	async def angry(self, ctx):
+	async def angry(self, ctx, member: discord.Member=None):
 		usercolor = ctx.author.color
+		member = member if member else ctx.author
 		ra = random.choice(angry_list)
-		em = discord.Embed(color=usercolor, description=f"**{ctx.author.name}** is crying")
-		em.set_image(url=ra)
+		if member == ctx.author:
+			em = discord.Embed(color=usercolor, description=f"**{ctx.author.name}** is Angry")
+			em.set_image(url=ra)
+			await ctx.message.reply(embed=em)
+		else:
+			emm = discord.Embed(color=usercolor, description=f"**{ctx.author.name}** is raging at {member.name}")
+			emm.set_image(url=ra)
+			await ctx.message.reply(embed=emm)
 
-		await ctx.message.reply(embed=em)
 
 	@commands.command(name="8Ball", description="Ask you question to bot", usage="[question]", aliases=['8b'])
 	@commands.cooldown(3, 30, commands.BucketType.user)

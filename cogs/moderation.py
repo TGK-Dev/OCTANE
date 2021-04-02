@@ -68,7 +68,7 @@ class Moderation(commands.Cog):
     @commands.command(
         name='mute',
         description="Mutes a given user for x time!",
-        ussage='<user> [time]'
+        ussage='mute <user> [time]'
     )
     @commands.has_permissions(manage_roles=True)
     async def mute(self, ctx, member: discord.Member, *, time: TimeConverter=None):
@@ -130,7 +130,7 @@ class Moderation(commands.Cog):
     @commands.command(
         name='unmute',
         description="Unmuted a member!",
-        usage='<user>'
+        usage='unmute <user>'
     )
     @commands.has_permissions(manage_roles=True)
     async def unmute(self, ctx, member: discord.Member):
@@ -155,11 +155,12 @@ class Moderation(commands.Cog):
     @commands.command(
         name="kick",
         description="A command which kicks a given user",
-        usage="<user> [reason]",
+        usage="kick <user> [reason]",
     )
     @commands.guild_only()
     @commands.has_guild_permissions(ban_members=True)
     async def kick(self, ctx, member: discord.Member, *, reason=None):
+        await ctx.message.delete()
         try:
             await member.send(f"You Have Been kicked")
             await ctx.guild.kick(user=member, reason=reason)
@@ -184,11 +185,12 @@ class Moderation(commands.Cog):
     @commands.command(
         name="Ban",
         description="A command which kicks a given user",
-        usage="<user> [reason]",
+        usage="ban <user> [reason]",
     )
     @commands.guild_only()
     @commands.has_guild_permissions(ban_members=True)
     async def ban(self, ctx, member: discord.Member, *, reason=None):
+        await ctx.message.delete()
         try:
             await member.send(f"You Have Been Banned | {reason}")
             await ctx.guild.kick(user=member, reason=reason)
@@ -209,7 +211,7 @@ class Moderation(commands.Cog):
 
         await log_channel.send(embed=embed)
         await log_channel.send(embed=embed)
-    @commands.command(name="unban", description="A command which unbans a given user", usage="<user> [reason]")
+    @commands.command(name="unban", description="A command which unbans a given user", usage="unban <user> [reason]")
     @commands.guild_only()
     @commands.has_guild_permissions(ban_members=True)
     async def unban(self, ctx, member, *, reason=None):
@@ -225,7 +227,7 @@ class Moderation(commands.Cog):
     @commands.command(
         name="purge",
         description="A command which purges the channel it is called in",
-        usage="[amount]",
+        usage="purge [amount]",
     )
     @commands.guild_only()
     @commands.has_permissions(manage_messages=True)
@@ -238,7 +240,7 @@ class Moderation(commands.Cog):
         )
         await ctx.send(embed=embed, delete_after=15)
 
-    @commands.command(name="User Info", description="Give all Infomation about user", usage="[member]")
+    @commands.command(name="User Info", description="Give all Infomation about user", usage="whois [member]")
     @commands.has_permissions(manage_messages=True)
     async def whois(self, ctx, member: discord.Member = None):
         

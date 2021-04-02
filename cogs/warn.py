@@ -9,7 +9,7 @@ class Warns(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         
-    @commands.command()
+    @commands.command(name="Warn", description="Gives an Warnings to user", usage="warn [member] [warn]")
     @commands.guild_only()
     @commands.has_permissions(manage_messages=True)
     async def warn(self, ctx, member: discord.Member, *, reason):
@@ -60,7 +60,7 @@ class Warns(commands.Cog):
         await log_channel.send(embed=embed)
 
 
-    @commands.command()
+    @commands.command(name="Warnings", description="Show All Warnings for User", usage="Warnings [member]")
     @commands.guild_only()
     @commands.has_permissions(manage_messages=True)
     async def Warnings(self, ctx, member: discord.Member):

@@ -23,6 +23,7 @@ class txt_manage(commands.Cog):
         name="channelstats",
         aliases=["cs"],
         description="Sends a nice fancy embed with some channel stats",
+        usage="<channelstats> [channel]",
     )
     @commands.has_permissions(manage_messages=True)
     async def channelstats(self, ctx):
@@ -66,7 +67,7 @@ class txt_manage(commands.Cog):
     @new.command(
         name="category",
         description="Create a new category",
-        usage="<role> <Category name>",
+        usage="new <role> <Category name>",
     )
     async def category(self, ctx, role: discord.Role, *, name):
         overwrites = {
@@ -80,7 +81,7 @@ class txt_manage(commands.Cog):
     @new.command(
         name="channel",
         description="Create a new channel",
-        usage="<role> <channel name>",
+        usage="new <role> <channel name>",
     )
     async def channel(self, ctx, role: discord.Role, *, name):
         overwrites = {
@@ -95,13 +96,13 @@ class txt_manage(commands.Cog):
         )
         await ctx.send(f"Hey dude, I made {channel.name} for ya!")
 
-    @commands.group(invoke_without_command=True)
+    @commands.group(name="category", description="Delete a category/channel", usage="delete help", invoke_without_command=True)
     @commands.has_permissions(administrator=True)
     async def delete(self, ctx):
         await ctx.send("Invalid sub-command passed")
 
     @delete.command(
-        name="category", description="Delete a category", usage="<category> [reason]"
+        name="category", description="Delete a category", usage="delete <category> [reason]"
     )
     @our_custom_check()
     async def _category(self, ctx, category: discord.CategoryChannel, *, reason=None):
@@ -109,7 +110,7 @@ class txt_manage(commands.Cog):
         await ctx.send(f"hey! I deleted {category.name} for you")
 
     @delete.command(
-        name="channel", description="Delete a channel", usage="<channel> [reason]"
+        name="channel", description="Delete a channel", usage="delete <channel> [reason]"
     )
     @our_custom_check()
     async def _channel(self, ctx, channel: discord.TextChannel = None, *, reason=None):
@@ -118,7 +119,7 @@ class txt_manage(commands.Cog):
         await ctx.send(f"hey! I deleted {category.name} for you")
 
 
-    @commands.command(name="lockdown", description="Lock the given channel for mentioned Role", usage="[channel] [Role]", aliases=['l'])
+    @commands.command(name="lockdown", description="Lock the given channel for mentioned Role", usage="lock [channel] [Role]", aliases=['l'])
     @commands.has_permissions(manage_messages=True)
     async def lock(self, ctx, channel: discord.TextChannel = None, role: discord.Role = None):
         channel = channel if channel else ctx.channel
@@ -130,7 +131,7 @@ class txt_manage(commands.Cog):
         embed = discord.Embed(color=0xff0000, description=f'The {channel.name} is lock for {role.mention}')
         await channel.send(embed=embed)
 
-    @commands.command(name="unlock", description="UnLock the given channel For mentioned Role", usage="[channel] [Role]",)
+    @commands.command(name="unlock", description="UnLock the given channel For mentioned Role", usage="usagenLock [channel] [Role]",)
     @commands.has_permissions(manage_messages=True)
     async def unlock(self, ctx, channel: discord.TextChannel = None, role: discord.Role = None):
 
@@ -146,7 +147,7 @@ class txt_manage(commands.Cog):
         embed = discord.Embed(color=0x02ff06, description=f'The {channel.name} is unlock for {role.mention}')
         await channel.send(embed=embed)
 
-    @commands.command(name="slowmode", description="Set Slowmode In Current Channel", usage="[slowmode time 1m, 1s 1h max 6h", aliases=['sm'])
+    @commands.command(name="slowmode", description="Set Slowmode In Current Channel", usage="slowmode [slowmode time 1m, 1s 1h max 6h]", aliases=['sm'])
     @commands.has_permissions(manage_messages=True)
     async def slowmode(self, ctx, time: str = '0'):
 
@@ -180,6 +181,38 @@ class txt_manage(commands.Cog):
                 await ctx.send(f'Slowmode interval is now **{int(cd/60)} mins**.')
             else:
                 await ctx.send(f'Slowmode interval is now **{cd} secs**.')
+
+
+    @commands.command(name="Hide", description="Hide Channels For mentioned Role", usage="hide [channel] [role]")
+    @commands.has_permissions(ban_members=True)
+    async def hide(self, ctx, channel: discord.TextChannel = None, role: discord.Role = None):
+        channel = channel if channel else ctx.channel
+        role = role if role else discord.utils.get(ctx.guild.roles, name="࿐ NEWBIE 〢 0")
+        overwrite = channel.overwrites_for(role)
+        overwrite.view_channel = False
+        await channel.set_permissions(role, overwrite=overwrite)
+        await ctx.message.delete()
+
+        embed = discord.Embed(
+            color=0x02ff06, description=f'The {channel.name} is Now Hidded for for {role.name}')
+        await ctx.send(embed=embed, delete_after=10)
+        
+
+
+    @commands.command(name="Unhide", description="Unhide Channels For mentioned Role", usage="Unhide [channel] [role]")
+    @commands.has_permissions(ban_members=True)
+    async def unhide(self, ctx, channel: discord.TextChannel = None, role: discord.Role = None):
+        channel = channel if channel else ctx.channel
+        role = role if role else discord.utils.get(ctx.guild.roles, name="࿐ NEWBIE 〢 0")
+        overwrite = channel.overwrites_for(role)
+        overwrite.view_channel = True
+        await channel.set_permissions(role, overwrite=overwrite)
+        await ctx.message.delete()
+
+        embed = discord.Embed(
+            color=0x02ff06, description=f'The {channel.name} is Now Not Hidded for for {role.name}')
+        await ctx.send(embed=embed, delete_after=10)
+
 
 def setup(bot):
     bot.add_cog(txt_manage(bot))

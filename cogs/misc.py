@@ -15,7 +15,7 @@ class Misc(commands.Cog):
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
 
     @commands.command(
-        name="stats", description="A useful command that displays bot statistics."
+        name="stats", description="A useful command that displays bot statistics.", usage="stats"
     )
     async def stats(self, ctx):
         pythonVersion = platform.python_version()
@@ -35,13 +35,13 @@ class Misc(commands.Cog):
         embed.add_field(name="Discord.Py Version", value=dpyVersion)
         embed.add_field(name="Total Guilds:", value=serverCount)
         embed.add_field(name="Total Users:", value=memberCount)
-        embed.add_field(name="Bot Developers:", value="<@488614633670967307>")
+        embed.add_field(name="Bot Developers:", value="<@488614633670967307>\n<@301657045248114690>")
 
         embed.set_footer(text=f"Carpe Noctem | {self.bot.user.name}")
         embed.set_author(name=self.bot.user.name, icon_url=self.bot.user.avatar_url)
 
         await ctx.send(embed=embed)
-
+"""
     @commands.command(aliases=['sinfo'])
     async def serverinfo(self, ctx):
         usercolor = ctx.author.color
@@ -55,7 +55,7 @@ class Misc(commands.Cog):
         em.add_field(name='Server Member Count: ', value=f'{guild.member_count}', inline=False)
         em.set_footer(text='ID: 785839283847954433, Created•12/08/2020', icon_url=guild.icon_url)
         await ctx.send(embed=em)
-
+"""
 
 def setup(bot):
     bot.add_cog(Misc(bot))

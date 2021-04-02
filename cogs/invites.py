@@ -1,8 +1,12 @@
 import discord
 import DiscordUtils
+import datetime
 from discord.ext import commands
 
 # Requires: pip install DiscordUtils
+
+def fomat_time(time):
+    return time.strftime('%d-%B-%Y %I:%m %p')
 
 
 class Invites(commands.Cog):
@@ -42,7 +46,9 @@ class Invites(commands.Cog):
         await self.bot.invites.upsert(data)
 
         channel =  self.bot.get_channel(819999483793506315)
-        embed = discord.Embed(title=f"**Member Information: {member.display_name}**", description=f"Name: {member.name}\nMemeber ID: {member.id}\n\n**Inviter Information: Invited by: {inviter.mention}**\nInviter Name:{inviter.name}\nInviter ID: {inviter.id}\nTotal Invites: {data['count']}", timestamp=member.joined_at)
+        embed = discord.Embed(timestamp=member.joined_at)
+        embed.add_field(name=f"Member Information:", value=f"Name: {member.display_name}\n Member ID:\n {member.id}\nCreated at:\n{fomat_time(member.created_at)}")
+        embed.add_field(namef="Invited Information", value=f"Name: {inviter.name}\nInviter ID:{inviter.id}\nInviter account created at{fomat_time(inviter.created_at)}")
         embed.set_thumbnail(url=member.avatar_url)
         embed.set_footer(text=member.guild.name, icon_url=member.guild.icon_url)
         await channel.send(embed=embed)
