@@ -2,6 +2,46 @@ import random
 
 import discord
 from discord.ext import commands
+from discord.ext.buttons import Paginator
+
+class Pag(Paginator):
+    async def teardown(self):
+        try:
+            await self.page.clear_reactions()
+        except discord.HTTPException:
+            pass
+
+
+async def GetMessage(
+    bot, ctx, contentOne="Default Message", contentTwo="\uFEFF", timeout=100
+):
+    """
+    This function sends an embed containing the params and then waits for a message to return
+    Params:
+     - bot (commands.Bot object) :
+     - ctx (context object) : Used for sending msgs n stuff
+     - Optional Params:
+        - contentOne (string) : Embed title
+        - contentTwo (string) : Embed description
+        - timeout (int) : Timeout for wait_for
+    Returns:
+     - msg.content (string) : If a message is detected, the content will be returned
+    or
+     - False (bool) : If a timeout occurs
+    """
+    embed = discord.Embed(title=f"{contentOne}", description=f"{contentTwo}",)
+    sent = await ctx.send(embed=embed)
+    try:
+        msg = await bot.wait_for(
+            "message",
+            timeout=timeout,
+            check=lambda message: message.author == ctx.author
+            and message.channel == ctx.channel,
+        )
+        if msg:
+            return msg.content
+    except asyncio.TimeoutError:
+        return False
 
 
 class txt_manage(commands.Cog):
@@ -23,7 +63,7 @@ class txt_manage(commands.Cog):
         name="channelstats",
         aliases=["cs"],
         description="Sends a nice fancy embed with some channel stats",
-        usage="<channelstats> [channel]",
+        usage="[channel]",
     )
     @commands.has_permissions(manage_messages=True)
     async def channelstats(self, ctx):
@@ -67,7 +107,7 @@ class txt_manage(commands.Cog):
     @new.command(
         name="category",
         description="Create a new category",
-        usage="new <role> <Category name>",
+        usage="<role> <Category name>",
     )
     async def category(self, ctx, role: discord.Role, *, name):
         overwrites = {
@@ -81,7 +121,7 @@ class txt_manage(commands.Cog):
     @new.command(
         name="channel",
         description="Create a new channel",
-        usage="new <role> <channel name>",
+        usage="<role> <channel name>",
     )
     async def channel(self, ctx, role: discord.Role, *, name):
         overwrites = {
@@ -96,7 +136,7 @@ class txt_manage(commands.Cog):
         )
         await ctx.send(f"Hey dude, I made {channel.name} for ya!")
 
-    @commands.group(name="category", description="Delete a category/channel", usage="delete help", invoke_without_command=True)
+    @commands.group(name="category", description="Delete a category/channel", usage="help", invoke_without_command=True)
     @commands.has_permissions(administrator=True)
     async def delete(self, ctx):
         await ctx.send("Invalid sub-command passed")
@@ -119,19 +159,23 @@ class txt_manage(commands.Cog):
         await ctx.send(f"hey! I deleted {category.name} for you")
 
 
-    @commands.command(name="lockdown", description="Lock the given channel for mentioned Role", usage="lock [channel] [Role]", aliases=['l'])
+    @commands.command(name="lock", description="Lock the given channel For mentioned Role", usage="[channel] [Role]",)
     @commands.has_permissions(manage_messages=True)
     async def lock(self, ctx, channel: discord.TextChannel = None, role: discord.Role = None):
+
         channel = channel if channel else ctx.channel
         role = role if role else ctx.guild.default_role
+
         overwrite = channel.overwrites_for(role)
         overwrite.send_messages = False
+
         await ctx.message.delete()
         await channel.set_permissions(role, overwrite=overwrite)
-        embed = discord.Embed(color=0xff0000, description=f'The {channel.name} is lock for {role.mention}')
+
+        embed = discord.Embed(color=0x02ff06, description=f'The {channel.name} is Lock for {role.mention}')
         await channel.send(embed=embed)
 
-    @commands.command(name="unlock", description="UnLock the given channel For mentioned Role", usage="usagenLock [channel] [Role]",)
+    @commands.command(name="unlock", description="UnLock the given channel For mentioned Role", usage="[channel] [Role]",)
     @commands.has_permissions(manage_messages=True)
     async def unlock(self, ctx, channel: discord.TextChannel = None, role: discord.Role = None):
 
@@ -147,7 +191,7 @@ class txt_manage(commands.Cog):
         embed = discord.Embed(color=0x02ff06, description=f'The {channel.name} is unlock for {role.mention}')
         await channel.send(embed=embed)
 
-    @commands.command(name="slowmode", description="Set Slowmode In Current Channel", usage="slowmode [slowmode time 1m, 1s 1h max 6h]", aliases=['sm'])
+    @commands.command(name="slowmode", description="Set Slowmode In Current Channel", usage="[slowmode time 1m, 1s 1h max 6h]", aliases=['sm'])
     @commands.has_permissions(manage_messages=True)
     async def slowmode(self, ctx, time: str = '0'):
 
@@ -183,7 +227,7 @@ class txt_manage(commands.Cog):
                 await ctx.send(f'Slowmode interval is now **{cd} secs**.')
 
 
-    @commands.command(name="Hide", description="Hide Channels For mentioned Role", usage="hide [channel] [role]")
+    @commands.command(name="Hide", description="Hide Channels For mentioned Role", usage="[channel] [role]")
     @commands.has_permissions(ban_members=True)
     async def hide(self, ctx, channel: discord.TextChannel = None, role: discord.Role = None):
         channel = channel if channel else ctx.channel
@@ -199,7 +243,7 @@ class txt_manage(commands.Cog):
         
 
 
-    @commands.command(name="Unhide", description="Unhide Channels For mentioned Role", usage="Unhide [channel] [role]")
+    @commands.command(name="Unhide", description="Unhide Channels For mentioned Role", usage="[channel] [role]")
     @commands.has_permissions(ban_members=True)
     async def unhide(self, ctx, channel: discord.TextChannel = None, role: discord.Role = None):
         channel = channel if channel else ctx.channel

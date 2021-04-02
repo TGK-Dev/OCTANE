@@ -5,8 +5,49 @@ import traceback
 import asyncio
 import discord
 from discord.ext import commands
+from discord.ext.buttons import Paginator
 
 import utils.json_loader
+
+
+class Pag(Paginator):
+    async def teardown(self):
+        try:
+            await self.page.clear_reactions()
+        except discord.HTTPException:
+            pass
+
+
+async def GetMessage(
+    bot, ctx, contentOne="Default Message", contentTwo="\uFEFF", timeout=100
+):
+    """
+    This function sends an embed containing the params and then waits for a message to return
+    Params:
+     - bot (commands.Bot object) :
+     - ctx (context object) : Used for sending msgs n stuff
+     - Optional Params:
+        - contentOne (string) : Embed title
+        - contentTwo (string) : Embed description
+        - timeout (int) : Timeout for wait_for
+    Returns:
+     - msg.content (string) : If a message is detected, the content will be returned
+    or
+     - False (bool) : If a timeout occurs
+    """
+    embed = discord.Embed(title=f"{contentOne}", description=f"{contentTwo}",)
+    sent = await ctx.send(embed=embed)
+    try:
+        msg = await bot.wait_for(
+            "message",
+            timeout=timeout,
+            check=lambda message: message.author == ctx.author
+            and message.channel == ctx.channel,
+        )
+        if msg:
+            return msg.content
+    except asyncio.TimeoutError:
+        return False
 
 
 class Config(commands.Cog):
@@ -16,6 +57,10 @@ class Config(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
+
+    @commands.command()
+    async def ping(self, ctx):
+        await ctx.reply(f'Ping ``{round(self.bot.latency * 1000)}``ms') 
 
     @commands.command(
         name="prefix",
@@ -31,7 +76,7 @@ class Config(commands.Cog):
         )
 
     @commands.command(
-        name="deleteprefix", aliases=["dp"], description="Delete your guilds prefix!", usage="deleteprefix"
+        name="deleteprefix", aliases=["dp"], description="Delete your guilds prefix!", usage=""
     )
     @commands.guild_only()
     @commands.has_guild_permissions(administrator=True)
@@ -40,7 +85,7 @@ class Config(commands.Cog):
         await ctx.send("This guilds prefix has been set back to the default")
 
     @commands.command(
-        name="blacklist", description="Blacklist a user from the bot", usage="blacklist <user>"
+        name="blacklist", description="Blacklist a user from the bot", usage="<user>"
     )
     @commands.has_permissions(administrator=True)
     async def blacklist(self, ctx, user: discord.Member):
@@ -57,7 +102,7 @@ class Config(commands.Cog):
     @commands.command(
         name="unblacklist",
         description="Unblacklist a user from the bot",
-        usage="unblacklist <user>",
+        usage="<user>",
     )
     @commands.has_permissions(administrator=True)
     async def unblacklist(self, ctx, user: discord.Member):
@@ -70,14 +115,14 @@ class Config(commands.Cog):
         utils.json_loader.write_json(data, "blacklist")
         await ctx.send(f"Hey, I have unblacklisted {user.name} for you.")
 
-    @commands.command(name="activity", description="Change Bot activity", usage="activity [activity]")
+    @commands.command(name="activity", description="Change Bot activity", usage="[activity]")
     @commands.has_permissions(administrator=True)
     async def activity(self, ctx, *, activity):
         
         await self.bot.change_presence(activity=discord.Game(name=f"{activity}")) # This changes the bots 'activity'
         await ctx.send('Bot activity is Updated')
 
-    @commands.command(name="Status", description="Change Bot Status to online & Dnd & idle", usage="status [dnd & idle & online]")
+    @commands.command(name="Status", description="Change Bot Status to online & Dnd & idle", usage="[dnd & idle & online]")
     @commands.has_permissions(administrator=True)
     async def status(self,ctx, arg):
         if arg == 'dnd':
@@ -98,7 +143,7 @@ class Config(commands.Cog):
         name="logout",
         aliases=["disconnect", "close", "stopbot"],
         description="Log the bot out of discord! Owner role only",
-        usage="logout",
+        usage="",
     )
     @commands.has_role(785842380565774368)
     async def logout(self, ctx):
@@ -116,7 +161,7 @@ class Config(commands.Cog):
 
 
     @commands.command(
-        name='reload', description="Reload all/one of the bots cogs!", usage="reload"
+        name='reload', description="Reload all/one of the bots cogs!", usage=""
     )
     @commands.has_permissions(administrator=True)
     async def reload(self, ctx, cog=None):

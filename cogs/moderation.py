@@ -1,7 +1,7 @@
 import re
 import datetime
 from copy import deepcopy
-
+from discord.ext.buttons import Paginator
 import asyncio
 import discord
 from discord.ext import commands, tasks
@@ -9,6 +9,45 @@ from dateutil.relativedelta import relativedelta
 
 time_regex = re.compile("(?:(\d{1,5})(h|s|m|d))+?")
 time_dict = {"h": 3600, "s": 1, "m": 60, "d": 86400}
+
+class Pag(Paginator):
+    async def teardown(self):
+        try:
+            await self.page.clear_reactions()
+        except discord.HTTPException:
+            pass
+
+
+async def GetMessage(
+    bot, ctx, contentOne="Default Message", contentTwo="\uFEFF", timeout=100
+):
+    """
+    This function sends an embed containing the params and then waits for a message to return
+    Params:
+     - bot (commands.Bot object) :
+     - ctx (context object) : Used for sending msgs n stuff
+     - Optional Params:
+        - contentOne (string) : Embed title
+        - contentTwo (string) : Embed description
+        - timeout (int) : Timeout for wait_for
+    Returns:
+     - msg.content (string) : If a message is detected, the content will be returned
+    or
+     - False (bool) : If a timeout occurs
+    """
+    embed = discord.Embed(title=f"{contentOne}", description=f"{contentTwo}",)
+    sent = await ctx.send(embed=embed)
+    try:
+        msg = await bot.wait_for(
+            "message",
+            timeout=timeout,
+            check=lambda message: message.author == ctx.author
+            and message.channel == ctx.channel,
+        )
+        if msg:
+            return msg.content
+    except asyncio.TimeoutError:
+        return False
 
 
 class TimeConverter(commands.Converter):
@@ -68,7 +107,7 @@ class Moderation(commands.Cog):
     @commands.command(
         name='mute',
         description="Mutes a given user for x time!",
-        ussage='mute <user> [time]'
+        ussage='<user> [time]'
     )
     @commands.has_permissions(manage_roles=True)
     async def mute(self, ctx, member: discord.Member, *, time: TimeConverter=None):
@@ -130,7 +169,7 @@ class Moderation(commands.Cog):
     @commands.command(
         name='unmute',
         description="Unmuted a member!",
-        usage='unmute <user>'
+        usage='<user>'
     )
     @commands.has_permissions(manage_roles=True)
     async def unmute(self, ctx, member: discord.Member):
@@ -152,11 +191,18 @@ class Moderation(commands.Cog):
         await member.remove_roles(role)
         await ctx.send(f"Unmuted `{member.display_name}`")
 
-    @commands.command(
-        name="kick",
-        description="A command which kicks a given user",
-        usage="kick <user> [reason]",
-    )
+        log_channel = self.bot.get_channel(803687264110247987)
+
+        embed = discord.Embed(title=f"Unmuted | {member.name}")
+        embed.add_field(name="User", value=f"{member.name}", inline=False)
+        embed.add_field(name="Moderator", value=f"{ctx.author.mention}", inline=False)
+        embed.set_footer(text=f"{member.id}", icon_url=member.avatar_url)
+
+        await log_channel.send(embed=embed)
+
+
+
+    @commands.command(name="kick", description="A command which kicks a given user", usage="<user> [reason]")
     @commands.guild_only()
     @commands.has_guild_permissions(ban_members=True)
     async def kick(self, ctx, member: discord.Member, *, reason=None):
@@ -182,11 +228,7 @@ class Moderation(commands.Cog):
         await log_channel.send(embed=embed)
 
 
-    @commands.command(
-        name="Ban",
-        description="A command which kicks a given user",
-        usage="ban <user> [reason]",
-    )
+    @commands.command(name="Ban", description="A command which kicks a given user", usage="<user> [reason]")
     @commands.guild_only()
     @commands.has_guild_permissions(ban_members=True)
     async def ban(self, ctx, member: discord.Member, *, reason=None):
@@ -203,15 +245,15 @@ class Moderation(commands.Cog):
 
         log_channel = self.bot.get_channel(803687264110247987)
 
-        embed = discord.Embed(title=f"kicked | {member.name}")
+        embed = discord.Embed(title=f"Banned | {member.name}")
         embed.add_field(name="User", value=f"{member.name}", inline=False)
         embed.add_field(name="Moderator", value=f"{ctx.author.mention}", inline=False)
         embed.add_field(name="Reason", value=f"{reason}", inline=False)
         embed.set_footer(text=f"{member.id}", icon_url=member.avatar_url)
 
         await log_channel.send(embed=embed)
-        await log_channel.send(embed=embed)
-    @commands.command(name="unban", description="A command which unbans a given user", usage="unban <user> [reason]")
+
+    @commands.command(name="unban", description="A command which unbans a given user", usage="<user> [reason]")
     @commands.guild_only()
     @commands.has_guild_permissions(ban_members=True)
     async def unban(self, ctx, member, *, reason=None):
@@ -224,12 +266,17 @@ class Moderation(commands.Cog):
         )
         await ctx.send(embed=embed)
 
-    @commands.command(
-        name="purge",
-        description="A command which purges the channel it is called in",
-        usage="purge [amount]",
-    )
-    @commands.guild_only()
+        log_channel = self.bot.get_channel(803687264110247987)
+
+        embed = discord.Embed(title=f"unban | {member.name}")
+        embed.add_field(name="User", value=f"{member.name}", inline=False)
+        embed.add_field(name="Moderator", value=f"{ctx.author.mention}", inline=False)
+        embed.add_field(name="Reason", value=f"{reason}", inline=False)
+        embed.set_footer(text=f"{member.id}")
+
+        await log_channel.send(embed=embed)
+
+    @commands.command(name="purge", description="A command which purges the channel it is called in", usage="[amount]")
     @commands.has_permissions(manage_messages=True)
     async def purge(self, ctx, amount=15):
         await ctx.message.delete()
@@ -240,9 +287,9 @@ class Moderation(commands.Cog):
         )
         await ctx.send(embed=embed, delete_after=15)
 
-    @commands.command(name="User Info", description="Give all Infomation about user", usage="whois [member]")
+    @commands.command(name="uerinfo", description="Give all Infomation about user", usage="[member]", aliases=['whois'])
     @commands.has_permissions(manage_messages=True)
-    async def whois(self, ctx, member: discord.Member = None):
+    async def uerinfo(self, ctx, member: discord.Member = None):
         
         def fomat_time(time):
           return time.strftime('%d-%B-%Y %I:%m %p')

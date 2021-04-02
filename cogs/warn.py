@@ -1,16 +1,54 @@
 import discord
 from discord.ext import commands
-
-from utils.util import Pag
-
 from utils.mongo import Document
+from discord.ext.buttons import Paginator
+
+class Pag(Paginator):
+    async def teardown(self):
+        try:
+            await self.page.clear_reactions()
+        except discord.HTTPException:
+            pass
+
+
+async def GetMessage(
+    bot, ctx, contentOne="Default Message", contentTwo="\uFEFF", timeout=100
+):
+    """
+    This function sends an embed containing the params and then waits for a message to return
+    Params:
+     - bot (commands.Bot object) :
+     - ctx (context object) : Used for sending msgs n stuff
+     - Optional Params:
+        - contentOne (string) : Embed title
+        - contentTwo (string) : Embed description
+        - timeout (int) : Timeout for wait_for
+    Returns:
+     - msg.content (string) : If a message is detected, the content will be returned
+    or
+     - False (bool) : If a timeout occurs
+    """
+    embed = discord.Embed(title=f"{contentOne}", description=f"{contentTwo}",)
+    sent = await ctx.send(embed=embed)
+    try:
+        msg = await bot.wait_for(
+            "message",
+            timeout=timeout,
+            check=lambda message: message.author == ctx.author
+            and message.channel == ctx.channel,
+        )
+        if msg:
+            return msg.content
+    except asyncio.TimeoutError:
+        return False
+
+
 
 class Warns(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         
-    @commands.command(name="Warn", description="Gives an Warnings to user", usage="warn [member] [warn]")
-    @commands.guild_only()
+    @commands.command(name="Warn", description="Gives an Warnings to user", usage="[member] [warn]")
     @commands.has_permissions(manage_messages=True)
     async def warn(self, ctx, member: discord.Member, *, reason):
         if member.id in [ctx.author.id, self.bot.user.id]:
@@ -60,8 +98,7 @@ class Warns(commands.Cog):
         await log_channel.send(embed=embed)
 
 
-    @commands.command(name="Warnings", description="Show All Warnings for User", usage="Warnings [member]")
-    @commands.guild_only()
+    @commands.command(name="Warnings", description="Show All Warnings for User", usage="[member]")
     @commands.has_permissions(manage_messages=True)
     async def Warnings(self, ctx, member: discord.Member):
         warn_filter = {"user_id": member.id, "guild_id": member.guild.id}

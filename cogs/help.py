@@ -1,9 +1,5 @@
 from discord.ext import commands
-
-
-
 import asyncio
-
 import discord
 from discord.ext.buttons import Paginator
 
@@ -45,6 +41,7 @@ async def GetMessage(
             return msg.content
     except asyncio.TimeoutError:
         return False
+
 
 
 class Help(commands.Cog, name="Help command"):
