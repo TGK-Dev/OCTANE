@@ -38,7 +38,7 @@ class Invites(commands.Cog):
     async def on_member_join(self, member):
         inviter = await self.tracker.fetch_inviter(member)  # inviter is the member who invited
         data = await self.bot.invites.find(inviter.id)
-
+        
         if data is None:
             data = {"_id": inviter.id, "count": 0, "userInvited": []}
 
