@@ -154,7 +154,7 @@ class Config(commands.Cog):
         await self.bot.logout()
 
     @commands.command(name="Say", description="And classic say command", usage="[anything]")
-    @commands.has_permissions(administrator=True)
+    @commands.has_permissions(manage_guild=True)
     async def say(self,ctx, *, say):
         await ctx.message.delete()
         await ctx.send(f'{say}')
