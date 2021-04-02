@@ -218,7 +218,7 @@ class fun(commands.Cog):
 	@commands.cooldown(3, 30, commands.BucketType.user)
 	async def kill(self, ctx, member: discord.Member=None):
 		usercolor = ctx.author.color
-		member = member if member else ect.author
+		member = member if member else ctx.author
 		kill = random.choice(kill_list)
 		Nkill	= random.choice(no_kill)
 		if member == ctx.author:
