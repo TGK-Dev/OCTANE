@@ -220,10 +220,10 @@ class fun(commands.Cog):
 		usercolor = ctx.author.color
 		member = member if member else ect.author
 		kill = random.choice(kill_list)
-		no_kill	= random.choice(no_kill)
+		Nkill	= random.choice(no_kill)
 		if member == ctx.author:
 			em = discord.Embed(color=usercolor, description=f"**{ctx.author.name}** is staying alive... *pouts*")
-			em.set_image(url=no_kill)
+			em.set_image(url=Nkill)
 			await ctx.reply(embed=em)
 		else:
 			em = discord.Embed(color=usercolor, description=f"**{ctx.author.name}** is murdering **{member.name}**")
