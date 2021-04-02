@@ -304,7 +304,7 @@ class Moderation(commands.Cog):
         embed.add_field(name='Created at:', value=fomat_time(member.created_at))
         embed.add_field(name='Joined at', value=fomat_time(member.joined_at))
 
-        hsorted_roles = sorted([role for role in member.roles[+1:]], key=lambda x: x.position, reverse=True)
+        hsorted_roles = sorted([role for role in member.roles[-2:]], key=lambda x: x.position, reverse=True)
         
 
         embed.add_field(name='Top:', value=', '.join(role.mention for role in hsorted_roles), inline=False)
