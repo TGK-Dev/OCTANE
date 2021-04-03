@@ -49,7 +49,7 @@ class Invites(commands.Cog):
         channel =  self.bot.get_channel(819999483793506315)
         embed = discord.Embed(timestamp=member.joined_at)
         embed.add_field(name=f"Member Information:", value=f"Name: {member.mention}\n Member ID:\n {member.id}\nCreated at:\n{fomat_time(member.created_at)}")
-        embed.add_field(name=f"Invited Information", value=f"Name: {inviter.mention}\nInviter ID:{inviter.id}\nInviter account created at\n{fomat_time(inviter.created_at)}", inline=False)
+        embed.add_field(name=f"Invited Information", value=f"Name: {inviter.mention}\nInviter ID:{inviter.id}\nInviter account created at\n{fomat_time(inviter.created_at)}\nInvites: {data['count']}", inline=False)
         embed.set_thumbnail(url=member.avatar_url)
         embed.set_footer(text=member.guild.name, icon_url=member.guild.icon_url)
         await channel.send(embed=embed)
