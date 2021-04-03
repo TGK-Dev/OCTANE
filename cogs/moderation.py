@@ -103,6 +103,11 @@ class Moderation(commands.Cog):
     @check_current_mutes.before_loop
     async def before_check_current_mutes(self):
         await self.bot.wait_until_ready()
+    
+    
+    @commands.Cog.listener()
+    async def on_ready(self):
+        print(f"{self.__class__.__name__} Cog has been loaded\n-----")
 
     @commands.command(
         name='mute',
@@ -235,12 +240,12 @@ class Moderation(commands.Cog):
         await ctx.message.delete()
         try:
             await member.send(f"You Have Been Banned | {reason}")
-            await ctx.guild.kick(user=member, reason=reason)
-            em = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **{member.name}** Has been Banned")
+            await ctx.guild.ban(user=member, reason=reason)
+            em = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **{member.name}** Has been Banned || {reason}")
             await ctx.send(embed=em)
         except discord.HTTPException:
-            await ctx.guild.kick(user=member, reason=reason)
-            emb = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **The User {member.name} Has Been Banned.**")
+            await ctx.guild.ban(user=member, reason=reason)
+            emb = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **The User {member.name}** Has Been Banned || {reason}")
             await ctx.send(embed=emb)
 
         log_channel = self.bot.get_channel(803687264110247987)
