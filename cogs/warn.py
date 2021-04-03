@@ -47,12 +47,14 @@ async def GetMessage(
 class Warns(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+	
+	
+	
     
     @commands.Cog.listener()
 	async def on_ready(self):
 		print(f"{self.__class__.__name__} Cog has been loaded\n-----")
-    
-        
+		
     @commands.command(name="Warn", description="Gives an Warnings to user", usage="[member] [warn]")
     @commands.has_permissions(manage_messages=True)
     async def warn(self, ctx, member: discord.Member, *, reason):
