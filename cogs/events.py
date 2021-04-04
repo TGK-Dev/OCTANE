@@ -16,17 +16,16 @@ class Events(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
-    
-    
-    @commands.Cog.listener()
-	async def on_message(self, message):
-		word_list = ['vote link', 'vote Link', 'Vote link', 'Vote Link']
 
-		messageContent = message.content
-		if len(messageContent) > 0:
-			for word in word_list:
-				if word in messageContent:
-					return await message.reply('Please Vote us here, <https://top.gg/servers/785839283847954433/vote>, Thanks For Support ^0^', )
+    @commands.Cog.listener()
+    async def on_message(self, message):
+        word_list = ['vote link', 'vote Link', 'Vote link', 'Vote Link']
+
+        messageContent = message.content
+        if len(messageContent) > 0:
+            for word in word_list:
+                if word in messageContent:
+                    return await message.reply('Please Vote us here, <https://top.gg/servers/785839283847954433/vote>, Thanks For Support ^0^', )
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
