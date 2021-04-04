@@ -260,7 +260,7 @@ class Moderation(commands.Cog):
 
     @commands.command(name="unban", description="A command which unbans a given user", usage="<user> [reason]")
     @commands.guild_only()
-    @commands.has_guild_permissions(ban_members=True)
+    @commands.has_guild_permissions(administrator=True)
     async def unban(self, ctx, member, *, reason=None):
         await ctx.message.delete()
         member = await self.bot.fetch_user(int(member))
