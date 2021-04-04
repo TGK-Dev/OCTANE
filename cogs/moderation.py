@@ -236,7 +236,7 @@ class Moderation(commands.Cog):
     @commands.command(name="Ban", description="A command which kicks a given user", usage="<user> [reason]")
     @commands.guild_only()
     @commands.has_guild_permissions(ban_members=True)
-    async def ban(self, ctx, member: discord.Member, *, reason=None):
+    async def ban(self, ctx, member: discord.User, *, reason=None):
         await ctx.message.delete()
         try:
             await member.send(f"You Have Been Banned | {reason}")
