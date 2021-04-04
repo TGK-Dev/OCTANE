@@ -133,7 +133,7 @@ async def on_message(message):
 
 
 @bot.command(name="eval", aliases=["exec"])
-@commands.is_owner()
+@commands.has_guild_permissions(administrator=True)
 async def _eval(ctx, *, code):
     code = clean_code(code)
 
