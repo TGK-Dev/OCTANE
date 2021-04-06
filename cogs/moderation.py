@@ -116,6 +116,7 @@ class Moderation(commands.Cog):
     )
     @commands.has_permissions(manage_roles=True)
     async def mute(self, ctx, member: discord.Member, *, time: TimeConverter=None):
+        await ctx.message.delete()
         role = discord.utils.get(ctx.guild.roles, name="Muted")
         if not role:
             await ctx.send("No muted role was found! Please create one called `Muted`")
@@ -178,6 +179,7 @@ class Moderation(commands.Cog):
     )
     @commands.has_permissions(manage_roles=True)
     async def unmute(self, ctx, member: discord.Member):
+        await ctx.message.delete()
         role = discord.utils.get(ctx.guild.roles, name="Muted")
         if not role:
             await ctx.send("No muted role was found! Please create one called `Muted`")
@@ -295,7 +297,7 @@ class Moderation(commands.Cog):
     @commands.command(name="uerinfo", description="Give all Infomation about user", usage="[member]", aliases=['whois'])
     @commands.has_permissions(manage_messages=True)
     async def uerinfo(self, ctx, member: discord.Member = None):
-        
+        await ctx.message.delete()
         def fomat_time(time):
           return time.strftime('%d-%B-%Y %I:%m %p')
 

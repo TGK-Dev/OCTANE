@@ -100,6 +100,8 @@ class dank(commands.Cog):
             await dank_pre.send(embed=embed)
             await dank_vip.send(embed=embed)
 
+        await ctx.send("Dank is LockedUp")
+
 
     @commands.command(
         name="dankup",
@@ -138,7 +140,7 @@ class dank(commands.Cog):
             await dank_vip.purge(limit=1)
 
             embed = discord.Embed(
-                title="Dank is Down",
+                title="Dank is Back",
                 color=0xff0000,
                 description="The Dank memer is Back to Grinding"
             )
@@ -147,6 +149,8 @@ class dank(commands.Cog):
             await dank_2.send(embed=embed)
             await dank_pre.send(embed=embed)
             await dank_vip.send(embed=embed)
+
+        await ctx.send("Dank is unlocked")
 
 
 def setup(bot):
