@@ -113,21 +113,35 @@ class Warns(commands.Cog):
                 await member.send(f"You Have Been Warned | {reason} | Warnings Count {current_warn_count} | Frist threshold Reached Muted You have been muted for 1 Day")
                 em = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **{member.name} Has been Warned | {reason} |Warnings Count {current_warn_count} | Frist threshold Reached Muted User for 1 Day **")
                 await ctx.send(embed=em)
+                
+                log_channel = self.bot.get_channel(803687264110247987)
+
+                embed = discord.Embed(color=0x06f79e, title=f"Warned | {member.name}")
+                embed.add_field(name="User", value=f"{member.name}", inline=False)
+                embed.add_field(name="Moderator", value=f"{ctx.author.mention}", inline=False)
+                embed.add_field(name="Reason", value=f"{reason}", inline=False)
+                embed.add_field(name="Warnings Count", value=f"{current_warn_count}")
+                embed.add_field(name="threshold Action", value="Muted For Day")
+                embed.set_footer(text=f"{member.id}", icon_url=member.avatar_url)
+
+                await log_channel.send(embed=embed)
+
+
             except discord.HTTPException:
                 emb = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **The User {member.name} | {reason} | Warnings Count {current_warn_count} | Frist threshold Reached Muted User for 1 Day |Has Been Warned I couldn't DM them.**")
                 await ctx.send(embed=emb)
 
-            log_channel = self.bot.get_channel(803687264110247987)
+                log_channel = self.bot.get_channel(803687264110247987)
 
-            embed = discord.Embed(color=0x06f79e, title=f"Warned | {member.name}")
-            embed.add_field(name="User", value=f"{member.name}", inline=False)
-            embed.add_field(name="Moderator", value=f"{ctx.author.mention}", inline=False)
-            embed.add_field(name="Reason", value=f"{reason}", inline=False)
-            embed.add_field(name="Warnings Count", value=f"{current_warn_count}")
-            embed.add_field(name="threshold Action", value="Muted For Day")
-            embed.set_footer(text=f"{member.id}", icon_url=member.avatar_url)
+                embed = discord.Embed(color=0x06f79e, title=f"Warned | {member.name}")
+                embed.add_field(name="User", value=f"{member.name}", inline=False)
+                embed.add_field(name="Moderator", value=f"{ctx.author.mention}", inline=False)
+                embed.add_field(name="Reason", value=f"{reason}", inline=False)
+                embed.add_field(name="Warnings Count", value=f"{current_warn_count}")
+                embed.add_field(name="threshold Action", value="Muted For Day")
+                embed.set_footer(text=f"{member.id}", icon_url=member.avatar_url)
 
-            await log_channel.send(embed=embed)
+                await log_channel.send(embed=embed)
 
         elif current_warn_count == 10:
 
@@ -148,21 +162,32 @@ class Warns(commands.Cog):
                 await member.send(f"You Have Been Warned | {reason} | Warnings Count {current_warn_count} | Second threshold Reached Muted YOu have been for muted 1 Week")
                 em = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **{member.name} Has been Warned | {reason} |Warnings Count {current_warn_count} | Second threshold Reached Muted User for 1 Week **")
                 await ctx.send(embed=em)
+
+                embed = discord.Embed(color=0x06f79e, title=f"Warned | {member.name}")
+                embed.add_field(name="User", value=f"{member.name}", inline=False)
+                embed.add_field(name="Moderator", value=f"{ctx.author.mention}", inline=False)
+                embed.add_field(name="Reason", value=f"{reason}", inline=False)
+                embed.add_field(name="Warnings Count", value=f"{current_warn_count}")
+                embed.add_field(name="threshold Action", value="Muted For Week")
+                embed.set_footer(text=f"{member.id}", icon_url=member.avatar_url)
+
+                await log_channel.send(embed=embed)
+
             except discord.HTTPException:
                 emb = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **The User {member.name} | {reason} | Warnings Count {current_warn_count} | Second threshold Reached Muted User for 1 Day |Has Been Warned I couldn't DM them.**")
                 await ctx.send(embed=emb)
 
-            log_channel = self.bot.get_channel(803687264110247987)
+                log_channel = self.bot.get_channel(803687264110247987)
 
-            embed = discord.Embed(color=0x06f79e, title=f"Warned | {member.name}")
-            embed.add_field(name="User", value=f"{member.name}", inline=False)
-            embed.add_field(name="Moderator", value=f"{ctx.author.mention}", inline=False)
-            embed.add_field(name="Reason", value=f"{reason}", inline=False)
-            embed.add_field(name="Warnings Count", value=f"{current_warn_count}")
-            embed.add_field(name="threshold Action", value="Muted For Week")
-            embed.set_footer(text=f"{member.id}", icon_url=member.avatar_url)
+                embed = discord.Embed(color=0x06f79e, title=f"Warned | {member.name}")
+                embed.add_field(name="User", value=f"{member.name}", inline=False)
+                embed.add_field(name="Moderator", value=f"{ctx.author.mention}", inline=False)
+                embed.add_field(name="Reason", value=f"{reason}", inline=False)
+                embed.add_field(name="Warnings Count", value=f"{current_warn_count}")
+                embed.add_field(name="threshold Action", value="Muted For Week")
+                embed.set_footer(text=f"{member.id}", icon_url=member.avatar_url)
 
-            await log_channel.send(embed=embed)
+                await log_channel.send(embed=embed)
 
 
         elif current_warn_count == 15:
@@ -172,6 +197,17 @@ class Warns(commands.Cog):
                 em = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **{member.name} Has been Warned | {reason} |Warnings Count {current_warn_count} | Third threshold Reached user Has Been Kicked **")
                 await ctx.send(embed=em)
                 await ctx.guild.kick(user=member, reason=f"15 Warnings Reached")
+                embed = discord.Embed(color=0x06f79e, title=f"Warned | {member.name}")
+                embed.add_field(name="User", value=f"{member.name}", inline=False)
+                embed.add_field(name="Moderator", value=f"{ctx.author.mention}", inline=False)
+                embed.add_field(name="Reason", value=f"{reason}", inline=False)
+                embed.add_field(name="Warnings Count", value=f"{current_warn_count}")
+                embed.add_field(name="threshold Action", value="Kicked")
+                embed.set_footer(text=f"{member.id}", icon_url=member.avatar_url)
+
+                await log_channel.send(embed=embed)
+
+
             except discord.HTTPException:
                 emb = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **The User {member.name} | {reason} | Warnings Count {current_warn_count} | Third threshold Reached user Has Been Kicked | Has Been Warned I couldn't DM them.**")
                 await ctx.send(embed=emb)
