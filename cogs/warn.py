@@ -196,6 +196,19 @@ class Warns(commands.Cog):
                 em = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **{member.name} Has been Warned | {reason} |Warnings Count {current_warn_count} | Third threshold Reached user Has Been Banned **")
                 await ctx.send(embed=em)
                 await ctx.guild.ban(user=member, reason=f"20 Warnings Reached")
+
+                log_channel = self.bot.get_channel(803687264110247987)
+
+                embed = discord.Embed(color=0x06f79e, title=f"Warned | {member.name}")
+                embed.add_field(name="User", value=f"{member.name}", inline=False)
+                embed.add_field(name="Moderator", value=f"{ctx.author.mention}", inline=False)
+                embed.add_field(name="Reason", value=f"{reason}", inline=False)
+                embed.add_field(name="Warnings Count", value=f"{current_warn_count}")
+                embed.add_field(name="threshold Action", value="Banned")
+                embed.set_footer(text=f"{member.id}", icon_url=member.avatar_url)
+
+                await log_channel.send(embed=embed)
+                
             except discord.HTTPException:
                 emb = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **The User {member.name} | {reason} | Warnings Count {current_warn_count} | Third threshold Reached user Has Been Banned | Has Been Warned I couldn't DM them.**")
                 await ctx.send(embed=emb)
