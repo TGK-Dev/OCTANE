@@ -310,11 +310,14 @@ class Moderation(commands.Cog):
         embed.add_field(name='Account Name:', value=f'{member.name}', inline=False)
         embed.add_field(name='Created at:', value=fomat_time(member.created_at))
         embed.add_field(name='Joined at', value=fomat_time(member.joined_at))
+        embed.add_field(name='Account Status', value=str(member.status).title())
+        embed.add_field(name='Account Activity', value=f"{str(member.activity.type).title().split('.')[1]} {member.activity.name}" if member.activity is not None else "None")
 
         hsorted_roles = sorted([role for role in member.roles[-2:]], key=lambda x: x.position, reverse=True)
         
 
-        embed.add_field(name='Top:', value=', '.join(role.mention for role in hsorted_roles), inline=False)
+        embed.add_field(name='Top Role:', value=', '.join(role.mention for role in hsorted_roles), inline=False)
+        embed.add_field(name='Number of Roles', value=f"{len(member.roles) -1 }")
         embed.set_footer(text=f'ID {member.id}', icon_url=member.avatar_url)
         await ctx.send(embed=embed)
 
