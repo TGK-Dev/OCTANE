@@ -42,7 +42,10 @@ class Events(commands.Cog):
             embed.add_field(name='Server Member Count: ', value=f'{guild.member_count}', inline=False)
             embed.set_footer(text='Once again, a warm welcome. Have a great time!', icon_url=member.avatar_url)
             await channel.send(f'{member.mention}', embed=embed)
-            await member.send(embed=embed)
+
+            #await member.send(embed=embed)
+            #channel = get(guild.channels, name )
+            #await channel.edit(name = f'Member Count: {guild.membe}')
         else:
             return
 

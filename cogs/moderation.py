@@ -321,6 +321,25 @@ class Moderation(commands.Cog):
         embed.set_footer(text=f'ID {member.id}', icon_url=member.avatar_url)
         await ctx.send(embed=embed)
 
+    @commands.command(name="roleinfo", description="members with this role", usage="[role.mention.id]")
+    @commands.has_permissions(manage_messages=True)
+    async def roleinfo(self, ctx, role: discord.Role=None):
+        def fomat_time(time):
+          return time.strftime('%d-%B-%Y %I:%m %p')
+
+        role_color = role.color
+        embed = discord.Embed(title=f"Role Infomation for {role.name}", color=role_color)
+        embed.add_field(name=f"Name:", value=f"{role.name}")
+        embed.add_field(name=f"Members:", value=f"{len(role.members)}", inline=False)
+        embed.add_field(name=f"Created At", value=fomat_time(role.created_at))
+        embed.add_field(name=f"color", value=f"{role.color}", inline=False)
+        embed.set_footer(text=f"ID {role.id}")
+
+        await ctx.send(embed=embed, delete_after=60)
+
+
+
+
 
 def setup(bot):
     bot.add_cog(Moderation(bot))

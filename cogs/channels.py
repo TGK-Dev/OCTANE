@@ -257,6 +257,29 @@ class txt_manage(commands.Cog):
             color=0x02ff06, description=f'The {channel.name} is Now Not Hidded for for {role.name}')
         await ctx.send(embed=embed, delete_after=10)
 
-
 def setup(bot):
     bot.add_cog(txt_manage(bot))
+
+
+"""
+@commands.command(name="lockdown", description="Put Server in lockdown", usage="")
+    @commands.has_permissions(ban_members=True)
+    async def lockdown(self, ctx, *,reason=None):
+        role = ctx.guild.default_role
+        permissions = discord.PermissionOverwrite()
+        PermissionOverwrite.update(send_messages = False)
+
+        await role.edit(reason=reason, permissions=permissions)
+        await ctx.send("Server LOck")
+
+    @commands.command(name="server_unlock", description="Unlock Server from lockdown", usage="")
+    @commands.has_permissions(ban_members=True)
+    async def server_unlock(self, ctx, *,reason= None):
+        role = ctx.guild.default_role
+        permissions = discord.PermissionOverwrite()
+        PermissionOverwrite.update(send_messages = True)
+
+        await role.edit(reason=reason, permissions=permissions)
+
+        await ctx.send("Server UnLock")
+"""

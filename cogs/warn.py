@@ -1,6 +1,8 @@
 import re
 import discord
 import datetime
+import random 
+
 
 from discord.ext import commands
 from discord.ext.buttons import Paginator
@@ -8,6 +10,8 @@ from dateutil.relativedelta import relativedelta
 
 time_regex = re.compile("(?:(\d{1,5})(h|s|m|d))+?")
 time_dict = {"h": 3600, "s": 1, "m": 60, "d": 86400}
+
+
 
 
 class Pag(Paginator):
@@ -102,17 +106,20 @@ class Warns(commands.Cog):
             emb = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **The User {member.name} Has Been Warned I couldn't DM them.| Warnings Count {current_warn_count}**")
             await ctx.send(embed=emb)
         
-        log_channel = self.bot.get_channel(803687264110247987)
+        try:
+            log_channel = self.bot.get_channel(803687264110247987)
 
-        embed = discord.Embed(color=0x06f79e, title=f"Warned | {member.name}")
-        embed.add_field(name="User", value=f"{member.name}", inline=False)
-        embed.add_field(name="Moderator", value=f"{ctx.author.mention}", inline=False)
-        embed.add_field(name="Reason", value=f"{reason}", inline=False)
-        embed.add_field(name="Warnings Count", value=f"{current_warn_count}")
-        embed.add_field(name="threshold Action", value="None")
-        embed.set_footer(text=f"{member.id}", icon_url=member.avatar_url)
+            embed = discord.Embed(color=0x06f79e, title=f"Warned | {member.name}")
+            embed.add_field(name="User", value=f"{member.name}", inline=False)
+            embed.add_field(name="Moderator", value=f"{ctx.author.mention}", inline=False)
+            embed.add_field(name="Reason", value=f"{reason}", inline=False)
+            embed.add_field(name="Warnings Count", value=f"{current_warn_count}")
+            embed.add_field(name="threshold Action", value="None")
+            embed.set_footer(text=f"{member.id}", icon_url=member.avatar_url)
 
-        await log_channel.send(embed=embed)
+            await log_channel.send(embed=embed)
+        except:
+            pass
 
     @commands.command(name="Warnings", description="Show All Warnings for User", usage="[member]")
     @commands.has_permissions(manage_messages=True)
@@ -128,6 +135,7 @@ class Warns(commands.Cog):
         pages = []
         for warn in warns:
             description = f"""
+            Warn id: `{warn['_id']}`
             Warn Number: `{warn['number']}`
             Warn Reason: `{warn['reason']}`
             Warned By: <@{warn['warned_by']}>
@@ -155,6 +163,37 @@ def setup(bot):
         embed.set_author(name=ctx.guild.name, icon_url=ctx.guild.icon_url)
         embed.set_footer(text=f"Warn: {current_warn_count}")
 """
+
+
+
+"""
+    @commands.command(name="delwarn", description="Delete Warnings For User", usage="[warn_id]")
+    @commands.has_permissions(administrator=True)
+    async def delwarn(self, ctx, member: discord.Member, warn_id):
+
+
+
+        warn_filter = {"_id": warn_id, "user_id": member.id}
+        await self.bot.warns.delete(warn_filter)
+
+        await ctx.send("Done")
+    
+        warn_filter = {"_id": f"{warn_id}"}
+        await self.bot.warns.delete(warn_id)
+
+        await ctx.send(f"{warns}")
+        await ctx.send(f"---------\n")
+        await ctx.send(f"{Warns}")
+
+        embed = discord.Embed(color=0x06f79e,description=f'<:allow:819194696874197004> The Warnings is Deleted')
+
+        await ctx.send(embed=embed)
+"""
+
+
+
+
+
 
 
 """
