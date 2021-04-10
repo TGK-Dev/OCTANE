@@ -2,7 +2,7 @@ import random
 import datetime
 
 import discord
-from discord.ext import commands
+from discord.ext import commands , tasks
 
 
 # In cogs we make our own class
@@ -12,6 +12,20 @@ from discord.ext import commands
 class Events(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+
+    @tasks.loop(minutes=5)
+    async def counter_task(self):
+        guild = self.bot.get_guild(785839283847954433)
+        human = self.bot.get_channel(830369104485417020)
+        total = self.bot.get_channel(821747329316290560)
+        robot = discord.utils.get(ctx.guild.roles, name="《══ ROBOT ══》")
+
+        await human.edit(name=f"😊。Humans: {guild.member_count - len(robot.members)}")
+        await total.edit(name=f"🎯。Current Goal: {guild.member_count}")
+
+    @counter_task.before_loop
+    async def before_counter_task(self):
+        await self.wait_until_ready()
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -48,6 +62,17 @@ class Events(commands.Cog):
             #await channel.edit(name = f'Member Count: {guild.membe}')
         else:
             return
+
+
+    @commands.command()
+    async def lol(self, ctx):
+        guild = self.bot.get_guild(785839283847954433)
+        human = self.bot.get_channel(830369104485417020)
+        robot = discord.utils.get(ctx.guild.roles, name="《══ ROBOT ══》")
+        
+        await human.edit(name=f"{guild.member_count - len(robot.members)}")
+
+        await ctx.send("done")
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
