@@ -100,7 +100,7 @@ class roles(commands.Cog):
    
 
     @commands.command(name="Pings", description="Give numbers of some the pings roles", usage="")
-    @commands.has_permissions(ban_members=True)
+    @commands.has_permissions(manage_messages=True)
     async def pings(self, ctx):
         heist = discord.utils.get(ctx.guild.roles, id=804068344612913163 )
         partner_heist = discord.utils.get(ctx.guild.roles, id=804069957528584212)
