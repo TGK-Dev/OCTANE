@@ -100,6 +100,8 @@ class Moderation(commands.Cog):
                 except KeyError:
                     pass
 
+
+
     @check_current_mutes.before_loop
     async def before_check_current_mutes(self):
         await self.bot.wait_until_ready()
@@ -156,7 +158,7 @@ class Moderation(commands.Cog):
 
 
         try:
-            em = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **{member.name} Has been Muted")
+            em = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **{member.name} Has been Muted**")
             await ctx.send(embed=em)
             await member.send(f"You Have Muted For |{time}|")
         except discord.HTTPException:
@@ -320,25 +322,6 @@ class Moderation(commands.Cog):
         embed.add_field(name='Number of Roles', value=f"{len(member.roles) -1 }")
         embed.set_footer(text=f'ID {member.id}', icon_url=member.avatar_url)
         await ctx.send(embed=embed)
-
-    @commands.command(name="roleinfo", description="members with this role", usage="[role.mention.id]")
-    @commands.has_permissions(manage_messages=True)
-    async def roleinfo(self, ctx, role: discord.Role=None):
-        def fomat_time(time):
-          return time.strftime('%d-%B-%Y %I:%m %p')
-
-        role_color = role.color
-        embed = discord.Embed(title=f"Role Infomation for {role.name}", color=role_color)
-        embed.add_field(name=f"Name:", value=f"{role.name}")
-        embed.add_field(name=f"Members:", value=f"{len(role.members)}", inline=False)
-        embed.add_field(name=f"Created At", value=fomat_time(role.created_at))
-        embed.add_field(name=f"color", value=f"{role.color}", inline=False)
-        embed.set_footer(text=f"ID {role.id}")
-
-        await ctx.send(embed=embed, delete_after=60)
-
-
-
 
 
 def setup(bot):

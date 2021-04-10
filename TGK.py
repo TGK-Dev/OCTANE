@@ -57,6 +57,7 @@ logging.basicConfig(level=logging.INFO)
 bot.DEFAULTPREFIX = DEFAULTPREFIX
 bot.blacklisted_users = []
 bot.muted_users = {}
+bot.temp_roled_users = {}
 bot.cwd = cwd
 
 bot.version = "15"
@@ -102,6 +103,11 @@ async def on_ready():
     for mute in currentMutes:
         bot.muted_users[mute["_id"]] = mute
 
+    currentTemps = await bot.temp_roles.get_all()
+    for temp in currentTemps:
+        bot.temp_roled_users[temp["_id"]] = temp
+
+    print(bot.temp_roled_users)
     print(bot.muted_users)
 
     print("Initialized Database\n-----")
@@ -180,6 +186,7 @@ if __name__ == "__main__":
     bot.config = Document(bot.db, "config")
     bot.mutes = Document(bot.db, "mutes")
     bot.warns = Document(bot.db, "warns")
+    bot.temp_roles = Document(bot.db, "temp_roles")
     bot.invites = Document(bot.db, "invites")
     bot.command_usage = Document(bot.db, "command_usage")
     bot.reaction_roles = Document(bot.db, "reaction_roles")
