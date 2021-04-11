@@ -96,7 +96,7 @@ class roles(commands.Cog):
    
 
     @commands.command(name="Pings", description="Give numbers of some the pings roles", usage="")
-    @commands.has_permissions(ban_members=True)
+    @commands.has_permissions(manage_messages=True)
     async def pings(self, ctx):
         await ctx.message.delete()
 
