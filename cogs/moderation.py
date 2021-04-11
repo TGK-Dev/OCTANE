@@ -114,7 +114,7 @@ class Moderation(commands.Cog):
     @commands.command(
         name='mute',
         description="Mutes a given user for x time!",
-        ussage='<user> [time]'
+        usage='<user> [time]'
     )
     @commands.has_permissions(manage_roles=True)
     async def mute(self, ctx, member: discord.Member, *, time: TimeConverter=None):

@@ -53,10 +53,6 @@ class TimeConverter(commands.Converter):
                 raise commands.BadArgument(f"{key} is not a number!")
         return round(time)
 
-
-
-
-
 class roles(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -102,6 +98,8 @@ class roles(commands.Cog):
     @commands.command(name="Pings", description="Give numbers of some the pings roles", usage="")
     @commands.has_permissions(ban_members=True)
     async def pings(self, ctx):
+        await ctx.message.delete()
+
         heist = discord.utils.get(ctx.guild.roles, id=804068344612913163 )
         partner_heist = discord.utils.get(ctx.guild.roles, id=804069957528584212)
         giveaway = discord.utils.get(ctx.guild.roles, id=800685251276963861)
@@ -109,12 +107,10 @@ class roles(commands.Cog):
         danker = discord.utils.get(ctx.guild.roles, id=801392998465404958)
         partnership = discord.utils.get(ctx.guild.roles, id=797448080223109120)
 
-
-
         embed = discord.Embed(title=f"Showing some pings counts",
             description=f"{heist.mention} = {len(heist.members)}\n{partner_heist.mention} = {len(partner_heist.members)}\n{othere_heist.mention} = {len(othere_heist.members)}\n{danker.mention} = {len(danker.members)}\n{partnership.mention} = {len(partnership.members)}\n{giveaway.mention} = {len(giveaway.members)}", color=0x06f79e)
 
-        await ctx.send(embed=embed)
+        await ctx.send(embed=embed, delete_after=60)
 
 
 def setup(bot):
