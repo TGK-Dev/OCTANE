@@ -71,9 +71,12 @@ class Moderation(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.mute_task = self.check_current_mutes.start()
+        #self.ban_task = self.check_current_bans.start()
 
     def cog_unload(self):
         self.mute_task.cancel()
+        #self.ban_task.cancel()
+
 
     @tasks.loop(minutes=5)
     async def check_current_mutes(self):
@@ -102,10 +105,10 @@ class Moderation(commands.Cog):
 
 
 
+
     @check_current_mutes.before_loop
     async def before_check_current_mutes(self):
         await self.bot.wait_until_ready()
-    
     
     @commands.Cog.listener()
     async def on_ready(self):
@@ -252,12 +255,13 @@ class Moderation(commands.Cog):
             emb = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **The User {member.name}** Has Been Banned || {reason}")
             await ctx.send(embed=emb)
 
-        log_channel = self.bot.get_channel(803687264110247987)
+        log_channel = self.bot.get_channel(827245906331566180)
 
         embed = discord.Embed(title=f"Banned | {member.name}")
-        embed.add_field(name="User", value=f"{member.name}", inline=False)
-        embed.add_field(name="Moderator", value=f"{ctx.author.mention}", inline=False)
+        embed.add_field(name="User", value=f"{member.name}")
+        embed.add_field(name="Moderator", value=f"{ctx.author.mention}")
         embed.add_field(name="Reason", value=f"{reason}", inline=False)
+        embed.add_field(name='Duration', value=f"{time}")
         embed.set_footer(text=f"{member.id}", icon_url=member.avatar_url)
 
         await log_channel.send(embed=embed)
@@ -324,5 +328,55 @@ class Moderation(commands.Cog):
         await ctx.send(embed=embed)
 
 
+    @commands.command(name="bans", description="ban list", usage="")
+    async def bans(self, ctx, member: discord.User):
+        ban = list[ctx.guild.bans]
+
+        await ctx.send(f"{ban}")
+
+    
+
+
 def setup(bot):
     bot.add_cog(Moderation(bot))
+
+"""
+    @tasks.loop(minutes=1)
+    async def check_current_bans(self):
+        currentTime = datetime.datetime.now()
+        bans = deepcopy(self.bot.banned_user)
+        for key, value in bans.items():
+            if value['banDuration'] is None:
+                continue
+
+            unbanTime = value['banAt'] + relativedelta(seconds=value['banDuration'])
+
+            if currentTime >= unbanTime:
+                guild = self.bot.get_guild(value['guildId'])
+                member  = self.bot.banned_user[value['_id']]
+                ban_list = await guild.bans()
+
+                if member in ban_list:
+                    await guild.unban(member)
+                    print(f"Unmuted: {member.display_name}")
+
+                await self.bot.banned.delete(member)
+
+    @check_current_bans.before_loop
+    async def before_check_current_bans(self):
+        await self.bot.wait_until_ready()
+
+
+
+
+
+            data = {
+            '_id': member.id,
+            'banAt': datetime.datetime.now(),
+            'banDuration': time or None,
+            'banbedBy': ctx.author.id,
+            'guildId': ctx.guild.id,
+            }
+        await self.bot.banned.upsert(data)
+        self.bot.banned_user[member.id] = data
+"""

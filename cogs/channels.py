@@ -254,8 +254,91 @@ class txt_manage(commands.Cog):
         await ctx.message.delete()
 
         embed = discord.Embed(
-            color=0x02ff06, description=f'The {channel.name} is Now Not Hidded for for {role.name}')
+            color=0x02ff06, description=f'The {channel.name} is Now Visibal for for {role.name}')
         await ctx.send(embed=embed, delete_after=10)
+
+    #tickets Fixes 
+
+    @commands.command(name="adduser", description="add User to the channel", usage="[member] [channel]")
+    @commands.has_permissions(manage_messages=True)
+    async def adduser(self, ctx, member: discord.User=None, channel: discord.TextChannel=None):
+        channel = channel if channel else ctx.channel
+
+        if member == ctx.author:
+            await ctx.send("you use command on your self")
+
+        overwrite = channel.overwrites_for(member)
+        overwrite.view_channel = True
+        overwrite.send_messages = True
+
+        await channel.set_permissions(member, overwrite=overwrite)
+
+        embed = discord.Embed(
+            color=0x02ff06,
+            description=f"The User {member.mention} Is added to the Channel"
+            )
+        await ctx.send(embed=embed)
+
+
+    @commands.command(name="removeuser", description="Remove User to the channel", usage="[member] [channel]")
+    @commands.has_permissions(manage_messages=True)
+    async def removeuser(self, ctx, member:discord.Member, channel: discord.TextChannel=None):
+        channel = channel if channel else ctx.channel
+
+        if member == ctx.author:
+            await ctx.send("you use command on your self")
+
+        overwrite = channel.overwrites_for(member)
+        overwrite.view_channel = False
+        overwrite.send_messages = False
+
+        await channel.set_permissions(member, overwrite=overwrite)
+
+        embed = discord.Embed(
+            color=0x02ff06,
+            description=f"The User {member.mention} Is Remove from the Channel"
+            )
+        await ctx.send(embed=embed)
+
+    @commands.command(name="addrole", description="add User to the channel", usage="[member] [channel]")
+    @commands.has_permissions(manage_messages=True)
+    async def addrole(self, ctx, role: discord.Role, channel: discord.TextChannel=None):
+        channel = channel if channel else ctx.channel
+
+        if role == None or ctx.guild.default_role:
+            await ctx.send("you need to enter role mention/id or u can't add this role")
+
+        overwrite = channel.overwrites_for(role)
+        overwrite.view_channel = True
+        overwrite.send_messages = True
+
+        await channel.set_permissions(role, overwrite=overwrite)
+
+        embed = discord.Embed(
+            color=0x02ff06,
+            description=f"The Role {role.mention} Is added to the Channel"
+            )
+        await ctx.send(embed=embed)
+
+    @commands.command(name="removerole", description="Remove User to the channel", usage="[Role.id/mention] [channel]", aliases=["removr"])
+    @commands.has_permissions(manage_messages=True)
+    async def removerole(self, ctx, role:discord.Role, channel: discord.TextChannel=None):
+        channel = channel if channel else ctx.channel
+
+        if role == None:
+            await ctx.send("you need to enter role mention/id")
+
+        overwrite = channel.overwrites_for(role)
+        overwrite.view_channel = False
+        overwrite.send_messages = False
+
+        await channel.set_permissions(role, overwrite=overwrite)
+
+        embed = discord.Embed(
+            color=0x02ff06,
+            description=f"The Role {role.mention} Is Remove from the Channel"
+            )
+        await ctx.send(embed=embed)
 
 def setup(bot):
     bot.add_cog(txt_manage(bot))
