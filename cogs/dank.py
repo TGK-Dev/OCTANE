@@ -171,6 +171,7 @@ class dank(commands.Cog):
     
 
     @commands.command(name="Heist", description="Setup an Heist",usage="[host] [ammout] [starter] [req role] ")
+    @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
     async def hesit(self, ctx, host: discord.Member, ammout, starter: discord.Member=None,req_role: discord.Role=None):
         starter = starter if starter else ctx.author
         starter_role = discord.utils.get(ctx.guild.roles, name="Hest Starter")
