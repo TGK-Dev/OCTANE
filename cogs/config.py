@@ -1,5 +1,7 @@
 import os
 import random
+import platform
+
 import traceback
 
 import asyncio
