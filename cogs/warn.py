@@ -75,7 +75,7 @@ class Warns(commands.Cog):
         self.bot = bot
 		
     @commands.command(name="Warn", description="Gives an Warnings to user", usage="[member] [warn]")
-    @commands.has_permissions(manage_messages=True)
+    @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
     async def warn(self, ctx, member: discord.Member, *, reason):
         role = discord.utils.get(ctx.guild.roles, name="Muted")
         await ctx.message.delete()
@@ -122,7 +122,7 @@ class Warns(commands.Cog):
             pass
 
     @commands.command(name="Warnings", description="Show All Warnings for User", usage="[member]")
-    @commands.has_permissions(manage_messages=True)
+    @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
     async def Warnings(self, ctx, member: discord.Member):
         warn_filter = {"user_id": member.id, "guild_id": member.guild.id}
         warns = await self.bot.warns.find_many_by_custom(warn_filter)

@@ -141,7 +141,7 @@ class Config(commands.Cog):
 
     @commands.command(
         name="logout",
-        aliases=["disconnect", "close", "stopbot"],
+        aliases=["disconnect","stopbot"],
         description="Log the bot out of discord! Owner role only",
         usage="",
     )

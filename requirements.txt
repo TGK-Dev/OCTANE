@@ -54,3 +54,4 @@ python-dateutil==2.8.1
 emojis==0.6.0
 buttons==0.1.9
 Paginator==0.5.1
+asyncio==3.4.3

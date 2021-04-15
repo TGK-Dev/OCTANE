@@ -64,7 +64,7 @@ class roles(commands.Cog):
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
 
     @commands.command(name="roleinfo", description="members with this role", usage="[role.id]")
-    @commands.has_permissions(manage_messages=True)
+    @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
     async def roleinfo(self, ctx, role: discord.Role=None):
         def fomat_time(time):
           return time.strftime('%d-%B-%Y %I:%m %p')
@@ -80,7 +80,7 @@ class roles(commands.Cog):
         await ctx.send(embed=embed, delete_after=60)
 
     @commands.command(name="role", description="add Role fored user", usage="[member][role]")
-    @commands.has_permissions(ban_members=True)
+    @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376)
     async def role(self, ctx, member:discord.Member, role: discord.Role):
         roles = member.roles
         await ctx.message.delete()
@@ -96,7 +96,7 @@ class roles(commands.Cog):
    
 
     @commands.command(name="Pings", description="Give numbers of some the pings roles", usage="")
-    @commands.has_permissions(manage_messages=True)
+    @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
     async def pings(self, ctx):
         await ctx.message.delete()
 
@@ -108,7 +108,7 @@ class roles(commands.Cog):
         partnership = discord.utils.get(ctx.guild.roles, id=797448080223109120)
 
         embed = discord.Embed(title=f"Showing some pings counts",
-            description=f"{heist.mention} = {len(heist.members)}\n{partner_heist.mention} = {len(partner_heist.members)}\n{othere_heist.mention} = {len(othere_heist.members)}\n{danker.mention} = {len(danker.members)}\n{partnership.mention} = {len(partnership.members)}\n{giveaway.mention} = {len(giveaway.members)}", color=0x06f79e)
+            description=f"{heist.mention} = {len(heist.members)}\n-----\n{partner_heist.mention} = {len(partner_heist.members)}\n-----\n{othere_heist.mention} = {len(othere_heist.members)}\n-----\n{danker.mention} = {len(danker.members)}\n-----\n{partnership.mention} = {len(partnership.members)}\n-----\n{giveaway.mention} = {len(giveaway.members)}", color=0x06f79e)
 
         await ctx.send(embed=embed, delete_after=60)
 

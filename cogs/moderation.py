@@ -119,7 +119,7 @@ class Moderation(commands.Cog):
         description="Mutes a given user for x time!",
         usage='<user> [time]'
     )
-    @commands.has_permissions(manage_roles=True)
+    @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
     async def mute(self, ctx, member: discord.Member, *, time: TimeConverter=None):
         await ctx.message.delete()
         role = discord.utils.get(ctx.guild.roles, name="Muted")
@@ -182,7 +182,7 @@ class Moderation(commands.Cog):
         description="Unmuted a member!",
         usage='<user>'
     )
-    @commands.has_permissions(manage_roles=True)
+    @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376)
     async def unmute(self, ctx, member: discord.Member):
         await ctx.message.delete()
         role = discord.utils.get(ctx.guild.roles, name="Muted")
@@ -216,7 +216,7 @@ class Moderation(commands.Cog):
 
     @commands.command(name="kick", description="A command which kicks a given user", usage="<user> [reason]")
     @commands.guild_only()
-    @commands.has_guild_permissions(ban_members=True)
+    @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376)
     async def kick(self, ctx, member: discord.Member, *, reason=None):
         await ctx.message.delete()
         try:
@@ -242,7 +242,7 @@ class Moderation(commands.Cog):
 
     @commands.command(name="Ban", description="A command which kicks a given user", usage="<user> [reason]")
     @commands.guild_only()
-    @commands.has_guild_permissions(ban_members=True)
+    @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376)
     async def ban(self, ctx, member: discord.User, *, reason=None):
         await ctx.message.delete()
         try:
@@ -268,7 +268,7 @@ class Moderation(commands.Cog):
 
     @commands.command(name="unban", description="A command which unbans a given user", usage="<user> [reason]")
     @commands.guild_only()
-    @commands.has_guild_permissions(administrator=True)
+    @commands.has_any_role(785842380565774368,799037944735727636)
     async def unban(self, ctx, member, *, reason=None):
         await ctx.message.delete()
         member = await self.bot.fetch_user(int(member))
@@ -290,7 +290,7 @@ class Moderation(commands.Cog):
         await log_channel.send(embed=embed)
 
     @commands.command(name="purge", description="A command which purges the channel it is called in", usage="[amount]")
-    @commands.has_permissions(manage_messages=True)
+    @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
     async def purge(self, ctx, amount=15):
         await ctx.message.delete()
         await ctx.channel.purge(limit=amount + 1)
@@ -301,7 +301,7 @@ class Moderation(commands.Cog):
         await ctx.send(embed=embed, delete_after=15)
 
     @commands.command(name="uerinfo", description="Give all Infomation about user", usage="[member]", aliases=['whois'])
-    @commands.has_permissions(manage_messages=True)
+    @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
     async def uerinfo(self, ctx, member: discord.Member = None):
         await ctx.message.delete()
         def fomat_time(time):
