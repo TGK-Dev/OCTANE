@@ -68,38 +68,15 @@ class tickets(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
-
-
+   
     @commands.command(name="Support", description="make an Support tickets for user", usage="")
+    #@commands.cooldown(3, 86400, commands.BucketType.user)
     async def support(self, ctx):
-        await ctx.message.delete()
-        category = 831481927055704075
-        guild = ctx.guild
-        if ctx.channel.id == 831780329080487986:
-            member = ctx.author
-
-            channel = await guild.create_text_channel(category=self.bot.get_channel(831481927055704075), sync_permissions=True, name=f"{ctx.author.name} tickets counter", topic=f"{ctx.author.id}")
-            overwrites = channel.overwrites_for(member)
-            overwrites.send_messages = True
-            overwrites.view_channel = True
-            counter = counter +1
-            await channel.set_permissions(member, view_channel=True, send_messages=True)
-            embed = discord.Embed(title=f"{ctx.author.display_name} Welcome to Your Support tickets",
-                color=0x008000,
-                description="Welcome to the Server Support. Mention any of the online staff only once and and please be patient until they approach you.")
-            await channel.send(f"{ctx.author.mention}", embed=embed)
-        else:
-            return    
-    @commands.command(name="Support", description="make an Support tickets for user", usage="")
-    @commands.cooldown(3, 86400, commands.BucketType.user)
-    async def support(self, ctx):
-        await ctx.message.delete()
-        category = 829230513516445736
-        guild = ctx.guild
         if ctx.channel.id == 830493297407164426:
             member = ctx.author
+            guild = ctx.guild
 
-            channel = await guild.create_text_channel(category=self.bot.get_channel(831481927055704075), sync_permissions=True, name=f"{ctx.author.name} tickets", topic=f"{ctx.author.id}")
+            channel = await guild.create_text_channel(category=self.bot.get_channel(829230513516445736), sync_permissions=True, name=f"{ctx.author.name} tickets", topic=f"{ctx.author.id}")
             overwrites = channel.overwrites_for(member)
             overwrites.send_messages = True
             overwrites.view_channel = True
@@ -109,6 +86,7 @@ class tickets(commands.Cog):
                 color=0x008000,
                 description="Welcome to the Server Support. Mention any of the online staff only once and and please be patient until they approach you.")
             await channel.send(f"{ctx.author.mention}", embed=embed)
+            await ctx.message.delete()
         else:
             return
 
@@ -127,17 +105,19 @@ class tickets(commands.Cog):
     @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
     async def delete(self, ctx):
         channel = ctx.channel
-        if ctx.channel.category.id == 829230513516445736:
-            await ctx.send("Are Your sure?[Y/N]")
-            try:
-                await self.bot.wait_for("message", check=lambda m: m.content.startswith(f"Y"), timeout=3600)
-                embed_delete = discord.Embed(description="``Deleting this tickets in 10 seconds``")
-                await ctx.send(embed=embed_delete)
-                await asyncio.sleep(10)
-                await channel.delete()
-            except asyncio.TimeoutError:
-                embed = discord.Embed(description="``Time out canceling the cancel ``")
-                await ctx.send(embed=embed)
+        async with ctx.typing():
+            
+            if ctx.channel.category.id == 829230513516445736:
+                await ctx.send("Are Your sure?[Y/N]")
+                try:
+                    await self.bot.wait_for("message", check=lambda m: m.content.startswith(f"Y"), timeout=3600)
+                    embed_delete = discord.Embed(description="``Deleting this tickets in 10 seconds``")
+                    await ctx.send(embed=embed_delete)
+                    await asyncio.sleep(10)
+                    await channel.delete()
+                except asyncio.TimeoutError:
+                    embed = discord.Embed(description="``Time out canceling the cancel ``")
+                    await ctx.send(embed=embed)
 
     @commands.command(name="adduser", description="add User to the channel", usage="[member] [channel]")
     @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
