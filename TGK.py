@@ -1,3 +1,4 @@
+
 # Standard libraries
 import contextlib
 import io
@@ -156,6 +157,7 @@ if __name__ == "__main__":
     bot.mutes = Document(bot.db, "mutes")
 #    bot.banned = Document(bot.db, "banned")
     bot.warns = Document(bot.db, "warns")
+    bot.ticket = Document(bot.db, "ticket")
     bot.temp_roles = Document(bot.db, "temp_roles")
     bot.invites = Document(bot.db, "invites")
     bot.command_usage = Document(bot.db, "command_usage")

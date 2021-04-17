@@ -66,6 +66,7 @@ class roles(commands.Cog):
     @commands.command(name="roleinfo", description="members with this role", usage="[role.id]")
     @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
     async def roleinfo(self, ctx, role: discord.Role=None):
+        await ctx.message.delete()
         def fomat_time(time):
           return time.strftime('%d-%B-%Y %I:%m %p')
 
@@ -96,7 +97,7 @@ class roles(commands.Cog):
    
 
     @commands.command(name="Pings", description="Give numbers of some the pings roles", usage="")
-    @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
+    @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889, 831405039830564875)
     async def pings(self, ctx):
         await ctx.message.delete()
 

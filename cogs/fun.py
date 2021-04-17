@@ -71,13 +71,14 @@ class fun(commands.Cog):
 	@commands.command(name="Cheer", description="send cheer full gif", usage="[optional: member]")
 	@commands.cooldown(3, 60, commands.BucketType.user)
 	async def cheer(self, ctx, member: discord.Member=None):
+		await ctx.message.delete()
 		member = member if member else ctx.author
 		usercolor = ctx.author.color
 		rc = random.choice(cheer_list)
 		if member == ctx.author:
 			em = discord.Embed(color=usercolor, description=f"**{ctx.author.name}** is cheering")
 			em.set_image(url=rc)
-			await ctx.reply(embed=em, delete_after=60)
+			await ctx.send(embed=em, delete_after=60)
 		else:
 			emm = discord.Embed(color=usercolor, description=f"**{ctx.author.name}** is cheering for **{member.name}**")
 			emm.set_image(url=rc)
@@ -86,21 +87,23 @@ class fun(commands.Cog):
 	@commands.command(name="Happy", description="Send happy gif", usage="[optional: member]")
 	@commands.cooldown(3, 60, commands.BucketType.user)
 	async def happy(self, ctx, member: discord.Member=None):
+		await ctx.message.delete()
 		member = member if member else ctx.author
 		usercolor = ctx.author.color
 		rh = random.choice(happy_list)
 		if member == ctx.author:
 			em = discord.Embed(color=usercolor, description=f"**{ctx.author.name}** is happy")
 			em.set_image(url=rh)
-			await ctx.reply(embed=em, delete_after=60)
+			await ctx.send(embed=em, delete_after=60)
 		else:
 			emm = discord.Embed(color=usercolor, description=f"**{member.name}** Made **{ctx.author.name}**")
 			emm.set_image(url=rh)
-			await ctx.reply(embed=emm, delete_after=60)
+			await ctx.send(embed=emm, delete_after=60)
 
 	@commands.command(name="Thumbsup", description="send thumbsup gif", usage="[optional: member]", aliases=['thunbs up'])
 	@commands.cooldown(3, 60, commands.BucketType.user)
 	async def thumbsup(self, ctx, member: discord.Member=None):
+		await ctx.message.delete()
 		member = member if member else ctx.author
 		usercolor = ctx.author.color
 		rhh = random.choice(thunbs_list)
@@ -108,28 +111,30 @@ class fun(commands.Cog):
 
 			em = discord.Embed(color=usercolor, description=f"**{ctx.author.name}** is giving a thumbsup")
 			em.set_image(url=rhh)
-			await ctx.reply(embed=em, delete_after=60)
+			await ctx.send(embed=em, delete_after=60)
 		else:
 			emm = discord.Embed(color=usercolor, description=f"**{ctx.author.name}** is giving **{member.name}** a thumbsup")
 			emm.set_image(url=rhh)
-			await ctx.reply(embed=emm, delete_after=60)
+			await ctx.send(embed=emm, delete_after=60)
 
 	@commands.command(name="Bonk", description="Bonk Some one's Head", usage="[member]")
 	@commands.cooldown(3, 60, commands.BucketType.user)
 	async def bonk(self, ctx, member: discord.Member=None):
+		await ctx.message.delete()
 		member = member if member else ctx.author
 		usercolor = ctx.author.color
 		rb = random.choice(bonk_list)
 		if member == ctx.author:
-			await ctx.reply("You can't bonk your self")
+			await ctx.send("You can't bonk your self")
 		else:
 			emm = discord.Embed(color=usercolor, description=f"**{member.name}** got their head bonked by **{ctx.author}**")
 			emm.set_image(url=rb)
-			await ctx.message.reply(embed=emm, delete_after=60)
+			await ctx.message.send(embed=emm, delete_after=60)
 
 	@commands.command(name="Dab", description="send Dab gif", usage="[optional: member]")
 	@commands.cooldown(3, 60, commands.BucketType.user)
 	async def dab(self, ctx, member: discord.Member=None):
+		await ctx.message.delete()
 		member = member if member else ctx.author
 
 		usercolor = ctx.author.color
@@ -137,86 +142,92 @@ class fun(commands.Cog):
 		if member == ctx.author:
 			em = discord.Embed(color=usercolor, description=f"**{ctx.author.name}** is dabbing")
 			em.set_image(url=rd)
-			await ctx.reply(embed=em, delete_after=60)
+			await ctx.send(embed=em, delete_after=60)
 		else:
 			emm = discord.Embed(color=usercolor, description=f"**{ctx.author.name}** is dabbing With **{member.name}**")
 			emm.set_image(url=rd)
-			await ctx.reply(embed=emm, delete_after=60)
+			await ctx.send(embed=emm, delete_after=60)
 
 	@commands.command(name="Sleep", description="send Sleepy gif", usage="")
 	@commands.cooldown(3, 60, commands.BucketType.user)
 	async def sleep(self, ctx):
+		await ctx.message.delete()
 		usercolor = ctx.author.color
 		rs = random.choice(sleep_list)
 		em = discord.Embed(color=usercolor, description=f"**{ctx.author.name}** is Sleepy")
 		em.set_image(url=rs)
 
-		await ctx.message.reply(embed=em, delete_after=60)
+		await ctx.message.send(embed=em, delete_after=60)
 
 	@commands.command(name="Yes", description="send Yes gif", usage="[optional: member]")
 	@commands.cooldown(3, 60, commands.BucketType.user)
 	async def yes(self, ctx, member: discord.Member=None):
+		await ctx.message.delete()
 		member = member if member else ctx.author
 		usercolor = ctx.author.color
 		ry = random.choice(yes_list)
 		if member == ctx.author:
 			em = discord.Embed(color=usercolor, description=f"**{ctx.author.name}** Agrees")
 			em.set_image(url=ry)
-			await ctx.reply(embed=em, delete_after=60)
+			await ctx.send(embed=em, delete_after=60)
 		else:
 			em = discord.Embed(color=usercolor, description=f"**{ctx.author.name}** agrees with **{member.name}**")
 			em.set_image(url=ry)
-			await ctx.reply(embed=em, delete_after=60)
+			await ctx.send(embed=em, delete_after=60)
 
 
 	@commands.command(name="Cry", description="Send Crying Gif", usage="[optional: member]")
 	@commands.cooldown(3, 60, commands.BucketType.user)
 	async def cry(self, ctx, member: discord.Member=None):
+		await ctx.message.delete()
 		usercolor = ctx.author.color
 		member = member if member else ctx.	author
 		rcc = random.choice(cry_list)
 		if member == ctx.author:
 			em = discord.Embed(color=usercolor, description=f"**{ctx.author.name}** is crying")
 			em.set_image(url=rcc)
-			await ctx.reply(embed=em, delete_after=60)
+			await ctx.send(embed=em, delete_after=60)
 		else:
 			emm = discord.Embed(color=usercolor, description=f"**{member.name}** Made **{ctx.author.name}** cry")
 			emm.set_image(url=rcc)
-			await ctx.reply(embed=emm, delete_after=60)
+			await ctx.send(embed=emm, delete_after=60)
 
 	@commands.command(name="Sad", description="send Sad gif", usage="[optional: member] ")
 	@commands.cooldown(3, 60, commands.BucketType.user)
 	async def sad(self, ctx, member: discord.Member=None):
+		await ctx.message.delete()
 		usercolor = ctx.author.color
 		member = member if member else ctx.author
 		sl = random.choice(sad_list)
 		if member == ctx.author:
 			em = discord.Embed(color=usercolor, description=f"**{ctx.author.name}** is crying")
 			em.set_image(url=sl)
-			await ctx.reply(embed=em, delete_after=60)
+			await ctx.send(embed=em, delete_after=60)
 		else:
 			emm = discord.Embed(color=usercolor, description=f"**{member.name}** Made **{ctx.author.name}** Sad")
 			emm.set_image(url=sl)
-			await ctx.reply(embed=emm, delete_after=60)
+			await ctx.send(embed=emm, delete_after=60)
 
 	@commands.command(name="Angry", description="Send Angry list", usage="[optional: member]")
 	@commands.cooldown(3, 60, commands.BucketType.user)
 	async def angry(self, ctx, member: discord.Member=None):
+		await ctx.message.delete()
 		usercolor = ctx.author.color
 		member = member if member else ctx.author
 		ra = random.choice(angry_list)
 		if member == ctx.author:
 			em = discord.Embed(color=usercolor, description=f"**{ctx.author.name}** is Angry")
 			em.set_image(url=ra)
-			await ctx.message.reply(embed=em, delete_after=60)
+			await ctx.message.send(embed=em, delete_after=60)
 		else:
 			emm = discord.Embed(color=usercolor, description=f"**{ctx.author.name}** is raging at **{member.name}**")
 			emm.set_image(url=ra)
-			await ctx.message.reply(embed=emm, delete_after=60)
+			await ctx.message.send(embed=emm, delete_after=60)
 
 	@commands.command(name="kill", description="Kill some one it's Only For Joke ", usage="[member]")
 	@commands.cooldown(3, 30, commands.BucketType.user)
 	async def kill(self, ctx, member: discord.Member=None):
+		await ctx.message.delete()
 		usercolor = ctx.author.color
 		member = member if member else ctx.author
 		kill = random.choice(kill_list)
@@ -224,11 +235,11 @@ class fun(commands.Cog):
 		if member == ctx.author:
 			em = discord.Embed(color=usercolor, description=f"**{ctx.author.name}** is staying alive... *pouts*")
 			em.set_image(url=Nkill)
-			await ctx.reply(embed=em, delete_after=60)
+			await ctx.send(embed=em, delete_after=60)
 		else:
 			em = discord.Embed(color=usercolor, description=f"**{ctx.author.name}** is murdering **{member.name}**")
 			em.set_image(url=kill)
-			await ctx.reply(embed=em, delete_after=60)
+			await ctx.send(embed=em, delete_after=60)
 
 	@commands.command(name="8Ball", description="Ask you question to bot", usage="[question]", aliases=['8b'])
 	@commands.cooldown(3, 30, commands.BucketType.user)

@@ -3,7 +3,7 @@ import discord
 import datetime
 import random 
 
-
+from bson.objectid import ObjectId
 from discord.ext import commands
 from discord.ext.buttons import Paginator
 from dateutil.relativedelta import relativedelta
@@ -79,8 +79,11 @@ class Warns(commands.Cog):
     async def warn(self, ctx, member: discord.Member, *, reason):
         role = discord.utils.get(ctx.guild.roles, name="Muted")
         await ctx.message.delete()
-        if member.id in [ctx.author.id, self.bot.user.id]:
-            return await ctx.send("You cannot warn yourself or the bot!")
+        if member.id in [self.bot.user.id, 488614633670967307, 301657045248114690]:
+            return await ctx.send("You cannot warn bot or it's Creater because they are way too cool to be warned")
+
+        if member.id == ctx.author.id:
+            return await ctx.send("You cannot warn your self")
         
 
         
@@ -149,6 +152,33 @@ class Warns(commands.Cog):
             entries=pages,
             length=1
         ).start(ctx)
+
+    @commands.command(name="delwarn", description="Delete Warning For user", usage="[Warn_id]")
+    @commands.has_any_role(785842380565774368, 799037944735727636, 786281307063189565)
+    async def delwarn(self, ctx, *,_id):
+
+        warns_filter = {"_id": ObjectId(_id)}
+
+        await self.bot.warns.delete_by_custom(warns_filter)
+
+        embed = discord.Embed(color=0x02ff06, description=f"Deleted Warning by ID ``{_id}``")
+
+        await ctx.send(embed=embed)
+
+    @commands.command(name="clearwarn", description="Clear all warnings form user", usage="[member]")
+    @commands.has_any_role(785842380565774368)
+    async def clearwarn(self, ctx, member: discord.Member=None):
+        member = member if member else ctx.author
+
+        if member.id == ctx.author.id:
+            await ctx.send("you can't clear your own warn")
+
+        warn_filter = {"user_id": member.id}
+
+        await self.bot.warns.delete_by_custom(warn_filter)
+
+        await ctx.send(f"Cleared all warnings form the {member.display_name}")
+
 
 
 def setup(bot):
