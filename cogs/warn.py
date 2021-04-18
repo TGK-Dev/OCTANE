@@ -154,7 +154,7 @@ class Warns(commands.Cog):
         ).start(ctx)
 
     @commands.command(name="delwarn", description="Delete Warning For user", usage="[Warn_id]")
-    @commands.has_any_role(785842380565774368, 799037944735727636, 786281307063189565)
+    @commands.has_any_role(785842380565774368, 799037944735727636)
     async def delwarn(self, ctx, *,_id):
 
         warns_filter = {"_id": ObjectId(_id)}
@@ -178,8 +178,6 @@ class Warns(commands.Cog):
         await self.bot.warns.delete_by_custom(warn_filter)
 
         await ctx.send(f"Cleared all warnings form the {member.display_name}")
-
-
 
 def setup(bot):
     bot.add_cog(Warns(bot))

@@ -15,27 +15,6 @@ from dateutil.relativedelta import relativedelta
 class Events(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.member_task = self.check_current_mambers.start()
-
-    def cog_unload(self):
-        self.member_task.cancel()
-
-    @tasks.loop(seconds=10)
-    async def check_current_mambers(self):
-        #guild = self.bot.get_guild(785839283847954433)
-        #total = discord.utils.get(guild.voice_channels, id=821747329316290560)
-        #human = discord.utils.get(guild.voice_channels, id=821747332327931995)
-        #robot = discord.utils.get(guild.roles, id=810153515610537994)
-        temp = self.bot.get_channel(830493297407164426)
-        count = 0
-        #await total.edit(name=f"💪。Total: {len(guild.member_count)}")
-
-        #await human.edit(name=f"😊。Humans: {len(guild.member_count) - len(robot)}")
-        await temp.send(f"{count + 1}")
-
-    @check_current_mambers.before_loop
-    async def before_check_current_mambers(self):
-        await self.bot_wait_until_ready()
 
     @commands.Cog.listener()
     async def on_ready(self):

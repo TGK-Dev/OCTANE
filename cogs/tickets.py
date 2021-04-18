@@ -2,8 +2,11 @@ import random
 import asyncio
 import datetime
 import discord
+import chat_exporter
 from discord.ext import commands
 from discord.ext.buttons import Paginator
+from bson.objectid import ObjectId
+
 
 class Pag(Paginator):
     async def teardown(self):
@@ -101,8 +104,8 @@ class ticket(commands.Cog):
 
                 await self.bot.ticket.upsert_custom(ticket_filter, ticket_data)
 
-                await channel.edit(name=f"{ctx.author.display_name} ticket {current_ticket_count}")
-                await channel.set_permissions(member, view_channel=True, send_messages=True)
+                await channel.edit(name=f"{ctx.author.display_name} ticket {current_ticket_count} || Unclaim")
+                await channel.set_permissions(member, view_channel=True, send_messages=True, attach_files=True, embed_links=True)
 
             await channel.send(f"{ctx.author.mention}", embed=embed)
             await ctx.message.delete()
@@ -124,16 +127,20 @@ class ticket(commands.Cog):
     @commands.command(name="open", description="delete current ticket", usage="")
     @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
     async def open(self, ctx):
-        ticket_filter= {"ticket_id": ctx.channel.id," guild_id": ctx.guild.id}
-        tickets = await self.bot.ticket.find_many_by_custom(ticket_filter)
+
+        ticket_filter = {"ticket_id": ctx.channel.id}
+
+        ticket = await self.bot.ticket.find_many_by_custom(ticket_filter, {'user_id': 1})
+
+
+        print(f"{ticket}")
+
+    @commands.command(name="transcript", description="delete current ticket", usage="")
+    @commands.has_any_role(785842380565774368,799037944735727636)
+    async def transcript(self, ctx):
+        await chat_exporter.quick_export(ctx)
+
         
-        if not bool(ticket):
-            return
-
-        await self.bot.ticket.find_one()
-
-
-        await ctx.send(f"{tickets}, {member}")
     @commands.command(name="delete", description="delete the ticket", usage="")
     @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
     async def delete(self, ctx):
@@ -154,6 +161,7 @@ class ticket(commands.Cog):
                 except asyncio.TimeoutError:
                     embed = discord.Embed(description="``Time out canceling the cancel ``")
                     await ctx.send(embed=embed)
+
 
     @commands.command(name="adduser", description="add User to the channel", usage="[member] [channel]")
     @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
