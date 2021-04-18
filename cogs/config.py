@@ -190,7 +190,7 @@ class Config(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.command(name="toggle", description="Enable or disable a command!")
-    @commands.is_owner()
+    @commands.has_role(785842380565774368)
     async def toggle(self, ctx, *, command):
         command = self.bot.get_command(command)
 
