@@ -189,6 +189,24 @@ class Config(commands.Cog):
 
         await ctx.send(embed=embed)
 
+    @commands.command(name="toggle", description="Enable or disable a command!")
+    @commands.is_owner()
+    async def toggle(self, ctx, *, command):
+        command = self.bot.get_command(command)
+
+        if command is None:
+            await ctx.send("I can't find a command with that name!")
+
+        elif ctx.command == command:
+            await ctx.send("You cannot disable this command.")
+
+        else:
+            command.enabled = not command.enabled
+            ternary = "enabled" if command.enabled else "disabled"
+            await ctx.send(f"I have {ternary} {command.qualified_name} for you!")
+
+
+
 
     @commands.command(
         name='reload', description="Reload all/one of the bots cogs!", usage=""

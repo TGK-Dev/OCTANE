@@ -49,7 +49,7 @@ class Events(commands.Cog):
         if len(messageContent) > 0:
             for word in word_list:
                 if word in messageContent:
-                    return await message.reply('Please Vote us here, <https://top.gg/servers/785839283847954433/vote>, Thanks For Support ^0^', )
+                    return await message.reply('Please Vote us here, <https://top.gg/servers/785839283847954433/vote>, Thanks For Support ^0^')
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
@@ -111,6 +111,8 @@ class Events(commands.Cog):
             await ctx.message.reply(f'The {name} is Already UnLoaded')
         elif isinstance(error, commands.ExtensionNotFound):
             await ctx.message.reply(f'The Extension not Found')
+        elif isinstance(error, commands.DisabledCommand):
+            await ctx.message.reply('The command is disabed by Owner')
         else:
             raise error
 

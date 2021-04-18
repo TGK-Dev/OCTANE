@@ -257,7 +257,13 @@ class txt_manage(commands.Cog):
             color=0x02ff06, description=f'The {channel.name} is Now Visibal for for {role.name}')
         await ctx.send(embed=embed, delete_after=10)
 
-    #tickets Fixes 
+    @commands.command(name="Sync", description="Sync Channels permissions", usage="[channel]")
+    @commands.has_any_role(785842380565774368,799037944735727636)
+    async def sync(self, ctx, channel: discord.TextChannel=None):
+        channel = channel if channel else ctx.channel
+
+        await channel.edit(sync_permissions=True)
+        await ctx.send("permissions are Synced", delete_after=15)
 
 
 
