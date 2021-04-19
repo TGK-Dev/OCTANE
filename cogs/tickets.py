@@ -117,7 +117,7 @@ class tickets(commands.Cog):
 
             lob_channel = self.bot.get_channel(804024766150738030)
 
-            await lob_channel.send(embed=embed)
+            await lob_channel.send(embed=log_embed)
 
 
 
@@ -160,14 +160,14 @@ class tickets(commands.Cog):
             
 
 
-    @commands.command(name="transcript", description="delete current ticket", usage="")
+    @commands.command(name="transcript", description="delete current ticket", usage="[limit] [time Zone]", aliases=["save"])
     @commands.has_any_role(785842380565774368,799037944735727636)
-    async def save(ctx, limit: int=None, tz_info=None):
+    async def transcript(self, ctx, limit: int=None, tz_info=None):
 
         limit = limit if limit else 150
         tz_info = tz_info if tz_info else "Asia/Kolkata"
 
-        channel = self.bot.get_channel(833386438338674718)
+        channel =  self.bot.get_channel(833386438338674718)
         transcript = await chat_exporter.export(ctx.channel, limit, tz_info)
 
         if transcript is None:
@@ -176,7 +176,8 @@ class tickets(commands.Cog):
         transcript_file = discord.File(io.BytesIO(transcript.encode()),
             filename=f"transcript-{ctx.channel.name}.html")
 
-        await channel.send(file=transcript_file)
+        await channel.send(f"{ctx.channel.name}", file=transcript_file)
+        await ctx.send("transcript Saved")
 
         
     @commands.command(name="delete", description="delete the ticket", usage="")
@@ -237,23 +238,19 @@ class tickets(commands.Cog):
         await ctx.channel.set_permissions(jr_mod, send_messages=None, view_channel=True)
         await ctx.channel.set_permissions(partner, send_messages=None, view_channel=True)
 
-        embed = discord.Embed(description=f"This Ticket Will hanndle by the {ctx.author.mention}")
+        embed = discord.Embed(description=f"This Ticket is now UnClaimed")
         await ctx.send(embed=embed)
 
     @commands.command(name="adduser", description="add User to the channel", usage="[member] [channel]")
     @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
-    async def adduser(self, ctx, member: discord.User=None, channel: discord.TextChannel=None):
-        channel = channel if channel else ctx.channel
+    async def adduser(self, ctx, member: discord.User=None):
+        channel = ctx.channel
         if ctx.channel.category.id == 829230513516445736:
 
             if member == ctx.author:
                 await ctx.send("you use command on your self")
 
-            overwrite = channel.overwrites_for(member)
-            overwrite.view_channel = True
-            overwrite.send_messages = True
-
-            await channel.set_permissions(member, overwrite=overwrite)
+            await channel.set_permissions(member, send_messages=True, view_channel=True)
 
             embed = discord.Embed(
                 color=0x02ff06,
@@ -265,8 +262,8 @@ class tickets(commands.Cog):
 
     @commands.command(name="removeuser", description="Remove User to the channel", usage="[member] [channel]")
     #@commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
-    async def removeuser(self, ctx, member:discord.Member, channel: discord.TextChannel=None):
-        channel = channel if channel else ctx.channel
+    async def removeuser(self, ctx, member:discord.Member):
+        channel = ctx.channel
         if ctx.channel.category.id == 829230513516445736:
 
             if member == ctx.author:
@@ -276,7 +273,7 @@ class tickets(commands.Cog):
             overwrite.view_channel = False
             overwrite.send_messages = False
 
-            await channel.set_permissions(member, overwrite=overwrite)
+            await channel.set_permissions(member, send_messages=None, view_channel=None)
 
             embed = discord.Embed(
                 color=0x02ff06,
@@ -287,18 +284,14 @@ class tickets(commands.Cog):
 
     @commands.command(name="addrole", description="add User to the channel", usage="[member] [channel]")
     #@commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
-    async def addrole(self, ctx, role: discord.Role, channel: discord.TextChannel=None):
-        channel = channel if channel else ctx.channel
+    async def addrole(self, ctx, role: discord.Role):
+        channel = ctx.channel
         if ctx.channel.category.id == 829230513516445736:
 
-            if role == None or ctx.guild.default_role:
+            if role == ctx.guild.default_role:
                 return await ctx.send("you need to enter role mention/id or u can't add this role")
 
-            overwrite = channel.overwrites_for(role)
-            overwrite.view_channel = True
-            overwrite.send_messages = True
-
-            await channel.set_permissions(role, overwrite=overwrite)
+            await channel.set_permissions(role, send_messages=True, view_channel=True)
 
             embed = discord.Embed(
                 color=0x02ff06,
@@ -309,18 +302,11 @@ class tickets(commands.Cog):
 
     @commands.command(name="removerole", description="Remove User to the channel", usage="[Role.id/mention] [channel]", aliases=["removr"])
     #@commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
-    async def removerole(self, ctx, role:discord.Role, channel: discord.TextChannel=None):
-        channel = channel if channel else ctx.channel
+    async def removerole(self, ctx, role:discord.Role):
+        channel = ctx.channel
         if ctx.channel.category.id == 829230513516445736:
 
-            if role == None:
-                await ctx.send("you need to enter role mention/id")
-
-            overwrite = channel.overwrites_for(role)
-            overwrite.view_channel = False
-            overwrite.send_messages = False
-
-            await channel.set_permissions(role, overwrite=overwrite)
+            await channel.set_permissions(role, send_messages=None, view_channel=None)
 
             embed = discord.Embed(
                 color=0x02ff06,
