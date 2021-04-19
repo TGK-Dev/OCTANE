@@ -53,6 +53,8 @@ bot = commands.Bot(
 bot.config_token = secret_file["token"]
 bot.connection_url = secret_file["mongo"]
 
+bot.joke_api_key = secret_file["x-rapidapi-key"]
+
 logging.basicConfig(level=logging.INFO)
 
 bot.DEFAULTPREFIX = DEFAULTPREFIX
