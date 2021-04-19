@@ -112,7 +112,7 @@ class tickets(commands.Cog):
             await channel.send(f"{ctx.author.mention}", embed=embed)
             await ctx.message.delete()
 
-            log_embed = discord.embed(title=f"{ctx.author.display_name}")
+            log_embed = discord.Embed(title=f"{ctx.author.display_name}")
             log_embed.add_field(name="Ticket Name", value=f"{channel.name}")
 
             lob_channel = self.bot.get_channel(804024766150738030)
