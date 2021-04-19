@@ -192,7 +192,7 @@ class txt_manage(commands.Cog):
         await channel.send(embed=embed)
 
     @commands.command(name="slowmode", description="Set Slowmode In Current Channel", usage="[slowmode time 1m, 1s 1h max 6h]", aliases=['sm'])
-    @commands.has_any_role(799037944735727636, 785845265118265376, 787259553225637889)
+    @commands.has_any_role(785842380565774368, 799037944735727636, 785845265118265376, 787259553225637889)
     async def slowmode(self, ctx, time: str = '0'):
 
         unit = ['h', 'H', 'm', 'M', 's', 'S']

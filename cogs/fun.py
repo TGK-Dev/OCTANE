@@ -1,5 +1,6 @@
 import discord
 import random
+import eight_ball
 from aiohttp import ClientSession 
 from discord.ext import commands
 from discord.ext.buttons import Paginator
@@ -16,7 +17,7 @@ cry_list = ['https://cdn.discordapp.com/attachments/825090653729456169/825090684
 sad_list = ['https://cdn.discordapp.com/attachments/825091183234908200/825091270028034048/6NCYiaXakn5.gif', 'https://cdn.discordapp.com/attachments/825091183234908200/825091268970807346/1MPH4xL6wyM.gif', 'https://cdn.discordapp.com/attachments/825091183234908200/825091261806542889/zmRtMflCtAV.gif', 'https://cdn.discordapp.com/attachments/825091183234908200/825091258409811978/KYl87iM4Vbz.gif', 'https://cdn.discordapp.com/attachments/825091183234908200/825091255499096104/sLLhw_KTXzW.gif']
 kill_list = ['https://cdn.discordapp.com/attachments/827524405315633163/827524453806243841/YIy0BmMjANn.gif', 'https://cdn.discordapp.com/attachments/827524405315633163/827524448075644939/Xufk1gBs8pl.gif', 'https://cdn.discordapp.com/attachments/827524405315633163/827524448126369802/bOtF4EdBbDJ.gif', 'https://cdn.discordapp.com/attachments/827524405315633163/827524444679438346/HaqpyGK874b.gif', 'https://cdn.discordapp.com/attachments/827524405315633163/827524445228367882/uOlyiKmmUhS.gif']
 no_kill = ['https://cdn.discordapp.com/attachments/827527230401806366/827527260771844116/jz7xK5wHTUi.gif', 'https://cdn.discordapp.com/attachments/827527230401806366/827527267122151424/awPIyhKLM5T.gif']
-responses = ["It is certain.", "It is decidedly so.", "Without a doubt.", "||Yes|| - definitely.", "You may rely on it.", "As I see it, yes.", "Most likely.", "Outlook good.", "Yes.", "Signs point to yes.", "Reply hazy, try again.", "Ask again later.", "Better not tell you now.", "Cannot predict now.", "Concentrate and ask again.", "Don't count on it.", "My reply is no.", "My sources say no.", "Outlook not so good.", "Very doubtful.", "My reply is no.", "Why don't we partner", "Well i know but Won't Tell", "Why you like this type of question","No.", "||No|| - definitely.", "If you don't know about this how did you pass the School", "You Stupid", "I have doubt that your human or ....", "Your genius||Not Jk||", "Your genius ||JK||", "oh no you , not you again!", "why should i even tell you that?", "you are so dumb duh!", "Bruh"]
+
 
 
 
@@ -244,8 +245,8 @@ class fun(commands.Cog):
 
 	@commands.command(name="8Ball", description="Ask you question to bot", usage="[question]", aliases=['8b'])
 	@commands.cooldown(3, 30, commands.BucketType.user)
-	async def _8ball(self, ctx, *, question):
-		await ctx.reply(f'Question: {question}\nAnswer: {random.choice(responses)}')
+	async def ball(self, ctx, *, question):
+ 		await ctx.send(bot.ball.response(question))
 
 	@commands.command(name="dadjoke", description="Send a dad Joke", usage="" ,aliases=["djoke"])
 	@commands.cooldown(2, 60, commands.BucketType.user)

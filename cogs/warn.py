@@ -145,7 +145,7 @@ class Warns(commands.Cog):
             Warn Time: {warn['timestamp'].strftime("%I:%M %p %B %d, %Y")}
             """
             pages.append(description)
-        
+
         await Pag(
             title=f"Warns for `{member.display_name}`",
             colour=0xCE2029,
@@ -161,7 +161,7 @@ class Warns(commands.Cog):
 
         await self.bot.warns.delete_by_custom(warns_filter)
 
-        embed = discord.Embed(color=0x02ff06, description=f"Deleted Warning by ID ``{_id}``")
+        embed = discord.Embed(color=0x02ff06, description=f"Deleted Warning by ID `{_id}`")
 
         await ctx.send(embed=embed)
 

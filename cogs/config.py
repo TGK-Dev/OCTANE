@@ -62,7 +62,7 @@ class Config(commands.Cog):
 
     @commands.command()
     async def ping(self, ctx):
-        await ctx.reply(f'Ping ``{round(self.bot.latency * 1000)}``ms') 
+        await ctx.reply(f'Ping `{round(self.bot.latency * 1000)}`ms') 
 
     @commands.command(
         name="prefix",

@@ -3,6 +3,7 @@ import asyncio
 import datetime
 import discord
 import chat_exporter
+import io
 from discord.ext import commands
 from discord.ext.buttons import Paginator
 from bson.objectid import ObjectId
@@ -65,7 +66,7 @@ async def GetMessage(
         return False
 counter = 0
 
-class ticket(commands.Cog):
+class tickets(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -76,7 +77,7 @@ class ticket(commands.Cog):
     @commands.command(name="Support", description="make an Support ticket for user", usage="")
     @commands.cooldown(3, 86400, commands.BucketType.user)
     async def support(self, ctx):
-        if ctx.channel.id == 830493297407164426:
+        if ctx.channel.id == 785901543349551104:
             async with ctx.typing():
                 member = ctx.author
                 guild = ctx.guild
@@ -89,6 +90,7 @@ class ticket(commands.Cog):
                 embed = discord.Embed(title=f"{ctx.author.display_name} Welcome to Your Support ticket",
                     color=0x008000,
                     description="Welcome to the Server Support. Mention any of the online staff only once and and please be patient until they approach you.")
+                embed.set_footer(text="Developed and Owned by Jay & utki007")
 
                 current_ticket_count = len(
                     await self.bot.ticket.find_many_by_custom(
@@ -104,11 +106,21 @@ class ticket(commands.Cog):
 
                 await self.bot.ticket.upsert_custom(ticket_filter, ticket_data)
 
-                await channel.edit(name=f"{ctx.author.display_name} ticket {current_ticket_count} || Unclaim")
+                await channel.edit(name=f"{ctx.author.display_name} ticket {current_ticket_count}")
                 await channel.set_permissions(member, view_channel=True, send_messages=True, attach_files=True, embed_links=True)
 
             await channel.send(f"{ctx.author.mention}", embed=embed)
             await ctx.message.delete()
+
+            log_embed = discord.embed(title=f"{ctx.author.display_name}")
+            log_embed.add_field(value="Ticket Name", value=f"{channel.name}")
+
+            lob_channel = self.bot.get_channel(804024766150738030)
+
+            await lob_channel.send(embed=embed)
+
+
+
         else:
             return
 
@@ -119,8 +131,8 @@ class ticket(commands.Cog):
                 await ctx.send("ticket Is Closed already")
             else:
                 await ctx.channel.edit(sync_permissions=True)
-                await ctx.channel.edit(name=f"{ctx.channel.name} Closed")
-                await ctx.send("ticket Close")
+                embed = discord.Embed(description=f"Ticket Closed By {ctx.author.mention}")
+                await ctx.send(embed=embed)
         else:
             await ctx.send("You can't use this command here")
 
@@ -130,15 +142,41 @@ class ticket(commands.Cog):
 
         ticket_filter = {"ticket_id": ctx.channel.id}
 
-        ticket = await self.bot.ticket.find_many_by_custom(ticket_filter, {'user_id': 1})
+        tickets = await self.bot.ticket.find_many_by_custom(ticket_filter)
 
+        if not bool(tickets):
+            return await ctx.send(f"Couldn't find any Close Tickets")
 
-        print(f"{ticket}")
+        tickets = sorted(tickets, key=lambda x: x["ticket_number"])
+
+        for ticket in tickets:
+            member = ctx.guild.get_member(ticket['user_id'])
+            
+            await ctx.channel.set_permissions(member, view_channel=True, send_messages=True, attach_files=True, embed_links=True)
+            
+            embed = discord.Embed(color=0x02ff06, description=f"ticket open by {ctx.author.mention}")
+
+            await ctx.send(embed=embed)
+            
+
 
     @commands.command(name="transcript", description="delete current ticket", usage="")
     @commands.has_any_role(785842380565774368,799037944735727636)
-    async def transcript(self, ctx):
-        await chat_exporter.quick_export(ctx)
+    async def save(ctx, limit: int=None, tz_info=None):
+
+        limit = limit if limit else 150
+        tz_info = tz_info if tz_info else "Asia/Kolkata"
+
+        channel = self.bot.get_channel(833386438338674718)
+        transcript = await chat_exporter.export(ctx.channel, limit, tz_info)
+
+        if transcript is None:
+            return
+
+        transcript_file = discord.File(io.BytesIO(transcript.encode()),
+            filename=f"transcript-{ctx.channel.name}.html")
+
+        await channel.send(file=transcript_file)
 
         
     @commands.command(name="delete", description="delete the ticket", usage="")
@@ -162,6 +200,45 @@ class ticket(commands.Cog):
                     embed = discord.Embed(description="``Time out canceling the cancel ``")
                     await ctx.send(embed=embed)
 
+    @commands.command(name="Claim", description="Claim Tickets to provide Support", usage="")
+    @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889, 831405039830564875)
+    async def Claim(self, ctx):
+        guild = ctx.guild
+
+        admin_role = discord.utils.get(guild.roles, id=799037944735727636)
+        mod_role = discord.utils.get(guild.roles, id=785845265118265376)
+        jr_mod = discord.utils.get(guild.roles, id=787259553225637889)
+        partner = discord.utils.get(guild.roles, id=831405039830564875)
+
+
+        await ctx.channel.set_permissions(ctx.author, send_messages=True, view_channel=True, attach_files=True, embed_links=True)
+        await ctx.channel.set_permissions(admin_role, send_messages=False, view_channel=True)
+        await ctx.channel.set_permissions(mod_role, send_messages=False, view_channel=True)
+        await ctx.channel.set_permissions(jr_mod, send_messages=False, view_channel=True)
+        await ctx.channel.set_permissions(partner, send_messages=False, view_channel=True)
+
+        embed = discord.Embed(description=f"This Ticket Will hanndle by the {ctx.author.mention}")
+        await ctx.send(embed=embed)
+
+    @commands.command(name="unClaim", description="UnClaim Tickets", usage="")
+    @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889, 831405039830564875)
+    async def unClaim(self, ctx):
+        guild = ctx.guild
+
+        admin_role = discord.utils.get(guild.roles, id=799037944735727636)
+        mod_role = discord.utils.get(guild.roles, id=785845265118265376)
+        jr_mod = discord.utils.get(guild.roles, id=787259553225637889)
+        partner = discord.utils.get(guild.roles, id=831405039830564875)
+
+
+        await ctx.channel.set_permissions(ctx.author, send_messages=None, view_channel=None, attach_files=None, embed_links=None)
+        await ctx.channel.set_permissions(admin_role, send_messages=None, view_channel=True)
+        await ctx.channel.set_permissions(mod_role, send_messages=None, view_channel=True)
+        await ctx.channel.set_permissions(jr_mod, send_messages=None, view_channel=True)
+        await ctx.channel.set_permissions(partner, send_messages=None, view_channel=True)
+
+        embed = discord.Embed(description=f"This Ticket Will hanndle by the {ctx.author.mention}")
+        await ctx.send(embed=embed)
 
     @commands.command(name="adduser", description="add User to the channel", usage="[member] [channel]")
     @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
@@ -187,7 +264,7 @@ class ticket(commands.Cog):
 
 
     @commands.command(name="removeuser", description="Remove User to the channel", usage="[member] [channel]")
-    @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
+    #@commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
     async def removeuser(self, ctx, member:discord.Member, channel: discord.TextChannel=None):
         channel = channel if channel else ctx.channel
         if ctx.channel.category.id == 829230513516445736:
@@ -209,7 +286,7 @@ class ticket(commands.Cog):
             await ctx.send(embed=embed)
 
     @commands.command(name="addrole", description="add User to the channel", usage="[member] [channel]")
-    @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
+    #@commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
     async def addrole(self, ctx, role: discord.Role, channel: discord.TextChannel=None):
         channel = channel if channel else ctx.channel
         if ctx.channel.category.id == 829230513516445736:
@@ -231,7 +308,7 @@ class ticket(commands.Cog):
             await ctx.send(embed=embed)
 
     @commands.command(name="removerole", description="Remove User to the channel", usage="[Role.id/mention] [channel]", aliases=["removr"])
-    @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
+    #@commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
     async def removerole(self, ctx, role:discord.Role, channel: discord.TextChannel=None):
         channel = channel if channel else ctx.channel
         if ctx.channel.category.id == 829230513516445736:
@@ -254,4 +331,4 @@ class ticket(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(ticket(bot))
+    bot.add_cog(tickets(bot))
