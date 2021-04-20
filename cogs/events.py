@@ -77,24 +77,62 @@ class Events(commands.Cog):
             # If the command has failed a check, trip this
             await ctx.send("Hey! You lack permission to use this command.")
         elif isinstance(error, commands.MemberNotFound):
-            await ctx.message.reply('Member not Found')
+            await ctx.send('Member not Found')
         elif isinstance(error, commands.UserNotFound):
-            await ctx.message.reply('User not Found')
+            await ctx.send('User not Found')
         elif isinstance(error, commands.ChannelNotFound):
-            await ctx.message.reply('Channel Not Found')
+            await ctx.send('Channel Not Found')
         elif isinstance(error, commands.RoleNotFound):
-            await ctx.message.reply('Role Not Found')
+            await ctx.send('Role Not Found')
         elif isinstance(error, commands.ExtensionAlreadyLoaded):
-            await ctx.message.reply(f'The {name} is Already Loaded')
+            await ctx.send(f'The {name} is Already Loaded')
         elif isinstance(error, commands.ExtensionNotFound):
-            await ctx.message.reply(f'The {name} is Already UnLoaded')
+            await ctx.send(f'The {name} is Already UnLoaded')
         elif isinstance(error, commands.ExtensionNotFound):
-            await ctx.message.reply(f'The Extension not Found')
+            await ctx.send(f'The Extension not Found')
         elif isinstance(error, commands.DisabledCommand):
-            await ctx.message.reply('The command is disabed by Owner')
+            await ctx.send('The command is disabed by Owner')
+        elif isinstance(error, commands.MissingRequiredArgument):
+            await ctx.message.reply(f'Please Enter all the Requird Argument')
         else:
             raise error
 
 
+
+
+
+
+
 def setup(bot):
     bot.add_cog(Events(bot))
+"""
+    @commands.Cog.listener()
+    async def on_message(self, meg):
+        if meg.author.bot:
+            return
+
+        odd = [1,3,5,7,9]
+        even = [0,2,4,6,8]
+
+        num1 = random.choice(odd)
+        num2 = random.choice(even)
+
+        if num1 > num2:
+
+            embed = discord.Embed(title="Random Event",
+                description="Server Is been raided type `ban` to ban them all",
+                color=0x09fa2c)
+            mess = await meg.channel.send(embed=embed)
+            try:
+                await self.bot.wait_for("message", check=lambda m: m.content.startswith(f"ban"), timeout=60)
+                over = discord.Embed(title="Event expired",
+                    description=f"All Reider Was Banned by {m.author.mention}",
+                    color=0xbf1932)
+                await mess.edit(embed=over)
+            except asyncio.TimeoutError:
+                over = discord.Embed(title="Event expired",
+                    description=f"Server got raided no one saved Server",
+                    color=0xbf1932)
+
+                await mess.edit(embed=over)
+"""

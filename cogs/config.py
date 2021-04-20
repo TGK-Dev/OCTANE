@@ -1,15 +1,16 @@
 import os
 import random
 import platform
-
 import traceback
-
+import utils.json_loader
 import asyncio
 import discord
+
+
 from discord.ext import commands
 from discord.ext.buttons import Paginator
+from discord_slash import cog_ext, SlashContext
 
-import utils.json_loader
 
 
 class Pag(Paginator):
@@ -205,8 +206,27 @@ class Config(commands.Cog):
             ternary = "enabled" if command.enabled else "disabled"
             await ctx.send(f"I have {ternary} {command.qualified_name} for you!")
 
+    @commands.command(name="load", description="load extension")
+    @commands.has_role(785842380565774368)
+    async def load(self, ctx, extension):
+        if extension == "config":
+            return await ctx.send("you can't load/unload Core Cog")
 
+        self.bot.load_extension(f'cogs.{extension}')
+        print(f'The {extension} is loaded by {ctx.author.name}')
+        embed = discord.Embed(description=f"successfully loaded {extension}")
+        await ctx.send(embed=embed)
 
+    @commands.command(name="unload", description="unload extension")
+    @commands.has_permissions(administrator=True)
+    async def unload(self, ctx: SlashContext, extension):
+        if extension == "config":
+            return await ctx.send("you can't load/unload Core Cog")
+
+        self.bot.unload_extension(f'cogs.{extension}')
+        print(f'The {extension} is unloaded by {ctx.author.name}')
+        embed = discord.Embed(description=f"successfully unloaded {extension}")
+        await ctx.send(embed=embed)
 
     @commands.command(
         name='reload', description="Reload all/one of the bots cogs!", usage=""

@@ -146,6 +146,22 @@ class Moderation(commands.Cog):
 
         await member.add_roles(role)
 
+        try:
+            em = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **{member.name} Has been Muted**")
+            await ctx.send(embed=em)
+            await member.send(f"You Have Muted For |{time}|")
+        except discord.HTTPException:
+            emb = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **The User {member.name} Muted I couldn't DM them.**")
+            await ctx.send(embed=emb)
+        log_channel = self.bot.get_channel(803687264110247987)
+        embed = discord.Embed(title=f"Muted | {member.name}", inline=True)
+        embed.add_field(name="User", value=f"{member.mention}", inline=True)
+        embed.add_field(name="Moderator", value=f"{ctx.author.mention}", inline=True)
+        embed.add_field(name="Time", value=f"{time}", inline=True)
+        embed.set_footer(text=f"{member.id}", icon_url=member.avatar_url)
+
+        await log_channel.send(embed=embed)
+
         if time and time < 300:
             await asyncio.sleep(time)
 
@@ -158,23 +174,6 @@ class Moderation(commands.Cog):
                 self.bot.muted_users.pop(member.id)
             except KeyError:
                 pass
-
-
-        try:
-            em = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **{member.name} Has been Muted**")
-            await ctx.send(embed=em)
-            await member.send(f"You Have Muted For |{time}|")
-        except discord.HTTPException:
-            emb = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **The User {member.name} Muted I couldn't DM them.**")
-            await ctx.send(embed=emb)
-        log_channel = self.bot.get_channel(803687264110247987)
-        embed = discord.Embed(title=f"Muted | {member.name}", inlin=True)
-        embed.add_field(name="User", value=f"{member.mention}", inlin=True)
-        embed.add_field(name="Moderator", value=f"{ctx.author.mention}", inlin=True)
-        embed.add_field(name="Time", value=f"{time}", inlin=True)
-        embed.set_footer(text=f"{member.id}", icon_url=member.avatar_url)
-
-        await log_channel.send(embed=embed)
 
 
     @commands.command(
