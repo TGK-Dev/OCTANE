@@ -232,6 +232,7 @@ class Moderation(commands.Cog):
             await ctx.send(embed=emb)
 
         log_channel = self.bot.get_channel(803687264110247987)
+        log2_channel = self.bot.get_channel(806107399005667349)
 
         embed = discord.Embed(title=f"kicked | {member.name}")
         embed.add_field(name="User", value=f"{member.name}", inline=False)
@@ -239,6 +240,7 @@ class Moderation(commands.Cog):
         embed.add_field(name="Reason", value=f"{reason}", inline=False)
         embed.set_footer(text=f"{member.id}", icon_url=member.avatar_url)
 
+        await log_channel.send(embed=embed)
         await log_channel.send(embed=embed)
 
 
@@ -261,15 +263,17 @@ class Moderation(commands.Cog):
             await ctx.send(embed=emb)
 
         log_channel = self.bot.get_channel(827245906331566180)
+        log2_channel = self.bot.get_channel(806107399005667349)
 
         embed = discord.Embed(title=f"Banned | {member.name}")
         embed.add_field(name="User", value=f"{member.name}")
         embed.add_field(name="Moderator", value=f"{ctx.author.mention}")
         embed.add_field(name="Reason", value=f"{reason}", inline=False)
-        embed.add_field(name='Duration', value=f"{time}")
+
         embed.set_footer(text=f"{member.id}", icon_url=member.avatar_url)
 
         await log_channel.send(embed=embed)
+        await log2_channel.send(embed=embed)
 
     @commands.command(name="unban", description="A command which unbans a given user", usage="<user> [reason]")
     @commands.guild_only()
@@ -285,6 +289,7 @@ class Moderation(commands.Cog):
         await ctx.send(embed=embed)
 
         log_channel = self.bot.get_channel(803687264110247987)
+        log2_channel = self.bot.get_channel(806107399005667349)
 
         embed = discord.Embed(title=f"unban | {member.name}")
         embed.add_field(name="User", value=f"{member.name}", inline=False)
@@ -293,6 +298,7 @@ class Moderation(commands.Cog):
         embed.set_footer(text=f"{member.id}")
 
         await log_channel.send(embed=embed)
+        await log2_channel.send(embed=embed)
 
     @commands.command(name="purge", description="A command which purges the channel it is called in", usage="[amount]")
     @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
