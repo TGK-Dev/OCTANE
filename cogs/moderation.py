@@ -218,6 +218,9 @@ class Moderation(commands.Cog):
     @commands.guild_only()
     @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376)
     async def kick(self, ctx, member: discord.Member, *, reason=None):
+        if member.top_role >= ctx.author.top_role:
+            return await ctx.send("You can't You cannot do this action on this user due to role hierarchy.")
+
         await ctx.message.delete()
         try:
             await member.send(f"You Have Been kicked")
@@ -244,6 +247,9 @@ class Moderation(commands.Cog):
     @commands.guild_only()
     @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376)
     async def ban(self, ctx, member: discord.User, *, reason=None):
+        if member.top_role >= ctx.author.top_role:
+            return await ctx.send("You can't You cannot do this action on this user due to role hierarchy.")
+        
         await ctx.message.delete()
         try:
             await member.send(f"You Have Been Banned | {reason}")
@@ -329,10 +335,11 @@ class Moderation(commands.Cog):
 
 
     @commands.command(name="bans", description="ban list", usage="")
-    async def bans(self, ctx, member: discord.User):
-        ban = list[ctx.guild.bans]
-
-        await ctx.send(f"{ban}")
+    async def bans(self, ctx, member: discord.Member):
+        if member.top_role >= ctx.author.top_role:
+            await ctx.send("YOur Role lower")
+        else:
+            await ctx.send("YOur Role Higher")
 
     
 

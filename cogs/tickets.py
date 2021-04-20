@@ -136,7 +136,7 @@ class tickets(commands.Cog):
         else:
             await ctx.send("You can't use this command here")
 
-    @commands.command(name="open", description="delete current ticket", usage="")
+    @commands.command(name="open", description="Reopens current ticket", usage="")
     @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
     async def open(self, ctx):
 
@@ -160,7 +160,7 @@ class tickets(commands.Cog):
             
 
 
-    @commands.command(name="transcript", description="delete current ticket", usage="[limit] [time Zone]", aliases=["save"])
+    @commands.command(name="transcript", description="Save current ticket's transcript", usage="[limit] [time Zone]", aliases=["save"])
     @commands.has_any_role(785842380565774368,799037944735727636)
     async def transcript(self, ctx, limit: int=None, tz_info=None):
 

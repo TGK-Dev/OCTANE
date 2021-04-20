@@ -83,6 +83,9 @@ class roles(commands.Cog):
     @commands.command(name="role", description="add Role fored user", usage="[member][role]")
     @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376)
     async def role(self, ctx, member:discord.Member, role: discord.Role):
+        if role >= ctx.author.top_role:
+            return await ctx.send("You can't You cannot do this action due to role hierarchy.")
+        
         roles = member.roles
         await ctx.message.delete()
         if role in roles:
