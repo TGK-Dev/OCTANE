@@ -9,7 +9,6 @@ import discord
 
 from discord.ext import commands
 from discord.ext.buttons import Paginator
-from discord_slash import cog_ext, SlashContext
 
 
 
