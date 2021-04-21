@@ -66,7 +66,7 @@ bot.muted_users = {}
 bot.temp_roled_users = {}
 bot.cwd = cwd
 
-bot.version = "3.0"
+bot.version = "4.0"
 
 bot.colors = {
     "WHITE": 0xFFFFFF,
