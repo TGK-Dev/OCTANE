@@ -47,10 +47,11 @@ bot = commands.Bot(
     description="commands List of Me",
     command_prefix=get_prefix,
     case_insensitive=True,
-    owner_id=271612318947868673,
+    owner_id=488614633670967307,
     help_command=None,
     intents=intents,
-)# change command_prefix='-' to command_prefix=get_prefix for custom prefixes
+)
+# change command_prefix='-' to command_prefix=get_prefix for custom prefixes
 bot.config_token = secret_file["token"]
 bot.connection_url = secret_file["mongo"]
 

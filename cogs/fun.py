@@ -247,7 +247,8 @@ class fun(commands.Cog):
 	@commands.command(name="8Ball", description="Ask you question to bot", usage="[question]", aliases=['8b'])
 	@commands.cooldown(3, 30, commands.BucketType.user)
 	async def ball(self, ctx, *, question):
- 		await ctx.send(bot.ball.response(question))
+		ball = eight_ball.ball()
+		await ctx.send(ball.response(question))
 
 	@commands.command(name="dadjoke", description="Send a dad Joke", usage="" ,aliases=["djoke"])
 	@commands.cooldown(2, 60, commands.BucketType.user)
