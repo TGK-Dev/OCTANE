@@ -218,7 +218,7 @@ class tickets(commands.Cog):
         await ctx.channel.set_permissions(jr_mod, send_messages=False, view_channel=True)
         await ctx.channel.set_permissions(partner, send_messages=False, view_channel=True)
 
-        embed = discord.Embed(description=f"This Ticket Will hanndle by the {ctx.author.mention}")
+        embed = discord.Embed(description=f"This ticket will now be handled by {ctx.author.mention}")
         await ctx.send(embed=embed)
 
     @commands.command(name="unClaim", description="UnClaim Tickets", usage="")
