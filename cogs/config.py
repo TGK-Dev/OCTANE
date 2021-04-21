@@ -62,7 +62,8 @@ class Config(commands.Cog):
 
     @commands.command()
     async def ping(self, ctx):
-        await ctx.reply(f'Ping `{round(self.bot.latency * 1000)}`ms') 
+        message = await ctx.send(f'Ping') 
+        await message.edit(content=f"Ping `{round(self.bot.latency * 1000)}`ms")
 
     @commands.command(
         name="prefix",
