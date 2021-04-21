@@ -95,5 +95,43 @@ class Invites(commands.Cog):
         embed.set_footer(text=member.guild.name, icon_url=member.guild.icon_url)
         await channel.send(embed=embed)
 
+    @commands.command(name="invites", description="Show user total Invites", usage="[Member]")
+    async def invites(self, ctx ,member: discord.Member=None):
+        member = member if member else ctx.author
+
+        invites_filter = {"_id": member.id}
+
+        invites = await self.bot.invites.find_many_by_custom(invites_filter)
+
+        if not bool(invites):
+            return await ctx.send(f"There is no Invites for the {member.name}")
+
+        for invite in invites:
+            count = (invite['count'])
+            mcolor = member.color
+            embed = discord.Embed(description=f"The User {member.name} Has `{count}` Invites", color=mcolor, timestamp=datetime.datetime.now())
+
+            await ctx.send(embed=embed)
+    @commands.command(name="inviter", description="find who Invited given user", usage="[member]")
+    async def inviter(self, ctx, member: discord.Member):
+
+        invites_filter = {"userInvited": member.id}
+
+        invites = await self.bot.invites.find_many_by_custom(invites_filter)
+
+        if not bool(invites):
+            return await ctx.send("I failed to find vaild Entry in DataBase")
+
+        for invite in invites:
+            invier = (invite['_id'])
+            mcolor = member.color
+            embed = discord.Embed(description=f"The {member.mention} Is invited by <@{invier}>", timestamp=datetime.datetime.now())
+
+            await ctx.send(embed=embed)
+
+
+
+
+
 def setup(bot):
     bot.add_cog(Invites(bot))
