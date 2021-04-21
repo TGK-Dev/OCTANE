@@ -99,66 +99,6 @@ class txt_manage(commands.Cog):
 
         await ctx.send(embed=embed)
 
-    @commands.group(invoke_without_command=True)
-    @commands.has_permissions(administrator=True)
-    async def new(self, ctx):
-        await ctx.send("Invalid sub-command passed.")
-
-    @new.command(
-        name="category",
-        description="Create a new category",
-        usage="<role> <Category name>",
-    )
-    async def category(self, ctx, role: discord.Role, *, name):
-        overwrites = {
-            ctx.guild.default_role: discord.PermissionOverwrite(read_messages=False),
-            ctx.guild.me: discord.PermissionOverwrite(read_messages=True),
-            role: discord.PermissionOverwrite(read_messages=True),
-        }
-        category = await ctx.guild.create_category(name=name, overwrites=overwrites)
-        await ctx.send(f"Hey dude, I made {category.name} for ya!")
-
-    @new.command(
-        name="channel",
-        description="Create a new channel",
-        usage="<role> <channel name>",
-    )
-    async def channel(self, ctx, role: discord.Role, *, name):
-        overwrites = {
-            ctx.guild.default_role: discord.PermissionOverwrite(read_messages=False),
-            ctx.guild.me: discord.PermissionOverwrite(read_messages=True),
-            role: discord.PermissionOverwrite(read_messages=True),
-        }
-        channel = await ctx.guild.create_text_channel(
-            name=name,
-            overwrites=overwrites,
-            category=self.bot.get_channel(707945693582590005),
-        )
-        await ctx.send(f"Hey dude, I made {channel.name} for ya!")
-
-    @commands.group(name="category", description="Delete a category/channel", usage="help", invoke_without_command=True)
-    @commands.has_permissions(administrator=True)
-    async def delete(self, ctx):
-        await ctx.send("Invalid sub-command passed")
-
-    @delete.command(
-        name="category", description="Delete a category", usage="delete <category> [reason]"
-    )
-    @our_custom_check()
-    async def _category(self, ctx, category: discord.CategoryChannel, *, reason=None):
-        await category.delete(reason=reason)
-        await ctx.send(f"hey! I deleted {category.name} for you")
-
-    @delete.command(
-        name="channel", description="Delete a channel", usage="delete <channel> [reason]"
-    )
-    @our_custom_check()
-    async def _channel(self, ctx, channel: discord.TextChannel = None, *, reason=None):
-        channel = channel or ctx.channel
-        await channel.delete(reason=reason)
-        await ctx.send(f"hey! I deleted {category.name} for you")
-
-
     @commands.command(name="lock", description="Lock the given channel For mentioned Role", usage="[channel] [Role]",)
     @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
     async def lock(self, ctx, channel: discord.TextChannel = None, role: discord.Role = None):
