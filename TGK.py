@@ -60,8 +60,8 @@ bot.joke_api_key = secret_file["x-rapidapi-key"]
 logging.basicConfig(level=logging.INFO)
 
 bot.DEFAULTPREFIX = DEFAULTPREFIX
+bot.blacklisted_users = []
 bot.muted_users = {}
-bot.banned_user = {}
 bot.temp_roled_users = {}
 bot.cwd = cwd
 
