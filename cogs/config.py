@@ -90,7 +90,7 @@ class Config(commands.Cog):
     @commands.command(
         name="blacklist", description="Blacklist a user from the bot", usage="<user>"
     )
-    @commands.has_permissions(administrator=True)
+    @commands.is_owner()
     async def blacklist(self, ctx, user: discord.Member):
         if ctx.message.author.id == user.id:
             await ctx.send("Hey, you cannot blacklist yourself!")
@@ -101,7 +101,7 @@ class Config(commands.Cog):
         data["blacklistedUsers"].append(user.id)
         utils.json_loader.write_json(data, "blacklist")
         await ctx.send(f"Hey, I have blacklisted {user.name} for you.")
-
+        
     @commands.command(
         name="unblacklist",
         description="Unblacklist a user from the bot",
