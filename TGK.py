@@ -60,9 +60,8 @@ bot.joke_api_key = secret_file["x-rapidapi-key"]
 logging.basicConfig(level=logging.INFO)
 
 bot.DEFAULTPREFIX = DEFAULTPREFIX
-bot.blacklisted_users = []
 bot.muted_users = {}
-#bot.banned_user = {}
+bot.banned_user = {}
 bot.temp_roled_users = {}
 bot.cwd = cwd
 
@@ -108,10 +107,6 @@ async def on_ready():
     currentMutes = await bot.mutes.get_all()
     for mute in currentMutes:
         bot.muted_users[mute["_id"]] = mute
-    
-#    currentBans = await bot.banned.get_all()
-#    for banned in currentBans:
-#        bot.banned_user[banned["_id"]] = banned
 
     currentTemps = await bot.temp_roles.get_all()
     for temp in currentTemps:
@@ -121,8 +116,6 @@ async def on_ready():
     print(bot.temp_roled_users)
     print("\n-----")
     print(bot.muted_users)
-#   print("\n-----")
-#    print(bot.banned_user)
     print("\n-----")
     print("Initialized Database\n-----")
 
@@ -159,7 +152,6 @@ if __name__ == "__main__":
     bot.db = bot.mongo["tgk_database"]
     bot.config = Document(bot.db, "config")
     bot.mutes = Document(bot.db, "mutes")
-#    bot.banned = Document(bot.db, "banned")
     bot.warns = Document(bot.db, "warns")
     bot.ticket = Document(bot.db, "ticket")
     bot.temp_roles = Document(bot.db, "temp_roles")
@@ -170,4 +162,3 @@ if __name__ == "__main__":
             bot.load_extension(f"cogs.{file[:-3]}")
 
     bot.run(bot.config_token)
-#ODE2Njk5MTY3ODI0MjgxNjIx.YD-wXw.3rtJg9Os78CSFFU5j_CXPY27c2U9
