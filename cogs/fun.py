@@ -312,7 +312,7 @@ class fun(commands.Cog):
 		sem = discord.Embed(description="Game Started", color=0xF1C40F)
 		await ctx.send(embed=sem)
 		try:
-			message = await self.bot.wait_for("message", check= lambda m: m.content.startswith(f"{right_num}") and m.channel.id == 834830865775067136, timeout=time)
+			message = await self.bot.wait_for("message", check= lambda m: m.content.startswith(f"{right_num}") and m.channel.id == game_channel.id, timeout=time)
 			await message.reply(f"{message.author.mention} is right Locking channel")
 			await game_channel.set_permissions(ctx.guild.default_role, send_messages=False)
 
