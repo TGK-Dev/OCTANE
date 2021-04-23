@@ -289,7 +289,7 @@ class fun(commands.Cog):
 				r = r["body"][0]
 				await ctx.send(f"**{r['setup']}**\n\n||{r['punchline']}||")
 
-	@commands.command(name="Guess The Number", description="Guess the Number Game", usage="[mini] [max]", aliases=["gn"])
+	@commands.command(name="Guess The Number", description="Guess the Number Game", usage="[max]", aliases=["gn"])
 	#@commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376)
 	async def guess_number(self, ctx, maxn: int, time: TimeConverter=None):
 		right_num = random.randint(1, maxn)
