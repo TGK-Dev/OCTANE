@@ -289,37 +289,69 @@ class fun(commands.Cog):
 				r = r["body"][0]
 				await ctx.send(f"**{r['setup']}**\n\n||{r['punchline']}||")
 
-	@commands.command(name="Guess The Number", description="Guess the Number Game", usage="[max]", aliases=["gn"])
-	#@commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376)
-	async def guess_number(self, ctx, maxn: int, time: TimeConverter=None):
+	@commands.command(name="Guess The Number", description="Guess the Number Game", usage="[max] [time] [price]", aliases=["gn"])
+	@commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376)
+	async def guess_number(self, ctx, maxn: int, time: TimeConverter=None, *,price=None):
+		if maxn > 10000:
+			return await ctx.send("you can't big number then 10000")
+
 		right_num = random.randint(1, maxn)
+		price = price if price else "None"
 		time = time if time else 3600
 		game_channel =  self.bot.get_channel(835138688668401675)
 		right_backup = self.bot.get_channel(834847353436373012)
 
 		start_em = discord.Embed(title=":tada: Guess The Number")
 		start_em.add_field(name="How to Play:",
-			value=f"· I've thought of a number between 1 and {maxn}.\n· First person to guess the number wins!\n· You have UNLIMITED guesses.\n·You have {int(time/60)}hour to Guess the right Number\n· Starting game in 10 seconds")
+			value=f"· I've thought of a number between 1 and {maxn}.\n· First person to guess the number wins!\n· You have UNLIMITED guesses.\n·You have {int((time/60)/60)}hour to Guess the right Number\n· Starting game in 10 seconds\n·The Price of this round is `{price}`")
+		start_em.set_footer(text="Developed and Owned by Jay & utki007")
 		await game_channel.send(embed=start_em)
 		
 		try:
-			await ctx.author.send(right_num)
+			await ctx.author.send(f" The Currect Number Is `{right_num}`")
 		except discord.HTTPException:
 			await right_backup.send(right_num)
 
 		await asyncio.sleep(10)
-		await game_channel.set_permissions(ctx.guild.default_role, send_messages=True)
+
 		sem = discord.Embed(description="Game Started", color=0xF1C40F)
 		await ctx.send(embed=sem)
+
+		role = ctx.guild.default_role
+		overwrite = game_channel.overwrites_for(role)
+		overwrite.send_messages = True
+		await game_channel.set_permissions(role, overwrite=overwrite)
+
 		try:
 			message = await self.bot.wait_for("message", check= lambda m: m.content.startswith(f"{right_num}") and m.channel.id == game_channel.id, timeout=time)
-			await message.reply(f"{message.author.mention} is right Locking channel")
-			await game_channel.set_permissions(ctx.guild.default_role, send_messages=False)
+			
+			done_overwrite = game_channel.overwrites_for(role)
+			done_overwrite.send_messages = False
 
+			await game_channel.set_permissions(role, overwrite=done_overwrite)
+
+			done_embed = discord.Embed(title=f":tada: Congratulations, {message.author.display_name}!",
+				description="The number you guessed was right! The game has ended and the channel locked, thanks for playing!",
+				color=0x11806A)
+
+			done_embed.add_field(name="Correct Number:", value=right_num)
+			done_embed.add_field(name="Winner:", value=message.author.mention)
+			done_embed.set_footer(text="Developed and Owned by Jay & utki007")
+
+			await message.reply(f"{message.author.mention}", embed=done_embed)
+
+			await ctx.author.send(f"{message.author.name} / {message.author.id} Is Guessd Correct Number")
+	
 		except asyncio.TimeoutError:
 
-			await game_channel.set_permissions(ctx.guild.default_role, send_messages=False)
-			await game_channel.send(f"Time Out you guys fail right Number was {right_num}")
+			fail_overwrite = game_channel.overwrites_for(role)
+			fail_overwrite.send_messages = False
+			await game_channel.set_permissions(role, overwrite=fail_overwrite)
+			
+			lose_embed = discord.Embed(title="Time's up",
+				description="Well Played but unfortunately None can guess the Currect Number",
+				color=0xE74C3C)
+			await game_channel.send(embed=lose_embed)
 
 	
 def setup(bot):
