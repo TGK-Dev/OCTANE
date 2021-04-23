@@ -112,10 +112,10 @@ class Moderation(commands.Cog):
     @commands.command(
         name='mute',
         description="Mutes a given user for x time!",
-        usage='<user> [time]'
+        usage='<user> [time] [reason]'
     )
     @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
-    async def mute(self, ctx, member: discord.Member, *, time: TimeConverter=None):
+    async def mute(self, ctx, member: discord.Member, time: TimeConverter=None, *,reason):
         await ctx.message.delete()
         role = discord.utils.get(ctx.guild.roles, name="Muted")
         if not role:
@@ -144,14 +144,16 @@ class Moderation(commands.Cog):
         try:
             em = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **{member.name} Has been Muted**")
             await ctx.send(embed=em)
-            await member.send(f"You Have Muted For |{time}|")
+            await member.send(f"You Have Muted for {reason} || {time}")
         except discord.HTTPException:
             emb = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **The User {member.name} Muted I couldn't DM them.**")
             await ctx.send(embed=emb)
+            
         log_channel = self.bot.get_channel(803687264110247987)
         embed = discord.Embed(title=f"Muted | {member.name}", inline=True)
         embed.add_field(name="User", value=f"{member.mention}", inline=True)
         embed.add_field(name="Moderator", value=f"{ctx.author.mention}", inline=True)
+        embed.add_field(name="Reason", value=f"{reason}", inline=True)
         embed.add_field(name="Time", value=f"{time}", inline=True)
         embed.set_footer(text=f"{member.id}", icon_url=member.avatar_url)
 
