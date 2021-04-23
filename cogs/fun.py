@@ -1,6 +1,11 @@
+import datetime
+import asyncio
+from discord.ext import commands, tasks
 import discord
 import random
+import asyncio
 import eight_ball
+import re
 #-----------------------------
 from aiohttp import ClientSession 
 from discord.ext import commands
@@ -19,6 +24,8 @@ sad_list = ['https://cdn.discordapp.com/attachments/825091183234908200/825091270
 kill_list = ['https://cdn.discordapp.com/attachments/827524405315633163/827524453806243841/YIy0BmMjANn.gif', 'https://cdn.discordapp.com/attachments/827524405315633163/827524448075644939/Xufk1gBs8pl.gif', 'https://cdn.discordapp.com/attachments/827524405315633163/827524448126369802/bOtF4EdBbDJ.gif', 'https://cdn.discordapp.com/attachments/827524405315633163/827524444679438346/HaqpyGK874b.gif', 'https://cdn.discordapp.com/attachments/827524405315633163/827524445228367882/uOlyiKmmUhS.gif']
 no_kill = ['https://cdn.discordapp.com/attachments/827527230401806366/827527260771844116/jz7xK5wHTUi.gif', 'https://cdn.discordapp.com/attachments/827527230401806366/827527267122151424/awPIyhKLM5T.gif']
 
+time_regex = re.compile("(?:(\d{1,5})(h|s|m|d))+?")
+time_dict = {"h": 3600, "s": 1, "m": 60, "d": 86400}
 
 
 
@@ -60,6 +67,22 @@ async def GetMessage(
             return msg.content
     except asyncio.TimeoutError:
         return False
+
+class TimeConverter(commands.Converter):
+    async def convert(self, ctx, argument):
+        args = argument.lower()
+        matches = re.findall(time_regex, args)
+        time = 0
+        for key, value in matches:
+            try:
+                time += time_dict[value] * float(key)
+            except KeyError:
+                raise commands.BadArgument(
+                    f"{value} is an invalid time key! h|m|s|d are valid arguments"
+                )
+            except ValueError:
+                raise commands.BadArgument(f"{key} is not a number!")
+        return round(time)
 
 
 class fun(commands.Cog):
@@ -266,7 +289,98 @@ class fun(commands.Cog):
 				r = r["body"][0]
 				await ctx.send(f"**{r['setup']}**\n\n||{r['punchline']}||")
 
+	@commands.command(name="Guess The Number", description="Guess the Number Game", usage="[mini] [max]", aliases=["gn"])
+	#@commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376)
+	async def guess_number(self, ctx, maxn: int, time: TimeConverter=None):
+		right_num = random.randint(1, maxn)
+		time = time if time else 3600
+		game_channel =  self.bot.get_channel(835138688668401675)
+		right_backup = self.bot.get_channel(834847353436373012)
 
+		start_em = discord.Embed(title=":tada: Guess The Number")
+		start_em.add_field(name="How to Play:",
+			value=f"· I've thought of a number between 1 and {maxn}.\n· First person to guess the number wins!\n· You have UNLIMITED guesses.\n·You have {int(time/60)}hour to Guess the right Number\n· Starting game in 10 seconds")
+		await game_channel.send(embed=start_em)
+		
+		try:
+			await ctx.author.send(right_num)
+		except discord.HTTPException:
+			await right_backup.send(right_num)
 
+		await asyncio.sleep(10)
+		await game_channel.set_permissions(ctx.guild.default_role, send_messages=True)
+		sem = discord.Embed(description="Game Started", color=0xF1C40F)
+		await ctx.send(embed=sem)
+		try:
+			message = await self.bot.wait_for("message", check= lambda m: m.content.startswith(f"{right_num}") and m.channel.id == 834830865775067136, timeout=time)
+			await message.reply(f"{message.author.mention} is right Locking channel")
+			await game_channel.set_permissions(ctx.guild.default_role, send_messages=False)
+
+		except asyncio.TimeoutError:
+
+			await game_channel.set_permissions(ctx.guild.default_role, send_messages=False)
+			await game_channel.send(f"Time Out you guys fail right Number was {right_num}")
+
+	
 def setup(bot):
 	bot.add_cog(fun(bot))
+
+"""
+@commands.Cog.listener()
+async def on_message(self, message):
+	trinnger1 = random.randint(1,100)
+	trinnger2 = random.randint(1,100)
+
+	print(f"trinnger1 = {trinnger1}")
+	print(f"trinnger2 = {trinnger2}")
+	print(f"{int(trinnger2/trinnger1)}")
+
+	if message.author.bot:
+		return
+
+	if int(trinnger2/trinnger1) == 0:
+
+		embed = discord.Embed(title="Random Chat event", 
+			description="server Is getting Raided type ` ban ` to ban them",
+			color=0x2ECC71)
+
+		await message.channel.send(embed=embed)
+		try:
+			win_mess = await self.bot.wait_for("message", check= lambda m: m.content.startswith("ban") or m.content.startswith("Ban"), timeout=15)
+			win_embed = discord.Embed(title="Random Chat event",
+				description=f"All Raider are now Banned Thanks to {win_mess.author.mention}",
+				color=0xE74C3C)
+
+			await win_mess.channel.send("Event is Over", embed=win_embed)
+
+		except asyncio.TimeoutError:
+			
+			lose_embed = discord.Embed(title="Random Chat Event",
+				description="Server is Now Raided",
+				color=0xE74C3C)
+
+			await message.channel.send(embed=embed)
+
+	elif int(trinnger2/trinnger1) == 5:
+
+		embed = discord.Embed(title="Random Chat event", 
+			description="React this message with :thumbsup: Frist is The Winner",
+			color=0x2ECC71)
+
+		rect_mess = await message.channel.send(embed=embed)
+		try:
+			reaction,  = await self.bot.wait_for("reaction_add", check= lambda reaction: reaction.RawReactionActionEvent.message_id == rect_mess.id and reaction.emoji == '👍', timeout=15)
+			win_embed = discord.Embed(title="Random Chat event",
+				description=f"the <@{reaction.user_id}> is Fast As Fast",
+				color=0xE74C3C)
+
+			await win_mess.channel.send("Event is Over", embed=win_embed)
+
+		except asyncio.TimeoutError:
+			
+			lose_embed = discord.Embed(title="Random Chat Event",
+				description="Server is Now Raided",
+				color=0xE74C3C)
+
+			await message.channel.send(embed=embed)
+"""
