@@ -22,13 +22,13 @@ class Events(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        word_list = ['vote link', 'vote Link', 'Vote link', 'Vote Link']
+        word_list = ['vote link','pls vote']
 
         messageContent = message.content
         if len(messageContent) > 0:
-            for word in word_list:
+            for word.lower() in word_list:
                 if word in messageContent:
-                    return await message.reply('Please Vote us here, <https://top.gg/servers/785839283847954433/vote>, Thanks For Support ^0^')
+                    return await message.reply('**Vote for us here**:\nhttps://top.gg/servers/785839283847954433/vote\n\n__**Voting Perks**__\n❥ Special "Voted" Role.\n❥ 2,500 Casino Cash. Collect using ,collectincome in #:game_die:。casino.\n❥ Access to 2x Amaari Channels, including Exclusive Chat and Dank Memer Premium.\n❥ Guild wide 1x Amaari.')
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
