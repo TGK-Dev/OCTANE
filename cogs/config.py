@@ -119,14 +119,14 @@ class Config(commands.Cog):
         utils.json_loader.write_json(data, "blacklist")
         await ctx.send(f"Hey, I have unblacklisted {user.name} for you.")
 
-    @commands.command(name="activity", description="Change Bot activity", usage="[activity]", , hidden=True)
+    @commands.command(name="activity", description="Change Bot activity", usage="[activity]", hidden=True)
     @commands.has_permissions(administrator=True)
     async def activity(self, ctx, *, activity):
         
         await self.bot.change_presence(activity=discord.Game(name=f"{activity}")) # This changes the bots 'activity'
         await ctx.send('Bot activity is Updated')
 
-    @commands.command(name="Status", description="Change Bot Status to online & Dnd & idle", usage="[dnd & idle & online]", , hidden=True)
+    @commands.command(name="Status", description="Change Bot Status to online & Dnd & idle", usage="[dnd & idle & online]", hidden=True)
     @commands.has_permissions(administrator=True)
     async def status(self,ctx, arg):
         if arg == 'dnd':
