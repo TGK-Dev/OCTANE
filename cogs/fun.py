@@ -289,12 +289,13 @@ class fun(commands.Cog):
 				r = r["body"][0]
 				await ctx.send(f"**{r['setup']}**\n\n||{r['punchline']}||")
 
-	@commands.command(name="Guess The Number", description="Guess the Number Game", usage="[max] [time] [price]", aliases=["gn"])
+	@commands.command(name="Guess The Number", description="Guess the Number Game", usage="[max] [time] [price] [role]", aliases=["gn"])
 	@commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376)
-	async def guess_number(self, ctx, maxn: int, time: TimeConverter=None, *,price=None):
+	async def guess_number(self, ctx, maxn: int, time: TimeConverter=None, *,price=None)
 		if maxn > 10000:
 			return await ctx.send("you can't big number then 10000")
 
+		role = ctx.guild.default_role
 		right_num = random.randint(1, maxn)
 		price = price if price else "None"
 		time = time if time else 3600
@@ -317,7 +318,6 @@ class fun(commands.Cog):
 		sem = discord.Embed(description="Game Started", color=0xF1C40F)
 		await ctx.send(embed=sem)
 
-		role = ctx.guild.default_role
 		overwrite = game_channel.overwrites_for(role)
 		overwrite.send_messages = True
 		await game_channel.set_permissions(role, overwrite=overwrite)
