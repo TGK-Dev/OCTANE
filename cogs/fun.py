@@ -291,7 +291,7 @@ class fun(commands.Cog):
 
 	@commands.command(name="Guess The Number", description="Guess the Number Game", usage="[max] [time] [price] [role]", aliases=["gn"])
 	@commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376)
-	async def guess_number(self, ctx, maxn: int, time: TimeConverter=None, *,price=None)
+	async def guess_number(self, ctx, maxn: int, time: TimeConverter=None, *,price=None):
 		if maxn > 10000:
 			return await ctx.send("you can't big number then 10000")
 
