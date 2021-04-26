@@ -167,47 +167,6 @@ class dank(commands.Cog):
             await dank_vip.send(embed=embed)
 
         await ctx.send("Dank is unlocked")
-#Hesits Settings 
-    
-
-    @commands.command(name="Heist", description="Setup an Heist",usage="[host] [ammout] [starter] [req role] ")
-    @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
-    async def hesit(self, ctx, host: discord.Member, ammout, starter: discord.Member=None,req_role: discord.Role=None):
-        starter = starter if starter else ctx.author
-        starter_role = discord.utils.get(ctx.guild.roles, name="Hest Starter")
-        channel = ctx.channel
-        req_role = req_role if req_role else ctx.guild.default_role
-
-        embed = discord.Embed(title="Heist!",
-            description=f"{host.mention} will be hosting a heist!")
-        embed.add_field(name="Checklist", value=f"- disable passive mode ``(pls settings passive disable)``\n- withdraw 2,000 coins ``(pls with 2000)``\n- you must have the {req_role.mention} role to join")
-        await ctx.send(embed=embed)
-
-
-        await starter.add_roles(starter_role)
-        await ctx.send(f"**{host.display_name}**")
-        await ctx.send(" <a:60s:831979067107573780> Searching for heist in this channel")
-        try:
-
-            await self.bot.wait_for("message", check=lambda m: m.content.startswith(f"**{host.display_name}**"), timeout=60)
-
-            await channel.set_permissions(req_role, send_messages=True)
-
-            await ctx.send(f"unlocked channel for ``{req_role.name}``")
-            await asyncio.sleep(5)
-            await starter.remove_roles(starter_role)
-
-            try:
-                await self.bot.wait_for("message", check=lambda m: m.author.id == 488614633670967307 and m.content.startswith("Time is up to join"), timeout=240)
-                await ctx.channel.edit(sync_permissions=True)
-                await ctx.send("channel Lock bceause Time's Up")
-
-            except asyncio.TimeoutError:
-
-                await ctx.channel.edit(sync_permissions=True)
-                await ctx.send("channel Lock bceause Time's Up")
-        except asyncio.TimeoutError:
-            await ctx.send("No hesit Found Please Try Again")
 
         
 
