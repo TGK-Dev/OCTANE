@@ -79,7 +79,7 @@ class Config(commands.Cog):
         )
 
     @commands.command(
-        name="deleteprefix", aliases=["dp"], description="Delete your guilds prefix!", usage=""
+        name="deleteprefix", aliases=["dp"], description="Delete your guilds prefix!", usage="", hidden=True
     )
     @commands.guild_only()
     @commands.has_guild_permissions(administrator=True)
@@ -88,7 +88,7 @@ class Config(commands.Cog):
         await ctx.send("This guilds prefix has been set back to the default")
 
     @commands.command(
-        name="blacklist", description="Blacklist a user from the bot", usage="<user>"
+        name="blacklist", description="Blacklist a user from the bot", usage="<user>", hidden=True
     )
     @commands.is_owner()
     async def blacklist(self, ctx, user: discord.Member):
@@ -106,6 +106,7 @@ class Config(commands.Cog):
         name="unblacklist",
         description="Unblacklist a user from the bot",
         usage="<user>",
+        hidden=True
     )
     @commands.has_permissions(administrator=True)
     async def unblacklist(self, ctx, user: discord.Member):
@@ -118,14 +119,14 @@ class Config(commands.Cog):
         utils.json_loader.write_json(data, "blacklist")
         await ctx.send(f"Hey, I have unblacklisted {user.name} for you.")
 
-    @commands.command(name="activity", description="Change Bot activity", usage="[activity]")
+    @commands.command(name="activity", description="Change Bot activity", usage="[activity]", , hidden=True)
     @commands.has_permissions(administrator=True)
     async def activity(self, ctx, *, activity):
         
         await self.bot.change_presence(activity=discord.Game(name=f"{activity}")) # This changes the bots 'activity'
         await ctx.send('Bot activity is Updated')
 
-    @commands.command(name="Status", description="Change Bot Status to online & Dnd & idle", usage="[dnd & idle & online]")
+    @commands.command(name="Status", description="Change Bot Status to online & Dnd & idle", usage="[dnd & idle & online]", , hidden=True)
     @commands.has_permissions(administrator=True)
     async def status(self,ctx, arg):
         if arg == 'dnd':
@@ -147,6 +148,7 @@ class Config(commands.Cog):
         aliases=["disconnect","stopbot"],
         description="Log the bot out of discord! Owner role only",
         usage="",
+        hidden=True
     )
     @commands.has_role(785842380565774368)
     async def logout(self, ctx):
@@ -156,7 +158,7 @@ class Config(commands.Cog):
         await ctx.send(f"Hey {ctx.author.mention}, I am now logging out :wave:")
         await self.bot.logout()
 
-    @commands.command(name="Say", description="And classic say command", usage="[anything]")
+    @commands.command(name="Say", description="And classic say command", usage="[anything]", hidden=True)
     @commands.has_permissions(manage_guild=True)
     async def say(self,ctx, *, say):
         await ctx.message.delete()
@@ -190,7 +192,7 @@ class Config(commands.Cog):
 
         await ctx.send(embed=embed)
 
-    @commands.command(name="toggle", description="Enable or disable a command!")
+    @commands.command(name="toggle", description="Enable or disable a command!", hidden=True)
     @commands.has_role(785842380565774368)
     async def toggle(self, ctx, *, command):
         command = self.bot.get_command(command)
@@ -208,7 +210,7 @@ class Config(commands.Cog):
 
 
     @commands.command(
-        name='reload', description="Reload all/one of the bots cogs!", usage=""
+        name='reload', description="Reload all/one of the bots cogs!", usage="", hidden=True
     )
     @commands.has_permissions(administrator=True)
     async def reload(self, ctx, cog=None):
