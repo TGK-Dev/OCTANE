@@ -238,7 +238,6 @@ class Moderation(commands.Cog):
         embed.set_footer(text=f"{member.id}", icon_url=member.avatar_url)
 
         await log_channel.send(embed=embed)
-        await log_channel.send(embed=embed)
 
 
     @commands.command(name="Ban", description="A command which kicks a given user", usage="<user> [reason]")
@@ -270,7 +269,6 @@ class Moderation(commands.Cog):
         embed.set_footer(text=f"{member.id}", icon_url=member.avatar_url)
 
         await log_channel.send(embed=embed)
-        await log2_channel.send(embed=embed)
 
     @commands.command(name="unban", description="A command which unbans a given user", usage="<user> [reason]")
     @commands.guild_only()
@@ -295,7 +293,7 @@ class Moderation(commands.Cog):
         embed.set_footer(text=f"{member.id}")
 
         await log_channel.send(embed=embed)
-        await log2_channel.send(embed=embed)
+
 
     @commands.command(name="purge", description="A command which purges the channel it is called in", usage="[amount]")
     @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
@@ -334,20 +332,6 @@ class Moderation(commands.Cog):
         embed.add_field(name='Number of Roles', value=f"{len(member.roles) -1 }")
         embed.set_footer(text=f'ID {member.id}', icon_url=member.avatar_url)
         await ctx.send(embed=embed)
-
-
-    @commands.command(name="banscheck", description="ban list", usage="")
-    async def banscheck(self, ctx, member: discord.User):
-
-        ban_list = await ctx.guild.bans()
-        if member in ban_list:
-            await ctx.send("Banned")
-        else:
-            await ctx.send("not Banned")
-        
-
-    
-
 
 def setup(bot):
     bot.add_cog(Moderation(bot))
