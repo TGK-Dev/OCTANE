@@ -53,6 +53,9 @@ class TimeConverter(commands.Converter):
                 raise commands.BadArgument(f"{key} is not a number!")
         return round(time)
 
+def fomat_time(time):
+  return time.strftime('%d-%B-%Y %I:%m %p')
+
 class roles(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -64,11 +67,18 @@ class roles(commands.Cog):
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
 
     @commands.command(name="roleinfo", description="members with this role", usage="[role.id]")
-    @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
-    async def roleinfo(self, ctx, role: discord.Role=None):
+    #@commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
+    async def roleinfo(self, ctx, *,role: discord.Role=None):
+        if role == None:
+            return await ctx.send("Looks like you forget to add role")
+
+        if role == int:
+
+            role = discord.utils.get(ctx.guild.roles, id=role)
+        else:
+            role = discord.utils.get(ctx.guild.roles, name=f"{role}")
+
         await ctx.message.delete()
-        def fomat_time(time):
-          return time.strftime('%d-%B-%Y %I:%m %p')
 
         role_color = role.color
         embed = discord.Embed(title=f"Role Infomation for {role.name}", color=role_color)
@@ -81,8 +91,18 @@ class roles(commands.Cog):
         await ctx.send(embed=embed, delete_after=60)
 
     @commands.command(name="role", description="add Role fored user", usage="[member][role]")
-    @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376)
-    async def role(self, ctx, member:discord.Member, role: discord.Role):
+    #@commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376)
+    async def role(self, ctx, member:discord.Member, *,role: discord.Role):
+        if role == None:
+            return await ctx.send("Looks like you forget to add role")
+
+        if role == int:
+
+            role = discord.utils.get(ctx.guild.roles, id=role)
+        else:
+            role = discord.utils.get(ctx.guild.roles, name=f"{role}")
+
+
         if role >= ctx.author.top_role:
             return await ctx.send("You can't You cannot do this action due to role hierarchy.")
         
