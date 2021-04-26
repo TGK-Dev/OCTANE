@@ -340,7 +340,7 @@ class fun(commands.Cog):
 
 			await message.reply(f"{message.author.mention}", embed=done_embed)
 
-			await ctx.author.send(f"{message.author.name} / {message.author.id} Is Guessd Correct Number")
+			await ctx.author.send(f"`{message.author.name}\n{message.author.id}`\n Is guessed correct Number")
 	
 		except asyncio.TimeoutError:
 
