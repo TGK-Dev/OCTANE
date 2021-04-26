@@ -164,7 +164,7 @@ class tickets(commands.Cog):
     @commands.has_any_role(785842380565774368,799037944735727636)
     async def transcript(self, ctx, limit: int=None, tz_info=None):
 
-        limit = limit if limit else 150
+        limit = limit if limit else 500
         tz_info = tz_info if tz_info else "Asia/Kolkata"
 
         channel =  self.bot.get_channel(833386438338674718)
@@ -189,7 +189,7 @@ class tickets(commands.Cog):
                 await ctx.send("Are Your sure?[Y/N]")
                 try:
 
-                    await self.bot.wait_for("message", check=lambda m: m.content.startswith(f"Y"), timeout=3600)
+                    await self.bot.wait_for("message", check=lambda m: m.content.startswith(f"Y") or m.content.startswith(f"y"), timeout=60)
                     embed_delete = discord.Embed(description="``Deleting this ticket in 10 seconds``")
                     await ctx.send(embed=embed_delete)
                     ticket_filter = {"ticket_id": channel.id}
@@ -206,14 +206,12 @@ class tickets(commands.Cog):
     async def Claim(self, ctx):
         guild = ctx.guild
 
-        admin_role = discord.utils.get(guild.roles, id=799037944735727636)
         mod_role = discord.utils.get(guild.roles, id=785845265118265376)
         jr_mod = discord.utils.get(guild.roles, id=787259553225637889)
         partner = discord.utils.get(guild.roles, id=831405039830564875)
 
 
         await ctx.channel.set_permissions(ctx.author, send_messages=True, view_channel=True, attach_files=True, embed_links=True)
-        await ctx.channel.set_permissions(admin_role, send_messages=False, view_channel=True)
         await ctx.channel.set_permissions(mod_role, send_messages=False, view_channel=True)
         await ctx.channel.set_permissions(jr_mod, send_messages=False, view_channel=True)
         await ctx.channel.set_permissions(partner, send_messages=False, view_channel=True)
@@ -233,7 +231,6 @@ class tickets(commands.Cog):
 
 
         await ctx.channel.set_permissions(ctx.author, send_messages=None, view_channel=None, attach_files=None, embed_links=None)
-        await ctx.channel.set_permissions(admin_role, send_messages=None, view_channel=True)
         await ctx.channel.set_permissions(mod_role, send_messages=None, view_channel=True)
         await ctx.channel.set_permissions(jr_mod, send_messages=None, view_channel=True)
         await ctx.channel.set_permissions(partner, send_messages=None, view_channel=True)
