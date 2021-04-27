@@ -24,6 +24,7 @@ class tickets(commands.Cog):
         guild = self.bot.get_guild(785839283847954433)
 
         if message.id == 836537042614616115:
+
             if payload.emoji.name == "help":
 
                 channel = await guild.create_text_channel(category=self.bot.get_channel(829230513516445736), sync_permissions=True, name=f"{member.display_name} Ticket", topic=f"User Id: {member.id}")
@@ -48,10 +49,11 @@ class tickets(commands.Cog):
                 await self.bot.ticket.upsert_custom(ticket_filter, ticket_data)
 
                 await channel.edit(name=f"{member.display_name} ticket {goble_count}")
+                await channel.set_permissions(member, view_channel=True, send_messages=True, attach_files=True, embed_links=True)
 
                 await channel.send(f"{member.mention}", embed=embed)
 
-                await message.remove_reaction(payload.emoji, member)                
+                await message.remove_reaction(payload.emoji, member)
         else:
             return
 
