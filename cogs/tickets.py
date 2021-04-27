@@ -15,6 +15,65 @@ class tickets(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
+
+    @commands.Cog.listener()
+    async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
+        echannel = self.bot.get_channel(payload.channel_id)
+        message = await echannel.fetch_message(payload.message_id)
+        member =  self.bot.get_user(payload.user_id)
+        guild = self.bot.get_guild(785839283847954433)
+
+        if message.id == 836537042614616115:
+            if payload.emoji.name == "help":
+
+                channel = await guild.create_text_channel(category=self.bot.get_channel(829230513516445736), sync_permissions=True, name=f"{member.display_name} Ticket", topic=f"User Id: {member.id}")
+                overwrite = channel.overwrites_for(member)
+                overwrite.send_messages = True
+                overwrite.view_channel = True
+
+                await self.bot.ticket.increment(4455160013290432032, 1, "globle")
+                current_ticket_count = {'_id': 4455160013290432032}
+                counts = await self.bot.ticket.find_many_by_custom(current_ticket_count)
+
+                for count in counts:
+                    goble_count = count['globle']
+
+                embed = discord.Embed(title=f"Hi {member.display_name}, Welcome to Server Support",
+                    color=0x008000,
+                    description="Kindly wait patiently. A staff member will assist you shortly.\nIf you're looking to approach a specific staff member, ping the member once. Do not spam ping any member or role.\n\nThank you.")
+                embed.set_footer(text="Developed and Owned by Jay & utki007")
+
+                ticket_filter = {"user_id": member.id, "guild_id": guild.id, "ticket_number": goble_count}
+                ticket_data = {"ticket_id": channel.id, "timestamp": datetime.datetime.now()}
+                await self.bot.ticket.upsert_custom(ticket_filter, ticket_data)
+
+                await channel.edit(name=f"{member.display_name} ticket {goble_count}")
+
+                await channel.send(f"{member.mention}", embed=embed)
+
+                await message.remove_reaction(payload.emoji, member)                
+        else:
+            return
+
+    @commands.command(name="eml", hidden=True)
+    @commands.has_role(785842380565774368)
+    async def eml(self, ctx):
+        embed = discord.Embed(title=f"Hi {ctx.author.display_name}, Welcome to Server Support",
+                    color=0x008000,
+                    description="Kindly wait patiently. A staff member will assist you shortly.\nIf you're looking to approach a specific staff member, ping the member once. Do not spam ping any member or role.\n\nThank you.")
+        embed.set_footer(text="Developed and Owned by Jay & utki007")
+        await ctx.send(embed=embed)
+
+    @commands.command(name="setup", hidden=True)
+    @commands.has_role(785842380565774368)
+    async def setup(self, ctx):
+        embed = discord.Embed(title="Server Support",
+            description="React below with <:help:836533559325753405>. This will help you to contact the server staff to help you / discussion about partnership",
+            color=0x2ECC71)
+        message = await ctx.send(embed=embed)
+        emoji = self.bot.get_emoji(836533559325753405)
+        await message.add_reaction(emoji)
+
    
     @commands.command(name="Support", description="make an Support ticket for user", usage="")
     @commands.cooldown(3, 86400, commands.BucketType.user)
@@ -39,9 +98,9 @@ class tickets(commands.Cog):
                 for count in counts:
                     goble_count = count['globle']
 
-                embed = discord.Embed(title=f"{ctx.author.display_name} Welcome to Your Support ticket",
+                embed = discord.Embed(title=f"HI {ctx.author.display_name}, Welcome to Server Support",
                     color=0x008000,
-                    description="Welcome to the Server Support. Mention any of the online staff only once and and please be patient until they approach you.")
+                    description="Kindly wait patiently. A staff member will assist you shortly.\nIf you're looking to approach a specific staff member, ping the member once. Do not spam ping any member or role.\n\nThank you.")
                 embed.set_footer(text="Developed and Owned by Jay & utki007")
 
 
@@ -65,8 +124,6 @@ class tickets(commands.Cog):
             lob_channel = self.bot.get_channel(804024766150738030)
 
             await lob_channel.send(embed=log_embed)
-
-
 
         else:
             return
@@ -205,7 +262,7 @@ class tickets(commands.Cog):
 
 
     @commands.command(name="removeuser", description="Remove User to the channel", usage="[member] [channel]")
-    #@commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
+    @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
     async def removeuser(self, ctx, member:discord.Member):
         channel = ctx.channel
         if ctx.channel.category.id == 829230513516445736:
@@ -227,7 +284,7 @@ class tickets(commands.Cog):
             await ctx.send(embed=embed)
 
     @commands.command(name="addrole", description="add User to the channel", usage="[member] [channel]")
-    #@commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
+    @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
     async def addrole(self, ctx, role: discord.Role):
         channel = ctx.channel
         if ctx.channel.category.id == 829230513516445736:
@@ -245,7 +302,7 @@ class tickets(commands.Cog):
             await ctx.send(embed=embed)
 
     @commands.command(name="removerole", description="Remove User to the channel", usage="[Role.id/mention] [channel]", aliases=["removr"])
-    #@commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
+    @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
     async def removerole(self, ctx, role:discord.Role):
         channel = ctx.channel
         if ctx.channel.category.id == 829230513516445736:
@@ -258,7 +315,6 @@ class tickets(commands.Cog):
                 )
             await ctx.message.delete()
             await ctx.send(embed=embed)
-
 
 def setup(bot):
     bot.add_cog(tickets(bot))
