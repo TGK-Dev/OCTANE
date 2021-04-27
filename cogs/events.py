@@ -8,10 +8,6 @@ from discord.ext import commands, tasks
 from dateutil.relativedelta import relativedelta
 
 
-# In cogs we make our own class
-# for d.py which subclasses commands.Cog
-
-
 class Events(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
