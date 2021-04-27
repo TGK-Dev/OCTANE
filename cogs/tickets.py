@@ -8,8 +8,6 @@ from discord.ext import commands
 from discord.ext.buttons import Paginator
 from bson.objectid import ObjectId
 
-counter = 0
-
 class tickets(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -31,33 +29,38 @@ class tickets(commands.Cog):
                 overwrites.send_messages = True
                 overwrites.view_channel = True
                 
+
+                await self.bot.ticket.increment(4455160013290432032, 1, "globle")
+
+                current_ticket_count = {'_id': 4455160013290432032}
+
+                counts = await self.bot.ticket.find_many_by_custom(current_ticket_count)
+
+                for count in counts:
+                    goble_count = count['globle']
+
                 embed = discord.Embed(title=f"{ctx.author.display_name} Welcome to Your Support ticket",
                     color=0x008000,
                     description="Welcome to the Server Support. Mention any of the online staff only once and and please be patient until they approach you.")
                 embed.set_footer(text="Developed and Owned by Jay & utki007")
 
-                current_ticket_count = len(
-                    await self.bot.ticket.find_many_by_custom(
-                        {
-                            "user_id": ctx.author.id,
-                            "guild_id": member.guild.id
-                        }
-                    )
-                ) + 1
 
-                ticket_filter = {"user_id": ctx.author.id, "guild_id": ctx.guild.id, "ticket_number": current_ticket_count}
+
+                ticket_filter = {"user_id": ctx.author.id, "guild_id": ctx.guild.id, "ticket_number": goble_count}
                 ticket_data = {"ticket_id": channel.id, "timestamp": datetime.datetime.now()}
 
                 await self.bot.ticket.upsert_custom(ticket_filter, ticket_data)
 
-                await channel.edit(name=f"{ctx.author.display_name} ticket {current_ticket_count}")
+                await channel.edit(name=f"{ctx.author.display_name} ticket {goble_count}")
                 await channel.set_permissions(member, view_channel=True, send_messages=True, attach_files=True, embed_links=True)
 
             await channel.send(f"{ctx.author.mention}", embed=embed)
             await ctx.message.delete()
 
-            log_embed = discord.Embed(title=f"{ctx.author.display_name}")
+            log_embed = discord.Embed(title=f"{ctx.author.display_name} open Ticket")
+
             log_embed.add_field(name="Ticket Name", value=f"{channel.name}")
+            log_embed.add_field(name="Ticket Number :", value=f"{goble_count}", inline=False)
 
             lob_channel = self.bot.get_channel(804024766150738030)
 
