@@ -10,48 +10,6 @@ from dateutil.relativedelta import relativedelta
 time_regex = re.compile("(?:(\d{1,5})(h|s|m|d))+?")
 time_dict = {"h": 3600, "s": 1, "m": 60, "d": 86400}
 
-class Pag(Paginator):
-    async def teardown(self):
-        try:
-            await self.page.clear_reactions()
-        except discord.HTTPException:
-            pass
-
-
-async def GetMessage(
-    bot, ctx, contentOne="Default Message", contentTwo="\uFEFF", timeout=100
-):
-
-    embed = discord.Embed(title=f"{contentOne}", description=f"{contentTwo}",)
-    sent = await ctx.send(embed=embed)
-    try:
-        msg = await bot.wait_for(
-            "message",
-            timeout=timeout,
-            check=lambda message: message.author == ctx.author
-            and message.channel == ctx.channel,
-        )
-        if msg:
-            return msg.content
-    except asyncio.TimeoutError:
-        return False
-
-
-class TimeConverter(commands.Converter):
-    async def convert(self, ctx, argument):
-        args = argument.lower()
-        matches = re.findall(time_regex, args)
-        time = 0
-        for key, value in matches:
-            try:
-                time += time_dict[value] * float(key)
-            except KeyError:
-                raise commands.BadArgument(
-                    f"{value} is an invalid time key! h|m|s|d are valid arguments"
-                )
-            except ValueError:
-                raise commands.BadArgument(f"{key} is not a number!")
-        return round(time)
 
 def fomat_time(time):
   return time.strftime('%d-%B-%Y %I:%m %p')
@@ -59,8 +17,6 @@ def fomat_time(time):
 class roles(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-
-
 
     @commands.Cog.listener()
     async def on_ready(self):
