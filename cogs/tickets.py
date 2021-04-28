@@ -76,60 +76,6 @@ class tickets(commands.Cog):
         emoji = self.bot.get_emoji(836533559325753405)
         await message.add_reaction(emoji)
 
-   
-    @commands.command(name="Support", description="make an Support ticket for user", usage="")
-    @commands.cooldown(3, 86400, commands.BucketType.user)
-    async def support(self, ctx):
-        if ctx.channel.id == 785901543349551104:
-            async with ctx.typing():
-                member = ctx.author
-                guild = ctx.guild
-
-                channel = await guild.create_text_channel(category=self.bot.get_channel(829230513516445736), sync_permissions=True, name=f"{ctx.author.name} ticket", topic=f"{ctx.author.id}")
-                overwrites = channel.overwrites_for(member)
-                overwrites.send_messages = True
-                overwrites.view_channel = True
-                
-
-                await self.bot.ticket.increment(4455160013290432032, 1, "globle")
-
-                current_ticket_count = {'_id': 4455160013290432032}
-
-                counts = await self.bot.ticket.find_many_by_custom(current_ticket_count)
-
-                for count in counts:
-                    goble_count = count['globle']
-
-                embed = discord.Embed(title=f"HI {ctx.author.display_name}, Welcome to Server Support",
-                    color=0x008000,
-                    description="Kindly wait patiently. A staff member will assist you shortly.\nIf you're looking to approach a specific staff member, ping the member once. Do not spam ping any member or role.\n\nThank you.")
-                embed.set_footer(text="Developed and Owned by Jay & utki007")
-
-
-
-                ticket_filter = {"user_id": ctx.author.id, "guild_id": ctx.guild.id, "ticket_number": goble_count}
-                ticket_data = {"ticket_id": channel.id, "timestamp": datetime.datetime.now()}
-
-                await self.bot.ticket.upsert_custom(ticket_filter, ticket_data)
-
-                await channel.edit(name=f"{ctx.author.display_name} ticket {goble_count}")
-                await channel.set_permissions(member, view_channel=True, send_messages=True, attach_files=True, embed_links=True)
-
-            await channel.send(f"{ctx.author.mention}", embed=embed)
-            await ctx.message.delete()
-
-            log_embed = discord.Embed(title=f"{ctx.author.display_name} open Ticket")
-
-            log_embed.add_field(name="Ticket Name", value=f"{channel.name}")
-            log_embed.add_field(name="Ticket Number :", value=f"{goble_count}", inline=False)
-
-            lob_channel = self.bot.get_channel(804024766150738030)
-
-            await lob_channel.send(embed=log_embed)
-
-        else:
-            return
-
     @commands.command(name="close", description="close The ticket", usage="")
     async def close(self, ctx):
         if ctx.channel.category.id == 829230513516445736:
@@ -195,7 +141,7 @@ class tickets(commands.Cog):
                 await ctx.send("Are Your sure?[Y/N]")
                 try:
 
-                    await self.bot.wait_for("message", check=lambda m: m.content.startswith(f"Y") or m.content.startswith(f"y"), timeout=60)
+                    await self.bot.wait_for("message", check=lambda m: m.content.startswith("Y") or m.content.startswith("y"), timeout=60)
                     embed_delete = discord.Embed(description="``Deleting this ticket in 10 seconds``")
                     await ctx.send(embed=embed_delete)
                     ticket_filter = {"ticket_id": channel.id}
@@ -204,7 +150,7 @@ class tickets(commands.Cog):
                     await asyncio.sleep(10)
                     await channel.delete()
                 except asyncio.TimeoutError:
-                    embed = discord.Embed(description="``Time out canceling the cancel ``")
+                    embed = discord.Embed(description="``Time out canceling the commands ``")
                     await ctx.send(embed=embed)
 
     @commands.command(name="Claim", description="Claim Tickets to provide Support", usage="")
