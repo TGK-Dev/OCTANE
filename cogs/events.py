@@ -33,25 +33,28 @@ class Events(commands.Cog):
     async def on_member_join(self, member):
         guild = member.guild.id 
         channel =  self.bot.get_channel(785847439579676672)
-        guild = self.bot.get_guild(785839283847954433)
         robot = discord.utils.get(guild.roles, id=810153515610537994)
         count = guild.member_count
 
         if member.guild.id == 785839283847954433:
-            embed = discord.Embed(title=f'<a:celeyay:821818380406882315> WELCOME TO TGK {member.name} <a:celeyay:821818380406882315> ', color=0xff00ff)
-            embed.set_thumbnail(url=member.avatar_url)
-            embed.add_field(name='Info Counter:', value='➻ Read our [Rules](https://discord.com/channels/785839283847954433/785841560918163501) \n ➻ Get your roles from :sparkles:[。self-roles](https://discord.com/channels/785839283847954433/785882615202316298/795729352062140537), and say Hi to everyone at :speech_balloon:[。general](https://discord.com/channels/785839283847954433/785847439579676672/817100365665009684)!', inline=False)
-            embed.add_field(name='Server Games:', value='➻ To access specific sections, simply follow:\n◉ :frog:[。dank-bifröst](https://discord.com/channels/785839283847954433/801394407521517578/812654537873162261) for Dank Memer Channels\n◉ :dragon:[。poke-bifröst](https://discord.com/channels/785839283847954433/802195590208421908/802538839838556170) for Pokémon Channels\n◉ :game_die:[:。casino-bifrost](https://discord.com/channels/785839283847954433/804042634011738112/804051999879462982) for Casino Channels', inline=False)
-            embed.add_field(name='Server Support', value='To get in touch with staff, simply Raise an ticket from 💌。[server-support](https://discord.com/channels/785839283847954433/785901543349551104/829248763646050324)', inline=False)
-            embed.add_field(name='Server Member Count: ', value=f'{guild.member_count - len(robot.members)}', inline=False)
-            embed.set_footer(text='Once again, a warm welcome. Have a great time!', icon_url=member.avatar_url)
-            await channel.send(f'{member.mention}', embed=embed)
 
-            #await member.send(embed=embed)
-            #channel = get(guild.channels, name )
-            #await channel.edit(name = f'Member Count: {guild.membe}')
+            embed = discord.Embed(title=f'**WELCOME TO TGK, {ctx.author.display_name}!**',
+                description=f"\n\n:sparkles: Get your favorite roles from [Self Roles](https://discord.gg/6WmKQZrKD9),\nand say _Hello_ to everyone in [Chat](https://discord.gg/B2FDCggkES) !\n\n**To access Dank Memer, react in [Dank Bifrost](https://discord.gg/BUtTb7FVxJ).**\n\n:circus_tent: Also check out other fun game bots on the server:\n✦ [Pokemon](https://discord.gg/6dGkammu6P)  ✦ [Casino](https://discord.gg/f4YzaVyhRE)  ✦[Akinator](https://discord.gg/HyVgTrF2E5)  ✦ [Mudae](https://discord.gg/u2XJ8SaY) ✦\n\nMake sure you follow the [Rules](https://discord.gg/Z4rbTcvDyb) of the house for a good time here. Also, check out rules and instructions of game bots in respective channels.\n\n:love_letter: To get in touch with staff, simply raise a ticket from [Server Support](https://discord.gg/gJhmaFJmra).\n\nHave fun!\n\n__Server Member Count:__ {ctx.author.guild.member_count - len(robot.member) -1}",
+                color=0x000000)
+            embed.set_thumbnail(url=member.avatar_url)
+            await channels.send(embed=embed)
+
         else:
             return
+
+    @commands.command(name="joint", hidden=True)
+    @commands.has_any_role(785842380565774368,799037944735727636)
+    async def joint(self, ctx):
+        embed = discord.Embed(title=f'**WELCOME TO TGK, {ctx.author.display_name}!**',
+            description=f"\n\n:sparkles: Get your favorite roles from [Self Roles](https://discord.gg/6WmKQZrKD9),\nand say _Hello_ to everyone in [Chat](https://discord.gg/B2FDCggkES) !\n\n**To access Dank Memer, react in [Dank Bifrost](https://discord.gg/BUtTb7FVxJ).**\n\n:circus_tent: Also check out other fun game bots on the server:\n✦ [Pokemon](https://discord.gg/6dGkammu6P)  ✦ [Casino](https://discord.gg/f4YzaVyhRE)  ✦[Akinator](https://discord.gg/HyVgTrF2E5)  ✦ [Mudae](https://discord.gg/u2XJ8SaY) ✦\n\nMake sure you follow the [Rules](https://discord.gg/Z4rbTcvDyb) of the house for a good time here. Also, check out rules and instructions of game bots in respective channels.\n\n:love_letter: To get in touch with staff, simply raise a ticket from [Server Support](https://discord.gg/gJhmaFJmra).\n\nHave fun!\n\n__Server Member Count:__ {ctx.author.guild.member_count}",
+            color=0x2ECC71)
+        embed.set_thumbnail(url=ctx.author.avatar_url)
+        await ctx.send(embed=embed)
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
