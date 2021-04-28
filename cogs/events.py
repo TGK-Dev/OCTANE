@@ -27,7 +27,7 @@ class Events(commands.Cog):
         if len(messageContent) > 0:
             for word in word_list:
                 if word in messageContent:
-                    return await message.reply('**Vote for us here**:\nhttps://top.gg/servers/785839283847954433/vote\n\n__**Voting Perks**__\n❥ Special "Voted" Role.\n❥ 2,500 Casino Cash. Collect using ,collectincome in #:game_die:。casino.\n❥ Access to 2x Amaari Channels, including Exclusive Chat and Dank Memer Premium.\n❥ Guild wide 1x Amaari.')
+                    return await message.reply('**Vote for us here**:\nhttps://top.gg/servers/785839283847954433/vote\n\n__**Voting Perks**__\n❥ Special "Voted" Role.\n❥ 2,500 Casino Cash. Collect using ,collectincome in #:game_die:。casino.\n❥ Access to Dank Memer Premium with 2x Amaari.\n❥ Guild wide 1x Amaari.')
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
@@ -97,11 +97,6 @@ class Events(commands.Cog):
             await ctx.message.reply(f'Please Enter all the Requird Argument')
         else:
             raise error
-
-
-
-
-
 
 
 def setup(bot):
