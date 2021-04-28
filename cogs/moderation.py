@@ -294,5 +294,11 @@ class Moderation(commands.Cog):
         embed.set_footer(text=f'ID {member.id}', icon_url=member.avatar_url)
         await ctx.send(embed=embed)
 
+    @commands.command(name="tag", hidden=True)
+    @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
+    async def tag(self, ctx):
+        await ctx.send("**Avoid tagging Owners/Admins.**\nKindly tag available mods/admins for queries.\nOr simply raise a ticket from <#785901543349551104>.\n")
+
+
 def setup(bot):
     bot.add_cog(Moderation(bot))
