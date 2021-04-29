@@ -23,58 +23,152 @@ class tickets(commands.Cog):
         member =  self.bot.get_user(payload.user_id)
         guild = self.bot.get_guild(785839283847954433)
 
-        if message.id == 836537042614616115:
+        if member.id in self.bot.blacklist_user:
+            try:
+                await member.send("Your Blacklist form bot and it's Ticket System")
+                return await message.remove_reaction(payload.emoji, member)
+            except discord.HTTPException:
+                await echannel.send(f"Your {member.mention} Blacklist form bot and it's Ticket System", delete_after=15)
+                return await message.remove_reaction(payload.emoji, member)
 
-            if payload.emoji.name == "help":
+        ticket_check = {'_id': member.id}
+        check = await self.bot.ticket.find_many_by_custom(ticket_check)
+
+        if bool(check):
+            await echannel.send(f"Your {member.mention} have Reach the max number of the tickets", delete_after=15)
+            return await message.remove_reaction(payload.emoji, member)
+
+        if message.id == 837276253408198677:
+
+            if payload.emoji.name == "support":
 
                 channel = await guild.create_text_channel(category=self.bot.get_channel(829230513516445736), sync_permissions=True, name=f"{member.display_name} Ticket", topic=f"User Id: {member.id}")
                 overwrite = channel.overwrites_for(member)
                 overwrite.send_messages = True
                 overwrite.view_channel = True
 
-                await self.bot.ticket.increment(4455160013290432032, 1, "globle")
-                current_ticket_count = {'_id': 4455160013290432032}
-                counts = await self.bot.ticket.find_many_by_custom(current_ticket_count)
-
-                for count in counts:
-                    goble_count = count['globle']
-
                 embed = discord.Embed(title=f"Hi {member.display_name}, Welcome to Server Support",
                     color=0x008000,
                     description="Kindly wait patiently. A staff member will assist you shortly.\nIf you're looking to approach a specific staff member, ping the member once. Do not spam ping any member or role.\n\nThank you.")
                 embed.set_footer(text="Developed and Owned by Jay & utki007")
 
-                ticket_filter = {"user_id": member.id, "guild_id": guild.id, "ticket_number": goble_count}
+                ticket_filter = {"_id": member.id, "guild_id": guild.id,}
                 ticket_data = {"ticket_id": channel.id, "timestamp": datetime.datetime.now()}
                 await self.bot.ticket.upsert_custom(ticket_filter, ticket_data)
 
-                await channel.edit(name=f"{member.display_name} ticket {goble_count}")
+                await channel.edit(name=f"{member.display_name} Ticket")
                 await channel.set_permissions(member, view_channel=True, send_messages=True, attach_files=True, embed_links=True)
 
                 await channel.send(f"{member.mention}", embed=embed)
 
                 await message.remove_reaction(payload.emoji, member)
+
+                return
+
+            if payload.emoji.name == "partner":
+
+
+                channel = await guild.create_text_channel(category=self.bot.get_channel(829230513516445736), sync_permissions=True, name=f"{member.display_name} Ticket-Partnership", topic=f"User Id: {member.id}")
+                overwrite = channel.overwrites_for(member)
+                overwrite.send_messages = True
+                overwrite.view_channel = True
+                prole = discord.utils.get(guild.roles, id=831405039830564875)
+
+                embed = discord.Embed(title=f"Hi {member.display_name}, Welcome to Server Support",
+                    color=0x008000,
+                    description="Kindly wait patiently. A staff member/ partnership Manager will assist you shortly.\nIf you're looking to approach a specific staff member, ping the member once. Do not spam ping any member or role.\n\nThank you.")
+                embed.set_footer(text="Developed and Owned by Jay & utki007")
+
+                ticket_filter = {"_id": member.id, "guild_id": guild.id,}
+                ticket_data = {"ticket_id": channel.id, "timestamp": datetime.datetime.now()}
+                await self.bot.ticket.upsert_custom(ticket_filter, ticket_data)
+
+                await channel.edit(name=f"{member.display_name} Partnership Ticket")
+                poverwrite = channel.overwrites_for(prole)
+                poverwrite.send_messages = True
+                poverwrite.view_channel = True
+
+                await channel.set_permissions(member, view_channel=True, send_messages=True, attach_files=True, embed_links=True)
+                await channel.set_permissions(prole, overwrite=poverwrite)
+
+                await channel.send(f"{member.mention}\n{prole.mention}", embed=embed)
+
+                await message.remove_reaction(payload.emoji, member)
+
+                return
+
         else:
             return
 
-    @commands.command(name="eml", hidden=True)
-    @commands.has_role(785842380565774368)
-    async def eml(self, ctx):
-        embed = discord.Embed(title=f"Hi {ctx.author.display_name}, Welcome to Server Support",
-                    color=0x008000,
-                    description="Kindly wait patiently. A staff member will assist you shortly.\nIf you're looking to approach a specific staff member, ping the member once. Do not spam ping any member or role.\n\nThank you.")
+    @commands.command(name="new", hidden=True)
+    @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
+    async def new(self, ctx, member: discord.Member=None):
+        member = member if member else ctx.author
+        guild = self.bot.get_guild(785839283847954433)
+        channel = await guild.create_text_channel(category=self.bot.get_channel(829230513516445736), sync_permissions=True, name=f"{member.display_name} Ticket", topic=f"User Id: {member.id}")
+        overwrite = channel.overwrites_for(member)
+        overwrite.send_messages = True
+        overwrite.view_channel = True
+
+        embed = discord.Embed(title=f"Hi {member.display_name}, Welcome to Server Support",
+            color=0x008000,
+            description="Kindly wait patiently. A staff member will assist you shortly.\nIf you're looking to approach a specific staff member, ping the member once. Do not spam ping any member or role.\n\nThank you.")
         embed.set_footer(text="Developed and Owned by Jay & utki007")
-        await ctx.send(embed=embed)
+
+        ticket_filter = {"_id": member.id, "guild_id": guild.id,}
+        ticket_data = {"ticket_id": channel.id, "timestamp": datetime.datetime.now()}
+        await self.bot.ticket.upsert_custom(ticket_filter, ticket_data)
+
+        await channel.edit(name=f"{member.display_name} Ticket")
+        await channel.set_permissions(member, view_channel=True, send_messages=True, attach_files=True, embed_links=True)
+
+        await channel.send(f"{member.mention}", embed=embed)
+        await ctx.message.delete()
+
+    @commands.command(name="pnew", hidden=True)
+    @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
+    async def pnew(self, ctx, member: discord.Member=None):
+        member = member if member else ctx.author
+        guild = self.bot.get_guild(785839283847954433)
+        channel = await guild.create_text_channel(category=self.bot.get_channel(829230513516445736), sync_permissions=True, name=f"{member.display_name} Ticket-Partnership", topic=f"User Id: {member.id}")
+        overwrite = channel.overwrites_for(member)
+        overwrite.send_messages = True
+        overwrite.view_channel = True
+        prole = discord.utils.get(guild.roles, id=831405039830564875)
+
+        embed = discord.Embed(title=f"Hi {member.display_name}, Welcome to Server Support",
+            color=0x008000,
+            description="Kindly wait patiently. A staff member/ partnership Manager will assist you shortly.\nIf you're looking to approach a specific staff member, ping the member once. Do not spam ping any member or role.\n\nThank you.")
+        embed.set_footer(text="Developed and Owned by Jay & utki007")
+
+        ticket_filter = {"_id": member.id, "guild_id": guild.id,}
+        ticket_data = {"ticket_id": channel.id, "timestamp": datetime.datetime.now()}
+        await self.bot.ticket.upsert_custom(ticket_filter, ticket_data)
+
+        await channel.edit(name=f"{member.display_name} Partnership Ticket")
+        poverwrite = channel.overwrites_for(prole)
+        poverwrite.send_messages = True
+        poverwrite.view_channel = True
+
+        await channel.set_permissions(member, view_channel=True, send_messages=True, attach_files=True, embed_links=True)
+        await channel.set_permissions(prole, overwrite=poverwrite)
+
+        await channel.send(f"{member.mention}", embed=embed)
+        await ctx.message.delete()
+
+
 
     @commands.command(name="setup", hidden=True)
     @commands.has_role(785842380565774368)
     async def setup(self, ctx):
-        embed = discord.Embed(title="Server Support",
-            description="React below with <:help:836533559325753405>. This will help you to contact the server staff to help you / discussion about partnership",
+        embed = discord.Embed(title="SERVER SUPPORT",
+            description="Get in touch with TGK Staff Team by reacting below.\nMake sure you react with the right emoji, to get apt support.\n\n<:support:837272254307106849> **Queries and Complaints**\n<:partner:837272392472330250> **Partnership**\n\nPlease Note that only 1 Active Ticket is allowed per member.\nTo raise a New Ticket, ensure that your previous ticket is Closed and Deleted.\n\nMisuse of the service will lead to Blacklisting of the Member from the Service.",
             color=0x2ECC71)
         message = await ctx.send(embed=embed)
-        emoji = self.bot.get_emoji(836533559325753405)
-        await message.add_reaction(emoji)
+        semoji = self.bot.get_emoji(837272254307106849)
+        pemoji = self.bot.get_emoji(837272392472330250)
+        await message.add_reaction(semoji)
+        await message.add_reaction(pemoji)
 
     @commands.command(name="close", description="close The ticket", usage="")
     async def close(self, ctx):
