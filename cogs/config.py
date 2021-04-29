@@ -54,15 +54,13 @@ class Config(commands.Cog):
         name="blacklist", description="Blacklist a user from the bot", usage="<user>", hidden=True
     )
     @commands.has_permissions(administrator=True)
-    async def blacklist(self, ctx, user: discord.Member, *,reason=None):
+    async def blacklist(self, ctx, user: discord.Member=None):
+        user = user if user else ctx.author
         if user.id in [self.bot.user.id, ctx.author.id,488614633670967307, 488614633670967307]:
             return await ctx.send("Hey, you cannot blacklist yourself / bot/ Owner")
 
-        reason = reason if reason else "Breaking Rules"
-
         blacklist = {
-            '_id': user.id,
-            'reason': reason or None
+            '_id': user.id
         }
 
         await self.bot.blacklist.upsert(blacklist)
