@@ -205,11 +205,11 @@ class fun(commands.Cog):
 		if member == ctx.author:
 			em = discord.Embed(color=usercolor, description=f"**{ctx.author.name}** is Angry")
 			em.set_image(url=ra)
-			await ctx.message.send(embed=em, delete_after=60)
+			await ctx.send(embed=em, delete_after=60)
 		else:
 			emm = discord.Embed(color=usercolor, description=f"**{ctx.author.name}** is raging at **{member.name}**")
 			emm.set_image(url=ra)
-			await ctx.message.send(embed=emm, delete_after=60)
+			await ctx.send(embed=emm, delete_after=60)
 
 	@commands.command(name="kill", description="Kill some one it's Only For Joke ", usage="[member]")
 	@commands.cooldown(3, 30, commands.BucketType.user)
@@ -252,11 +252,12 @@ class fun(commands.Cog):
 
 	@commands.command(name="Guess The Number", description="Guess the Number Game", usage="[max] [time] [price] [role]", aliases=["gn"])
 	@commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376)
-	async def guess_number(self, ctx, maxn: int, time: TimeConverter=None, *,price=None):
+	async def guess_number(self, ctx, maxn: int, time: TimeConverter=None, role: discord.Role=None, *,price=None):
 		if maxn > 10000:
 			return await ctx.send("you can't big number then 10000")
 
-		role = ctx.guild.default_role
+		role = role if role else ctx.guild.default_role
+
 		right_num = random.randint(1, maxn)
 		price = price if price else "None"
 		time = time if time else 3600
@@ -265,7 +266,7 @@ class fun(commands.Cog):
 
 		start_em = discord.Embed(title=":tada: Guess The Number")
 		start_em.add_field(name="How to Play:",
-			value=f"· I've thought of a number between 1 and {maxn}.\n· First person to guess the number wins!\n· You have UNLIMITED guesses.\n·You have {int((time/60)/60)}hour to Guess the right Number\n· Starting game in 10 seconds\n·The Price of this round is `{price}`")
+			value=f"· I've thought of a number between 1 and {maxn}.\n· First person to guess the number wins!\n· You have UNLIMITED guesses.\n·You Must have {role.mention} To Enter\n·You have {int((time/60)/60)}hour to Guess the right Number\n· Starting game in 10 seconds\n·The Price of this round is `{price}`")
 		start_em.set_footer(text="Developed and Owned by Jay & utki007")
 		await game_channel.send(embed=start_em)
 		
@@ -287,7 +288,7 @@ class fun(commands.Cog):
 			message = await self.bot.wait_for("message", check= lambda m: m.content.startswith(f"{right_num}") and m.channel.id == game_channel.id, timeout=time)
 			
 			done_overwrite = game_channel.overwrites_for(role)
-			done_overwrite.send_messages = False
+			done_overwrite.send_messages = None
 
 			await game_channel.set_permissions(role, overwrite=done_overwrite)
 
