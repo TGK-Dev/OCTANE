@@ -59,8 +59,8 @@ bot.joke_api_key = secret_file["x-rapidapi-key"]
 logging.basicConfig(level=logging.INFO)
 
 bot.DEFAULTPREFIX = DEFAULTPREFIX
-bot.blacklisted_users = []
 bot.muted_users = {}
+bot.blacklist_user = {}
 bot.temp_roled_users = {}
 bot.cwd = cwd
 
@@ -103,14 +103,16 @@ async def on_ready():
     for document in await bot.config.get_all():
         print(document)
 
+    current_blacklist_user = await bot.blacklist.get_all()
+    for blacklisted_user in current_blacklist_user:
+        bot.blacklist_user[blacklisted_user["_id"]] = blacklisted_user
+
     currentMutes = await bot.mutes.get_all()
     for mute in currentMutes:
         bot.muted_users[mute["_id"]] = mute
 
-    currentTemps = await bot.temp_roles.get_all()
-    for temp in currentTemps:
-        bot.temp_roled_users[temp["_id"]] = temp
-
+    print("\n-----")
+    print(bot.blacklist_user)
     print("\n-----")
     print(bot.temp_roled_users)
     print("\n-----")
@@ -126,8 +128,8 @@ async def on_message(message):
         return
 
     # A way to blacklist users from the bot by not processing commands
-    # if the author is in the blacklisted_users list
-    if message.author.id in bot.blacklisted_users:
+    # if the author is in the blacklisted list
+    if message.author.id in bot.blacklist_user:
         return
 
     # Whenever the bot is tagged, respond with its prefix
@@ -153,7 +155,7 @@ if __name__ == "__main__":
     bot.mutes = Document(bot.db, "mutes")
     bot.warns = Document(bot.db, "warns")
     bot.ticket = Document(bot.db, "ticket")
-    bot.temp_roles = Document(bot.db, "temp_roles")
+    bot.blacklist = Document(bot.db, "blacklist")
     bot.invites = Document(bot.db, "invites")
 
     for file in os.listdir(cwd + "/cogs"):
