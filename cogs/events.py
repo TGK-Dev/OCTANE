@@ -33,7 +33,7 @@ class Events(commands.Cog):
     async def on_member_join(self, member):
         guild = member.guild.id 
         guild = self.bot.get_guild(785839283847954433)
-        channel =  self.bot.get_channel(785847439579676672)
+        channel =  self.bot.get_channel(837285329610080276)
         robot = discord.utils.get(guild.roles, id=810153515610537994)
         count = guild.member_count
 
@@ -43,7 +43,7 @@ class Events(commands.Cog):
                 description=f"\n\n:sparkles: Get your favorite roles from [Self Roles](https://discord.gg/6WmKQZrKD9),\nand say _Hello_ to everyone in [Chat](https://discord.gg/B2FDCggkES) !\n\n**To access Dank Memer, react in [Dank Bifrost](https://discord.gg/BUtTb7FVxJ).**\n\n:circus_tent: Also check out other fun game bots on the server:\n✦ [Pokemon](https://discord.gg/6dGkammu6P)  ✦ [Casino](https://discord.gg/f4YzaVyhRE)  ✦[Akinator](https://discord.gg/HyVgTrF2E5)  ✦ [Mudae](https://discord.gg/u2XJ8SaY) ✦\n\nMake sure you follow the [Rules](https://discord.gg/Z4rbTcvDyb) of the house for a good time here. Also, check out rules and instructions of game bots in respective channels.\n\n:love_letter: To get in touch with staff, simply raise a ticket from [Server Support](https://discord.gg/gJhmaFJmra).\n\nHave fun!\n\n__Server Member Count:__ {guild.member_count - len(robot.members) -1}",
                 color=0x000000)
             embed.set_thumbnail(url=member.avatar_url)
-            await channel.send(embed=embed)
+            await channel.send(f"{member.mention}", embed=embed)
 
         else:
             return
