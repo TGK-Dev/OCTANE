@@ -23,22 +23,24 @@ class tickets(commands.Cog):
         member =  self.bot.get_user(payload.user_id)
         guild = self.bot.get_guild(785839283847954433)
 
-        if member.id in self.bot.blacklist_user:
-            try:
-                await member.send("Your Blacklist form bot and it's Ticket System")
-                return await message.remove_reaction(payload.emoji, member)
-            except discord.HTTPException:
-                await echannel.send(f"Your {member.mention} Blacklist form bot and it's Ticket System", delete_after=15)
-                return await message.remove_reaction(payload.emoji, member)
-
-        ticket_check = {'_id': member.id}
-        check = await self.bot.ticket.find_many_by_custom(ticket_check)
-
-        if bool(check):
-            await echannel.send(f"Your {member.mention} have Reach the max number of the tickets", delete_after=15)
-            return await message.remove_reaction(payload.emoji, member)
-
         if message.id == 837276253408198677:
+
+            if member.id in self.bot.blacklist_user:
+                try:
+                    await member.send("Your Blacklist form bot and it's Ticket System")
+                    return await message.remove_reaction(payload.emoji, member)
+                except discord.HTTPException:
+                    await echannel.send(f"Your {member.mention} Blacklist form bot and it's Ticket System", delete_after=15)
+                    return await message.remove_reaction(payload.emoji, member)
+
+
+            ticket_check = {'user_id': member.id}
+            check = await self.bot.ticket.find_many_by_custom(ticket_check)
+
+            if bool(check):
+                await echannel.send(f"Your {member.mention} have Reach the max number of the tickets", delete_after=15)
+                return await message.remove_reaction(payload.emoji, member)
+
 
             if payload.emoji.name == "support":
 
@@ -52,7 +54,7 @@ class tickets(commands.Cog):
                     description="Kindly wait patiently. A staff member will assist you shortly.\nIf you're looking to approach a specific staff member, ping the member once. Do not spam ping any member or role.\n\nThank you.")
                 embed.set_footer(text="Developed and Owned by Jay & utki007")
 
-                ticket_filter = {"_id": member.id, "guild_id": guild.id,}
+                ticket_filter = {"user_id": member.id, "guild_id": guild.id,}
                 ticket_data = {"ticket_id": channel.id, "timestamp": datetime.datetime.now()}
                 await self.bot.ticket.upsert_custom(ticket_filter, ticket_data)
 
@@ -79,7 +81,7 @@ class tickets(commands.Cog):
                     description="Kindly wait patiently. A staff member/ partnership Manager will assist you shortly.\nIf you're looking to approach a specific staff member, ping the member once. Do not spam ping any member or role.\n\nThank you.")
                 embed.set_footer(text="Developed and Owned by Jay & utki007")
 
-                ticket_filter = {"_id": member.id, "guild_id": guild.id,}
+                ticket_filter = {"user_id": member.id, "guild_id": guild.id,}
                 ticket_data = {"ticket_id": channel.id, "timestamp": datetime.datetime.now()}
                 await self.bot.ticket.upsert_custom(ticket_filter, ticket_data)
 
@@ -115,7 +117,7 @@ class tickets(commands.Cog):
             description="Kindly wait patiently. A staff member will assist you shortly.\nIf you're looking to approach a specific staff member, ping the member once. Do not spam ping any member or role.\n\nThank you.")
         embed.set_footer(text="Developed and Owned by Jay & utki007")
 
-        ticket_filter = {"_id": member.id, "guild_id": guild.id,}
+        ticket_filter = {"user_id": member.id, "guild_id": guild.id,}
         ticket_data = {"ticket_id": channel.id, "timestamp": datetime.datetime.now()}
         await self.bot.ticket.upsert_custom(ticket_filter, ticket_data)
 
@@ -141,7 +143,7 @@ class tickets(commands.Cog):
             description="Kindly wait patiently. A staff member/ partnership Manager will assist you shortly.\nIf you're looking to approach a specific staff member, ping the member once. Do not spam ping any member or role.\n\nThank you.")
         embed.set_footer(text="Developed and Owned by Jay & utki007")
 
-        ticket_filter = {"_id": member.id, "guild_id": guild.id,}
+        ticket_filter = {"user_id": member.id, "guild_id": guild.id,}
         ticket_data = {"ticket_id": channel.id, "timestamp": datetime.datetime.now()}
         await self.bot.ticket.upsert_custom(ticket_filter, ticket_data)
 
@@ -236,15 +238,20 @@ class tickets(commands.Cog):
                 try:
 
                     await self.bot.wait_for("message", check=lambda m: m.content.startswith("Y") or m.content.startswith("y"), timeout=60)
-                    embed_delete = discord.Embed(description="``Deleting this ticket in 10 seconds``")
+                    embed_delete = discord.Embed(description="`Deleting this ticket in 10 seconds type >fstop/>fs to cancel`")
                     await ctx.send(embed=embed_delete)
-                    ticket_filter = {"ticket_id": channel.id}
+                    try:
+                        await self.bot.wait_for("message",check=lambda m: m.content.startswith(">fstop") or m.content.startswith(">fs"), timeout=10)
+                        embed = discord.Embed(description="`canceling the command`")
+                        return await ctx.send(embed=embed)
+                    except asyncio.TimeoutError:
 
-                    await self.bot.ticket.delete_by_custom(ticket_filter)
-                    await asyncio.sleep(10)
-                    await channel.delete()
+                        ticket_filter = {"ticket_id": channel.id}
+                        await self.bot.ticket.delete_by_custom(ticket_filter)
+                        await channel.delete()
+
                 except asyncio.TimeoutError:
-                    embed = discord.Embed(description="``Time out canceling the commands ``")
+                    embed = discord.Embed(description="`Time out canceling the command`")
                     await ctx.send(embed=embed)
 
     @commands.command(name="Claim", description="Claim Tickets to provide Support", usage="")
