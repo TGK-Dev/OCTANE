@@ -62,9 +62,9 @@ class txt_manage(commands.Cog):
 
     @commands.command(name="lock", description="Lock the given channel For mentioned Role", usage="[channel] [Role]",)
     @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
-    async def lock(self, ctx, channel: discord.TextChannel = None, role: discord.Role = None):
+    async def lock(self, ctx, role: discord.Role = None):
 
-        channel = channel if channel else ctx.channel
+        channel = ctx.channel
         role = role if role else ctx.guild.default_role
 
         overwrite = channel.overwrites_for(role)
@@ -78,9 +78,9 @@ class txt_manage(commands.Cog):
 
     @commands.command(name="unlock", description="UnLock the given channel For mentioned Role", usage="[channel] [Role]",)
     @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
-    async def unlock(self, ctx, channel: discord.TextChannel = None, role: discord.Role = None):
+    async def unlock(self, ctx, role: discord.Role = None):
 
-        channel = channel if channel else ctx.channel
+        channel = ctx.channel
         role = role if role else ctx.guild.default_role
 
         overwrite = channel.overwrites_for(role)
