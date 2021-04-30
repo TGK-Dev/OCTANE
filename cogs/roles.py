@@ -10,6 +10,14 @@ from dateutil.relativedelta import relativedelta
 time_regex = re.compile("(?:(\d{1,5})(h|s|m|d))+?")
 time_dict = {"h": 3600, "s": 1, "m": 60, "d": 86400}
 
+def comman_ping(role1, role2):
+    ping1 = set(role1)
+    ping2 = set(role2)
+
+    if len(ping1.intersection(ping2)) > 0:
+        return(ping1.intersection(ping2))  
+    else:
+        return("no common elements")
 
 def fomat_time(time):
   return time.strftime('%d-%B-%Y %I:%m %p')
@@ -91,6 +99,21 @@ class roles(commands.Cog):
             description=f"{heist.mention} = {len(heist.members)}\n-----\n{partner_heist.mention} = {len(partner_heist.members)}\n-----\n{othere_heist.mention} = {len(othere_heist.members)}\n-----\n{danker.mention} = {len(danker.members)}\n-----\n{partnership.mention} = {len(partnership.members)}\n-----\n{giveaway.mention} = {len(giveaway.members)}", color=0x06f79e)
 
         await ctx.send(embed=embed, delete_after=60)
+
+    @commands.command(name="mping", description="Mutual Pings for tow role", usage="[role 1] [role 2]", hidden=True)
+    @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889, 831405039830564875)
+    async def mping(self, ctx, role1: discord.Role, role2: discord.Role):
+        pings1 = role1.members
+        pings2 = role2.members
+
+        if role1 == role2:
+            return await ctx.send("you can't use same role for mutual pings")
+
+        embed= discord.Embed(title="Mutual Pings", color=0xF1C40F,
+            description=f"Showing Mutual pings for the two Role\n1.Role {role1.mention} total members: {len(pings1)}\n2.Role{role2.mention} total members: {len(pings2)}\n\n**Unique Members are: {len(pings1) + len(pings2) - len(comman_ping(pings1, pings2))}**")#(comman_ping(pings1, pings2))
+
+        await ctx.send(embed=embed)
+
 
     @commands.command(name="verify", description="Very Your self in Server", usage="[]", hidden=True)
     async def verify(self, ctx):
