@@ -11,10 +11,6 @@ from discord.ext import commands
 from discord.ext.buttons import Paginator
 
 
-
-
-
-
 class Config(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
