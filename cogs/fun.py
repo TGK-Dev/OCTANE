@@ -288,7 +288,7 @@ class fun(commands.Cog):
 			message = await self.bot.wait_for("message", check= lambda m: m.content.startswith(f"{right_num}") and m.channel.id == game_channel.id, timeout=time)
 			
 			done_overwrite = game_channel.overwrites_for(role)
-			done_overwrite.send_messages = None
+			done_overwrite.send_messages = False
 
 			await game_channel.set_permissions(role, overwrite=done_overwrite)
 
