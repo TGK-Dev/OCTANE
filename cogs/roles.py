@@ -30,8 +30,9 @@ class roles(commands.Cog):
     async def on_ready(self):
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
 
+    #geting All Info mantions
     @commands.command(name="roleinfo", description="members with this role", usage="[role.id]")
-    #@commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
+    @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
     async def roleinfo(self, ctx, *,role: discord.Role=None):
         if role == None:
             return await ctx.send("Looks like you forget to add role")
@@ -53,9 +54,10 @@ class roles(commands.Cog):
         embed.set_footer(text=f"ID {role.id}")
 
         await ctx.send(embed=embed, delete_after=60)
-
+        
+    #Added Roel/Remove to any User
     @commands.command(name="role", description="add Role fored user", usage="[member][role]")
-    #@commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376)
+    @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376)
     async def role(self, ctx, member:discord.Member, *,role: discord.Role):
         if role == None:
             return await ctx.send("Looks like you forget to add role")
@@ -82,7 +84,7 @@ class roles(commands.Cog):
             await ctx.send(embed=embed)
 
    
-
+    #some Important roles members count 
     @commands.command(name="Pings", description="Give numbers of some the pings roles", usage="")
     @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889, 831405039830564875)
     async def pings(self, ctx):
@@ -100,6 +102,7 @@ class roles(commands.Cog):
 
         await ctx.send(embed=embed, delete_after=60)
 
+    #getting Mutual Pings 
     @commands.command(name="mping", description="Mutual Pings for tow role", usage="[role 1] [role 2]", hidden=True)
     @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889, 831405039830564875)
     async def mping(self, ctx, role1: discord.Role, role2: discord.Role):
@@ -110,11 +113,11 @@ class roles(commands.Cog):
             return await ctx.send("you can't use same role for mutual pings")
 
         embed= discord.Embed(title="Mutual Pings", color=0xF1C40F,
-            description=f"Showing Mutual pings for the two Role\n1.Role {role1.mention} total members: {len(pings1)}\n2.Role{role2.mention} total members: {len(pings2)}\n\n**Unique Members are: {len(pings1) + len(pings2) - len(comman_ping(pings1, pings2))}**")#(comman_ping(pings1, pings2))
+            description=f"Showing Mutual pings for the two Role\n1.Role {role1.mention} total members: {len(pings1)}\n2.Role{role2.mention} total members: {len(pings2)}\n\n**Unique Members are: {int(len(pings1) + len(pings2) - len(comman_ping(pings1, pings2)))}**")#(comman_ping(pings1, pings2))
 
         await ctx.send(embed=embed)
 
-
+    #Verify Command when Carl is down
     @commands.command(name="verify", description="Very Your self in Server", usage="[]", hidden=True)
     async def verify(self, ctx):
         if ctx.channel.id == 812906607301099520:
