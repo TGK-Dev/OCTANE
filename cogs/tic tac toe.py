@@ -86,7 +86,7 @@ class Games(commands.Cog):
     @commands.command(aliases=["ttt"])
     @commands.max_concurrency(1, commands.BucketType.channel)
     async def tictactoe(self, ctx, player_two: discord.Member = None):
-        if ctx.channel.id == 785849567518130176:
+        if ctx.channel.id in [785849567518130176, 792246185238069249, 785860772470849536]:
             def check(m):
                 return m.channel == ctx.channel and m.author == current_player
 
@@ -199,7 +199,7 @@ class Games(commands.Cog):
 
     @commands.command()
     async def profile(self, ctx, player: discord.Member = None):
-        if ctx.channel.id == 785849567518130176:
+        if ctx.channel.id in [785849567518130176, 792246185238069249, 785860772470849536]:
 
             """Returns your TicTacToe stats"""
             player = player or ctx.author
@@ -221,7 +221,7 @@ class Games(commands.Cog):
     @commands.command(aliases=["lb"])
     async def leaderboard(self, ctx, stat_type="wins"):
         """Shows the TicTacToe leaderboard"""
-        if ctx.channel.id == 785849567518130176:
+        if ctx.channel.id in [785849567518130176, 792246185238069249, 785860772470849536]:
             if (stat_type := stat_type.lower()) not in ["wins", "losses", "draws"]:
                 return await ctx.send("Invalid stat type requested!")
 
