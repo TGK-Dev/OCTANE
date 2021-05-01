@@ -112,6 +112,7 @@ class Invites(commands.Cog):
             embed = discord.Embed(description=f"The User {member.name} Has `{count}` Invites", color=mcolor, timestamp=datetime.datetime.now())
 
             await ctx.send(embed=embed)
+            
     @commands.command(name="inviter", description="find who Invited given user", usage="[member]")
     async def inviter(self, ctx, member: discord.Member):
 
