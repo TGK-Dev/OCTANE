@@ -275,8 +275,16 @@ class fun(commands.Cog):
 		except discord.HTTPException:
 			await right_backup.send(right_num)
 
-		await asyncio.sleep(10)
+		await asyncio.sleep(7)
+		mess1 = await ctx.send("`Starting IN 3`")
 
+		await mess1.edit(content="`Starting IN 2`")
+		await asyncio.sleep(1)
+
+		await mess1.edit(content="`Starting IN 1`")
+		await asyncio.sleep(1)
+		await mess1.delete()
+		
 		sem = discord.Embed(description="Game Started", color=0xF1C40F)
 		await ctx.send(embed=sem)
 
