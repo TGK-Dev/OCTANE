@@ -175,6 +175,7 @@ class tickets(commands.Cog):
     @commands.command(name="close", description="close The ticket", usage="")
     async def close(self, ctx):
         if ctx.channel.category.id == 829230513516445736:
+            await ctx.message.delete()
             if ctx.channel.permissions_synced:
                 await ctx.send("ticket Is Closed already")
             else:
@@ -205,15 +206,19 @@ class tickets(commands.Cog):
             embed = discord.Embed(color=0x02ff06, description=f"ticket open by {ctx.author.mention}")
 
             await ctx.send(embed=embed)
+            await ctx.message.delete()
             
 
 
     @commands.command(name="transcript", description="Save current ticket's transcript", usage="[limit] [time Zone]", aliases=["save"])
     @commands.has_any_role(785842380565774368,799037944735727636)
-    async def transcript(self, ctx, limit: int=None, tz_info=None):
+    async def transcript(self, ctx, limit: int=None, *,ticket=None):
+
+        ticket = ticket if ticket else "Topic Not Given"
+        message = await ctx.send("Saving Started")
 
         limit = limit if limit else 500
-        tz_info = tz_info if tz_info else "Asia/Kolkata"
+        tz_info = "Asia/Kolkata"
 
         channel =  self.bot.get_channel(833386438338674718)
         transcript = await chat_exporter.export(ctx.channel, limit, tz_info)
@@ -224,8 +229,8 @@ class tickets(commands.Cog):
         transcript_file = discord.File(io.BytesIO(transcript.encode()),
             filename=f"transcript-{ctx.channel.name}.html")
 
-        await channel.send(f"{ctx.channel.name}", file=transcript_file)
-        await ctx.send("transcript Saved")
+        await channel.send(f"{ctx.channel.name} / {ticket}", file=transcript_file)
+        await message.edit(content=f"{ctx.author.mention} transcript Saved")
 
         
     @commands.command(name="delete", description="delete the ticket", usage="")
@@ -257,6 +262,7 @@ class tickets(commands.Cog):
     @commands.command(name="Claim", description="Claim Tickets to provide Support", usage="")
     @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889, 831405039830564875)
     async def Claim(self, ctx):
+        await ctx.message.delete()
         guild = ctx.guild
 
         mod_role = discord.utils.get(guild.roles, id=785845265118265376)
@@ -276,6 +282,7 @@ class tickets(commands.Cog):
     @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889, 831405039830564875)
     async def unClaim(self, ctx):
         guild = ctx.guild
+        await ctx.message.delete()
 
         admin_role = discord.utils.get(guild.roles, id=799037944735727636)
         mod_role = discord.utils.get(guild.roles, id=785845265118265376)
@@ -293,12 +300,12 @@ class tickets(commands.Cog):
 
     @commands.command(name="adduser", description="add User to the channel", usage="[member] [channel]")
     @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
-    async def adduser(self, ctx, member: discord.User=None):
+    async def adduser(self, ctx, member: discord.User=None, role: discord.Role=None):
         channel = ctx.channel
         if ctx.channel.category.id == 829230513516445736:
 
             if member == ctx.author:
-                await ctx.send("you use command on your self")
+                return await ctx.send("you use command on your self")
 
             await channel.set_permissions(member, send_messages=True, view_channel=True)
 
@@ -317,7 +324,7 @@ class tickets(commands.Cog):
         if ctx.channel.category.id == 829230513516445736:
 
             if member == ctx.author:
-                await ctx.send("you use command on your self")
+                return await ctx.send("you use command on your self")
 
             overwrite = channel.overwrites_for(member)
             overwrite.view_channel = False
