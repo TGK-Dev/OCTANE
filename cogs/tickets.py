@@ -4,6 +4,8 @@ import datetime
 import discord
 import chat_exporter
 import io
+
+from typing import Union
 from discord.ext import commands
 from discord.ext.buttons import Paginator
 from bson.objectid import ObjectId
@@ -188,25 +190,26 @@ class tickets(commands.Cog):
     @commands.command(name="open", description="Reopens current ticket", usage="")
     @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
     async def open(self, ctx):
+        if ctx.channel.category.id == 829230513516445736:
 
-        ticket_filter = {"ticket_id": ctx.channel.id}
+            ticket_filter = {"ticket_id": ctx.channel.id}
 
-        tickets = await self.bot.ticket.find_many_by_custom(ticket_filter)
+            tickets = await self.bot.ticket.find_many_by_custom(ticket_filter)
 
-        if not bool(tickets):
-            return await ctx.send(f"Couldn't find any Close Tickets")
+            if not bool(tickets):
+                return await ctx.send(f"Couldn't find any Close Tickets")
 
-        tickets = sorted(tickets, key=lambda x: x["ticket_number"])
+            tickets = sorted(tickets, key=lambda x: x["ticket_number"])
 
-        for ticket in tickets:
-            member = ctx.guild.get_member(ticket['user_id'])
-            
-            await ctx.channel.set_permissions(member, view_channel=True, send_messages=True, attach_files=True, embed_links=True)
-            
-            embed = discord.Embed(color=0x02ff06, description=f"ticket open by {ctx.author.mention}")
+            for ticket in tickets:
+                member = ctx.guild.get_member(ticket['user_id'])
+                
+                await ctx.channel.set_permissions(member, view_channel=True, send_messages=True, attach_files=True, embed_links=True)
+                
+                embed = discord.Embed(color=0x02ff06, description=f"ticket open by {ctx.author.mention}")
 
-            await ctx.send(embed=embed)
-            await ctx.message.delete()
+                await ctx.send(embed=embed)
+                await ctx.message.delete()
             
 
 
@@ -264,112 +267,72 @@ class tickets(commands.Cog):
     async def Claim(self, ctx):
         await ctx.message.delete()
         guild = ctx.guild
+        if ctx.channel.category.id == 829230513516445736:
 
-        mod_role = discord.utils.get(guild.roles, id=785845265118265376)
-        jr_mod = discord.utils.get(guild.roles, id=787259553225637889)
-        partner = discord.utils.get(guild.roles, id=831405039830564875)
+            mod_role = discord.utils.get(guild.roles, id=785845265118265376)
+            jr_mod = discord.utils.get(guild.roles, id=787259553225637889)
+            partner = discord.utils.get(guild.roles, id=831405039830564875)
 
 
-        await ctx.channel.set_permissions(ctx.author, send_messages=True, view_channel=True, attach_files=True, embed_links=True)
-        await ctx.channel.set_permissions(mod_role, send_messages=False, view_channel=True)
-        await ctx.channel.set_permissions(jr_mod, send_messages=False, view_channel=True)
-        await ctx.channel.set_permissions(partner, send_messages=False, view_channel=True)
+            await ctx.channel.set_permissions(ctx.author, send_messages=True, view_channel=True, attach_files=True, embed_links=True)
+            await ctx.channel.set_permissions(mod_role, send_messages=False, view_channel=True)
+            await ctx.channel.set_permissions(jr_mod, send_messages=False, view_channel=True)
+            await ctx.channel.set_permissions(partner, send_messages=False, view_channel=True)
 
-        embed = discord.Embed(description=f"This ticket will now be handled by {ctx.author.mention}")
-        await ctx.send(embed=embed)
+            embed = discord.Embed(description=f"This ticket will now be handled by {ctx.author.mention}")
+            await ctx.send(embed=embed)
 
     @commands.command(name="unClaim", description="UnClaim Tickets", usage="")
     @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889, 831405039830564875)
     async def unClaim(self, ctx):
         guild = ctx.guild
         await ctx.message.delete()
+        if ctx.channel.category.id == 829230513516445736:
+            
+            admin_role = discord.utils.get(guild.roles, id=799037944735727636)
+            mod_role = discord.utils.get(guild.roles, id=785845265118265376)
+            jr_mod = discord.utils.get(guild.roles, id=787259553225637889)
+            partner = discord.utils.get(guild.roles, id=831405039830564875)
 
-        admin_role = discord.utils.get(guild.roles, id=799037944735727636)
-        mod_role = discord.utils.get(guild.roles, id=785845265118265376)
-        jr_mod = discord.utils.get(guild.roles, id=787259553225637889)
-        partner = discord.utils.get(guild.roles, id=831405039830564875)
 
+            await ctx.channel.set_permissions(ctx.author, send_messages=None, view_channel=None, attach_files=None, embed_links=None)
+            await ctx.channel.set_permissions(mod_role, send_messages=None, view_channel=True)
+            await ctx.channel.set_permissions(jr_mod, send_messages=None, view_channel=True)
+            await ctx.channel.set_permissions(partner, send_messages=None, view_channel=True)
 
-        await ctx.channel.set_permissions(ctx.author, send_messages=None, view_channel=None, attach_files=None, embed_links=None)
-        await ctx.channel.set_permissions(mod_role, send_messages=None, view_channel=True)
-        await ctx.channel.set_permissions(jr_mod, send_messages=None, view_channel=True)
-        await ctx.channel.set_permissions(partner, send_messages=None, view_channel=True)
+            embed = discord.Embed(description=f"This Ticket is now UnClaimed")
+            await ctx.send(embed=embed)
 
-        embed = discord.Embed(description=f"This Ticket is now UnClaimed")
-        await ctx.send(embed=embed)
-
-    @commands.command(name="adduser", description="add User to the channel", usage="[member] [channel]")
+    @commands.command(name="add", description="add User to the channel", usage="[member]")
     @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
-    async def adduser(self, ctx, member: discord.User=None, role: discord.Role=None):
+    async def add(self, ctx, *, target: Union[discord.Member, discord.Role]):
         channel = ctx.channel
         if ctx.channel.category.id == 829230513516445736:
 
-            if member == ctx.author:
-                return await ctx.send("you use command on your self")
+            overwrite = channel.overwrites_for(target)
+            overwrite.view_channel = True
+            overwrite.send_messages = True
 
-            await channel.set_permissions(member, send_messages=True, view_channel=True)
+            await channel.set_permissions(target, overwrite=overwrite)
+            embed = discord.Embed(description=f"<:allow:819194696874197004> | Added {target.mention} to the Tick")
 
-            embed = discord.Embed(
-                color=0x02ff06,
-                description=f"The User {member.mention} Is added to the Channel"
-                )
-            await ctx.message.delete()
             await ctx.send(embed=embed)
 
 
-    @commands.command(name="removeuser", description="Remove User to the channel", usage="[member] [channel]")
+
+    @commands.command(name="remove", description="Remove User to the channel", usage="[member]")
     @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
-    async def removeuser(self, ctx, member:discord.Member):
+    async def remove(self, ctx, *, target: Union[discord.Member, discord.Role]):
         channel = ctx.channel
         if ctx.channel.category.id == 829230513516445736:
 
-            if member == ctx.author:
-                return await ctx.send("you use command on your self")
-
-            overwrite = channel.overwrites_for(member)
+            overwrite = channel.overwrites_for(target)
             overwrite.view_channel = False
             overwrite.send_messages = False
 
-            await channel.set_permissions(member, send_messages=None, view_channel=None)
+            await channel.set_permissions(target, overwrite=overwrite)
+            embed = discord.Embed(description=f"<:allow:819194696874197004> | Removed {target.mention} to the Tick")
 
-            embed = discord.Embed(
-                color=0x02ff06,
-                description=f"The User {member.mention} Is Remove from the Channel"
-                )
-            await ctx.message.delete()
-            await ctx.send(embed=embed)
-
-    @commands.command(name="addrole", description="add User to the channel", usage="[member] [channel]")
-    @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
-    async def addrole(self, ctx, role: discord.Role):
-        channel = ctx.channel
-        if ctx.channel.category.id == 829230513516445736:
-
-            if role == ctx.guild.default_role:
-                return await ctx.send("you need to enter role mention/id or u can't add this role")
-
-            await channel.set_permissions(role, send_messages=True, view_channel=True)
-
-            embed = discord.Embed(
-                color=0x02ff06,
-                description=f"The Role {role.mention} Is added to the Channel"
-                )
-            await ctx.message.delete()
-            await ctx.send(embed=embed)
-
-    @commands.command(name="removerole", description="Remove User to the channel", usage="[Role.id/mention] [channel]", aliases=["removr"])
-    @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
-    async def removerole(self, ctx, role:discord.Role):
-        channel = ctx.channel
-        if ctx.channel.category.id == 829230513516445736:
-
-            await channel.set_permissions(role, send_messages=None, view_channel=None)
-
-            embed = discord.Embed(
-                color=0x02ff06,
-                description=f"The Role {role.mention} Is Remove from the Channel"
-                )
-            await ctx.message.delete()
             await ctx.send(embed=embed)
 
 def setup(bot):
