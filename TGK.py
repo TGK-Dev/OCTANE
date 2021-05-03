@@ -97,8 +97,8 @@ async def on_ready():
         f"-----\nLogged in as: {bot.user.name} : {bot.user.id}\n-----\nMy current prefix is: {bot.DEFAULTPREFIX}\n-----"
     )
     await bot.change_presence(
-        activity=discord.Game(name="Cries in Binary | 00111010 00101000", status= discord.Status.dnd)
-    )  # This changes the bots 'activity'
+        activity=discord.Game(name="Cries in Binary | 00111010 00101000"), status=discord.Status.dnd)
+      # This changes the bots 'activity'
 
     for document in await bot.config.get_all():
         print(document)
