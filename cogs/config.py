@@ -105,19 +105,17 @@ class Config(commands.Cog):
     @commands.command(name="Status", description="Change Bot Status to online & Dnd & idle", usage="[dnd & idle & online]", hidden=True)
     @commands.has_permissions(administrator=True)
     async def status(self,ctx, arg):
-        if arg == 'dnd':
-            await self.bot.change_presence(status=discord.Status.dnd)
+        if arg.lower() == 'dnd':
+            await self.client.change_presence(status=discord.Status.dnd)
             await ctx.send('Bot status is Updated')
-        elif arg == 'online':
-            await self.bot.change_presence(status=discord.Status.online)
+        elif arg.lower() == 'online':
+            await self.client.change_presence(status=discord.Status.online)
             await ctx.send('Bot status is Updated')
-        elif arg == 'idle' :
-            await self.bot.change_presence(status=discord.Status.idle)
+        elif arg.lower() == 'idle' :
+            await self.client.change_presence(status=discord.Status.idle)
             await ctx.send('Bot status is Updated')
         else: 
-            await ctx.send(f'{ctx.author.mention} Plsease Provide The vaild Status')
-            await ctx.send('Bot status is Updated')
-
+            await ctx.send(f':warning: {ctx.author.mention} Please provide valid status you dimwit!! :warning:')
 
     @commands.command(
         name="logout",
@@ -183,6 +181,29 @@ class Config(commands.Cog):
             command.enabled = not command.enabled
             ternary = "enabled" if command.enabled else "disabled"
             await ctx.send(f"I have {ternary} {command.qualified_name} for you!")
+
+    @commands.command(name="nuke", hidden=True)
+    @commands.has_permissions(administrator=True)
+    async def nuke(self, ctx, channel: discord.TextChannel=None):
+        channel = channel if channel else ctx.channel
+        try:
+            await ctx.send("are you Sure [Y/N]")
+            await self.bot.wait_for("message", check=lambda m: m.content.startswith("Y") or m.content.startswith("y"), timeout=60)
+            embed_delete = discord.Embed(description="` Nuking Channel in 10s Type>fstop/>fs to cancel`")
+            await ctx.send(embed=embed_delete)
+            try:
+                await self.bot.wait_for("message",check=lambda m: m.content.startswith(">fstop") or m.content.startswith(">fs"), timeout=10)
+                embed = discord.Embed(description="`canceling the command`")
+                return await ctx.send(embed=embed)
+            except asyncio.TimeoutError:
+                    nuke_channel = discord.utils.get(ctx.guild.channels, name=channel.name)
+                    new_channel = await nuke_channel.clone(reason="Has been Nuked!")
+                    await nuke_channel.delete()
+                    await new_channel.send("THIS CHANNEL HAS BEEN NUKED!\n https://tenor.com/view/nuke-bomb-deaf-dool-explode-gif-14424973")
+                    await ctx.send("Nuked the Channel sucessfully!")
+        except asyncio.TimeoutError:
+            embed = discord.Embed(description="`Time out canceling the command`")
+            await ctx.send(embed=embed)
 
 
     @commands.command(
