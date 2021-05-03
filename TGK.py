@@ -158,6 +158,7 @@ if __name__ == "__main__":
     bot.blacklist = Document(bot.db, "blacklist")
     bot.tictactoe = Document(bot.db, "tictactoe")
     bot.invites = Document(bot.db, "invites")
+    bot.todo = Document(bot.db, "todo")
 
     for file in os.listdir(cwd + "/cogs"):
         if file.endswith(".py") and not file.startswith("_"):
