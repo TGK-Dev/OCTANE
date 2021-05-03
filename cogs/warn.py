@@ -91,7 +91,7 @@ class Warns(commands.Cog):
             title=f"Warns for `{member.display_name}`",
             colour=0xCE2029,
             entries=pages,
-            length=1
+            length=2
         ).start(ctx)
 
     @commands.command(name="delwarn", description="Delete Warning For user", usage="[Warn_id]")
@@ -141,9 +141,9 @@ class Warns(commands.Cog):
         await ctx.message.delete()
         await ctx.send(embed=embed)
 
-    @commands.command(name="todos", description="lsit of of bugs", usage="", hidden=True)
+    @commands.command(name="tasks", description="lsit of of bugs", usage="", hidden=True)
     @commands.has_any_role(785842380565774368,799037944735727636)
-    async def todos(self, ctx):
+    async def tasks(self, ctx):
         todo_filter = {"guild_id": ctx.guild.id}
         todos = await self.bot.todo.find_many_by_custom(todo_filter)
         
@@ -168,8 +168,9 @@ class Warns(commands.Cog):
             title=f"Task for the TGK Utility",
             colour=0xCE2029,
             entries=pages,
-            length=1
+            length=2
         ).start(ctx)
+
     @commands.command(name="tdone", hidden=True)       
     @commands.has_role(785842380565774368)
     async def tdone(self, ctx, task_id, *,status=None):
