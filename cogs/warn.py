@@ -19,7 +19,6 @@ class Warns(commands.Cog):
     @commands.command(name="Warn", description="Gives an Warnings to user", usage="[member] [warn]")
     @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
     async def warn(self, ctx, member: discord.Member, *, reason):
-        role = discord.utils.get(ctx.guild.roles, name="Muted")
         await ctx.message.delete()
         if member.id in [self.bot.user.id, 488614633670967307, 301657045248114690]:
             return await ctx.send("You cannot warn bot or it's Creater because they are way too cool to be warned")
@@ -120,6 +119,67 @@ class Warns(commands.Cog):
         await self.bot.warns.delete_by_custom(warn_filter)
 
         await ctx.send(f"Cleared all warnings form the {member.display_name}")
+
+    @commands.command(name="task", description="send my bugs/typo to the Owners", usage="[todo]", hidden=True)
+    @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
+    async def task(self, ctx, *,todo):
+        status = "Pending"
+        current_task_count = len(
+            await self.bot.todo.find_many_by_custom(
+            {
+                "guild_id": ctx.guild.id
+            }
+            )
+
+        )+1
+
+        todo_filter = {'user_id': ctx.author.id, 'guild_id': ctx.guild.id, 'task_count': current_task_count}
+        todo_data = {'todo': todo, 'timestamp': datetime.datetime.now(), 'status': status}
+
+        await self.bot.todo.upsert_custom(todo_filter, todo_data)
+        embed = discord.Embed(description="Your bug/todo thing is saved.", color=0xFFFFFF)
+        await ctx.message.delete()
+        await ctx.send(embed=embed)
+
+    @commands.command(name="todos", description="lsit of of bugs", usage="", hidden=True)
+    @commands.has_any_role(785842380565774368,799037944735727636)
+    async def todos(self, ctx):
+        todo_filter = {"guild_id": ctx.guild.id}
+        todos = await self.bot.todo.find_many_by_custom(todo_filter)
+        
+        if not bool(todos):
+            return await ctx.send(f"All bugs are done for now")
+        
+        todos = sorted(todos, key=lambda x: x["task_count"])
+        
+        pages = []
+        for todo in todos:
+            description = f"""
+            Task id: `{todo['_id']}`
+            Task Number: `{todo['task_count']}`
+            Task : `{todo['todo']}`
+            Task Status: `{todo['status']}`
+            Task By: <@{todo['user_id']}>
+            Task File: {todo['timestamp'].strftime("%I:%M %p %B %d, %Y")}
+            """
+            pages.append(description)
+
+        await Pag(
+            title=f"Task for the TGK Utility",
+            colour=0xCE2029,
+            entries=pages,
+            length=1
+        ).start(ctx)
+    @commands.command(name="tdone", hidden=True)       
+    @commands.has_role(785842380565774368)
+    async def tdone(self, ctx, task_id, *,status=None):
+        if status is None:
+            await ctx.send("pleas Send Status for the Task")
+        todo_filter = { '_id': ObjectId(task_id)}
+        todo_data = {'status': status}
+        await self.bot.todo.update_by_custom(todo_filter, todo_data)
+        await ctx.send("Task updated")
+
 
 def setup(bot):
     bot.add_cog(Warns(bot))
