@@ -129,6 +129,27 @@ class Invites(commands.Cog):
             embed = discord.Embed(description=f"The {member.mention} Is invited by <@{invier}>", timestamp=datetime.datetime.now())
 
             await ctx.send(embed=embed)
+    @commands.command(name='ilb', description="invite lb")
+    async def ilb(self, ctx):
+        invites = await self.bot.invites.get_all()
+        
+        invites = sorted(invites, key=lambda x: x["count"], reverse=True)
+        
+        pages = []
+        for invite in invites:
+            description = f"""
+            Member: <@{invite['_id']}>
+            Toal Inivits: {invite['count']}
+            """
+            pages.append(description)
+
+        await Pag(
+            title=f"Inivits leaderboard",
+            colour=0xCE2029,
+            entries=pages,
+            length=5
+        ).start(ctx)
+        
 
 
 
