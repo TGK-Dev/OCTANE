@@ -120,66 +120,110 @@ class Warns(commands.Cog):
 
         await ctx.send(f"Cleared all warnings form the {member.display_name}")
 
-    @commands.command(name="task", description="send my bugs/typo to the Owners", usage="[todo]", hidden=True)
+    @commands.group(hidden = True,description="Simpal Task command",invoke_without_command = True)
     @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
-    async def task(self, ctx, *,todo):
+    async def tasks(self, ctx):
+        await ctx.invoke(self.bot.get_command("help"), entity="tasks")
+
+
+    @tasks.command(name="tasks", description="",invoke_without_command = True, usage="[task]", hidden=True)
+    @commands.has_any_role(785842380565774368,799037944735727636)
+    async def add(self, ctx, member: discord.Member=None, *,task):
+        member = member if member else ctx.author
+        if member == ctx.author:
+            return await ctx.send("Your can't give task to your self or you can?")
+
         status = "Pending"
         current_task_count = len(
-            await self.bot.todo.find_many_by_custom(
-            {
+            await self.bot.tasks.find_many_by_custom(
+            {   
+                "user_id": member.id,
                 "guild_id": ctx.guild.id
             }
+            
             )
-
         )+1
 
-        todo_filter = {'user_id': ctx.author.id, 'guild_id': ctx.guild.id, 'task_count': current_task_count}
-        todo_data = {'todo': todo, 'timestamp': datetime.datetime.now(), 'status': status}
+        if current_task_count >= 10:
+            return await ctx.send("User has maximum task reached")
 
-        await self.bot.todo.upsert_custom(todo_filter, todo_data)
-        embed = discord.Embed(description="Your bug/todo thing is saved.", color=0xFFFFFF)
+        task_filter = {'user_id': member.id, 'guild_id': ctx.guild.id, 'task_count': current_task_count}
+        task_data = {'task': task, 'timestamp': datetime.datetime.now(), 'status': status}
+
+        await self.bot.tasks.upsert_custom(task_filter, task_data)
+        embed = discord.Embed(description="Your Task is successfully assigned", color=0xFFFFFF)
         await ctx.message.delete()
         await ctx.send(embed=embed)
 
-    @commands.command(name="tasks", description="lsit of of bugs", usage="", hidden=True)
-    @commands.has_any_role(785842380565774368,799037944735727636)
-    async def tasks(self, ctx):
-        todo_filter = {"guild_id": ctx.guild.id}
-        todos = await self.bot.todo.find_many_by_custom(todo_filter)
+    @tasks.command(name="list", description="lsit of of bugs", usage="", hidden=True)
+    @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
+    async def list(self, ctx, member: discord.Member=None):
+        member = member if member else ctx.author
+        tasks_filter = {
+        "user_id": member.id,
+        "guild_id": ctx.guild.id
+
+        }
+        tasks = await self.bot.tasks.find_many_by_custom(tasks_filter)
         
-        if not bool(todos):
-            return await ctx.send(f"All bugs are done for now")
+        if not bool(tasks):
+            return await ctx.send(f"No Taks is Left to do")
         
-        todos = sorted(todos, key=lambda x: x["task_count"])
+        tasks = sorted(tasks, key=lambda x: x["task_count"])
         
         pages = []
-        for todo in todos:
+        for task in tasks:
             description = f"""
-            Task id: `{todo['_id']}`
-            Task Number: `{todo['task_count']}`
-            Task : `{todo['todo']}`
-            Task Status: `{todo['status']}`
-            Task By: <@{todo['user_id']}>
-            Task File: {todo['timestamp'].strftime("%I:%M %p %B %d, %Y")}
+            Task id: `{task['_id']}`
+            Task Number: `{task['task_count']}`
+            Task : `{task['task']}`
+            Task Status: `{task['status']}`
+            Task By: <@{task['user_id']}>
+            Task File: {task['timestamp'].strftime("%I:%M %p %B %d, %Y")}
             """
             pages.append(description)
 
         await Pag(
-            title=f"Task for the TGK Utility",
+            title=f"Showing the Task for the {member.display_name}",
             colour=0xCE2029,
             entries=pages,
             length=2
         ).start(ctx)
 
-    @commands.command(name="tdone", hidden=True)       
-    @commands.has_role(785842380565774368)
-    async def tdone(self, ctx, task_id, *,status=None):
+    @tasks.command(name="update", hidden=True)       
+    @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
+    async def update(self, ctx, task_id, *,status=None):
+        
         if status is None:
             await ctx.send("pleas Send Status for the Task")
-        todo_filter = { '_id': ObjectId(task_id)}
-        todo_data = {'status': status}
-        await self.bot.todo.update_by_custom(todo_filter, todo_data)
+
+        task_filter = { '_id': ObjectId(task_id), 'user_id': ctx.author.id}
+        tasks = await self.bot.task.find_many_by_custom(task_filter)
+
+        if not bool(tasks):
+            return await ctx.send("please Send ckeck your task id and your can't cahnnge other's task status")
+        task_data = {'status': status}
+        await self.bot.tasks.update_by_custom(task_filter, task_data)
         await ctx.send("Task updated")
+        await ctx.message.delete()
+
+    @tasks.command(name="remove", hidden=True)
+    @commands.has_permissions(administrator=True)
+    async def removed(self, ctx, *,tasks_id):
+        task_filter = {
+        '_id': ObjectId(tasks_id),
+        }
+        tasks = await self.bot.tasks.find_many_by_custom(task_filter)
+
+        for task in tasks:
+            await ctx.send(f"Are you Sure you want to remvoe the {task['task']} for the user <@{task['user_id']}> [y/n]")
+            try:
+                await self.bot.wait_for("message", check=lambda m: m.author.id == ctx.author.id and m.content.startswith("y") or m.content.startswith("Y"), timeout=60)
+                await self.bot.tasks.delete_by_custom(task_filter)
+                await ctx.send("Task Removed")
+            except asyncio.TimeoutError:
+                await ctx.send("timeout try again")
+
 
 
 def setup(bot):
