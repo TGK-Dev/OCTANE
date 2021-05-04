@@ -96,8 +96,7 @@ async def on_ready():
     print(
         f"-----\nLogged in as: {bot.user.name} : {bot.user.id}\n-----\nMy current prefix is: {bot.DEFAULTPREFIX}\n-----"
     )
-    await bot.change_presence(
-        activity=discord.Game(name="Cries in Binary | 00111010 00101000"), status=discord.Status.dnd)
+    await bot.change_presence(activity=discord.Game(name=f"Cries in Binary | 00111010 00101000"), status=discord.Status.dnd)
       # This changes the bots 'activity'
 
     for document in await bot.config.get_all():
@@ -158,7 +157,7 @@ if __name__ == "__main__":
     bot.blacklist = Document(bot.db, "blacklist")
     bot.tictactoe = Document(bot.db, "tictactoe")
     bot.invites = Document(bot.db, "invites")
-    bot.todo = Document(bot.db, "todo")
+    bot.tasks = Document(bot.db, "tasks")
 
     for file in os.listdir(cwd + "/cogs"):
         if file.endswith(".py") and not file.startswith("_"):
