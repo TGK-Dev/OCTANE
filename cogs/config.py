@@ -97,7 +97,7 @@ class Config(commands.Cog):
 
     @commands.command(name="activity", description="Change Bot activity", usage="[activity]", hidden=True)
     @commands.has_permissions(administrator=True)
-    async def activity(self, ctx, *, activity):
+    async def activity(self, ctx, *, activity): 
         await self.bot.change_presence(activity=discord.Game(name=f"{activity}"), status=discord.Status.dnd) # This changes the bots 'activity'
         await ctx.send('Bot activity is Updated')
 
