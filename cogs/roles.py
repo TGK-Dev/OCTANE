@@ -76,11 +76,11 @@ class roles(commands.Cog):
         await ctx.message.delete()
         if role in roles:
             await member.remove_roles(role)
-            embed = discord.Embed(description=f"<:allow:819194696874197004> | Removed {role} from {member}")
+            embed = discord.Embed(description=f"<:allow:819194696874197004> | {role} Removed from {member}")
             await ctx.send(embed=embed)
         else:
             await member.add_roles(role)
-            embed = discord.Embed(description=f"<:allow:819194696874197004> | Added {role} from {member}")
+            embed = discord.Embed(description=f"<:allow:819194696874197004> | {role} Added to {member}")
             await ctx.send(embed=embed)
 
    
