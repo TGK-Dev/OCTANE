@@ -10,6 +10,7 @@ from dateutil.relativedelta import relativedelta
 time_regex = re.compile("(?:(\d{1,5})(h|s|m|d))+?")
 time_dict = {"h": 3600, "s": 1, "m": 60, "d": 86400}
 
+description = "Moderation commands"
 
 class TimeConverter(commands.Converter):
     async def convert(self, ctx, argument):
@@ -28,7 +29,7 @@ class TimeConverter(commands.Converter):
         return round(time)
 
 
-class Moderation(commands.Cog):
+class Moderation(commands.Cog, description=description):
     def __init__(self, bot):
         self.bot = bot
         self.mute_task = self.check_current_mutes.start()
@@ -256,9 +257,9 @@ class Moderation(commands.Cog):
         await log_channel.send(embed=embed)
 
 
-    @commands.command(name="purge", description="A command which purges the channel it is called in", usage="[amount]")
+    @commands.group(name="purge", description="A command which purges the channel it is called in", usage="[amount]", invoke_without_command = True)
     @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
-    async def purge(self, ctx, amount=15):
+    async def purge(self, ctx, amount=10):
         await ctx.message.delete()
         await ctx.channel.purge(limit=amount + 1)
         embed = discord.Embed(
@@ -266,6 +267,21 @@ class Moderation(commands.Cog):
             description=f"{amount} messages were cleared",
         )
         await ctx.send(embed=embed, delete_after=15)
+
+    @purge.command(name="user", description="Delete mention Uers channel", hidden=True)
+    @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
+    async def user(self, ctx, user: discord.Member=None, amount=10):
+        user = user if user else ctx.author
+        if user == ctx.author:
+            return await ctx.send("you can't purge Your self")
+
+        channel = ctx.channel
+
+        def check(meg):
+            return meg.author.id == user.id
+
+        #await ctx.message.delete()
+        await channel.purge(limit=amount, check=check, before=None)
 
     @commands.command(name="uerinfo", description="Give all Infomation about user", usage="[member]", aliases=['whois'])
     @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
