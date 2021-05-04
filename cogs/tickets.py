@@ -199,8 +199,6 @@ class tickets(commands.Cog):
             if not bool(tickets):
                 return await ctx.send(f"Couldn't find any Close Tickets")
 
-            tickets = sorted(tickets, key=lambda x: x["ticket_number"])
-
             for ticket in tickets:
                 member = ctx.guild.get_member(ticket['user_id'])
                 
