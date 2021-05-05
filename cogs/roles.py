@@ -9,6 +9,7 @@ from dateutil.relativedelta import relativedelta
 
 time_regex = re.compile("(?:(\d{1,5})(h|s|m|d))+?")
 time_dict = {"h": 3600, "s": 1, "m": 60, "d": 86400}
+description = "Role Mangement Commands"
 
 def comman_ping(role1, role2):
     ping1 = set(role1)
@@ -22,7 +23,7 @@ def comman_ping(role1, role2):
 def fomat_time(time):
   return time.strftime('%d-%B-%Y %I:%m %p')
 
-class roles(commands.Cog):
+class roles(commands.Cog,  description=description):
     def __init__(self, bot):
         self.bot = bot
 
@@ -31,7 +32,7 @@ class roles(commands.Cog):
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
 
     #geting All Info mantions
-    @commands.command(name="roleinfo", description="members with this role", usage="[role.id]")
+    @commands.command(name="roleinfo", description="Give Infomation Abouth Role", usage="[Role]")
     @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
     async def roleinfo(self, ctx, *,role: discord.Role=None):
         if role == None:
@@ -46,17 +47,15 @@ class roles(commands.Cog):
         await ctx.message.delete()
 
         role_color = role.color
-        embed = discord.Embed(title=f"Role Infomation for {role.name}", color=role_color)
-        embed.add_field(name=f"Name:", value=f"{role.name}")
-        embed.add_field(name=f"Members:", value=f"{len(role.members)}", inline=False)
-        embed.add_field(name=f"Created At", value=fomat_time(role.created_at))
-        embed.add_field(name=f"color", value=f"{role.color}", inline=False)
-        embed.set_footer(text=f"ID {role.id}")
-
+        embed = discord.Embed(title=f"Role Infomation for {role.name}", color=role_color, 
+            description=f"**Name**: {role.name}\n**Role ID**: {role.id}\n**Created At**:{fomat_time(role.created_at)}\n\
+            **Role color**: {role.color}\n**Tatol Members**:{len(role.members)}\n\
+            **hoist**: {role.hoist}\n**Mentionable** {role.mentionable}"
+            )
         await ctx.send(embed=embed, delete_after=60)
         
     #Added Roel/Remove to any User
-    @commands.command(name="role", description="add Role fored user", usage="[member][role]")
+    @commands.command(name="role", description="add/Remove role from user", usage="[member][role]")
     @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376)
     async def role(self, ctx, member:discord.Member, *,role: discord.Role):
         if role == None:
@@ -85,7 +84,7 @@ class roles(commands.Cog):
 
    
     #some Important roles members count 
-    @commands.command(name="Pings", description="Give numbers of some the pings roles", usage="")
+    @commands.command(name="Pings", description="Members count of some Roles", usage="")
     @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889, 831405039830564875)
     async def pings(self, ctx):
         await ctx.message.delete()
@@ -118,7 +117,7 @@ class roles(commands.Cog):
         await ctx.send(embed=embed)
 
     #Verify Command when Carl is down
-    @commands.command(name="verify", description="Very Your self in Server", usage="[]", hidden=True)
+    @commands.command(name="verify", description="Very Yourself in Server", usage="[]", hidden=True)
     async def verify(self, ctx):
         if ctx.channel.id == 812906607301099520:
 
