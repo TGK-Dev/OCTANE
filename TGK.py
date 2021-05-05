@@ -12,11 +12,13 @@ import discord
 from pathlib import Path
 import motor.motor_asyncio
 from discord.ext import commands
+#from better_help import Help
 
 # Local code
 import utils.json_loader
 from utils.mongo import Document
 from utils.util import clean_code, Pag
+from utils.help import Help
 
 cwd = Path(__file__).parents[0]
 cwd = str(cwd)
@@ -47,7 +49,7 @@ bot = commands.Bot(
     command_prefix=get_prefix,
     case_insensitive=True,
     owner_id=488614633670967307,
-    help_command=None,
+    help_command=Help(),
     intents=intents,
 )
 # change command_prefix='-' to command_prefix=get_prefix for custom prefixes
@@ -164,3 +166,4 @@ if __name__ == "__main__":
             bot.load_extension(f"cogs.{file[:-3]}")
 
     bot.run(bot.config_token)
+
