@@ -10,7 +10,9 @@ from discord.ext import commands
 from discord.ext.buttons import Paginator
 from bson.objectid import ObjectId
 
-class tickets(commands.Cog):
+description = "Ticket System For the Server Support"
+
+class tickets(commands.Cog, description=description):
     def __init__(self, bot):
         self.bot = bot
 
