@@ -11,8 +11,9 @@ from discord.ext import commands
 from utils import Winner, TicTacToe, InvalidMove, PlayerStats
 from utils.util import Pag
 
+description = "Clasis Tic Tac Toe"
 #hell YEs
-class Games(commands.Cog):
+class Games(commands.Cog, description=description):
     def __init__(self, bot):
         self.bot = bot
         self.stats = {}
@@ -83,7 +84,7 @@ class Games(commands.Cog):
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
         await self.populate_stats()
 
-    @commands.command(aliases=["ttt"])
+    @commands.command(name="tictactoe",description="old tictactoe Games", aliases=["ttt"])
     @commands.max_concurrency(1, commands.BucketType.channel)
     async def tictactoe(self, ctx, player_two: discord.Member = None):
         if ctx.channel.id in [785849567518130176, 792246185238069249, 785860772470849536]:
@@ -197,7 +198,7 @@ class Games(commands.Cog):
         else:
             await ctx.send('Please Use the <#785849567518130176> to paly this Game')
 
-    @commands.command()
+    @commands.command(name="profile", description="Show Your Stats for the tic TicTacToe Game")
     async def profile(self, ctx, player: discord.Member = None):
         if ctx.channel.id in [785849567518130176, 792246185238069249, 785860772470849536]:
 
@@ -218,7 +219,7 @@ class Games(commands.Cog):
         else:
             return
 
-    @commands.command(aliases=["lb"])
+    @commands.command(nmae="leaderboard",description="leaderboard For the TicTacToe",aliases=["lb"])
     async def leaderboard(self, ctx, stat_type="wins"):
         """Shows the TicTacToe leaderboard"""
         if ctx.channel.id in [785849567518130176, 792246185238069249, 785860772470849536]:
