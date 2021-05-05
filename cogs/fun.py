@@ -13,10 +13,10 @@ from discord.ext.buttons import Paginator
 
 time_regex = re.compile("(?:(\d{1,5})(h|s|m|d))+?")
 time_dict = {"h": 3600, "s": 1, "m": 60, "d": 86400}
+description= "Fun commands"
 
 
-
-class TimeConverter(commands.Converter):
+class TimeConverter(commands.Converter,):
     async def convert(self, ctx, argument):
         args = argument.lower()
         matches = re.findall(time_regex, args)
@@ -33,14 +33,19 @@ class TimeConverter(commands.Converter):
         return round(time)
 
 
-class fun(commands.Cog):
+class fun(commands.Cog,  description=description):
 	"""docstring for Example"""
 	def __init__(self, bot):
 		self.bot = bot
 
 	@commands.Cog.listener()
 	async def on_ready(self):
-		print(f"{self.__class__.__name__} Cog has been loaded\n-----")	
+		print(f"{self.__class__.__name__} Cog has been loaded\n-----")
+
+	@commands.command(name="8ball", description="old School 8ball game", usage="[question]")
+	@commands.cooldown(2, 60, commands.BucketType.user)
+	async def ball(self, ctx, *, question):
+		await ctx.send(bot.ball.response(question))	
 
 	@commands.command(name="dadjoke", description="Send a dad Joke", usage="" ,aliases=["djoke"])
 	@commands.cooldown(2, 60, commands.BucketType.user)
