@@ -8,7 +8,7 @@ from discord.ext import commands, tasks
 from dateutil.relativedelta import relativedelta
 
 
-class Events(commands.Cog):
+class Events(commands.Cog, command_attrs=dict(hidden=True)):
     def __init__(self, bot):
         self.bot = bot
 
@@ -20,10 +20,6 @@ class Events(commands.Cog):
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
         # Ignore these errors
-        ignored = (commands.CommandNotFound, commands.UserInputError)
-        if isinstance(error, ignored):
-            return
-
         if isinstance(error, commands.CommandOnCooldown):
             # If the command is currently on cooldown trip this
             m, s = divmod(error.retry_after, 60)
@@ -41,30 +37,14 @@ class Events(commands.Cog):
         elif isinstance(error, commands.CheckFailure):
             # If the command has failed a check, trip this
             await ctx.send("Hey! You lack permission to use this command.")
-        elif isinstance(error, commands.MemberNotFound):
-            await ctx.send('Member not Found')
-        elif isinstance(error, commands.UserNotFound):
-            await ctx.send('User not Found')
-        elif isinstance(error, commands.ChannelNotFound):
-            await ctx.send('Channel Not Found')
-        elif isinstance(error, commands.RoleNotFound):
-            await ctx.send('Role Not Found')
-        elif isinstance(error, commands.ExtensionAlreadyLoaded):
-            await ctx.send(f'The {name} is Already Loaded')
-        elif isinstance(error, commands.ExtensionNotFound):
-            await ctx.send(f'The {name} is Already UnLoaded')
-        elif isinstance(error, commands.ExtensionNotFound):
-            await ctx.send(f'The Extension not Found')
         elif isinstance(error, commands.DisabledCommand):
             await ctx.send('The command is disabed by Owner')
-        elif isinstance(error, commands.MissingRequiredArgument):
-            await ctx.message.reply(f'Please Enter all the Requird Argument')
         elif isinstance(error, commands.MaxConcurrencyReached):
             await ctx.send('Please Wait for last Game to End')
         elif isinstance(error, commands.CommandInvokeError):
             return
         else:
-            raise error
+            await ctx.send(error)
 
     @commands.Cog.listener()
     async def on_message(self, message):
