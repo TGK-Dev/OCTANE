@@ -11,8 +11,10 @@ from dateutil.relativedelta import relativedelta
 
 time_regex = re.compile("(?:(\d{1,5})(h|s|m|d))+?")
 time_dict = {"h": 3600, "s": 1, "m": 60, "d": 86400}
+description = "Warnings System"
 
-class Warns(commands.Cog):
+
+class Warns(commands.Cog, description=description):
     def __init__(self, bot):
         self.bot = bot
 		
@@ -120,47 +122,12 @@ class Warns(commands.Cog):
 
         await ctx.send(f"Cleared all warnings form the {member.display_name}")
 
-    @commands.group(hidden = True,description="Simpal Task command",invoke_without_command = True)
+    @commands.group(name="tasks" ,hidden = False ,description="Simpal Task command" ,invoke_without_command = True)
     @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
     async def tasks(self, ctx):
-        await ctx.invoke(self.bot.get_command("help"), entity="tasks")
-
-
-    @tasks.command(name="tasks", description="",invoke_without_command = True, usage="[task]", hidden=True)
-    @commands.has_any_role(785842380565774368,799037944735727636)
-    async def add(self, ctx, member: discord.Member=None, *,task):
-        member = member if member else ctx.author
-        if member == ctx.author:
-            return await ctx.send("Your can't give task to your self or you can?")
-
-        status = "Pending"
-        current_task_count = len(
-            await self.bot.tasks.find_many_by_custom(
-            {   
-                "user_id": member.id,
-                "guild_id": ctx.guild.id
-            }
-            
-            )
-        )+1
-
-        if current_task_count >= 10:
-            return await ctx.send("User has maximum task reached")
-
-        task_filter = {'user_id': member.id, 'guild_id': ctx.guild.id, 'task_count': current_task_count}
-        task_data = {'task': task, 'timestamp': datetime.datetime.now(), 'status': status}
-
-        await self.bot.tasks.upsert_custom(task_filter, task_data)
-        embed = discord.Embed(description="Your Task is successfully assigned", color=0xFFFFFF)
-        await ctx.message.delete()
-        await ctx.send(embed=embed)
-
-    @tasks.command(name="list", description="lsit of of bugs", usage="", hidden=True)
-    @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
-    async def list(self, ctx, member: discord.Member=None):
-        member = member if member else ctx.author
+        member = ctx.author
         tasks_filter = {
-        "user_id": member.id,
+        "user_id": ctx.author.id,
         "guild_id": ctx.guild.id
 
         }
@@ -184,13 +151,47 @@ class Warns(commands.Cog):
             pages.append(description)
 
         await Pag(
-            title=f"Showing the Task for the {member.display_name}",
+            title=f"Showing the Task for the {ctx.author.display_name}",
             colour=0xCE2029,
             entries=pages,
             length=2
         ).start(ctx)
 
-    @tasks.command(name="update", hidden=True)       
+    @tasks.command(name="add", description="", usage="[task]", hidden=False)
+    @commands.has_any_role(785842380565774368,799037944735727636)
+    async def add(self, ctx, member: discord.Member=None, *,task):
+        member = member if member else ctx.author
+        #if member == ctx.author:
+            #return await ctx.send("Your can't give task to your self or you can?")
+
+        status = "Pending"
+        current_task_count = len(
+            await self.bot.tasks.find_many_by_custom(
+            {   
+                "user_id": member.id,
+                "guild_id": ctx.guild.id
+            }
+            
+            )
+        )+1
+
+        if current_task_count >= 10:
+            return await ctx.send("User has maximum task reached")
+
+        task_filter = {'user_id': member.id, 'guild_id': ctx.guild.id, 'task_count': current_task_count}
+        task_data = {'task': task, 'timestamp': datetime.datetime.now(), 'status': status}
+
+        await self.bot.tasks.upsert_custom(task_filter, task_data)
+        embed = discord.Embed(description="Your Task is successfully assigned", color=0xFFFFFF)
+        await ctx.message.delete()
+        dm_embed = discord.Embed(description=f"You have Got New Task\nTask: {task}\nTotal Task: {current_task_count} \nTask By: {ctx.author.name}")
+        try:
+            await member.send(embed=dm_embed)
+        except discord.HTTPException:
+            pass
+        await ctx.send(embed=embed)
+ 
+    @tasks.command(name="update", hidden=False)       
     @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
     async def update(self, ctx, task_id, *,status=None):
         
@@ -198,7 +199,7 @@ class Warns(commands.Cog):
             await ctx.send("pleas Send Status for the Task")
 
         task_filter = { '_id': ObjectId(task_id), 'user_id': ctx.author.id}
-        tasks = await self.bot.task.find_many_by_custom(task_filter)
+        tasks = await self.bot.tasks.find_many_by_custom(task_filter)
 
         if not bool(tasks):
             return await ctx.send("please Send ckeck your task id and your can't cahnnge other's task status")
@@ -207,9 +208,9 @@ class Warns(commands.Cog):
         await ctx.send("Task updated")
         await ctx.message.delete()
 
-    @tasks.command(name="remove", hidden=True)
+    @tasks.command(name="remove", hidden=False)
     @commands.has_permissions(administrator=True)
-    async def removed(self, ctx, *,tasks_id):
+    async def remove(self, ctx, *,tasks_id):
         task_filter = {
         '_id': ObjectId(tasks_id),
         }
