@@ -4,8 +4,9 @@ import discord
 from discord.ext import commands
 from discord.ext.buttons import Paginator
 
+description="Channel Management Commands"
 
-class txt_manage(commands.Cog):
+class channel(commands.Cog, description=description):
     def __init__(self, bot):
         self.bot = bot
 
@@ -60,7 +61,7 @@ class txt_manage(commands.Cog):
 
         await ctx.send(embed=embed)
 
-    @commands.command(name="lock", description="Lock the given channel For mentioned Role", usage="[channel] [Role]",)
+    @commands.command(name="lock", description="Lock the given channel For mentioned Role", usage="[Role]", aliases=['l'])
     @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
     async def lock(self, ctx, role: discord.Role = None):
 
@@ -76,7 +77,7 @@ class txt_manage(commands.Cog):
         embed = discord.Embed(color=0x02ff06, description=f'The {channel.name} is Lock for {role.mention}')
         await channel.send(embed=embed)
 
-    @commands.command(name="unlock", description="UnLock the given channel For mentioned Role", usage="[channel] [Role]",)
+    @commands.command(name="unlock", description="Unlock the given channel For mentioned Role", usage="[Role]", aliases=['ul'])
     @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
     async def unlock(self, ctx, role: discord.Role = None):
 
@@ -128,7 +129,7 @@ class txt_manage(commands.Cog):
                 await ctx.send(f'Slowmode interval is now **{cd} secs**.')
 
 
-    @commands.command(name="Hide", description="Hide Channels For mentioned Role", usage="[channel] [role]")
+    @commands.command(name="Hide", description="Hide Channels For mentioned Role", usage="[role]")
     @commands.has_any_role(785842380565774368,799037944735727636)
     async def hide(self, ctx, channel: discord.TextChannel = None, role: discord.Role = None):
         channel = channel if channel else ctx.channel
@@ -144,7 +145,7 @@ class txt_manage(commands.Cog):
         
 
 
-    @commands.command(name="Unhide", description="Unhide Channels For mentioned Role", usage="[channel] [role]")
+    @commands.command(name="Unhide", description="Unhide Channels For mentioned Role", usage="[role]")
     @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376)
     async def unhide(self, ctx, channel: discord.TextChannel = None, role: discord.Role = None):
         channel = channel if channel else ctx.channel
@@ -158,7 +159,7 @@ class txt_manage(commands.Cog):
             color=0x02ff06, description=f'The {channel.name} is Now Visibal for for {role.name}')
         await ctx.send(embed=embed, delete_after=10)
 
-    @commands.command(name="Sync", description="Sync Channels permissions", usage="[channel]")
+    @commands.command(name="Sync", description="Sync Channels permissions to it's Category", usage="[channel]")
     @commands.has_any_role(785842380565774368,799037944735727636)
     async def sync(self, ctx, channel: discord.TextChannel=None):
         channel = channel if channel else ctx.channel
@@ -169,7 +170,7 @@ class txt_manage(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(txt_manage(bot))
+    bot.add_cog(channel(bot))
 
 
 """
