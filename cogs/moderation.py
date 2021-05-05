@@ -29,7 +29,7 @@ class TimeConverter(commands.Converter):
         return round(time)
 
 
-class Moderation(commands.Cog, description=description):
+class Moderation(commands.Cog, description=description, command_attrs=dict(hidden=False)):
     def __init__(self, bot):
         self.bot = bot
         self.mute_task = self.check_current_mutes.start()
@@ -172,7 +172,7 @@ class Moderation(commands.Cog, description=description):
 
 
 
-    @commands.command(name="kick", description="A command which kicks a given user", usage="<user> [reason]")
+    @commands.command(name="kick", description="kick User from the guild", usage="<user> [reason]")
     @commands.guild_only()
     @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376)
     async def kick(self, ctx, member: discord.Member, *, reason=None):
@@ -202,7 +202,7 @@ class Moderation(commands.Cog, description=description):
         await log_channel.send(embed=embed)
 
 
-    @commands.command(name="Ban", description="A command which kicks a given user", usage="<user> [reason]")
+    @commands.command(name="Ban", description="Ban user From guild", usage="<user> [reason]")
     @commands.guild_only()
     @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376)
     async def ban(self, ctx, member: discord.Member, *, reason=None):
@@ -232,7 +232,7 @@ class Moderation(commands.Cog, description=description):
 
         await log_channel.send(embed=embed)
 
-    @commands.command(name="unban", description="A command which unbans a given user", usage="<user> [reason]")
+    @commands.command(name="unban", description="Unban user From guild", usage="<user> [reason]")
     @commands.guild_only()
     @commands.has_any_role(785842380565774368,799037944735727636)
     async def unban(self, ctx, member, *, reason=None):
@@ -257,7 +257,7 @@ class Moderation(commands.Cog, description=description):
         await log_channel.send(embed=embed)
 
 
-    @commands.group(name="purge", description="A command which purges the channel it is called in", usage="[amount]", invoke_without_command = True)
+    @commands.command(name="purge", description="A command which purges the channel it is called in", usage="[amount]", invoke_without_command = True)
     @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
     async def purge(self, ctx, amount=10):
         await ctx.message.delete()
@@ -267,21 +267,6 @@ class Moderation(commands.Cog, description=description):
             description=f"{amount} messages were cleared",
         )
         await ctx.send(embed=embed, delete_after=15)
-
-    @purge.command(name="user", description="Delete mention Uers channel", hidden=True)
-    @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
-    async def user(self, ctx, user: discord.Member=None, amount=10):
-        user = user if user else ctx.author
-        if user == ctx.author:
-            return await ctx.send("you can't purge Your self")
-
-        channel = ctx.channel
-
-        def check(meg):
-            return meg.author.id == user.id
-
-        #await ctx.message.delete()
-        await channel.purge(limit=amount, check=check, before=None)
 
     @commands.command(name="uerinfo", description="Give all Infomation about user", usage="[member]", aliases=['whois'])
     @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
