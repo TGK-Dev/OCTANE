@@ -44,7 +44,7 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
         elif isinstance(error, commands.CommandInvokeError):
             return
         else:
-            await ctx.send(error)
+            await ctx.send(error, delete_after=10)
 
     @commands.Cog.listener()
     async def on_message(self, message):
