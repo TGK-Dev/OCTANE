@@ -122,12 +122,12 @@ class Warns(commands.Cog, description=description):
 
         await ctx.send(f"Cleared all warnings form the {member.display_name}")
 
-    @commands.group(name="tasks" ,hidden = False ,description="Simpal Task command" ,invoke_without_command = True)
+    @commands.group(name="tasks" ,description="Simpal Task command" ,invoke_without_command = True)
     @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
-    async def tasks(self, ctx):
-        member = ctx.author
+    async def tasks(self, ctx, member: discord.Member=None):
+        member = member if member else ctx.author
         tasks_filter = {
-        "user_id": ctx.author.id,
+        "user_id": member.id,
         "guild_id": ctx.guild.id
 
         }
@@ -151,13 +151,13 @@ class Warns(commands.Cog, description=description):
             pages.append(description)
 
         await Pag(
-            title=f"Showing the Task for the {ctx.author.display_name}",
+            title=f"Showing the Task for the {member.display_name}",
             colour=0xCE2029,
             entries=pages,
             length=2
         ).start(ctx)
 
-    @tasks.command(name="add", description="", usage="[task]", hidden=False)
+    @tasks.command(name="add", description="", usage=" [user] [task]")
     @commands.has_any_role(785842380565774368,799037944735727636)
     async def add(self, ctx, member: discord.Member=None, *,task):
         member = member if member else ctx.author
@@ -191,7 +191,7 @@ class Warns(commands.Cog, description=description):
             pass
         await ctx.send(embed=embed)
  
-    @tasks.command(name="update", hidden=False)       
+    @tasks.command(name="update")       
     @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
     async def update(self, ctx, task_id, *,status=None):
         
@@ -208,7 +208,7 @@ class Warns(commands.Cog, description=description):
         await ctx.send("Task updated")
         await ctx.message.delete()
 
-    @tasks.command(name="remove", hidden=False)
+    @tasks.command(name="remove")
     @commands.has_permissions(administrator=True)
     async def remove(self, ctx, *,tasks_id):
         task_filter = {
@@ -225,6 +225,24 @@ class Warns(commands.Cog, description=description):
             except asyncio.TimeoutError:
                 await ctx.send("timeout try again")
 
+    @tasks.command(nmae="purge",)
+    @commands.has_permissions(administrator=True)
+    async def purge(self, ctx, member: discord.Member=None):
+        member = member if member else ctx.author
+
+        task_filter = {
+        'user_id': member.id,
+        'status' : 'Done'
+        }
+        task = len(await self.bot.tasks.find_many_by_custom(task_filter))
+
+        await ctx.send(f"You want to Clear {task} From the {member.mention}")
+        try:
+            await self.bot.wait_for("message", check=lambda m: m.author.id==ctx.author.id and m.channel.id== ctx.channel.id and m.content.startswith("y") or m.content.startswith("Y"), timeout=15)
+            await self.bot.tasks.delete_by_custom(task_filter)
+            await ctx.send("Tasks Removed")
+        except asyncio.TimeoutError:
+            await ctx.send("canceling The commands")
 
 
 def setup(bot):
