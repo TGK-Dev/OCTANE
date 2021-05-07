@@ -43,7 +43,10 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
             await ctx.send('Please Wait for last Game to End')
         elif isinstance(error, commands.CommandInvokeError):
             return
+        elif isinstance(error, commands.CommandNotFound):
+            return
         else:
+            #raise error
             await ctx.send(error, delete_after=10)
 
     @commands.Cog.listener()
