@@ -1,12 +1,6 @@
-import re
 import datetime
-from copy import deepcopy
-from discord.ext.buttons import Paginator
-import asyncio
 import discord
-from discord.ext import commands, tasks
-from dateutil.relativedelta import relativedelta
-
+from discord.ext import commands
 
 class Events(commands.Cog, command_attrs=dict(hidden=True)):
     def __init__(self, bot):
@@ -47,7 +41,8 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
             return
         else:
             #raise error
-            await ctx.send(error, delete_after=10)
+            await ctx.send(f"<:dnd:840490624670892063> | Error: `{error}`", delete_after=60)
+            mess = await ctx.send_help(ctx.command, )
 
     @commands.Cog.listener()
     async def on_message(self, message):

@@ -3,7 +3,6 @@ import DiscordUtils
 import datetime
 from discord.ext import commands
 from utils.util import Pag
-from discord.ext.buttons import Paginator
 
 # Requires: pip install DiscordUtils
 

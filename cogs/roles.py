@@ -1,14 +1,8 @@
-import re
 import datetime
-from copy import deepcopy
-from discord.ext.buttons import Paginator
 import asyncio
 import discord
-from discord.ext import commands, tasks
-from dateutil.relativedelta import relativedelta
+from discord.ext import commands
 
-time_regex = re.compile("(?:(\d{1,5})(h|s|m|d))+?")
-time_dict = {"h": 3600, "s": 1, "m": 60, "d": 86400}
 description = "Role Mangement Commands"
 
 def comman_ping(role1, role2):

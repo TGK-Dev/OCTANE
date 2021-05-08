@@ -1,15 +1,15 @@
 import datetime
 import asyncio
-from discord.ext import commands, tasks
 import discord
 import random
 import asyncio
 import eight_ball
 import re
 #-----------------------------
+
+from discord.ext import commands, tasks
 from aiohttp import ClientSession 
 from discord.ext import commands
-from discord.ext.buttons import Paginator
 
 time_regex = re.compile("(?:(\d{1,5})(h|s|m|d))+?")
 time_dict = {"h": 3600, "s": 1, "m": 60, "d": 86400}
@@ -38,6 +38,9 @@ class fun(commands.Cog,  description=description):
 	def __init__(self, bot):
 		self.bot = bot
 
+	def check_owner(ctx):
+		return ctx.author.bot == 488614633670967307 or 301657045248114690
+
 	@commands.Cog.listener()
 	async def on_ready(self):
 		print(f"{self.__class__.__name__} Cog has been loaded\n-----")
@@ -48,6 +51,8 @@ class fun(commands.Cog,  description=description):
 		await ctx.send(bot.ball.response(question))	
 
 	@commands.command(name="dadjoke", description="Send a dad Joke", usage="" ,aliases=["djoke"])
+	@commands.check(check_owner)
+	#@commands.has_any_role(799037944735727636)
 	@commands.cooldown(2, 60, commands.BucketType.user)
 	async def dadjoke(self, ctx):
 		url = "https://dad-jokes.p.rapidapi.com/random/jokes"
@@ -135,7 +140,6 @@ class fun(commands.Cog,  description=description):
 				description="Well Played but unfortunately None can guess the Currect Number",
 				color=0xE74C3C)
 			await game_channel.send(embed=lose_embed)
-
 	
 def setup(bot):
 	bot.add_cog(fun(bot))

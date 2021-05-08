@@ -2,7 +2,6 @@ import random
 
 import discord
 from discord.ext import commands
-from discord.ext.buttons import Paginator
 
 description="Channel Management Commands"
 

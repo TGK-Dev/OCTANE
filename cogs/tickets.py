@@ -4,10 +4,9 @@ import datetime
 import discord
 import chat_exporter
 import io
-
+#----------------------
 from typing import Union
 from discord.ext import commands
-from discord.ext.buttons import Paginator
 from bson.objectid import ObjectId
 
 description = "Ticket System For the Server Support"
