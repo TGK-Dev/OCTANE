@@ -6,3 +6,4 @@ Paginator==0.5.1
 asyncio==3.4.3
 chat-exporter==1.3.0.6.5
 eight-ball==3.0.3
+dnspython==1.16.0
