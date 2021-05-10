@@ -33,9 +33,13 @@ class Moderation(commands.Cog, description=description, command_attrs=dict(hidde
     def __init__(self, bot):
         self.bot = bot
         self.mute_task = self.check_current_mutes.start()
+        self.ban_task = self.check_current_bans.start()
 
     def cog_unload(self):
         self.mute_task.cancel()
+
+    def cog_unload(self):
+        self.ban_task.cancel()
 
 
     @tasks.loop(minutes=5)
@@ -62,6 +66,34 @@ class Moderation(commands.Cog, description=description, command_attrs=dict(hidde
                     self.bot.muted_users.pop(member.id)
                 except KeyError:
                     pass
+
+    @tasks.loop(seconds=10)
+    async def check_current_bans(self):
+        currentTime = datetime.datetime.now()
+        bans = deepcopy(self.bot.ban_users)
+        for key, value in bans.items():
+            if value['BanDuration'] is None:
+                continue
+
+            unbanTime = value['BannedAt'] + relativedelta(seconds=value['BanDuration'])
+
+            if currentTime >= unbanTime:
+                guild = self.bot.get_guild(value['guildId'])
+                member = await self.bot.fetch_user(int(value['_id']))
+                reason = "Auto Unban"
+                await guild.unban(member, reason=reason)
+                print("Testings")
+                await self.bot.bans.delete(member.id)
+                try:
+                    self.bot.ban_users.pop(member.id)
+                except KeyError:
+                    pass
+
+    @check_current_bans.before_loop
+    async def before_check_current_bans(self):
+        await self.bot.wait_until_ready()
+
+
 
     @check_current_mutes.before_loop
     async def before_check_current_mutes(self):
@@ -204,8 +236,8 @@ class Moderation(commands.Cog, description=description, command_attrs=dict(hidde
 
     @commands.command(name="Ban", description="Ban user From guild", usage="<user> [reason]")
     @commands.guild_only()
-    @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376)
-    async def ban(self, ctx, member: discord.Member, *, reason=None):
+    #@commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376)
+    async def ban(self, ctx, member: discord.Member, time: TimeConverter=None, *, reason=None):
         if member.top_role >= ctx.author.top_role:
             return await ctx.send("You can't You cannot do this action on this user due to role hierarchy.")
         
@@ -220,8 +252,19 @@ class Moderation(commands.Cog, description=description, command_attrs=dict(hidde
             emb = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **The User {member.name}** Has Been Banned || {reason}")
             await ctx.send(embed=emb)
 
+        data = {
+            '_id': member.id,
+            'BannedAt': datetime.datetime.now(),
+            'BanDuration': time or None,
+            'BanedBy': ctx.author.id,
+            'guildId': ctx.guild.id,
+        }
+        await self.bot.bans.upsert(data)
+        self.bot.ban_users[member.id] = data
+
+
         log_channel = self.bot.get_channel(827245906331566180)
-        log2_channel = self.bot.get_channel(806107399005667349)
+        #log2_channel = self.bot.get_channel(806107399005667349)
 
         embed = discord.Embed(title=f"Banned | {member.name}")
         embed.add_field(name="User", value=f"{member.name}")
@@ -234,7 +277,7 @@ class Moderation(commands.Cog, description=description, command_attrs=dict(hidde
 
     @commands.command(name="unban", description="Unban user From guild", usage="<user> [reason]")
     @commands.guild_only()
-    @commands.has_any_role(785842380565774368,799037944735727636)
+    #s@commands.has_any_role(785842380565774368,799037944735727636)
     async def unban(self, ctx, member, *, reason=None):
         await ctx.message.delete()
         member = await self.bot.fetch_user(int(member))
@@ -245,8 +288,14 @@ class Moderation(commands.Cog, description=description, command_attrs=dict(hidde
         )
         await ctx.send(embed=embed)
 
+        await self.bot.bans.delete(member.id)
+        try:
+            self.bot.muted_users.pop(member.id)
+        except KeyError:
+            pass
+
         log_channel = self.bot.get_channel(803687264110247987)
-        log2_channel = self.bot.get_channel(806107399005667349)
+        #log2_channel = self.bot.get_channel(806107399005667349)
 
         embed = discord.Embed(title=f"unban | {member.name}")
         embed.add_field(name="User", value=f"{member.name}", inline=False)
