@@ -234,7 +234,7 @@ class Moderation(commands.Cog, description=description, command_attrs=dict(hidde
         await log_channel.send(embed=embed)
 
 
-    @commands.command(name="Ban", description="Ban user From guild", usage="<user> [reason]")
+    @commands.command(name="Ban", description="Ban user From guild", usage="<user> [time] [reason]") 
     @commands.guild_only()
     #@commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376)
     async def ban(self, ctx, member: discord.Member, time: TimeConverter=None, *, reason=None):

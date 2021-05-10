@@ -68,19 +68,27 @@ class fun(commands.Cog,  description=description):
 				r = r["body"][0]
 				await ctx.send(f"**{r['setup']}**\n\n||{r['punchline']}||")
 
-	@commands.command(name="Guess The Number", description="Guess the Number Game", usage="[max] [time] [price] [role]", aliases=["gn"])
+	@commands.command(name="Guess The Number", description="Guess the Number Game", usage="[max] [time] [price] ", aliases=["gn"])
 	@commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376)
-	async def guess_number(self, ctx, maxn: int, time: TimeConverter=None, role: discord.Role=None, *,price=None):
+	async def guess_number(self, ctx, maxn: int, time: TimeConverter=None, *,price=None):
 		if maxn > 10000:
 			return await ctx.send("you can't big number then 10000")
-
-		role = role if role else ctx.guild.default_role
 
 		right_num = random.randint(1, maxn)
 		price = price if price else "None"
 		time = time if time else 3600
 		game_channel =  self.bot.get_channel(835138688668401675)
 		right_backup = self.bot.get_channel(834847353436373012)
+
+
+		await ctx.send("Please Enter required role or Type None to set it nono")
+		try:
+			message = await self.bot.wait_for("message", check= lambda m: m.channel.id == game_channel.id, timeout=60)
+			role = await commands.RoleConverter().convert(ctx, message.content)
+		except asyncio.TimeoutError:
+			return await ctx.send("Time Out Please Try Again")
+
+
 
 		start_em = discord.Embed(title=":tada: Guess The Number")
 		start_em.add_field(name="How to Play:",

@@ -192,32 +192,29 @@ class tickets(commands.Cog, description=description):
     @commands.command(name="open", description="Reopens current ticket", usage="")
     @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
     async def open(self, ctx):
-        if ctx.channel.category.id == 829230513516445736:
+        if ctx.channel.permissions_synced==False:
+            return await ctx.send("Ticket already Opned")
+        else:
 
-        	if ctx.channel.permissions_synced==False:
-        		return await ctx.send("Ticket already Opned")
-        	else:
+            ticket_filter = {"ticket_id": ctx.channel.id}
+            tickets = await self.bot.ticket.find_many_by_custom(ticket_filter)
 
-	            ticket_filter = {"ticket_id": ctx.channel.id}
+            if not bool(tickets):
+                return await ctx.send(f"Couldn't find any Close Tickets")
 
-	            tickets = await self.bot.ticket.find_many_by_custom(ticket_filter)
+            for ticket in tickets:
+                member = ctx.guild.get_member(ticket['user_id'])
 
-	            if not bool(tickets):
-	                return await ctx.send(f"Couldn't find any Close Tickets")
+            if not member:
+                return await ctx.send("user Not Found maybe he has Left server you may delete ticket by >delete")
 
-	            for ticket in tickets:
-	                member = ctx.guild.get_member(ticket['user_id'])
+            await ctx.channel.set_permissions(member, view_channel=True, send_messages=True, attach_files=True, embed_links=True)
 
-                    if not member:
-                        return await ctx.send("user Not Found maybe he has Left server you may delete ticket by >delete")
-	                
-	                await ctx.channel.set_permissions(member, view_channel=True, send_messages=True, attach_files=True, embed_links=True)
-	                
-	                embed = discord.Embed(color=0x02ff06, description=f"ticket open by {ctx.author.mention}")
+            embed = discord.Embed(color=0x02ff06, description=f"ticket open by {ctx.author.mention}")
 
-	                await ctx.send(embed=embed)
-	                await ctx.message.delete()
-            
+            await ctx.send(embed=embed)
+            await ctx.message.delete()
+           
 
 
     @commands.command(name="transcript", description="Save current ticket's transcript", usage="[limit] [time Zone]", aliases=["save"])
