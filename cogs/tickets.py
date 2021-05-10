@@ -104,6 +104,7 @@ class tickets(commands.Cog, description=description):
 
         else:
             return
+        
 
     @commands.command(name="new", hidden=True)
     @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
@@ -193,22 +194,29 @@ class tickets(commands.Cog, description=description):
     async def open(self, ctx):
         if ctx.channel.category.id == 829230513516445736:
 
-            ticket_filter = {"ticket_id": ctx.channel.id}
+        	if ctx.channel.permissions_synced==False:
+        		return await ctx.send("Ticket already Opned")
+        	else:
 
-            tickets = await self.bot.ticket.find_many_by_custom(ticket_filter)
+	            ticket_filter = {"ticket_id": ctx.channel.id}
 
-            if not bool(tickets):
-                return await ctx.send(f"Couldn't find any Close Tickets")
+	            tickets = await self.bot.ticket.find_many_by_custom(ticket_filter)
 
-            for ticket in tickets:
-                member = ctx.guild.get_member(ticket['user_id'])
-                
-                await ctx.channel.set_permissions(member, view_channel=True, send_messages=True, attach_files=True, embed_links=True)
-                
-                embed = discord.Embed(color=0x02ff06, description=f"ticket open by {ctx.author.mention}")
+	            if not bool(tickets):
+	                return await ctx.send(f"Couldn't find any Close Tickets")
 
-                await ctx.send(embed=embed)
-                await ctx.message.delete()
+	            for ticket in tickets:
+	                member = ctx.guild.get_member(ticket['user_id'])
+
+                    if not member:
+                        return await ctx.send("user Not Found maybe he has Left server you may delete ticket by >delete")
+	                
+	                await ctx.channel.set_permissions(member, view_channel=True, send_messages=True, attach_files=True, embed_links=True)
+	                
+	                embed = discord.Embed(color=0x02ff06, description=f"ticket open by {ctx.author.mention}")
+
+	                await ctx.send(embed=embed)
+	                await ctx.message.delete()
             
 
 
