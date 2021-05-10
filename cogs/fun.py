@@ -81,10 +81,14 @@ class fun(commands.Cog,  description=description):
 		right_backup = self.bot.get_channel(834847353436373012)
 
 
-		await ctx.send("Please Enter required role or Type None to set it nono")
+		await ctx.send("Please Enter required role or Type None to set it no requiment")
 		try:
 			message = await self.bot.wait_for("message", check= lambda m: m.channel.id == game_channel.id, timeout=60)
-			role = await commands.RoleConverter().convert(ctx, message.content)
+			if message.content.lower() == "none":
+				role = ctx.guild.default_role
+			else:				
+				role = await commands.RoleConverter().convert(ctx, message.content)
+
 		except asyncio.TimeoutError:
 			return await ctx.send("Time Out Please Try Again")
 
@@ -120,7 +124,6 @@ class fun(commands.Cog,  description=description):
 
 		try:
 			message = await self.bot.wait_for("message", check= lambda m: m.content.startswith(f"{right_num}") and m.channel.id == game_channel.id, timeout=time)
-			
 			done_overwrite = game_channel.overwrites_for(role)
 			done_overwrite.send_messages = False
 
