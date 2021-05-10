@@ -62,6 +62,7 @@ logging.basicConfig(level=logging.INFO)
 
 bot.DEFAULTPREFIX = DEFAULTPREFIX
 bot.muted_users = {}
+bot.ban_users = {}
 bot.blacklist_user = {}
 bot.temp_roled_users = {}
 bot.cwd = cwd
@@ -112,14 +113,20 @@ async def on_ready():
     for mute in currentMutes:
         bot.muted_users[mute["_id"]] = mute
 
+    currentBans = await bot.bans.get_all()
+    for ban in currentBans:
+        bot.ban_users[ban["_id"]] = ban
+
     print("\n-----")
-    print(bot.blacklist_user)
+    print(f"Current Bans\n{bot.blacklist_user}")
     print("\n-----")
-    print(bot.temp_roled_users)
+    print(f"Current Bans\n{bot.temp_roled_users}")
     print("\n-----")
-    print(bot.muted_users)
+    print(f"Current Bans\n{bot.muted_users}")
     print("\n-----")
-    print("Initialized Database\n-----")
+    print(f"Current Bans\n{bot.ban_users}")
+    print("\n-----")
+    print("Database Connected\n-----")
 
 
 @bot.event
@@ -154,6 +161,7 @@ if __name__ == "__main__":
     bot.db = bot.mongo["tgk_database"]
     bot.config = Document(bot.db, "config")
     bot.mutes = Document(bot.db, "mutes")
+    bot.bans = Document(bot.db, "bans")
     bot.warns = Document(bot.db, "warns")
     bot.ticket = Document(bot.db, "ticket")
     bot.blacklist = Document(bot.db, "blacklist")
