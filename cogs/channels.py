@@ -130,8 +130,8 @@ class channel(commands.Cog, description=description):
 
     @commands.command(name="Hide", description="Hide Channels For mentioned Role", usage="[role]")
     @commands.has_any_role(785842380565774368,799037944735727636)
-    async def hide(self, ctx, channel: discord.TextChannel = None, role: discord.Role = None):
-        channel = channel if channel else ctx.channel
+    async def hide(self, ctx, role: discord.Role = None):
+        channel = ctx.channel
         role = role if role else discord.utils.get(ctx.guild.roles, name="࿐ NEWBIE 〢 0")
         overwrite = channel.overwrites_for(role)
         overwrite.view_channel = False
@@ -139,15 +139,15 @@ class channel(commands.Cog, description=description):
         await ctx.message.delete()
 
         embed = discord.Embed(
-            color=0x02ff06, description=f'The {channel.name} is Now Hidded for for {role.name}')
+            color=0x02ff06, description=f'The {channel.name} is Now hidded for for {role.name}')
         await ctx.send(embed=embed, delete_after=10)
         
 
 
     @commands.command(name="Unhide", description="Unhide Channels For mentioned Role", usage="[role]")
     @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376)
-    async def unhide(self, ctx, channel: discord.TextChannel = None, role: discord.Role = None):
-        channel = channel if channel else ctx.channel
+    async def unhide(self, ctx, role: discord.Role = None):
+        channel = ctx.channel
         role = role if role else discord.utils.get(ctx.guild.roles, name="࿐ NEWBIE 〢 0")
         overwrite = channel.overwrites_for(role)
         overwrite.view_channel = True
