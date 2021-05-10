@@ -237,9 +237,9 @@ class Moderation(commands.Cog, description=description, command_attrs=dict(hidde
     @commands.command(name="Ban", description="Ban user From guild", usage="<user> [time] [reason]") 
     @commands.guild_only()
     #@commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376)
-    async def ban(self, ctx, member: discord.Member, time: TimeConverter=None, *, reason=None):
-        if member.top_role >= ctx.author.top_role:
-            return await ctx.send("You can't You cannot do this action on this user due to role hierarchy.")
+    async def ban(self, ctx, member: discord.User, time: TimeConverter=None, *, reason=None):
+        #if member.top_role >= ctx.author.top_role:
+            #return await ctx.send("You can't You cannot do this action on this user due to role hierarchy.")
         
         await ctx.message.delete()
         try:
