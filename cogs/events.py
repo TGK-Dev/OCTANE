@@ -1,5 +1,6 @@
 import datetime
 import discord
+import discord_slash
 from discord.ext import commands
 
 class Events(commands.Cog, command_attrs=dict(hidden=True)):
@@ -45,6 +46,31 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
                 description=f"<:tgk_warning:840638147838738432> | Error: `{error}`")
             await ctx.send(embed=embed)
             #mess = await ctx.send_help(ctx.command, )
+
+    @commands.Cog.listener()
+    async def on_slash_command_error(self, ctx, error):
+        if isinstance(error, commands.CommandOnCooldown):
+            # If the command is currently on cooldown trip this
+            m, s = divmod(error.retry_after, 60)
+            h, m = divmod(m, 60)
+            if int(h) == 0 and int(m) == 0:
+                await ctx.send(f" You must wait {int(s)} seconds to use this command!")
+            elif int(h) == 0 and int(m) != 0:
+                await ctx.send(
+                    f" You must wait {int(m)} minutes and {int(s)} seconds to use this command!"
+                )
+            else:
+                await ctx.send(
+                    f" You must wait {int(h)} hours, {int(m)} minutes and {int(s)} seconds to use this command!"
+                )
+        elif isinstance(error, commands.MissingPermissions):
+            await ctx.send("Hey! You lack permission to use this command.")
+        elif isinstance(error, commands.MissingAnyRole):
+            await ctx.send("Hey! You lack permission to use this command.")
+        else:
+            embed = discord.Embed(color=0xE74C3C, 
+                description=f"Error: `{error}`")
+            await ctx.send(embed=embed)
 
     @commands.Cog.listener()
     async def on_message(self, message):

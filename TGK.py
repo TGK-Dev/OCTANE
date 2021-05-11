@@ -12,6 +12,8 @@ import discord
 from pathlib import Path
 import motor.motor_asyncio
 from discord.ext import commands
+from discord_slash import SlashCommand
+from discord_slash.utils.manage_commands import create_option, create_choice
 #from better_help import Help
 
 # Local code
@@ -52,6 +54,7 @@ bot = commands.Bot(
     help_command=Help(),
     intents=intents,
 )
+slash = SlashCommand(bot, sync_commands=True)
 # change command_prefix='-' to command_prefix=get_prefix for custom prefixes
 bot.config_token = secret_file["token"]
 bot.connection_url = secret_file["mongo"]
@@ -66,7 +69,7 @@ bot.ban_users = {}
 bot.blacklist_user = {}
 bot.temp_roled_users = {}
 bot.cwd = cwd
-
+guild_ids = [785839283847954433, 797920317871357972]
 bot.version = "4.0"
 
 bot.colors = {
@@ -118,16 +121,15 @@ async def on_ready():
         bot.ban_users[ban["_id"]] = ban
 
     print("\n-----")
-    print(f"Current Bans\n{bot.blacklist_user}")
+    print(f"Current blacklist:\n{len(bot.blacklist_user)}\n{bot.blacklist_user}")
     print("\n-----")
-    print(f"Current Bans\n{bot.temp_roled_users}")
+    print(f"Current Temo Role:\n{len(bot.temp_roled_users)}\n{bot.temp_roled_users}")
     print("\n-----")
-    print(f"Current Bans\n{bot.muted_users}")
+    print(f"Current Mutes:\n{len(bot.muted_users)}\n{bot.muted_users}")
     print("\n-----")
-    print(f"Current Bans\n{bot.ban_users}")
+    print(f"Current Bans:{len(bot.ban_users)}\n{bot.ban_users}")
     print("\n-----")
     print("Database Connected\n-----")
-
 
 @bot.event
 async def on_message(message):
@@ -175,3 +177,11 @@ if __name__ == "__main__":
 
     bot.run(bot.config_token)
 
+"""
+
+{
+    "token": "ODMxNTYzNzgwNTI5MzI0MDMy.YHXEHg.7cm20TLRjhmXFmxl4KwUbwQIGWc",
+    "mongo": "mongodb+srv://test121:test121@cluster0.l4ljr.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
+    "x-rapidapi-key": "61081de6d7msh9b9cc262fb7993dp1ed8f8jsn4d6720e23330"
+}
+"""
