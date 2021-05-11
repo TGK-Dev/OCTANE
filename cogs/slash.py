@@ -11,7 +11,7 @@ from dateutil.relativedelta import relativedelta
 
 time_regex = re.compile("(?:(\d{1,5})(h|s|m|d))+?")
 time_dict = {"h": 3600, "s": 1, "m": 60, "d": 86400}
-guild_ids = [785839283847954433, 797920317871357972]
+guild_ids = [797920317871357972, 785839283847954433]
 
 description = "Slash Commands"
 
@@ -343,7 +343,7 @@ class Slash(commands.Cog, description=description):
 	    ) + 1
 	    
 	    warn_filter = {"user_id": member.id, "guild_id": member.guild.id, "number": current_warn_count}
-	    warn_data = {"reason": reason, "timestamp": ctx.message.created_at, "warned_by": ctx.author.id}
+	    warn_data = {"reason": reason, "timestamp": datetime.datetime.now(), "warned_by": ctx.author.id}
 	    
 	    await self.bot.warns.upsert_custom(warn_filter, warn_data)  
 	        
@@ -404,6 +404,14 @@ class Slash(commands.Cog, description=description):
 			entries=pages,
 			length=2
 		).start(ctx)
+	#
+	#
+	# Commands for channels
+	#
+	#
+
+
+		
 
 def setup(bot):
     bot.add_cog(Slash(bot))
