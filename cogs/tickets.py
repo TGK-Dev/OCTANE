@@ -26,7 +26,7 @@ class tickets(commands.Cog, description=description):
         member =  self.bot.get_user(payload.user_id)
         guild = self.bot.get_guild(785839283847954433)
 
-        if message.id == 837276253408198677:
+        if message.id == 841587710061969458:
 
             if member.id in self.bot.blacklist_user:
                 try:
