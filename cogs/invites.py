@@ -4,6 +4,10 @@ import datetime
 from discord.ext import commands
 from utils.util import Pag
 
+from discord_slash import cog_ext, SlashContext
+from discord_slash.utils.manage_commands import create_option, create_choice
+
+guild_ids = [797920317871357972, 785839283847954433]
 # Requires: pip install DiscordUtils
 
 def fomat_time(time):
@@ -74,9 +78,19 @@ class Invites(commands.Cog, description=description):
 
             await ctx.send(embed=embed)
             
-    @commands.command(name="inviter", description="find who Invited given user", usage="[member]")
-    @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
-    async def inviter(self, ctx, member: discord.Member):
+    @cog_ext.cog_slash(name="inviter", description="find who Invited given user",
+        guild_ids=guild_ids,
+        options=[
+        create_option(
+            name="member",
+            description="User you want to find inviter",
+            option_type=6,
+            required=True
+            )
+        ]
+    )
+    #@commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
+    async def inviter(self, ctx, member):
 
         invites_filter = {"userInvited": member.id}
 
@@ -91,7 +105,7 @@ class Invites(commands.Cog, description=description):
             embed = discord.Embed(description=f"The {member.mention} Is invited by <@{invier}>", timestamp=datetime.datetime.now())
 
             await ctx.send(embed=embed)
-            
+
     @commands.command(name='ilb', description="invites leaderboard")
     async def ilb(self, ctx):
         invites = await self.bot.invites.get_all()
