@@ -343,7 +343,7 @@ class Slash(commands.Cog, description=description):
 	    ) + 1
 	    
 	    warn_filter = {"user_id": member.id, "guild_id": member.guild.id, "number": current_warn_count}
-	    warn_data = {"reason": reason, "timestamp": ctx.datetime.datetime.now(), "warned_by": ctx.author.id}
+	    warn_data = {"reason": reason, "timestamp": datetime.datetime.now(), "warned_by": ctx.author.id}
 	    
 	    await self.bot.warns.upsert_custom(warn_filter, warn_data)  
 	        
