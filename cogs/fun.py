@@ -211,10 +211,7 @@ class fun(commands.Cog,  description=description):
 		except discord.HTTPException:
 			await right_backup.send(right_num)
 
-		i = 0
-		while(i<=10):
-			await game_channel.send(f"Starting in {i}")
-			i += 1
+		await asyncio.sleep(10)
 		
 		sem = discord.Embed(description="Game Started", color=0xF1C40F)
 		await game_channel.send(embed=sem)
