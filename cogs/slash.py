@@ -273,7 +273,12 @@ class Slash(commands.Cog, description=description):
 			self.bot.blacklist_user[blacklisted_user["_id"]] = blacklisted_user
 
 		embed = discord.Embed(description=f"The User {user.mention} is now blacklisted")
-		await ctx.send(embed=embed, hidden=True)
+		try:
+			await user.send("you Have been blacklist from using me")
+			await user.send("<a:bye:842697189159206932>")
+		except discord.HTTPException:
+			pass
+		await ctx.send(embed=embed, hidden=False)
 
 	@cog_ext.cog_slash(
 		name="unblacklist",
@@ -404,11 +409,107 @@ class Slash(commands.Cog, description=description):
 			entries=pages,
 			length=2
 		).start(ctx)
-	#
-	#
-	# Commands for channels
-	#
-	#
+
+	@cog_ext.cog_slash(name="ban", description="Ban user From guild,",
+	    guild_ids=guild_ids,
+	    options=[
+	        create_option(
+	            name="user",
+	            description="User you want to ban",
+	            option_type=6,
+	            required=True
+	            ),
+	        create_option(
+	            name="time",
+	            description="Duration Of the ban",
+	            option_type=3,
+	            required=False,
+	            ),
+	        create_option(
+	            name="reason",
+	            description="Reason of the ban",
+	            required=False,
+	            option_type=3
+	            )
+	        ]
+	    ) 
+	@commands.guild_only()
+	@commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376)
+	async def ban(self, ctx, member, time, reason=None):
+	    #if member.top_role >= ctx.author.top_role:
+	        #return await ctx.send("You can't You cannot do this action on this user due to role hierarchy.")
+	    
+	    time = await TimeConverter().convert(ctx, time)
+	    reason = reason if reason else "N/A"
+	    try:
+	        await member.send(f"You Have Been Banned | {reason}")
+	        await ctx.guild.ban(user=member, reason=reason)
+	        em = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **{member.name}** Has been Banned || {reason}")
+	        await ctx.send(embed=em)
+	    except discord.HTTPException:
+	        await ctx.guild.ban(user=member, reason=reason)
+	        emb = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **The User {member.name}** Has Been Banned || {reason}")
+	        await ctx.send(embed=emb)
+
+	    data = {
+	        '_id': member.id,
+	        'BannedAt': datetime.datetime.now(),
+	        'BanDuration': time or None,
+	        'BanedBy': ctx.author.id,
+	        'guildId': ctx.guild.id,
+	    }
+	    await self.bot.bans.upsert(data)
+	    self.bot.ban_users[member.id] = data
+
+
+	    log_channel = self.bot.get_channel(827245906331566180)
+	    #log2_channel = self.bot.get_channel(806107399005667349)
+
+	    embed = discord.Embed(title=f"Banned | {member.name}")
+	    embed.add_field(name="User", value=f"{member.name}")
+	    embed.add_field(name="Moderator", value=f"{ctx.author.mention}")
+	    embed.add_field(name="Reason", value=f"{reason}", inline=False)
+
+	    embed.set_footer(text=f"{member.id}", icon_url=member.avatar_url)
+
+	    await log_channel.send(embed=embed)
+
+	@cog_ext.cog_slash(
+    	name="role",
+    	description="Add or remove role from user",
+    	guild_ids=guild_ids,
+    	options=[
+    		create_option(
+    			name="member",
+    			description="Member your want to add & remove role",
+    			required=True,
+    			option_type=6
+    			),
+    		create_option(
+    			name="role",
+    			description="Role you want to add & remove ",
+    			required=True,
+    			option_type=8
+    			)
+    		]
+    	)
+	@commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376)
+	async def role(self, ctx, member:discord.Member, *,role: discord.Role):
+		if role >= ctx.author.top_role:
+			return await ctx.send("You can't You cannot do this action due to role hierarchy.")
+
+		roles = member.roles
+
+		if role in roles:
+			await member.remove_roles(role)
+			embed = discord.Embed(description=f"<:allow:819194696874197004> | {role} Removed from {member}")
+			await ctx.send(embed=embed)
+		else:
+			await member.add_roles(role)
+			embed = discord.Embed(description=f"<:allow:819194696874197004> | {role} Added to {member}")
+			await ctx.send(embed=embed)
+
+
 
 
 		

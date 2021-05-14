@@ -187,7 +187,7 @@ class fun(commands.Cog,  description=description):
 
 		]
 	)
-	#@commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376)
+	@commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376)
 	async def Guess_Number(self, ctx, maxn=None, time=None, price=None, role=None):
 		if maxn > 10000:
 			return await ctx.send("you can't big number then 10000")

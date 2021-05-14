@@ -23,44 +23,6 @@ class channel_slash(commands.Cog, description=description):
     async def on_ready(self):
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
 
-    @cog_ext.cog_slash(
-        name="channelstats",
-        description="Sends a nice fancy embed with some channel stats",
-        )
-    @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
-    async def channelstats(self, ctx):
-        channel = ctx.channel
-
-        embed = discord.Embed(
-            title=f"Stats for **{channel.name}**",
-            description=f"{'Category: {}'.format(channel.category.name) if channel.category else 'This channel is not in a category'}",
-            color=random.choice(self.bot.color_list),
-        )
-        embed.add_field(name="Channel Guild", value=ctx.guild.name, inline=False)
-        embed.add_field(name="Channel Id", value=channel.id, inline=False)
-        embed.add_field(
-            name="Channel Topic",
-            value=f"{channel.topic if channel.topic else 'No topic.'}",
-            inline=False,
-        )
-        embed.add_field(name="Channel Position", value=channel.position, inline=False)
-        embed.add_field(
-            name="Channel Slowmode Delay", value=channel.slowmode_delay, inline=False
-        )
-        embed.add_field(name="Channel is nsfw?", value=channel.is_nsfw(), inline=False)
-        embed.add_field(name="Channel is news?", value=channel.is_news(), inline=False)
-        embed.add_field(
-            name="Channel Creation Time", value=channel.created_at, inline=False
-        )
-        embed.add_field(
-            name="Channel Permissions Synced",
-            value=channel.permissions_synced,
-            inline=False,
-        )
-        embed.add_field(name="Channel Hash", value=hash(channel), inline=False)
-
-        await ctx.send(embed=embed)
-
     @cog_ext.cog_slash(name="lock",
         description="Lock channel for Role",
         guild_ids=guild_ids,
@@ -69,12 +31,16 @@ class channel_slash(commands.Cog, description=description):
             name="role",
             description="Role you want to lock",
             required=False,
-            option_type=8),
+            option_type=8
+            ),
         create_option(
             name="channel",
             description="channel You want to lock",
             required=False,
-            option_type=7)])
+            option_type=7
+            )
+        ]
+    )
     @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
     async def lock(self, ctx, role: str=None, channel: str=None):
         role = role if role else ctx.guild.default_role
@@ -124,7 +90,7 @@ class channel_slash(commands.Cog, description=description):
 
         await channel.set_permissions(role, overwrite=overwrite)
 
-        embed = discord.Embed(color=0x02ff06, description=f'The `{channel.name}` is Lock for `{role.name}`')
+        embed = discord.Embed(color=0x02ff06, description=f'The `{channel.mention}` is Unloock for `{role.name}`')
         await ctx.send(embed=embed)
 
     @cog_ext.cog_slash(
@@ -231,26 +197,6 @@ class channel_slash(commands.Cog, description=description):
         embed = discord.Embed(
             color=0x02ff06, description=f'The {channel.name} is Now Visible for for {role.name}')
         await ctx.send(embed=embed)
-
-    @cog_ext.cog_slash(
-        name="Sync",
-        description="Sync Channels permissions to it's Category",
-        guild_ids=guild_ids,
-        options=[
-            create_option(
-                name="channel",
-                description="Channels permissions you want to sync",
-                required=False,
-                option_type=7
-                )
-            ]
-    )
-    @commands.has_any_role(785842380565774368,799037944735727636)
-    async def sync(self, ctx, channel=None):
-        channel = channel if channel else ctx.channel
-
-        await channel.edit(sync_permissions=True)
-        await ctx.send("permissions are Synced", hidden=True)
 
 
 def setup(bot):

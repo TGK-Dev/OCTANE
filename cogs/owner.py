@@ -65,6 +65,8 @@ class Owner(commands.Cog, description=description):
 
         embed = discord.Embed(description=f"The User {user.mention} is now blacklisted")
         await ctx.send(embed=embed)
+        await user.send("you Have been blacklist from using me")
+        await user.send("<a:bye:842697189159206932>")
         await ctx.message.delete()
 
     @commands.command(
