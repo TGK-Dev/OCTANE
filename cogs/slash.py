@@ -186,12 +186,11 @@ class Slash(commands.Cog, description=description):
 	        ]
 	    )
 	@commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376)
-	async def kick(self, ctx, member: str, reason):
+	async def kick(self, ctx, member: str, reason=None):
 		reason = reason if reason else "N/A"
 		if member.top_role >= ctx.author.top_role:
 			return await ctx.send("You can't You cannot do this action on this user due to role hierarchy.")
 
-		await ctx.message.delete()
 		try:
 			await member.send(f"You Have Been kicked")
 			await ctx.guild.kick(user=member, reason=reason)
