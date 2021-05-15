@@ -435,43 +435,62 @@ class Slash(commands.Cog, description=description):
 	@commands.guild_only()
 	@commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376)
 	async def ban(self, ctx, member, time, reason=None):
-	    #if member.top_role >= ctx.author.top_role:
-	        #return await ctx.send("You can't You cannot do this action on this user due to role hierarchy.")
-	    
-	    time = await TimeConverter().convert(ctx, time)
-	    reason = reason if reason else "N/A"
-	    try:
-	        await member.send(f"You Have Been Banned | {reason}")
-	        await ctx.guild.ban(user=member, reason=reason)
-	        em = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **{member.name}** Has been Banned || {reason}")
-	        await ctx.send(embed=em)
-	    except discord.HTTPException:
-	        await ctx.guild.ban(user=member, reason=reason)
-	        emb = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **The User {member.name}** Has Been Banned || {reason}")
-	        await ctx.send(embed=emb)
+		try:
+			user = member.name.lower()
+			user = await commands.MemberConverter().convert(ctx, user)
+			if user.top_role >= ctx.author.top_role:
+				return await ctx.send("You can't You cannot do this action on this user due to role hierarchy.")
+		except:
+			pass
 
-	    data = {
-	        '_id': member.id,
-	        'BannedAt': datetime.datetime.now(),
-	        'BanDuration': time or None,
-	        'BanedBy': ctx.author.id,
-	        'guildId': ctx.guild.id,
-	    }
-	    await self.bot.bans.upsert(data)
-	    self.bot.ban_users[member.id] = data
+		if time == None:
+			await ctx.guild.ban(user=member, reason=reason)
+
+			try:
+				await member.send(f"You Have Been Banned | {reason}")
+				await ctx.guild.ban(user=member, reason=reason)
+				em = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **{member.name}** Has been Banned || {reason}")
+				await ctx.send(embed=em)
+			except discord.HTTPException:
+				await ctx.guild.ban(user=member, reason=reason)
+				emb = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **The User {member.name}** Has Been Banned || {reason}")
+				await ctx.send(embed=emb)
+		else:
 
 
-	    log_channel = self.bot.get_channel(827245906331566180)
-	    #log2_channel = self.bot.get_channel(806107399005667349)
+			try:
+				await member.send(f"You Have Been Banned | {reason}")
+				await ctx.guild.ban(user=member, reason=reason)
+				em = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **{member.name}** Has been Banned || {reason}")
+				await ctx.send(embed=em)
+			except discord.HTTPException:
+				await ctx.guild.ban(user=member, reason=reason)
+				emb = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **The User {member.name}** Has Been Banned || {reason}")
+				await ctx.send(embed=emb)
 
-	    embed = discord.Embed(title=f"Banned | {member.name}")
-	    embed.add_field(name="User", value=f"{member.name}")
-	    embed.add_field(name="Moderator", value=f"{ctx.author.mention}")
-	    embed.add_field(name="Reason", value=f"{reason}", inline=False)
+			data = {
+			'_id': member.id,
+			'BannedAt': datetime.datetime.now(),
+			'BanDuration': time or None,
+			'BanedBy': ctx.author.id,
+			'guildId': ctx.guild.id,
+			}
+			await self.bot.bans.upsert(data)
+			self.bot.ban_users[member.id] = data
 
-	    embed.set_footer(text=f"{member.id}", icon_url=member.avatar_url)
 
-	    await log_channel.send(embed=embed)
+			log_channel = self.bot.get_channel(827245906331566180)
+
+
+			embed = discord.Embed(title=f"Banned | {member.name}")
+			embed.add_field(name="User", value=f"{member.name}")
+			embed.add_field(name="Moderator", value=f"{ctx.author.mention}")
+			embed.add_field(name="Reason", value=f"{reason}", inline=False)
+
+			embed.set_footer(text=f"{member.id}", icon_url=member.avatar_url)
+
+			await log_channel.send(embed=embed)
+
 
 	@cog_ext.cog_slash(
     	name="role",

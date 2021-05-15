@@ -123,48 +123,71 @@ class Moderation(commands.Cog, description=description, command_attrs=dict(hidde
         except KeyError:
             pass
 
-        data = {
-            '_id': member.id,
-            'mutedAt': datetime.datetime.now(),
-            'muteDuration': time or None,
-            'mutedBy': ctx.author.id,
-            'guildId': ctx.guild.id,
-        }
-        await self.bot.mutes.upsert(data)
-        self.bot.muted_users[member.id] = data
+        if time == None:
+            await member.add_roles(role)
 
-        await member.add_roles(role)
-
-        try:
-            em = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **{member.name} Has been Muted**")
-            await ctx.send(embed=em)
-            await member.send(f"You Have Muted for {reason} || {time}")
-        except discord.HTTPException:
-            emb = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **The User {member.name} Muted I couldn't DM them.**")
-            await ctx.send(embed=emb)
-            
-        log_channel = self.bot.get_channel(803687264110247987)
-        embed = discord.Embed(title=f"Muted | {member.name}", inline=True)
-        embed.add_field(name="User", value=f"{member.mention}", inline=True)
-        embed.add_field(name="Moderator", value=f"{ctx.author.mention}", inline=True)
-        embed.add_field(name="Reason", value=f"{reason}", inline=True)
-        embed.add_field(name="Time", value=f"{time}", inline=True)
-        embed.set_footer(text=f"{member.id}", icon_url=member.avatar_url)
-
-        await log_channel.send(embed=embed)
-
-        if time and time < 300:
-            await asyncio.sleep(time)
-
-            if role in member.roles:
-                await member.remove_roles(role)
-                await ctx.send(f"Unmuted `{member.display_name}`")
-
-            await self.bot.mutes.delete(member.id)
             try:
-                self.bot.muted_users.pop(member.id)
-            except KeyError:
-                pass
+                em = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **{member.name} Has been Muted**")
+                await ctx.send(embed=em)
+                await member.send(f"You Have Muted for {reason} || {time}")
+            except discord.HTTPException:
+                emb = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **The User {member.name} Muted I couldn't DM them.**")
+                await ctx.send(embed=emb)
+                
+            log_channel = self.bot.get_channel(803687264110247987)
+            embed = discord.Embed(title=f"Muted | {member.name}", inline=True)
+            embed.add_field(name="User", value=f"{member.mention}", inline=True)
+            embed.add_field(name="Moderator", value=f"{ctx.author.mention}", inline=True)
+            embed.add_field(name="Reason", value=f"{reason}", inline=True)
+            embed.add_field(name="Time", value=f"{time}", inline=True)
+            embed.set_footer(text=f"{member.id}", icon_url=member.avatar_url)
+
+            await log_channel.send(embed=embed)
+
+        else:
+
+            data = {
+                '_id': member.id,
+                'mutedAt': datetime.datetime.now(),
+                'muteDuration': time or None,
+                'mutedBy': ctx.author.id,
+                'guildId': ctx.guild.id,
+            }
+            await self.bot.mutes.upsert(data)
+            self.bot.muted_users[member.id] = data
+
+            await member.add_roles(role)
+
+            try:
+                em = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **{member.name} Has been Muted**")
+                await ctx.send(embed=em)
+                await member.send(f"You Have Muted for {reason} || {time}")
+            except discord.HTTPException:
+                emb = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **The User {member.name} Muted I couldn't DM them.**")
+                await ctx.send(embed=emb)
+                
+            log_channel = self.bot.get_channel(803687264110247987)
+            embed = discord.Embed(title=f"Muted | {member.name}", inline=True)
+            embed.add_field(name="User", value=f"{member.mention}", inline=True)
+            embed.add_field(name="Moderator", value=f"{ctx.author.mention}", inline=True)
+            embed.add_field(name="Reason", value=f"{reason}", inline=True)
+            embed.add_field(name="Time", value=f"{time}", inline=True)
+            embed.set_footer(text=f"{member.id}", icon_url=member.avatar_url)
+
+            await log_channel.send(embed=embed)
+
+            if time and time < 300:
+                await asyncio.sleep(time)
+
+                if role in member.roles:
+                    await member.remove_roles(role)
+                    await ctx.send(f"Unmuted `{member.display_name}`")
+
+                await self.bot.mutes.delete(member.id)
+                try:
+                    self.bot.muted_users.pop(member.id)
+                except KeyError:
+                    pass
 
 
     @commands.command(
@@ -238,46 +261,67 @@ class Moderation(commands.Cog, description=description, command_attrs=dict(hidde
     @commands.guild_only()
     @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376)
     async def ban(self, ctx, member: discord.User, time: TimeConverter=None, *, reason=None):
-        #if member.top_role >= ctx.author.top_role:
-            #return await ctx.send("You can't You cannot do this action on this user due to role hierarchy.")
-        
         await ctx.message.delete()
         try:
-            await member.send(f"You Have Been Banned | {reason}")
+            user = member.name.lower()
+            user = await commands.MemberConverter().convert(ctx, user)
+            await ctx.send(f"`{user.mention}`")
+            if user.top_role >= ctx.author.top_role:
+                return await ctx.send("You can't You cannot do this action on this user due to role hierarchy.")
+        except:
+           pass
+
+        if time == None:
             await ctx.guild.ban(user=member, reason=reason)
-            em = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **{member.name}** Has been Banned || {reason}")
-            await ctx.send(embed=em)
-        except discord.HTTPException:
-            await ctx.guild.ban(user=member, reason=reason)
-            emb = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **The User {member.name}** Has Been Banned || {reason}")
-            await ctx.send(embed=emb)
 
-        data = {
-            '_id': member.id,
-            'BannedAt': datetime.datetime.now(),
-            'BanDuration': time or None,
-            'BanedBy': ctx.author.id,
-            'guildId': ctx.guild.id,
-        }
-        await self.bot.bans.upsert(data)
-        self.bot.ban_users[member.id] = data
+            try:
+                await member.send(f"You Have Been Banned | {reason}")
+                await ctx.guild.ban(user=member, reason=reason)
+                em = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **{member.name}** Has been Banned || {reason}")
+                await ctx.send(embed=em)
+            except discord.HTTPException:
+                await ctx.guild.ban(user=member, reason=reason)
+                emb = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **The User {member.name}** Has Been Banned || {reason}")
+                await ctx.send(embed=emb)
+        else:
+        
+        
+            try:
+                await member.send(f"You Have Been Banned | {reason}")
+                await ctx.guild.ban(user=member, reason=reason)
+                em = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **{member.name}** Has been Banned || {reason}")
+                await ctx.send(embed=em)
+            except discord.HTTPException:
+                await ctx.guild.ban(user=member, reason=reason)
+                emb = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **The User {member.name}** Has Been Banned || {reason}")
+                await ctx.send(embed=emb)
+
+            data = {
+                '_id': member.id,
+                'BannedAt': datetime.datetime.now(),
+                'BanDuration': time or None,
+                'BanedBy': ctx.author.id,
+                'guildId': ctx.guild.id,
+            }
+            await self.bot.bans.upsert(data)
+            self.bot.ban_users[member.id] = data
 
 
-        log_channel = self.bot.get_channel(827245906331566180)
-        #log2_channel = self.bot.get_channel(806107399005667349)
+            log_channel = self.bot.get_channel(827245906331566180)
 
-        embed = discord.Embed(title=f"Banned | {member.name}")
-        embed.add_field(name="User", value=f"{member.name}")
-        embed.add_field(name="Moderator", value=f"{ctx.author.mention}")
-        embed.add_field(name="Reason", value=f"{reason}", inline=False)
 
-        embed.set_footer(text=f"{member.id}", icon_url=member.avatar_url)
+            embed = discord.Embed(title=f"Banned | {member.name}")
+            embed.add_field(name="User", value=f"{member.name}")
+            embed.add_field(name="Moderator", value=f"{ctx.author.mention}")
+            embed.add_field(name="Reason", value=f"{reason}", inline=False)
 
-        await log_channel.send(embed=embed)
+            embed.set_footer(text=f"{member.id}", icon_url=member.avatar_url)
+
+            await log_channel.send(embed=embed)
 
     @commands.command(name="unban", description="Unban user From guild", usage="<user> [reason]")
     @commands.guild_only()
-    #s@commands.has_any_role(785842380565774368,799037944735727636)
+    @commands.has_any_role(785842380565774368,799037944735727636)
     async def unban(self, ctx, member, *, reason=None):
         await ctx.message.delete()
         member = await self.bot.fetch_user(int(member))
