@@ -141,7 +141,7 @@ class channel(commands.Cog, description=description):
         embed = discord.Embed(
             color=0x02ff06, description=f'The {channel.mention} is now hidden for{role.mention}')
         await ctx.send(embed=embed, delete_after=10)
-        
+
 
 
     @commands.command(name="Unhide", description="Unhide Channels For mentioned Role", usage="[role]")

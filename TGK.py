@@ -167,7 +167,6 @@ if __name__ == "__main__":
     bot.warns = Document(bot.db, "warns")
     bot.ticket = Document(bot.db, "ticket")
     bot.blacklist = Document(bot.db, "blacklist")
-    bot.tictactoe = Document(bot.db, "tictactoe")
     bot.invites = Document(bot.db, "invites")
     bot.tasks = Document(bot.db, "tasks")
 
