@@ -139,7 +139,7 @@ class channel(commands.Cog, description=description):
         await ctx.message.delete()
 
         embed = discord.Embed(
-            color=0x02ff06, description=f'The {channel.name} is Now hidded for for {role.name}')
+            color=0x02ff06, description=f'The {channel.mention} is now hidden for{role.mention}')
         await ctx.send(embed=embed, delete_after=10)
         
 
