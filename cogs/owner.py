@@ -204,6 +204,16 @@ class Owner(commands.Cog, description=description):
 
         await pager.start(ctx)
 
+    @commands.command(name="vsetup", hidden=True)
+    @commands.has_role(785842380565774368)
+    async def vsetup(self, ctx):
+        embed = discord.Embed(title="SERVER VERIFICATAON",
+            description="To unlock the Server find the Emoji Below and add your reaction if, if you still can't unlock the server please dm any online <@&799037944735727636>, <@&785845265118265376> to unlock server.",
+            color=0x2ECC71)
+        message = await ctx.send(embed=embed)
+        emoji = self.bot.get_emoji(843395086284357632)
+        await message.add_reaction(emoji)
+
     @commands.command(
         name='reload', description="Reload all/one of the bots cogs!", usage="", hidden=True
     )
