@@ -96,6 +96,8 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
         unverified = discord.utils.get(guild.roles, id=843399308408782868)
         level = discord.utils.get(guild.roles, id=810132828250832948)
         game = discord.utils.get(guild.roles, id=810135369177759774)
+        dono = discord.utils.get(guild.roles, id=810134737829888050)
+        special = discord.utils.get(guild.roles, id=810134311163920404)
     
         if member.guild.id == 785839283847954433:
     
@@ -108,6 +110,8 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
             await member.add_roles(unverified)
             await member.add_roles(level)
             await member.add_roles(game)
+            await member.add_roles(dono)
+            await member.add_roles(special)
 
     
         else:
