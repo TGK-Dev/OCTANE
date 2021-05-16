@@ -92,6 +92,10 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
         channel =  self.bot.get_channel(837285329610080276)
         robot = discord.utils.get(guild.roles, id=810153515610537994)
         count = guild.member_count
+        ping = discord.utils.get(guild.roles, id=810400876657115166)
+        unverified = discord.utils.get(guild.roles, id=843399308408782868)
+        level = discord.utils.get(guild.roles, id=810132828250832948)
+        game = discord.utils.get(guild.roles, id=810135369177759774)
     
         if member.guild.id == 785839283847954433:
     
@@ -100,9 +104,38 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
                 color=0x000000)
             embed.set_thumbnail(url=member.avatar_url)
             await channel.send(f"{member.mention}", embed=embed)
+            await member.add_roles(ping)
+            await member.add_roles(unverified)
+            await member.add_roles(level)
+            await member.add_roles(game)
+
     
         else:
             return
+
+    @commands.Cog.listener()
+    async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
+        echannel = self.bot.get_channel(payload.channel_id)
+        message = await echannel.fetch_message(payload.message_id)
+        guild = await self.bot.fetch_guild(payload.guild_id)
+        member = await guild.fetch_member(payload.user_id)
+        
+
+        if message.id == 843398585856557068:
+
+        	if payload.emoji.name == "success_tick":
+
+        		unverified = discord.utils.get(guild.roles, id=843399308408782868)
+        		newbiw = discord.utils.get(guild.roles, id=787566421592899614)
+        		#await echannel.send(f"{member.mention}")
+
+        		await member.remove_roles(unverified,)
+        		await member.add_roles(newbiw,)
+
+        	else:
+        		return
+        else:
+        	return
 
     @commands.command(name="joint", hidden=True)
     @commands.has_any_role(785842380565774368,799037944735727636)
