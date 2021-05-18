@@ -354,7 +354,7 @@ class Moderation(commands.Cog, description=description, command_attrs=dict(hidde
     @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916)
     async def purge(self, ctx, amount=10):
         await ctx.message.delete()
-        await ctx.channel.purge(limit=amount + 1)
+        await ctx.channel.purge(limit=amount)
         embed = discord.Embed(
             title=f"{ctx.author.name} purged: {ctx.channel.name}",
             description=f"{amount} messages were cleared",
