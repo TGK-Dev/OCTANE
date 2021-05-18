@@ -27,7 +27,7 @@ class Owner(commands.Cog, description=description):
         description="Change your guilds prefix!",
         usage="prefix [New_prefix]",
     )
-    @commands.has_guild_permissions(administrator=True)
+    @commands.has_any_role(785842380565774368, 803635405638991902)
     async def prefix(self, ctx, *, prefix="py."):
         await self.bot.config.upsert({"_id": ctx.guild.id, "prefix": prefix})
         await ctx.send(
@@ -37,7 +37,7 @@ class Owner(commands.Cog, description=description):
     @commands.command(
         name="deleteprefix", aliases=["dp"], description="Delete your guilds prefix!", usage="")
     @commands.guild_only()
-    @commands.has_guild_permissions(administrator=True)
+    @commands.has_any_role(785842380565774368, 803635405638991902)
     async def deleteprefix(self, ctx):
         await self.bot.config.unset({"_id": ctx.guild.id, "prefix": 1})
         await ctx.send("This guilds prefix has been set back to the default")
@@ -47,7 +47,7 @@ class Owner(commands.Cog, description=description):
     description="blacklist user from the bot",
     usage="<user>",
     )
-    @commands.has_permissions(administrator=True)
+    @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376)
     async def blacklist(self, ctx, user: discord.Member=None):
         user = user if user else ctx.author
         if user.id in [self.bot.user.id, ctx.author.id,488614633670967307, 488614633670967307]:
@@ -74,7 +74,7 @@ class Owner(commands.Cog, description=description):
         description="Unblacklist a user from the bot",
         usage="<user>"
     )
-    @commands.has_permissions(administrator=True)
+    @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636)
     async def unblacklist(self, ctx, user: discord.Member):
         """
         Unblacklist someone from the bot
@@ -142,7 +142,7 @@ class Owner(commands.Cog, description=description):
             await ctx.send(f"I have {ternary} {command.qualified_name} for you!")
 
     @commands.command(name="nuke", description="Nuke The Channel",hidden=True)
-    @commands.has_permissions(administrator=True)
+    @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636)
     @commands.max_concurrency(1, commands.BucketType.channel)
     async def nuke(self, ctx, channel: discord.TextChannel=None):
         channel = channel if channel else ctx.channel

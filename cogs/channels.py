@@ -26,7 +26,7 @@ class channel(commands.Cog, description=description):
         description="Sends a nice fancy embed with some channel stats",
         usage="[channel]",
     )
-    @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
+    @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916)
     async def channelstats(self, ctx):
         channel = ctx.channel
 
@@ -61,7 +61,7 @@ class channel(commands.Cog, description=description):
         await ctx.send(embed=embed)
 
     @commands.command(name="lock", description="Lock the given channel For mentioned Role", usage="[Role]", aliases=['l'])
-    @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
+    @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916)
     async def lock(self, ctx, role: discord.Role = None):
 
         channel = ctx.channel
@@ -77,7 +77,7 @@ class channel(commands.Cog, description=description):
         await channel.send(embed=embed)
 
     @commands.command(name="unlock", description="Unlock the given channel For mentioned Role", usage="[Role]", aliases=['ul'])
-    @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
+    @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916)
     async def unlock(self, ctx, role: discord.Role = None):
 
         channel = ctx.channel
@@ -93,7 +93,7 @@ class channel(commands.Cog, description=description):
         await channel.send(embed=embed)
 
     @commands.command(name="slowmode", description="Set Slowmode In Current Channel", usage="[slowmode time 1m, 1s 1h max 6h]", aliases=['sm'])
-    @commands.has_any_role(785842380565774368, 799037944735727636, 785845265118265376, 787259553225637889)
+    @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916)
     async def slowmode(self, ctx, time: str = '0'):
 
         unit = ['h', 'H', 'm', 'M', 's', 'S']
@@ -129,7 +129,7 @@ class channel(commands.Cog, description=description):
 
 
     @commands.command(name="Hide", description="Hide Channels For mentioned Role", usage="[role]")
-    @commands.has_any_role(785842380565774368,799037944735727636)
+    @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376)
     async def hide(self, ctx, role: discord.Role = None):
         channel = ctx.channel
         role = role if role else discord.utils.get(ctx.guild.roles, name="࿐ NEWBIE 〢 0")
@@ -145,7 +145,7 @@ class channel(commands.Cog, description=description):
 
 
     @commands.command(name="Unhide", description="Unhide Channels For mentioned Role", usage="[role]")
-    @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376)
+    @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376)
     async def unhide(self, ctx, role: discord.Role = None):
         channel = ctx.channel
         role = role if role else discord.utils.get(ctx.guild.roles, name="࿐ NEWBIE 〢 0")
@@ -159,7 +159,7 @@ class channel(commands.Cog, description=description):
         await ctx.send(embed=embed, delete_after=10)
 
     @commands.command(name="Sync", description="Sync Channels permissions to it's Category", usage="[channel]")
-    @commands.has_any_role(785842380565774368,799037944735727636)
+    @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376)
     async def sync(self, ctx, channel: discord.TextChannel=None):
         channel = channel if channel else ctx.channel
 

@@ -89,7 +89,7 @@ class Invites(commands.Cog, description=description):
             )
         ]
     )
-    #@commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
+    @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916)
     async def inviter(self, ctx, member):
 
         invites_filter = {"userInvited": member.id}

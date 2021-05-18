@@ -16,7 +16,7 @@ class Warns(commands.Cog, description=description):
         self.bot = bot
 		
     @commands.command(name="Warn", description="Gives an Warnings to user", usage="[member] [warn]")
-    @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
+    @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916)
     async def warn(self, ctx, member: discord.Member, *, reason):
         await ctx.message.delete()
         if member.id in [self.bot.user.id, 488614633670967307, 301657045248114690]:
@@ -65,7 +65,7 @@ class Warns(commands.Cog, description=description):
             pass
 
     @commands.command(name="Warnings", description="Show All Warnings for User", usage="[member]")
-    @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
+    @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916)
     async def Warnings(self, ctx, member: discord.Member):
         warn_filter = {"user_id": member.id, "guild_id": member.guild.id}
         warns = await self.bot.warns.find_many_by_custom(warn_filter)
@@ -94,7 +94,7 @@ class Warns(commands.Cog, description=description):
         ).start(ctx)
 
     @commands.command(name="delwarn", description="Delete Warning For user", usage="[Warn_id]")
-    @commands.has_any_role(785842380565774368, 799037944735727636)
+    @commands.has_any_role(785842380565774368, 803635405638991902)
     async def delwarn(self, ctx, *,_id):
 
         warns_filter = {"_id": ObjectId(_id)}
@@ -106,7 +106,7 @@ class Warns(commands.Cog, description=description):
         await ctx.send(embed=embed)
 
     @commands.command(name="clearwarn", description="Clear all warnings form user", usage="[member]")
-    @commands.has_any_role(785842380565774368)
+    @commands.has_any_role(785842380565774368, 803635405638991902)
     async def clearwarn(self, ctx, member: discord.Member=None):
         member = member if member else ctx.author
 
@@ -120,7 +120,7 @@ class Warns(commands.Cog, description=description):
         await ctx.send(f"Cleared all warnings form the {member.display_name}")
 
     @commands.group(name="tasks" ,description="Simpal Task command" ,invoke_without_command = True)
-    @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
+    @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916)
     async def tasks(self, ctx, member: discord.Member=None):
         member = member if member else ctx.author
         tasks_filter = {
@@ -155,7 +155,7 @@ class Warns(commands.Cog, description=description):
         ).start(ctx)
 
     @tasks.command(name="add", description="", usage=" [user] [task]")
-    @commands.has_any_role(785842380565774368,799037944735727636)
+    @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376)
     async def add(self, ctx, member: discord.Member=None, *,task):
         member = member if member else ctx.author
         #if member == ctx.author:
@@ -189,7 +189,7 @@ class Warns(commands.Cog, description=description):
         await ctx.send(embed=embed)
  
     @tasks.command(name="update")       
-    @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
+    @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916)
     async def update(self, ctx, task_id, *,status=None):
         
         if status is None:
@@ -206,7 +206,7 @@ class Warns(commands.Cog, description=description):
         await ctx.message.delete()
 
     @tasks.command(name="remove")
-    @commands.has_permissions(administrator=True)
+    @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376)
     async def remove(self, ctx, *,tasks_id):
         task_filter = {
         '_id': ObjectId(tasks_id),
@@ -223,7 +223,7 @@ class Warns(commands.Cog, description=description):
                 await ctx.send("timeout try again")
 
     @tasks.command(nmae="purge",)
-    @commands.has_permissions(administrator=True)
+    @commands.has_any_role(785842380565774368, 803635405638991902)
     async def purge(self, ctx, member: discord.Member=None):
         member = member if member else ctx.author
 

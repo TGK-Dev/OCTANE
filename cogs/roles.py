@@ -27,7 +27,7 @@ class roles(commands.Cog,  description=description):
 
     #geting All Info mantions
     @commands.command(name="roleinfo", description="Give Infomation Abouth Role", usage="[Role]")
-    @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
+    @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916)
     async def roleinfo(self, ctx, *,role: discord.Role=None):
         if role == None:
             return await ctx.send("Looks like you forget to add role")
@@ -50,7 +50,7 @@ class roles(commands.Cog,  description=description):
         
     #Added Roel/Remove to any User
     @commands.command(name="role", description="add/Remove role from user", usage="[member][role]")
-    @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376)
+    @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916)
     async def role(self, ctx, member:discord.Member, *,role: discord.Role):
         if role == None:
             return await ctx.send("Looks like you forget to add role")
@@ -79,7 +79,7 @@ class roles(commands.Cog,  description=description):
    
     #some Important roles members count 
     @commands.command(name="Pings", description="Members count of some Roles", usage="")
-    @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889, 831405039830564875)
+    @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916)
     async def pings(self, ctx):
         await ctx.message.delete()
 
@@ -97,7 +97,7 @@ class roles(commands.Cog,  description=description):
 
     #getting Mutual Pings 
     @commands.command(name="mping", description="Mutual Pings for tow role", usage="[role 1] [role 2]", hidden=True)
-    @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889, 831405039830564875)
+    @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916)
     async def mping(self, ctx, role1: discord.Role, role2: discord.Role):
         pings1 = role1.members
         pings2 = role2.members

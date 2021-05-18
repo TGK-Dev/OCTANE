@@ -26,7 +26,7 @@ class Config(commands.Cog, description=description):
         await message.edit(content=f"Ping `{round(self.bot.latency * 1000)}`ms")
         
     @commands.command(name="Status", description="Change Bot Status to online & Dnd & idle", usage="[dnd & idle & online]", hidden=True)
-    @commands.has_permissions(administrator=True)
+    @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636)
     async def status(self,ctx, arg):
         if arg.lower() == 'dnd':
             await self.client.change_presence(status=discord.Status.dnd)

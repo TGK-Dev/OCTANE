@@ -55,7 +55,7 @@ class config_slash(commands.Cog, description=description):
     		)
     	]
     )				
-    @commands.has_permissions(administrator=True)
+    @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636)
     async def status(self,ctx, arg):
         if arg.lower() == 'dnd':
             await self.bot.change_presence(status=discord.Status.dnd)

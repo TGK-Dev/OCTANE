@@ -41,7 +41,7 @@ class channel_slash(commands.Cog, description=description):
             )
         ]
     )
-    @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
+    @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916)
     async def lock(self, ctx, role: str=None, channel: str=None):
         role = role if role else ctx.guild.default_role
         channel = channel if channel else ctx.channel
@@ -79,7 +79,7 @@ class channel_slash(commands.Cog, description=description):
         ]
     )
 
-    @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
+    @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916)
     async def unlock(self, ctx, role=None, channel=None,unlock_type=None):
         unlock_type = unlock_type if unlock_type else None
         role = role if role else ctx.guild.default_role
@@ -104,7 +104,7 @@ class channel_slash(commands.Cog, description=description):
             required=True)
         ]
     )
-    @commands.has_any_role(785842380565774368, 799037944735727636, 785845265118265376, 787259553225637889)
+    @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916)
     async def slowmode(self, ctx, time: str = '0'):
 
         unit = ['h', 'H', 'm', 'M', 's', 'S']
@@ -155,7 +155,7 @@ class channel_slash(commands.Cog, description=description):
                 )
             ]
     )
-    @commands.has_any_role(785842380565774368,799037944735727636)
+    @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376)
     async def hide(self, ctx, role=None, channel=None):
         channel = channel if channel else ctx.channel
         role = role if role else ctx.guild.default_role
@@ -186,7 +186,7 @@ class channel_slash(commands.Cog, description=description):
                 )
             ]
     )
-    @commands.has_any_role(785842380565774368,799037944735727636)
+    @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376)
     async def Unhide(self, ctx, role=None, channel=None):
         channel = channel if channel else ctx.channel
         role = role if role else ctx.guild.default_role
