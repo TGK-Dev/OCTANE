@@ -432,9 +432,8 @@ class Slash(commands.Cog, description=description):
 	            )
 	        ]
 	    ) 
-	@commands.guild_only()
-	@commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889)
-	async def ban(self, ctx, member, time, reason=None):
+	async def ban(self, ctx, member: discord.User, time: TimeConverter=None, *, reason=None):
+		await ctx.message.delete()
 		try:
 			user = member.name.lower()
 			user = await commands.MemberConverter().convert(ctx, user)
@@ -444,7 +443,6 @@ class Slash(commands.Cog, description=description):
 			pass
 
 		if time == None:
-			await ctx.guild.ban(user=member, reason=reason)
 
 			try:
 				await member.send(f"You Have Been Banned | {reason}")
@@ -469,11 +467,11 @@ class Slash(commands.Cog, description=description):
 				await ctx.send(embed=emb)
 
 			data = {
-			'_id': member.id,
-			'BannedAt': datetime.datetime.now(),
-			'BanDuration': time or None,
-			'BanedBy': ctx.author.id,
-			'guildId': ctx.guild.id,
+				'_id': member.id,
+				'BannedAt': datetime.datetime.now(),
+				'BanDuration': time or None,
+				'BanedBy': ctx.author.id,
+				'guildId': ctx.guild.id,
 			}
 			await self.bot.bans.upsert(data)
 			self.bot.ban_users[member.id] = data
@@ -482,14 +480,14 @@ class Slash(commands.Cog, description=description):
 			log_channel = self.bot.get_channel(827245906331566180)
 
 
-			embed = discord.Embed(title=f"Banned | {member.name}")
-			embed.add_field(name="User", value=f"{member.name}")
-			embed.add_field(name="Moderator", value=f"{ctx.author.mention}")
-			embed.add_field(name="Reason", value=f"{reason}", inline=False)
+		embed = discord.Embed(title=f"Banned | {member.name}")
+		embed.add_field(name="User", value=f"{member.name}")
+		embed.add_field(name="Moderator", value=f"{ctx.author.mention}")
+		embed.add_field(name="Reason", value=f"{reason}", inline=False)
 
-			embed.set_footer(text=f"{member.id}", icon_url=member.avatar_url)
+		embed.set_footer(text=f"{member.id}", icon_url=member.avatar_url)
 
-			await log_channel.send(embed=embed)
+		await log_channel.send(embed=embed)
 
 
 	@cog_ext.cog_slash(
