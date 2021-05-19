@@ -1,5 +1,5 @@
 import random
-import asyncio
+
 import discord
 from discord.ext import commands
 
@@ -166,89 +166,31 @@ class channel(commands.Cog, description=description):
         await channel.edit(sync_permissions=True)
         await ctx.send("permissions are Synced", delete_after=15)
 
-    @commands.group(name="lockdown", description="Put server in Lock",invoke_without_command=True)
-    @command.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376)
-    async def lockdown(self, ctx):
-        channels = await self.bot.lockdown.get_all()
 
-        role = ctx.guild.default_role
-
-        for channel in channels:
-            channel =  self.bot.get_channel(channel["channel"])
-            overwrite = channel.overwrites_for(role)
-            overwrite.send_messages = False
-            await channel.set_permissions(role, overwrite=overwrite)
-            embed = discord.Embed(title="Server Lockdown", description="Your Not Muted Server Is in lockdown will Unlock *Soon*", color=0xE74C3C)
-            await channel.send(embed=embed)
-        embed = discord.Embed(description=f"Channel are locked \n Total channel lock: {len(channels)}")
-        await ctx.send(embed=embed)
-
-
-
-    @lockdown.command(name="add", description="add channel to the lockdown list")
-    @command.has_any_role(785842380565774368, 803635405638991902, 799037944735727636)
-    async def add(self, ctx, channel:discord.TextChannel):
-
-        data = {
-            "channel": channel.id
-        }
-
-        await self.bot.lockdown.insert(data)  
-
-        await ctx.send("channel added")
-
-    @lockdown.command(name="remove", description="remove channel form lockdown list")
-    @command.has_any_role(785842380565774368, 803635405638991902, 799037944735727636)
-    async def remove(self, ctx, channel:discord.TextChannel):
-
-        data = await self.bot.lockdown.find(ctx.guild.id)
-
-        if data is None:
-            return await ctx.send("There IS no channel in lockdown list add them by `lockdown add` command")
-        channel = { "lockdown_channels": [channel.id]}
-        await self.bot.blacklist.delete_by_custom(channel)
-        #data["lockdown_channels"].pop(channel.id)
-        #await self.bot.lockdown.upsert(data)
-        await ctx.send("data")
-
-    @lockdown.command(name="list", description="list of lockdown channels list")
-    @command.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889)
-    async def list(self, ctx):
-        channels = await self.bot.lockdown.get_all()
-
-        embed = discord.Embed(title="Lockdown Channels List", description="", color=0x9B59B6)
-        try:
-            i = 1
-            for channel in channels:
-                channel = self.bot.get_channel(channel["channel"])
-                embed.description += f"{i}.{channel.mention}\n"
-                i += 1
-            await ctx.send(embed=embed)
-        except KeyError:
-            await ctx.send("There are no channel in the list")
-        
-
-    @lockdown.command(name="end", description="End Server Lockdown")
-    @command.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376)
-    async def end(self, ctx):
-        await ctx.send("Are you Sure Want to Unlock Server[Y/n]")
-
-        try:
-            await self.bot.wait_for("message", check=lambda m: m.author == ctx.author and m.channel.id == ctx.channel.id and m.content.startswith("Y") or m.content.startswith("y"), timeout=30)
-
-            channels = await self.bot.lockdown.get_all()
-            role = ctx.guild.default_role
-
-            for channel in channels:
-                channel = self.bot.get_channel(channel["channel"])
-                overwrite = channel.overwrites_for(role)
-                overwrite.send_messages = None
-                await channel.set_permissions(role, overwrite=overwrite)
-                embed = discord.Embed(title="Server UnLockdown", description="Server is now unlock", color=0x2ECC71)
-                await channel.send(embed=embed)
-            await ctx.send("Ok we are back UP")
-        except asyncio.TimeoutError:
-            await ctx.send("TimeoutError canceling the command")
 
 def setup(bot):
     bot.add_cog(channel(bot))
+
+
+"""
+@commands.command(name="lockdown", description="Put Server in lockdown", usage="")
+    @commands.has_permissions(ban_members=True)
+    async def lockdown(self, ctx, *,reason=None):
+        role = ctx.guild.default_role
+        permissions = discord.PermissionOverwrite()
+        PermissionOverwrite.update(send_messages = False)
+
+        await role.edit(reason=reason, permissions=permissions)
+        await ctx.send("Server LOck")
+
+    @commands.command(name="server_unlock", description="Unlock Server from lockdown", usage="")
+    @commands.has_permissions(ban_members=True)
+    async def server_unlock(self, ctx, *,reason= None):
+        role = ctx.guild.default_role
+        permissions = discord.PermissionOverwrite()
+        PermissionOverwrite.update(send_messages = True)
+
+        await role.edit(reason=reason, permissions=permissions)
+
+        await ctx.send("Server UnLock")
+"""
