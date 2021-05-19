@@ -110,18 +110,6 @@ class roles(commands.Cog,  description=description):
 
         await ctx.send(embed=embed)
 
-    #Verify Command when Carl is down
-    @commands.command(name="verify", description="Very Yourself in Server", usage="[]", hidden=True)
-    async def verify(self, ctx):
-        if ctx.channel.id == 812906607301099520:
-
-            role = discord.utils.get(ctx.guild.roles, id=787566421592899614)
-
-            await ctx.author.add_roles(role)
-
-            await ctx.message.delete()
-
-
 def setup(bot):
     bot.add_cog(roles(bot))
 
