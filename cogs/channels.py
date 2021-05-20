@@ -206,10 +206,10 @@ class channel(commands.Cog, description=description):
         if data is None:
             return await ctx.send("There IS no channel in lockdown list add them by `lockdown add` command")
         channel = { "lockdown_channels": [channel.id]}
-        await self.bot.blacklist.delete_by_custom(channel)
+        await self.bot.lockdown.delete_by_custom(channel)
         #data["lockdown_channels"].pop(channel.id)
         #await self.bot.lockdown.upsert(data)
-        await ctx.send("data")
+        await ctx.send(f"The Channels {channel.mention} is removed from the List")
 
     @lockdown.command(name="list", description="list of lockdown channels list")
     @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889)

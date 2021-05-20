@@ -111,13 +111,14 @@ class Invites(commands.Cog, description=description):
         invites = await self.bot.invites.get_all()
         
         invites = sorted(invites, key=lambda x: x["count"], reverse=True)
-        
+         i = 1
         pages = []
         for invite in invites:
             description = f"""
-            Member: <@{invite['_id']}>
+            {i}.Member: <@{invite['_id']}>
             Toal Inivits: {invite['count']}
             """
+            i += 1
             pages.append(description)
 
         await Pag(
