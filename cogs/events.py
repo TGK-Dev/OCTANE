@@ -112,7 +112,9 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
             await member.add_roles(game)
             await member.add_roles(dono)
             await member.add_roles(special)
-
+            try:
+                await member.send(embed=embed)
+            except discord.Ht
     
         else:
             return

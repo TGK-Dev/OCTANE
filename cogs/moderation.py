@@ -338,7 +338,6 @@ class Moderation(commands.Cog, description=description, command_attrs=dict(hidde
             pass
 
         log_channel = self.bot.get_channel(803687264110247987)
-        #log2_channel = self.bot.get_channel(806107399005667349)
 
         embed = discord.Embed(title=f"unban | {member.name}")
         embed.add_field(name="User", value=f"{member.name}", inline=False)
@@ -350,7 +349,7 @@ class Moderation(commands.Cog, description=description, command_attrs=dict(hidde
 
 
     @commands.command(name="purge", description="A command which purges the channel it is called in", usage="[amount]", invoke_without_command = True)
-    @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916)
+    @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889)
     async def purge(self, ctx, amount=10):
         await ctx.message.delete()
         await ctx.channel.purge(limit=amount)
