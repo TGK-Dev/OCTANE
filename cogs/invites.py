@@ -1,11 +1,14 @@
-import discord
 import DiscordUtils
 import datetime
+import discord
+
 from discord.ext import commands
 from utils.util import Pag
 
-from discord_slash import cog_ext, SlashContext
-from discord_slash.utils.manage_commands import create_option, create_choice
+from discord_slash import SlashContext
+from discord_slash import cog_ext
+from discord_slash.utils.manage_commands import create_choice
+from discord_slash.utils.manage_commands import create_option
 
 guild_ids = [797920317871357972, 785839283847954433]
 # Requires: pip install DiscordUtils
@@ -111,7 +114,7 @@ class Invites(commands.Cog, description=description):
         invites = await self.bot.invites.get_all()
         
         invites = sorted(invites, key=lambda x: x["count"], reverse=True)
-         i = 1
+        i = 1
         pages = []
         for invite in invites:
             description = f"""

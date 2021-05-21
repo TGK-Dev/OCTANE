@@ -1,15 +1,16 @@
-import random
+import asyncio
 import contextlib
+import discord
 import io
 import os
-import asyncio
-import discord
+import random
 import textwrap
 
-from traceback import format_exception
-from utils.util import clean_code, Pag
 from discord.ext import commands
 from discord.ext.buttons import Paginator
+from traceback import format_exception
+from utils.util import Pag
+from utils.util import clean_code
 
 description = "Owners Commands"
 
@@ -27,7 +28,7 @@ class Owner(commands.Cog, description=description):
         description="Change your guilds prefix!",
         usage="prefix [New_prefix]",
     )
-    @commands.has_any_role(785842380565774368, 803635405638991902)
+    #@commands.has_any_role(785842380565774368, 803635405638991902)
     async def prefix(self, ctx, *, prefix="py."):
         await self.bot.config.upsert({"_id": ctx.guild.id, "prefix": prefix})
         await ctx.send(

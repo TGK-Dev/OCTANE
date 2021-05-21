@@ -1,10 +1,10 @@
-import os
-import random
-import platform
-import traceback
-import utils.json_loader
 import asyncio
 import discord
+import os
+import platform
+import random
+import traceback
+import utils.json_loader
 
 
 from discord.ext import commands

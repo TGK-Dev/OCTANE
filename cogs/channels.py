@@ -1,6 +1,7 @@
-import random
 import asyncio
 import discord
+import random
+
 from discord.ext import commands
 
 description="Channel Management Commands"

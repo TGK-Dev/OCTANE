@@ -1,17 +1,20 @@
+import asyncio
+import asyncio
 import datetime
-import asyncio
 import discord
-import random
-import asyncio
 import eight_ball
+import random
 import re
 #-----------------------------
 
-from discord.ext import commands, tasks
-from aiohttp import ClientSession 
+from aiohttp import ClientSession
 from discord.ext import commands
-from discord_slash import cog_ext, SlashContext
-from discord_slash.utils.manage_commands import create_option, create_choice
+from discord.ext import commands
+from discord.ext import tasks
+from discord_slash import SlashContext
+from discord_slash import cog_ext
+from discord_slash.utils.manage_commands import create_choice
+from discord_slash.utils.manage_commands import create_option
 
 guild_ids = [797920317871357972, 785839283847954433]
 
