@@ -1,6 +1,7 @@
 import datetime
 import discord
 import discord_slash
+
 from discord.ext import commands
 
 class Events(commands.Cog, command_attrs=dict(hidden=True)):
@@ -112,7 +113,10 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
             await member.add_roles(game)
             await member.add_roles(dono)
             await member.add_roles(special)
-
+            try:
+                await member.send(embed=embed)
+            except discord.HTTPException:
+                pass
     
         else:
             return
@@ -131,7 +135,6 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
 
         		unverified = discord.utils.get(guild.roles, id=843399308408782868)
         		newbiw = discord.utils.get(guild.roles, id=787566421592899614)
-        		#await echannel.send(f"{member.mention}")
 
         		await member.remove_roles(unverified,)
         		await member.add_roles(newbiw,)

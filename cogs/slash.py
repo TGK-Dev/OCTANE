@@ -1,13 +1,17 @@
-import re
-import datetime
-from copy import deepcopy
-from discord.ext.buttons import Paginator
 import asyncio
+import datetime
 import discord
-from discord_slash import cog_ext, SlashContext
-from discord_slash.utils.manage_commands import create_option, create_choice
-from discord.ext import commands, tasks
+import re
+
+from copy import deepcopy
 from dateutil.relativedelta import relativedelta
+from discord.ext import commands
+from discord.ext import tasks
+from discord.ext.buttons import Paginator
+from discord_slash import SlashContext
+from discord_slash import cog_ext
+from discord_slash.utils.manage_commands import create_choice
+from discord_slash.utils.manage_commands import create_option
 
 time_regex = re.compile("(?:(\d{1,5})(h|s|m|d))+?")
 time_dict = {"h": 3600, "s": 1, "m": 60, "d": 86400}

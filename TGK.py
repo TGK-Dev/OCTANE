@@ -1,26 +1,31 @@
 # Standard libraries
 import contextlib
 import io
-import os
 import logging
+import os
 
 # Third party libraries
 import textwrap
+
 from traceback import format_exception
 
 import discord
-from pathlib import Path
 import motor.motor_asyncio
+
 from discord.ext import commands
 from discord_slash import SlashCommand
-from discord_slash.utils.manage_commands import create_option, create_choice
+from discord_slash.utils.manage_commands import create_choice
+from discord_slash.utils.manage_commands import create_option
+from pathlib import Path
 #from better_help import Help
 
 # Local code
 import utils.json_loader
-from utils.mongo import Document
-from utils.util import clean_code, Pag
+
 from utils.help import Help
+from utils.mongo import Document
+from utils.util import Pag
+from utils.util import clean_code
 
 cwd = Path(__file__).parents[0]
 cwd = str(cwd)
@@ -68,6 +73,7 @@ bot.muted_users = {}
 bot.ban_users = {}
 bot.blacklist_user = {}
 bot.temp_roled_users = {}
+bot.ticket_setup = {}
 bot.cwd = cwd
 guild_ids = [785839283847954433, 797920317871357972]
 bot.version = "4.0"
@@ -119,6 +125,8 @@ async def on_ready():
     currentBans = await bot.bans.get_all()
     for ban in currentBans:
         bot.ban_users[ban["_id"]] = ban
+    currentticket = await bot.ticket.get_all()
+    #for
 
     print("\n-----")
     print(f"Current blacklist:\n{len(bot.blacklist_user)}\n{bot.blacklist_user}")
