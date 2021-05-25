@@ -292,8 +292,9 @@ class fun(commands.Cog,  description=description):
 					
 					gword = await self.bot.wait_for("message", check=lambda x: x.channel.id == message.channel.id and x.content.lower() == word.lower(), timeout=15)
 
-					winner_embed = discord.Embed(title="We Have an Winner",
-						description=f"{gword.author.mention} has successfully guessed the word!!!", color=0x3498DB)
+					winner_embed = discord.Embed(title="Event Has expired",
+						description=f"{gword.author.mention} has successfully guessed the word!!!\n\
+						Right word Was: `{word}`", color=0x3498DB)
 
 					end_embed = discord.Embed(title="Event Has expired",
 						description=f"Unscramble this word `{sword}` Frist person To Answer it is winner\n\
