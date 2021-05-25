@@ -7,10 +7,11 @@ import os
 # Third party libraries
 import textwrap
 
-from traceback import format_exception
-
 import discord
+import json
 import motor.motor_asyncio
+
+from traceback import format_exception
 
 from discord.ext import commands
 from discord_slash import SlashCommand
@@ -73,7 +74,7 @@ bot.muted_users = {}
 bot.ban_users = {}
 bot.blacklist_user = {}
 bot.temp_roled_users = {}
-bot.ticket_setup = {}
+bot.ticket_setups = {}
 bot.cwd = cwd
 guild_ids = [785839283847954433, 797920317871357972]
 bot.version = "4.0"
@@ -125,17 +126,22 @@ async def on_ready():
     currentBans = await bot.bans.get_all()
     for ban in currentBans:
         bot.ban_users[ban["_id"]] = ban
-    currentticket = await bot.ticket.get_all()
-    #for
+
+    datas = await bot.ticket_setup.get_all()
+    for data in datas:
+    	setup = json.dumps(data)
+    	bot.ticket_setups = json.loads(setup)
 
     print("\n-----")
-    print(f"Current blacklist:\n{len(bot.blacklist_user)}\n{bot.blacklist_user}")
+    print(f"Current blacklist:{len(bot.blacklist_user)}\n{bot.blacklist_user}")
     print("\n-----")
-    print(f"Current Temo Role:\n{len(bot.temp_roled_users)}\n{bot.temp_roled_users}")
+    print(f"Current temp Role:{len(bot.temp_roled_users)}\n{bot.temp_roled_users}")
     print("\n-----")
-    print(f"Current Mutes:\n{len(bot.muted_users)}\n{bot.muted_users}")
+    print(f"Current Mutes:{len(bot.muted_users)}\n{bot.muted_users}")
     print("\n-----")
     print(f"Current Bans:{len(bot.ban_users)}\n{bot.ban_users}")
+    print("\n-----")
+    print(f"Ticket Setups:\n{bot.ticket_setups}-----{type(bot.ticket_setups)}")
     print("\n-----")
     print("Database Connected\n-----")
 
@@ -174,6 +180,7 @@ if __name__ == "__main__":
     bot.bans = Document(bot.db, "bans")
     bot.warns = Document(bot.db, "warns")
     bot.ticket = Document(bot.db, "ticket")
+    bot.ticket_setup = Document(bot.db, "ticket_setup")
     bot.blacklist = Document(bot.db, "blacklist")
     bot.invites = Document(bot.db, "invites")
     bot.tasks = Document(bot.db, "tasks")
