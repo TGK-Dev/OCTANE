@@ -271,7 +271,7 @@ class fun(commands.Cog,  description=description):
 		if message.author.bot:
 			return
 
-		trinnger1 = random.randint(500,600)
+		trinnger1 = random.randint(500,560)
 		trinnger2 = random.randint(500,1000)
 		channel = message.channel
 
