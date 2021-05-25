@@ -32,7 +32,7 @@ word_list =  ["hello", "Game", "pizzaz", "queazy", "puzzle", "Excuse",
 			"government", "important", "improve", "improve", "interesting", "international", "knowledge", 
 			"machine", "magazine", "management", "movement", "operation", "opportunity", "organization",
 			"participant", "particularly", "performance", "population", "president", "production", 
-			"professional", "professor", "recognize", "relationship", "responsibility",]
+			"professional", "professor", "recognize", "relationship", "responsibility"]
 
 class TimeConverter(commands.Converter,):
     async def convert(self, ctx, argument):
@@ -275,7 +275,7 @@ class fun(commands.Cog,  description=description):
 		trinnger2 = random.randint(500,1000)
 		channel = message.channel
 
-		if channel.id in [785847439579676672, 785873318158008330, 789867479887249410, 792246185238069249]
+		if channel.id in [785847439579676672, 785873318158008330, 789867479887249410, 792246185238069249, 838041413320835072, 837999751068778517]:
 
 
 			if trinnger1 > trinnger2:
