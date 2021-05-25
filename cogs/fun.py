@@ -283,7 +283,9 @@ class fun(commands.Cog,  description=description):
 				word = random.choice(word_list)
 				sword = shuffle(word)
 				ssword = shuffle(sword)
-				print(word)
+				right_channel = self.bot.get_channel(846847052389941248)
+
+				todo = await right_channel.send(word)
 				embed = discord.Embed(
 					description=f"Unscramble this word `{ssword}` Frist person To Answer it is winner",
 					color=0x2ECC71)
@@ -305,12 +307,14 @@ class fun(commands.Cog,  description=description):
 
 					await edit_emved.edit(content="<:Event_end:846715951089057863>| Expired",embed=end_embed)
 					await gword.reply(embed=winner_embed)
+					await todo.delete()
 				except asyncio.TimeoutError:
 
 					fail_embed = discord.Embed(title="Event Has expired",
 						description=f"Nobody is smart enough to get the correct answer,\nright word was `{word}`",
 						color=0xE74C3C)
 					fail_embed.set_footer(text="Still In Ealry Stage This Might Get Change")
+					await todo.delete()
 					await edit_emved.reply(content="<:Event_end:846715951089057863>| Expired", embed=fail_embed)
 
 def setup(bot):
