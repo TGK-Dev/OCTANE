@@ -87,7 +87,7 @@ class tickets(commands.Cog, description=description):
 
                 return
 
-            if payload.emoji.name == setup["emoji_1"]:
+            if payload.emoji.name == setup["emoji_2"]:
                 
 
                 channel = await guild.create_text_channel(category=self.bot.get_channel(829230513516445736), sync_permissions=True, name=f"{member.display_name} Ticket-Partnership", topic=f"User Id: {member.id}")
