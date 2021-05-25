@@ -293,7 +293,7 @@ class fun(commands.Cog,  description=description):
 					gword = await self.bot.wait_for("message", check=lambda x: x.channel.id == message.channel.id and x.content.lower() == word.lower(), timeout=15)
 
 					winner_embed = discord.Embed(title="We Have an Winner",
-						description=f"{gword.author.mention} Was Right no dout your smart Right Word is `{word}`", color=0x3498DB)
+						description=f"{gword.author.mention} has successfully guessed the word!!!", color=0x3498DB)
 
 					end_embed = discord.Embed(title="Event Has expired",
 						description=f"Unscramble this word `{sword}` Frist person To Answer it is winner\n\
@@ -306,11 +306,10 @@ class fun(commands.Cog,  description=description):
 				except asyncio.TimeoutError:
 
 					fail_embed = discord.Embed(title="Event Has expired",
-						description=f"Unscramble this word `{sword}` Frist person To Answer it is winner\n\
-						no is smart enough to Get Right Word Better Luck next time",
+						description=f"no is smart enough to Get Right Word Better Luck next time, right word was `{word}`",
 						color=0xE74C3C)
 					fail_embed.set_footer(text="Still In Ealry Stage This Might Get Change")
-					await edit_emved.edit(content="<:Event_end:846715951089057863>| Expired", embed=fail_embed)
+					await edit_emved.reply(content="<:Event_end:846715951089057863>| Expired", embed=fail_embed)
 
 def setup(bot):
 	bot.add_cog(fun(bot))
