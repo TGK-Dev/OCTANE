@@ -305,7 +305,7 @@ class tickets(commands.Cog, description=description):
     async def delete(self, ctx):
         channel = ctx.channel
         async with ctx.typing():
-            if ctx.channel.category.id == 835091056068526121:
+            if ctx.channel.category.id == 829230513516445736:
                 await ctx.send("Are Your sure?[Y/N]")
                 try:
 
