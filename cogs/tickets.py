@@ -164,8 +164,8 @@ class tickets(commands.Cog, description=description):
 
 
 
-    @commands.command(name="setup", hidden=True)
-    @commands.has_role(785842380565774368)
+    @commands.command(name="setup", description="start Ticket System setup")
+    @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636)
     async def setup(self, ctx):
         embed = discord.Embed(title="SERVER SUPPORT",
             description="Get in touch with TGK Staff Team by reacting below.\nMake sure you react with the right emoji, to get apt support.\n\n<:support:837272254307106849> **Queries and Complaints**\n<:partner:837272392472330250> **Partnership**\n\nPlease Note that only 1 Active Ticket is allowed per member.\nTo raise a New Ticket, ensure that your previous ticket is Closed and Deleted.\n\nMisuse of the service will lead to Blacklisting of the Member from the Service.",
