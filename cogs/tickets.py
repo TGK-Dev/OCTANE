@@ -64,7 +64,7 @@ class tickets(commands.Cog, description=description):
 
             if payload.emoji.name == setup["emoji_1"]:
 
-                channel = await guild.create_text_channel(category=self.bot.get_channel(835091056068526121), sync_permissions=True, name=f"{member.display_name} Ticket", topic=f"User Id: {member.id}")
+                channel = await guild.create_text_channel(category=self.bot.get_channel(829230513516445736), sync_permissions=True, name=f"{member.display_name} Ticket", topic=f"User Id: {member.id}")
                 overwrite = channel.overwrites_for(member)
                 overwrite.send_messages = True
                 overwrite.view_channel = True
@@ -90,7 +90,7 @@ class tickets(commands.Cog, description=description):
             if payload.emoji.name == setup["emoji_1"]:
                 
 
-                channel = await guild.create_text_channel(category=self.bot.get_channel(835091056068526121), sync_permissions=True, name=f"{member.display_name} Ticket-Partnership", topic=f"User Id: {member.id}")
+                channel = await guild.create_text_channel(category=self.bot.get_channel(829230513516445736), sync_permissions=True, name=f"{member.display_name} Ticket-Partnership", topic=f"User Id: {member.id}")
                 overwrite = channel.overwrites_for(member)
                 overwrite.send_messages = True
                 overwrite.view_channel = True
