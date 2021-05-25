@@ -22,6 +22,11 @@ class tickets(commands.Cog, description=description):
         self.bot = bot
         self.setup = self.bot.ticket_setup.get_all()
 
+    def is_me():
+        def predicate(ctx):
+            return ctx.message.author.id == 488614633670967307
+        return commands.check(predicate)
+
     @commands.Cog.listener()
     async def on_ready(self):
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
@@ -123,7 +128,7 @@ class tickets(commands.Cog, description=description):
             return
         
     @commands.command(name="setup", description="Start Server Ticket System Setup")
-    @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636)
+    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636), is_me())
     async def setup(self, ctx, channel: discord.TextChannel, emoji1: discord.Emoji, emoji2: discord.Emoji):
 
         #ticket_setup = {" _id": ctx.guild.id}
@@ -180,7 +185,7 @@ class tickets(commands.Cog, description=description):
 
 
     @commands.command(name="new", hidden=True)
-    #@commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916)
+    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916), is_me())
     async def new(self, ctx, member: discord.Member=None):
         member = member if member else ctx.author
         guild = self.bot.get_guild(785839283847954433)
@@ -205,7 +210,7 @@ class tickets(commands.Cog, description=description):
         await ctx.message.delete()
 
     @commands.command(name="pnew", hidden=True)
-    #@commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916)
+    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916), is_me())
     async def pnew(self, ctx, member: discord.Member=None):
         member = member if member else ctx.author
         guild = self.bot.get_guild(785839283847954433)
@@ -236,7 +241,7 @@ class tickets(commands.Cog, description=description):
         await ctx.message.delete()
 
     @commands.command(name="close", description="close The ticket", usage="")
-    #@commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916)
+    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916), is_me())
     async def close(self, ctx):
         if ctx.channel.category.id == 829230513516445736:
             await ctx.message.delete()
@@ -250,7 +255,7 @@ class tickets(commands.Cog, description=description):
             await ctx.send("You can't use this command here")
 
     @commands.command(name="open", description="Reopens current ticket", usage="")
-    #@commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916)
+    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916), is_me())
     async def open(self, ctx):
         if ctx.channel.permissions_synced==False:
             return await ctx.send("Ticket already Opned")
@@ -278,7 +283,7 @@ class tickets(commands.Cog, description=description):
 
 
     @commands.command(name="transcript", description="Save current ticket's transcript", usage="[limit] [time Zone]", aliases=["save"])
-    #@commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376)
+    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916), is_me())
     async def transcript(self, ctx, limit: int=None, *,ticket=None):
 
         ticket = ticket if ticket else "Topic Not Given"
@@ -301,7 +306,7 @@ class tickets(commands.Cog, description=description):
 
         
     @commands.command(name="delete", description="delete the ticket", usage="")
-    #@commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916)
+    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916), is_me())
     async def delete(self, ctx):
         channel = ctx.channel
         async with ctx.typing():
@@ -327,7 +332,7 @@ class tickets(commands.Cog, description=description):
                     await ctx.send(embed=embed)
 
     @commands.command(name="Claim", description="Claim Tickets to provide Support", usage="")
-    #@commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916)
+    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916), is_me())
     async def Claim(self, ctx):
         await ctx.message.delete()
         guild = ctx.guild
@@ -347,7 +352,7 @@ class tickets(commands.Cog, description=description):
             await ctx.send(embed=embed)
 
     @commands.command(name="unClaim", description="UnClaim Tickets", usage="")
-    #@commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916)
+    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916), is_me())
     async def unClaim(self, ctx):
         guild = ctx.guild
         await ctx.message.delete()
@@ -368,7 +373,7 @@ class tickets(commands.Cog, description=description):
             await ctx.send(embed=embed)
 
     @commands.command(name="add", description="add User to the channel", usage="[member]")
-    #@commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916)
+    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916), is_me())
     async def add(self, ctx, *, target: Union[discord.Member, discord.Role]):
         channel = ctx.channel
         if ctx.channel.category.id == 829230513516445736:
@@ -385,7 +390,7 @@ class tickets(commands.Cog, description=description):
 
 
     @commands.command(name="remove", description="Remove User to the channel", usage="[member]")
-    #@commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916)
+    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916), is_me())
     async def remove(self, ctx, *, target: Union[discord.Member, discord.Role]):
         channel = ctx.channel
         if ctx.channel.category.id == 829230513516445736:

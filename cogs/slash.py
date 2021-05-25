@@ -40,6 +40,16 @@ class Slash(commands.Cog, description=description):
 	def __init__(self, bot):
 		self.bot = bot
 
+	def is_me():
+	    def predicate(ctx):
+	        return ctx.message.author.id == 488614633670967307
+	    return commands.check(predicate)
+
+	def is_me():
+	    def predicate(ctx):
+	        return ctx.message.author.id == 488614633670967307
+	    return commands.check(predicate)
+
 	@commands.Cog.listener()
 	async def on_ready(self):
 	    print(f"{self.__class__.__name__} Cog has been loaded\n-----")
@@ -51,6 +61,46 @@ class Slash(commands.Cog, description=description):
 	#							#
 	#							#
 	#############################
+
+	@cog_ext.cog_slash(name="Status",
+		description="Change Bot Status to online & Dnd & idle",
+		guild_ids=guild_ids,
+		options=[
+		create_option(
+			name="arg",
+			description="Status options",
+			option_type=3,
+			required=True,
+			choices=[
+				create_choice(
+						name="dnd",
+						value="dnd",
+					),
+				create_choice(
+						name="online",
+						value="online",
+					),
+				create_choice(
+						name="idle",
+						value="idle",
+					)
+				]
+			)
+		]
+	)				
+	@commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636)
+	async def status(self,ctx, arg):
+	    if arg.lower() == 'dnd':
+	        await self.bot.change_presence(status=discord.Status.dnd)
+	        await ctx.send('Bot status is Updated',hidden=True)
+	    elif arg.lower() == 'online':
+	        await self.bot.change_presence(status=discord.Status.online)
+	        await ctx.send('Bot status is Updated',hidden=True)
+	    elif arg.lower() == 'idle' :
+	        await self.bot.change_presence(status=discord.Status.idle)
+	        await ctx.send('Bot status is Updated',hidden=True)
+	    else: 
+	    	return 
 
 	@cog_ext.cog_slash(name="mute",
 	    description="Mute User for x time",
@@ -76,7 +126,7 @@ class Slash(commands.Cog, description=description):
 	            )
 	        ]
 	    )
-	@commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916)
+	@commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889), is_me())
 	async def Mute(self, ctx, member: str, time: str, *,reason=None):
 	    time = await TimeConverter().convert(ctx, time)
 	    reason = reason if reason else "N/A"
@@ -146,7 +196,7 @@ class Slash(commands.Cog, description=description):
 	        description="Mention / id Member to be Unmuted",
 	        option_type=6,
 	        required=True)])
-	@commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889)
+	@commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889), is_me())
 	async def unmute(self, ctx, member: discord.Member):
 	    role = discord.utils.get(ctx.guild.roles, name="Muted")
 	    if not role:
@@ -189,7 +239,7 @@ class Slash(commands.Cog, description=description):
 	            )
 	        ]
 	    )
-	@commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916)
+	@commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889), is_me())
 	async def kick(self, ctx, member: str, reason=None):
 		reason = reason if reason else "N/A"
 		if member.top_role >= ctx.author.top_role:
@@ -226,7 +276,7 @@ class Slash(commands.Cog, description=description):
 			required=True)
 		]
 	)
-	@commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916)
+	@commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889), is_me())
 	async def whois(self, ctx, member: str):
 		def fomat_time(time):
 			return time.strftime('%d-%B-%Y %I:%m %p')
@@ -261,7 +311,7 @@ class Slash(commands.Cog, description=description):
 			required=True,
 			option_type=6
 			)])
-	@commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376)
+	@commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376), is_me())
 	async def blacklist(self, ctx, user: str):
 		user = user if user else ctx.author
 		if user.id in [self.bot.user.id, ctx.author.id,488614633670967307, 488614633670967307]:
@@ -295,7 +345,7 @@ class Slash(commands.Cog, description=description):
 				required=True
 			)
 		])
-	@commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376)
+	@commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636), is_me())
 	async def unblacklist(self, ctx, user: discord.Member):
 		blacklist = {'_id': user.id}
 
@@ -331,7 +381,7 @@ class Slash(commands.Cog, description=description):
 	            )
 	        ]
 	    )
-	@commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916)
+	@commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916), is_me())
 	async def warn(self, ctx, member: str, reason: str):
 	    if member.id in [self.bot.user.id, 488614633670967307, 301657045248114690]:
 	        return await ctx.send("You cannot warn bot or it's Creater because they are way too cool to be warned")
@@ -385,7 +435,7 @@ class Slash(commands.Cog, description=description):
 				option_type=3,
 				required=True)
 		])
-	@commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916)
+	@commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889), is_me())
 	async def warnings(self, ctx, member: str):
 		warn_filter = {"user_id": member.id, "guild_id": member.guild.id}
 		warns = await self.bot.warns.find_many_by_custom(warn_filter)
@@ -436,6 +486,7 @@ class Slash(commands.Cog, description=description):
 	            )
 	        ]
 	    ) 
+	@commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916), is_me())
 	async def ban(self, ctx, member: discord.User, time: TimeConverter=None, *, reason=None):
 		await ctx.message.delete()
 		try:
@@ -513,7 +564,7 @@ class Slash(commands.Cog, description=description):
     			)
     		]
     	)
-	@commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889)
+	@commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916), is_me())
 	async def role(self, ctx, member:discord.Member, *,role: discord.Role):
 		if role >= ctx.author.top_role:
 			return await ctx.send("You can't You cannot do this action due to role hierarchy.")

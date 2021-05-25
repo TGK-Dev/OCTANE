@@ -56,8 +56,10 @@ class fun(commands.Cog,  description=description):
 	def __init__(self, bot):
 		self.bot = bot
 
-	def check_owner(ctx):
-		return ctx.author.bot == 488614633670967307 or 301657045248114690
+	def is_me():
+	    def predicate(ctx):
+	        return ctx.message.author.id == 488614633670967307
+	    return commands.check(predicate)
 
 	@commands.Cog.listener()
 	async def on_ready(self):
@@ -69,7 +71,6 @@ class fun(commands.Cog,  description=description):
 		await ctx.send(bot.ball.response(question))	
 
 	@commands.command(name="dadjoke", description="Send a dad Joke", usage="" ,aliases=["djoke"])
-	@commands.check(check_owner)
 	#@commands.has_any_role(799037944735727636)
 	@commands.cooldown(2, 60, commands.BucketType.user)
 	async def dadjoke(self, ctx):
@@ -87,7 +88,7 @@ class fun(commands.Cog,  description=description):
 				await ctx.send(f"**{r['setup']}**\n\n||{r['punchline']}||")
 
 	@commands.command(name="Guess The Number", description="Guess the Number Game", usage="[max] [time] [price] ", aliases=["gn"])
-	@commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916)
+	@commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889), is_me())
 	async def guess_number(self, ctx, maxn , time: TimeConverter=None, *,price=None):
 		if maxn > 10000:
 			return await ctx.send("you can't big number then 10000")
@@ -201,7 +202,7 @@ class fun(commands.Cog,  description=description):
 
 		]
 	)
-	@commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376)
+	@commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889), is_me())
 	async def Guess_Number(self, ctx, maxn=None, time=None, price=None, role=None):
 		if maxn > 10000:
 			return await ctx.send("you can't big number then 10000")
@@ -307,7 +308,7 @@ class fun(commands.Cog,  description=description):
 				except asyncio.TimeoutError:
 
 					fail_embed = discord.Embed(title="Event Has expired",
-						description=f"no is smart enough to Get Right Word Better Luck next time, right word was `{word}`",
+						description=f"Nobody is smart enough to get the correct answer,\nright word was `{word}`",
 						color=0xE74C3C)
 					fail_embed.set_footer(text="Still In Ealry Stage This Might Get Change")
 					await edit_emved.reply(content="<:Event_end:846715951089057863>| Expired", embed=fail_embed)

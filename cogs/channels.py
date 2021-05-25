@@ -10,11 +10,9 @@ class channel(commands.Cog, description=description):
     def __init__(self, bot):
         self.bot = bot
 
-    def our_custom_check():
-        async def predicate(ctx):
-            return ctx.guild is not None \
-                and ctx.author.guild_permissions.manage_channels \
-                and ctx.me.guild_permissions.manage_channels
+    def is_me():
+        def predicate(ctx):
+            return ctx.message.author.id == 488614633670967307
         return commands.check(predicate)
 
     @commands.Cog.listener()
@@ -27,7 +25,7 @@ class channel(commands.Cog, description=description):
         description="Sends a nice fancy embed with some channel stats",
         usage="[channel]",
     )
-    @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916)
+    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916), is_me())
     async def channelstats(self, ctx):
         channel = ctx.channel
 
@@ -62,7 +60,7 @@ class channel(commands.Cog, description=description):
         await ctx.send(embed=embed)
 
     @commands.command(name="lock", description="Lock the given channel For mentioned Role", usage="[Role]", aliases=['l'])
-    @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916)
+    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889), is_me())
     async def lock(self, ctx, role: discord.Role = None):
 
         channel = ctx.channel
@@ -78,7 +76,7 @@ class channel(commands.Cog, description=description):
         await channel.send(embed=embed)
 
     @commands.command(name="unlock", description="Unlock the given channel For mentioned Role", usage="[Role]", aliases=['ul'])
-    @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916)
+    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889), is_me())
     async def unlock(self, ctx, role: discord.Role = None):
 
         channel = ctx.channel
@@ -94,7 +92,7 @@ class channel(commands.Cog, description=description):
         await channel.send(embed=embed)
 
     @commands.command(name="slowmode", description="Set Slowmode In Current Channel", usage="[slowmode time 1m, 1s 1h max 6h]", aliases=['sm'])
-    @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916)
+    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916), is_me())
     async def slowmode(self, ctx, time: str = '0'):
 
         unit = ['h', 'H', 'm', 'M', 's', 'S']
@@ -130,7 +128,7 @@ class channel(commands.Cog, description=description):
 
 
     @commands.command(name="Hide", description="Hide Channels For mentioned Role", usage="[role]")
-    @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376)
+    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376), is_me())
     async def hide(self, ctx, role: discord.Role = None):
         channel = ctx.channel
         role = role if role else discord.utils.get(ctx.guild.roles, name="࿐ NEWBIE 〢 0")
@@ -146,7 +144,7 @@ class channel(commands.Cog, description=description):
 
 
     @commands.command(name="Unhide", description="Unhide Channels For mentioned Role", usage="[role]")
-    @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376)
+    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376), is_me())
     async def unhide(self, ctx, role: discord.Role = None):
         channel = ctx.channel
         role = role if role else discord.utils.get(ctx.guild.roles, name="࿐ NEWBIE 〢 0")
@@ -160,7 +158,7 @@ class channel(commands.Cog, description=description):
         await ctx.send(embed=embed, delete_after=10)
 
     @commands.command(name="Sync", description="Sync Channels permissions to it's Category", usage="[channel]")
-    @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376)
+    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376), is_me())
     async def sync(self, ctx, channel: discord.TextChannel=None):
         channel = channel if channel else ctx.channel
 
@@ -168,7 +166,7 @@ class channel(commands.Cog, description=description):
         await ctx.send("permissions are Synced", delete_after=15)
 
     @commands.group(name="lockdown", description="Put server in Lock",invoke_without_command=True)
-    @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376)
+    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889), is_me())
     async def lockdown(self, ctx):
         channels = await self.bot.lockdown.get_all()
 
@@ -187,7 +185,7 @@ class channel(commands.Cog, description=description):
 
 
     @lockdown.command(name="add", description="add channel to the lockdown list")
-    @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636)
+    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376), is_me())
     async def add(self, ctx, channel:discord.TextChannel):
 
         data = {
@@ -199,7 +197,7 @@ class channel(commands.Cog, description=description):
         await ctx.send("channel added")
 
     @lockdown.command(name="remove", description="remove channel form lockdown list")
-    @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636)
+    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376), is_me())
     async def remove(self, ctx, channel:discord.TextChannel):
 
         data = await self.bot.lockdown.find(ctx.guild.id)
@@ -213,7 +211,7 @@ class channel(commands.Cog, description=description):
         await ctx.send(f"The Channels {channel.mention} is removed from the List")
 
     @lockdown.command(name="list", description="list of lockdown channels list")
-    @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889)
+    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916), is_me())
     async def list(self, ctx):
         channels = await self.bot.lockdown.get_all()
 
@@ -230,7 +228,7 @@ class channel(commands.Cog, description=description):
         
 
     @lockdown.command(name="end", description="End Server Lockdown")
-    @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376)
+    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376), is_me())
     async def end(self, ctx):
         await ctx.send("Are you Sure Want to Unlock Server[Y/n]")
 

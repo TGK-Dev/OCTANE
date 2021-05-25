@@ -22,13 +22,18 @@ class roles(commands.Cog,  description=description):
     def __init__(self, bot):
         self.bot = bot
 
+    def is_me():
+        def predicate(ctx):
+            return ctx.message.author.id == 488614633670967307
+        return commands.check(predicate)
+
     @commands.Cog.listener()
     async def on_ready(self):
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
 
     #geting All Info mantions
     @commands.command(name="roleinfo", description="Give Infomation Abouth Role", usage="[Role]")
-    @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916)
+    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916), is_me())
     async def roleinfo(self, ctx, *,role: discord.Role=None):
         if role == None:
             return await ctx.send("Looks like you forget to add role")
@@ -51,7 +56,7 @@ class roles(commands.Cog,  description=description):
         
     #Added Roel/Remove to any User
     @commands.command(name="role", description="add/Remove role from user", usage="[member][role]")
-    @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916)
+    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889), is_me())
     async def role(self, ctx, member:discord.Member, *,role: discord.Role):
         if role == None:
             return await ctx.send("Looks like you forget to add role")
@@ -80,7 +85,7 @@ class roles(commands.Cog,  description=description):
    
     #some Important roles members count 
     @commands.command(name="Pings", description="Members count of some Roles", usage="")
-    @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916)
+    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916, 843775369470672916, 831405039830564875), is_me())
     async def pings(self, ctx):
         await ctx.message.delete()
 
@@ -97,8 +102,8 @@ class roles(commands.Cog,  description=description):
         await ctx.send(embed=embed, delete_after=60)
 
     #getting Mutual Pings 
-    @commands.command(name="mping", description="Mutual Pings for tow role", usage="[role 1] [role 2]", hidden=True)
-    @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916)
+    @commands.command(name="mping", description="Mutual Pings for tow role", usage="[role 1] [role 2]",)
+    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916, 843775369470672916, 831405039830564875), is_me())
     async def mping(self, ctx, role1: discord.Role, role2: discord.Role):
         pings1 = role1.members
         pings2 = role2.members

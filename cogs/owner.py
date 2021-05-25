@@ -17,6 +17,11 @@ description = "Owners Commands"
 class Owner(commands.Cog, description=description):
     def __init__(self, bot):
         self.bot = bot
+        
+    def is_me():
+        def predicate(ctx):
+            return ctx.message.author.id == 488614633670967307
+        return commands.check(predicate)
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -38,7 +43,7 @@ class Owner(commands.Cog, description=description):
     @commands.command(
         name="deleteprefix", aliases=["dp"], description="Delete your guilds prefix!", usage="")
     @commands.guild_only()
-    @commands.has_any_role(785842380565774368, 803635405638991902)
+    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902), is_me())
     async def deleteprefix(self, ctx):
         await self.bot.config.unset({"_id": ctx.guild.id, "prefix": 1})
         await ctx.send("This guilds prefix has been set back to the default")
@@ -48,7 +53,7 @@ class Owner(commands.Cog, description=description):
     description="blacklist user from the bot",
     usage="<user>",
     )
-    @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376)
+    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376), is_me())
     async def blacklist(self, ctx, user: discord.Member=None):
         user = user if user else ctx.author
         if user.id in [self.bot.user.id, ctx.author.id,488614633670967307, 488614633670967307]:
@@ -75,7 +80,7 @@ class Owner(commands.Cog, description=description):
         description="Unblacklist a user from the bot",
         usage="<user>"
     )
-    @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636)
+    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636), is_me())
     async def unblacklist(self, ctx, user: discord.Member):
         """
         Unblacklist someone from the bot
@@ -99,13 +104,13 @@ class Owner(commands.Cog, description=description):
 
 
     @commands.command(name="activity", description="Change Bot activity", usage="[activity]")
-    @commands.has_permissions(administrator=True)
+    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636), is_me())
     async def activity(self, ctx, *, activity): 
         await self.bot.change_presence(activity=discord.Game(name=f"{activity}"), status=discord.Status.dnd) # This changes the bots 'activity'
         await ctx.send('Bot activity is Updated')
 
     @commands.command(name="Say", description="And classic say command", usage="[anything]")
-    @commands.has_permissions(manage_guild=True)
+    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376), is_me())
     async def say(self,ctx, *, say):
         await ctx.message.delete()
         await ctx.send(f'{say}')
@@ -117,7 +122,7 @@ class Owner(commands.Cog, description=description):
         usage="",
         hidden=True
     )
-    @commands.has_role(785842380565774368)
+    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902), is_me())
     async def logout(self, ctx):
         """
         If the user running the command owns the bot then this will disconnect the bot from discord.
@@ -127,7 +132,7 @@ class Owner(commands.Cog, description=description):
 
 
     @commands.command(name="toggle", description="Enable or disable a command!")
-    @commands.has_role(785842380565774368)
+    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902), is_me())
     async def toggle(self, ctx, *, command):
         command = self.bot.get_command(command)
 
@@ -143,7 +148,7 @@ class Owner(commands.Cog, description=description):
             await ctx.send(f"I have {ternary} {command.qualified_name} for you!")
 
     @commands.command(name="nuke", description="Nuke The Channel",hidden=True)
-    @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636)
+    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902), is_me())
     @commands.max_concurrency(1, commands.BucketType.channel)
     async def nuke(self, ctx, channel: discord.TextChannel=None):
         channel = channel if channel else ctx.channel
@@ -167,7 +172,7 @@ class Owner(commands.Cog, description=description):
             await ctx.send(embed=embed)
 
     @commands.command(name="eval", description="Let Owner Run Code within bot",aliases=["exec"])    
-    @commands.has_role(785842380565774368)
+    @commands.check_any(commands.has_any_role(785842380565774368), is_me())
     async def _eval(self, ctx, *, code):
         code = clean_code(code)
 
@@ -206,7 +211,7 @@ class Owner(commands.Cog, description=description):
         await pager.start(ctx)
 
     @commands.command(name="vsetup", hidden=True)
-    @commands.has_role(785842380565774368)
+    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636), is_me())
     async def vsetup(self, ctx):
         embed = discord.Embed(title="SERVER VERIFICATAON",
             description="To unlock the Server find the Emoji Below and add your reaction if, if you still can't unlock the server please dm any online <@&799037944735727636>, <@&785845265118265376> to unlock server.",
@@ -218,7 +223,7 @@ class Owner(commands.Cog, description=description):
     @commands.command(
         name='reload', description="Reload all/one of the bots cogs!", usage="", hidden=True
     )
-    @commands.has_permissions(administrator=True)
+    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636), is_me())
     async def reload(self, ctx, cog=None):
         if not cog:
             # No cog, means we reload all cogs

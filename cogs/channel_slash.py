@@ -15,11 +15,9 @@ class channel_slash(commands.Cog, description=description):
     def __init__(self, bot):
         self.bot = bot
 
-    def our_custom_check():
-        async def predicate(ctx):
-            return ctx.guild is not None \
-                and ctx.author.guild_permissions.manage_channels \
-                and ctx.me.guild_permissions.manage_channels
+    def is_me():
+        def predicate(ctx):
+            return ctx.message.author.id == 488614633670967307
         return commands.check(predicate)
 
     @commands.Cog.listener()
@@ -44,7 +42,7 @@ class channel_slash(commands.Cog, description=description):
             )
         ]
     )
-    @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916)
+    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889), is_me())
     async def lock(self, ctx, role: str=None, channel: str=None):
         role = role if role else ctx.guild.default_role
         channel = channel if channel else ctx.channel
@@ -82,7 +80,7 @@ class channel_slash(commands.Cog, description=description):
         ]
     )
 
-    @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916)
+    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889), is_me())
     async def unlock(self, ctx, role=None, channel=None,unlock_type=None):
         unlock_type = unlock_type if unlock_type else None
         role = role if role else ctx.guild.default_role
@@ -107,7 +105,7 @@ class channel_slash(commands.Cog, description=description):
             required=True)
         ]
     )
-    @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916)
+    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889), is_me())
     async def slowmode(self, ctx, time: str = '0'):
 
         unit = ['h', 'H', 'm', 'M', 's', 'S']
@@ -158,7 +156,7 @@ class channel_slash(commands.Cog, description=description):
                 )
             ]
     )
-    @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376)
+    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376), is_me())
     async def hide(self, ctx, role=None, channel=None):
         channel = channel if channel else ctx.channel
         role = role if role else ctx.guild.default_role
@@ -189,7 +187,7 @@ class channel_slash(commands.Cog, description=description):
                 )
             ]
     )
-    @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376)
+    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376), is_me())
     async def Unhide(self, ctx, role=None, channel=None):
         channel = channel if channel else ctx.channel
         role = role if role else ctx.guild.default_role
