@@ -76,6 +76,7 @@ bot.blacklist_user = {}
 bot.temp_roled_users = {}
 bot.ticket_setups = {}
 bot.cwd = cwd
+bot.event_channel = {}
 guild_ids = [785839283847954433, 797920317871357972]
 bot.version = "4.0"
 
@@ -132,6 +133,15 @@ async def on_ready():
     	setup = json.dumps(data)
     	bot.ticket_setups = json.loads(setup)
 
+    try:
+        channels = await bot.event.get_all()
+        channel = json.dumps(channels[0]["event_channels"])
+        bot.event_channel = json.loads(channel)
+        print(bot.event_channel)
+    except:
+        pass
+
+
     print("\n-----")
     print(f"Current blacklist:{len(bot.blacklist_user)}\n{bot.blacklist_user}")
     print("\n-----")
@@ -185,6 +195,8 @@ if __name__ == "__main__":
     bot.invites = Document(bot.db, "invites")
     bot.tasks = Document(bot.db, "tasks")
     bot.lockdown = Document(bot.db, "lockdown")
+    bot.score = Document(bot.db, "score")
+    bot.event = Document(bot.db, "event")
 
     for file in os.listdir(cwd + "/cogs"):
         if file.endswith(".py") and not file.startswith("_"):
