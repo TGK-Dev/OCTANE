@@ -1,5 +1,4 @@
 import asyncio
-import asyncio
 import datetime
 import discord
 import eight_ball
@@ -22,17 +21,6 @@ guild_ids = [797920317871357972, 785839283847954433]
 time_regex = re.compile("(?:(\d{1,5})(h|s|m|d))+?")
 time_dict = {"h": 3600, "s": 1, "m": 60, "d": 86400}
 description= "Fun commands"
-word_list =  ["hello", "Game", "pizzaz", "queazy", "puzzle", "Excuse", 
-			"marbles", "amber", "actually", "address", "administration", "admit", 
-			"analysis", "anything", "authority", "available", "beautiful", "beyond",
-			"building", "campaign", "candidate", "certainly", "collection", "commercial",
-			"community", "conference", "Congress", "Democrat", "democratic", "development",
-			"difference", "discussion", "disease", "economic", "economy", "education", "employee",
-			"environment", "environmental", "everybody", "everyone", "experience", "financial", "generation",
-			"government", "important", "improve", "improve", "interesting", "international", "knowledge", 
-			"machine", "magazine", "management", "movement", "operation", "opportunity", "organization",
-			"participant", "particularly", "performance", "population", "president", "production", 
-			"professional", "professor", "recognize", "relationship", "responsibility"]
 
 class TimeConverter(commands.Converter,):
     async def convert(self, ctx, argument):
@@ -264,59 +252,6 @@ class fun(commands.Cog,  description=description):
 				description="Well Played but unfortunately None can guess the Currect Number",
 				color=0xE74C3C)
 			await game_channel.send(embed=lose_embed)
-
-
-
-	@commands.Cog.listener()
-	async def on_message(self, message):
-		if message.author.bot:
-			return
-
-		trinnger1 = random.randint(500,560)
-		trinnger2 = random.randint(500,1000)
-		channel = message.channel
-
-		if channel.id in [785847439579676672, 785873318158008330, 789867479887249410, 792246185238069249, 838041413320835072, 837999751068778517]:
-
-
-			if trinnger1 > trinnger2:
-				word = random.choice(word_list)
-				sword = shuffle(word)
-				ssword = shuffle(sword)
-				right_channel = self.bot.get_channel(846847052389941248)
-
-				todo = await right_channel.send(word)
-				embed = discord.Embed(
-					description=f"Unscramble this word `{ssword}` Frist person To Answer it is winner",
-					color=0x2ECC71)
-				embed.set_footer(text="Still In Ealry Stage This Might Get Change")
-				edit_emved = await channel.send("<:Event_start:846714727568637964>| Uncommon Event!",embed=embed)
-				try:
-					
-					gword = await self.bot.wait_for("message", check=lambda x: x.channel.id == message.channel.id and x.content.lower() == word.lower(), timeout=15)
-
-					winner_embed = discord.Embed(title="Event Has expired",
-						description=f"{gword.author.mention} has successfully guessed the word!!!\n\
-						Right word Was: `{word}`", color=0x3498DB)
-
-					end_embed = discord.Embed(title="Event Has expired",
-						description=f"Unscramble this word `{sword}` Frist person To Answer it is winner\n\
-						Winner is the {gword.author.mention}",
-						color=0xE74C3C)
-					end_embed.set_footer(text="Still In Ealry Stage This Might Get Change")
-
-					await edit_emved.edit(content="<:Event_end:846715951089057863>| Expired",embed=end_embed)
-					await gword.reply(embed=winner_embed)
-					await todo.delete()
-				except asyncio.TimeoutError:
-
-					fail_embed = discord.Embed(title="Event Has expired",
-						description=f"Nobody is smart enough to get the correct answer,\nright word was `{word}`",
-						color=0xE74C3C)
-					fail_embed.set_footer(text="Still In Ealry Stage This Might Get Change")
-					await todo.delete()
-					await edit_emved.reply(content="<:Event_end:846715951089057863>| Expired", embed=fail_embed)
-
 def setup(bot):
 	bot.add_cog(fun(bot))
 
