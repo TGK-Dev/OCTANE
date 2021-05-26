@@ -17,7 +17,7 @@ class channel_slash(commands.Cog, description=description):
 
     def is_me():
         def predicate(ctx):
-            return ctx.message.author.id == 488614633670967307
+            return ctx.author.id == 488614633670967307
         return commands.check(predicate)
 
     @commands.Cog.listener()

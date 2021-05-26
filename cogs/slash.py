@@ -42,12 +42,7 @@ class Slash(commands.Cog, description=description):
 
 	def is_me():
 	    def predicate(ctx):
-	        return ctx.message.author.id == 488614633670967307
-	    return commands.check(predicate)
-
-	def is_me():
-	    def predicate(ctx):
-	        return ctx.message.author.id == 488614633670967307
+	        return ctx.author.id == 488614633670967307
 	    return commands.check(predicate)
 
 	@commands.Cog.listener()
@@ -88,7 +83,7 @@ class Slash(commands.Cog, description=description):
 			)
 		]
 	)				
-	@commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636)
+	@commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902), is_me())
 	async def status(self,ctx, arg):
 	    if arg.lower() == 'dnd':
 	        await self.bot.change_presence(status=discord.Status.dnd)
