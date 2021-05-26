@@ -83,7 +83,7 @@ class Event(commands.Cog,  description=description):
 					await edit_emved.edit(content="<:Event_end:846715951089057863>| Expired",embed=end_embed)
 					await gword.reply(embed=winner_embed)
 					await todo.delete()
-					data = await self.bot.score.find(gword.id)
+					data = await self.bot.score.find(gword.author.id)
 
 					if data is None:
 						data = {"_id": gword.author.id, "score": 0}
@@ -117,7 +117,7 @@ class Event(commands.Cog,  description=description):
 						Winner is the {gword.author.mention}",color=0xE74C3C)						
 					await edit_emved.edit(content="<:Event_end:846715951089057863>| Expired",embed=end_embed)
 					await gword.reply(embed=winner_embed)
-					data = await self.bot.score.find(gword.id)
+					data = await self.bot.score.find(gword.author.id)
 
 					if data is None:
 						data = {"_id": gword.author.id, "score": 0}
