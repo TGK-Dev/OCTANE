@@ -332,7 +332,7 @@ class tickets(commands.Cog, description=description):
                     await ctx.send(embed=embed)
 
     @commands.command(name="Claim", description="Claim Tickets to provide Support", usage="")
-    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916), is_me())
+    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916, 831405039830564875), is_me())
     async def Claim(self, ctx):
         await ctx.message.delete()
         guild = ctx.guild
