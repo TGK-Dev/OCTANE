@@ -302,7 +302,7 @@ class tickets(commands.Cog, description=description):
             filename=f"transcript-{ctx.channel.name}.html")
 
         await channel.send(f"{ctx.channel.name} / {ticket}", file=transcript_file)
-        await message.edit(content=f"{ctx.author.mention} transcript Saved")
+        await message.edit(content=f"{ctx.author.mention} transcript Saved", file=transcript_file)
 
         
     @commands.command(name="delete", description="delete the ticket", usage="")
