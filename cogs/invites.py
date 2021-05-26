@@ -125,11 +125,5 @@ class Invites(commands.Cog, description=description):
             entries=pages,
             length=5
         ).start(ctx)
-        
-
-
-
-
-
 def setup(bot):
     bot.add_cog(Invites(bot))
