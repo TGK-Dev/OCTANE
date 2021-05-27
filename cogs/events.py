@@ -44,7 +44,7 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
         else:
             #raise error
             embed = discord.Embed(color=0xE74C3C, 
-                description=f"<:tgk_warning:840638147838738432> | Error: `{error}`")
+                description=f"<:dnd:840490624670892063> | Error: `{error}`")
             await ctx.send(embed=embed)
             #mess = await ctx.send_help(ctx.command, )
 
