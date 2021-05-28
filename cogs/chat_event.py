@@ -193,7 +193,10 @@ class Event(commands.Cog,  description=description):
 		await ctx.send(embed=embed)
 
 	@event.command(name="score", description="See Your or Other Score for Chat events")
+	@commands.cooldown(1, 60, commands.BucketType.user)
 	async def score(self, ctx, member: discord.Member=None):
+		if ctx.channel.id != 785849567518130176:
+			return await ctx.send("please Use <#785849567518130176> for this command")
 		member = member if member else ctx.author
 		data = await self.bot.score.find(member.id)
 
@@ -201,11 +204,14 @@ class Event(commands.Cog,  description=description):
 			embed = discord.Embed(description="User Score Is not Found Maybe he never won who know?",color=0xE67E22)
 			return await ctx.send(embed=embed)
 		#score = data["score"]
-		embed = discord.Embed(description=f"The user {member.mention} Has Totel: {data['score']}", color=0x2ECC71)
+		embed = discord.Embed(description=f"The user {member.mention} Has Total: {data['score']}", color=0x2ECC71)
 		await ctx.send(embed=embed)
 
 	@event.command(name="leaderboard", description="Chat event leaderboard")
+	@commands.cooldown(1, 60, commands.BucketType.user)
 	async def leaderboard(self, ctx):
+		if ctx.channel.id != 785849567518130176:
+			return await ctx.send("please Use <#785849567518130176> for this command")
 		scores = await self.bot.score.get_all()
 
 		scores = sorted(scores, key=lambda x: x["score"], reverse=True)
@@ -215,7 +221,7 @@ class Event(commands.Cog,  description=description):
 		for data in scores:
 			description = f"""
 			{i}.Member: <@{data['_id']}>
-			Toal Score: {data['score']}
+			Total Score: {data['score']}
 			"""
 			i += 1
 			pages.append(description)
