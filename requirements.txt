@@ -11,4 +11,3 @@ Paginator==0.5.1
 python-dateutil==2.8.1
 discord-py-slash-command==1.1.2
 python-string-utils==1.0.0
-eight-ball==3.0.3
