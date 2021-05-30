@@ -4,6 +4,7 @@ import discord
 import eight_ball
 import random
 import re
+import eight_ball
 from string_utils import shuffle
 #-----------------------------
 
@@ -56,7 +57,8 @@ class fun(commands.Cog,  description=description):
 	@commands.command(name="8ball", description="old School 8ball game", usage="[question]")
 	@commands.cooldown(2, 60, commands.BucketType.user)
 	async def ball(self, ctx, *, question):
-		await ctx.send(bot.ball.response(question))	
+		ball = eight_ball.ball()
+		await ctx.send(bot.ball.response(question))
 
 	@commands.command(name="dadjoke", description="Send a dad Joke", usage="" ,aliases=["djoke"])
 	#@commands.has_any_role(799037944735727636)
