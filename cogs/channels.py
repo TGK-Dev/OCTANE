@@ -177,7 +177,7 @@ class channel(commands.Cog, description=description):
             overwrite = channel.overwrites_for(role)
             overwrite.send_messages = False
             await channel.set_permissions(role, overwrite=overwrite)
-            embed = discord.Embed(title="Server Lockdown", description="Your Not Muted Server Is in lockdown will Unlock *Soon*", color=0xE74C3C)
+            embed = discord.Embed(title="Server Lockdown", description="You are **not muted tbh**.  The server is currently under maintenance. We regret the inconvenience caused. <:so_sad:810172533692694538>", color=0xE74C3C)
             await channel.send(embed=embed)
         embed = discord.Embed(description=f"Channel are locked \n Total channel lock: {len(channels)}")
         await ctx.send(embed=embed)
