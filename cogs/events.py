@@ -87,6 +87,47 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
                     return await message.reply('**Vote for us here**:\nhttps://top.gg/servers/785839283847954433/vote\n\n__**Voting Perks**__\n❥ Special "Voted" Role.\n❥ 2,500 Casino Cash. Collect using ,collectincome in #:game_die:。casino.\n❥ Access to Dank Memer Premium with 2x Amaari.\n❥ Guild wide 1x Amaari.', mention_author=False)
 
     @commands.Cog.listener()
+    async def on_member_update(self, before, after):
+        guild = self.bot.get_guild(797920317871357972)
+        if guild.id != 785839283847954433:
+            return
+        if len(before.roles) < len(after.roles):
+            guild = self.bot.get_guild(797920317871357972)
+            # The user has gained a new role, so lets find out which one
+            newRole = next(role for role in after.roles if role not in before.roles)
+
+            if newRole.id == 786884615192313866:
+                channel = bot.get_channel(838041413320835072)
+                embed = discord.Embed(title="New Booster",
+                description=f"{after.mention} Just Boosted The Server Yeye!\nThank you so much for the Boosting our lovely Server",color=0xff73fa)
+                await channel.send(embed=embed)
+
+    @commands.Cog.listener()
+    async def on_member_ban(self, guild, member):
+        if guild.id != 785839283847954433:
+            return
+        logs = await guild.audit_logs(limit=1, action=discord.AuditLogAction.ban).flatten()
+        channel = guild.get_channel(806107399005667349)
+        logs = logs[0]
+        await guild.unban(member)
+        if logs.target == member:
+            embed = discord.Embed(title="Case Ban",
+                description=f"**>**Moderator:`{logs.user}`\n**>**Offender: `{logs.target}`\n**>**Reason: `{logs.reason}`",color=0xE74C3C)
+            await channel.send(embed=embed)
+
+    @commands.Cog.listener()
+    async def on_member_unban(self, guild, member):
+        if guild.id != 785839283847954433:
+            return
+        log = await guild.audit_logs(limit=1, action=discord.AuditLogAction.unban).flatten()
+        channel = guild.get_channel(806107399005667349)
+        logs = log[0]
+        if logs.target == member:
+            embed = discord.Embed(title="Case UnBan",
+                description=f"**>**Moderator:`{logs.user}`\n**>**Offender: `{logs.target}`\n**>**Reason: `{logs.reason}`",color=0x2ECC71)
+            await channel.send(embed=embed)
+
+    @commands.Cog.listener()
     async def on_member_join(self, member):
         guild = member.guild.id 
         guild = self.bot.get_guild(785839283847954433)

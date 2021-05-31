@@ -190,33 +190,6 @@ async def on_message(message):
 
     await bot.process_commands(message)
 
-@bot.event
-async def on_member_ban(guild, member):
-    if guild.id != 785839283847954433:
-        return
-    logs = await guild.audit_logs(limit=1, action=discord.AuditLogAction.ban).flatten()
-    channel = guild.get_channel(806107399005667349)
-    logs = logs[0]
-    await guild.unban(member)
-    if logs.target == member:
-        embed = discord.Embed(title="Case Ban",
-            description=f"**>**Moderator:`{logs.user}`\n**>**Offender: `{logs.target}`\n**>**Reason: `{logs.reason}`",color=0xE74C3C)
-        await channel.send(embed=embed)
-
-@bot.event
-async def on_member_unban(guild, member):
-    if guild.id != 785839283847954433:
-        return
-    log = await guild.audit_logs(limit=1, action=discord.AuditLogAction.unban).flatten()
-    channel = guild.get_channel(806107399005667349)
-    logs = log[0]
-    if logs.target == member:
-        embed = discord.Embed(title="Case UnBan",
-            description=f"**>**Moderator:`{logs.user}`\n**>**Offender: `{logs.target}`\n**>**Reason: `{logs.reason}`",color=0x2ECC71)
-        await channel.send(embed=embed)
-
-
-
 
 if __name__ == "__main__":
     # When running this file, if it is the 'main' file
