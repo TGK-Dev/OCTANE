@@ -72,7 +72,7 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
             embed = discord.Embed(color=0xE74C3C, 
                 description=f"Error: `{error}`")
             await ctx.send(embed=embed)
-
+    
     @commands.Cog.listener()
     async def on_message(self, message):
         word_list = ['vote link','vote Link','Vote link', 'pls vote', 'pls Vote', 'Pls vote']
@@ -89,15 +89,15 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
     @commands.Cog.listener()
     async def on_member_update(self, before, after):
         guild = self.bot.get_guild(797920317871357972)
-        if guild.id != 785839283847954433:
+        if after.guild.id != 785839283847954433:
             return
         if len(before.roles) < len(after.roles):
             guild = self.bot.get_guild(797920317871357972)
             # The user has gained a new role, so lets find out which one
             newRole = next(role for role in after.roles if role not in before.roles)
 
-            if newRole.id == 786884615192313866:
-                channel = bot.get_channel(838041413320835072)
+            if newRole.id == 786477872029892639:
+                channel = self.bot.get_channel(838041413320835072)
                 embed = discord.Embed(title="New Booster",
                 description=f"{after.mention} Just Boosted The Server Yeye!\nThank you so much for the Boosting our lovely Server",color=0xff73fa)
                 await channel.send(embed=embed)
@@ -107,9 +107,8 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
         if guild.id != 785839283847954433:
             return
         logs = await guild.audit_logs(limit=1, action=discord.AuditLogAction.ban).flatten()
-        channel = guild.get_channel(806107399005667349)
+        channel = self.bot.get_channel(806107399005667349)
         logs = logs[0]
-        await guild.unban(member)
         if logs.target == member:
             embed = discord.Embed(title="Case Ban",
                 description=f"**>**Moderator:`{logs.user}`\n**>**Offender: `{logs.target}`\n**>**Reason: `{logs.reason}`",color=0xE74C3C)
@@ -120,7 +119,7 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
         if guild.id != 785839283847954433:
             return
         log = await guild.audit_logs(limit=1, action=discord.AuditLogAction.unban).flatten()
-        channel = guild.get_channel(806107399005667349)
+        channel = self.bot.get_channel(806107399005667349)
         logs = log[0]
         if logs.target == member:
             embed = discord.Embed(title="Case UnBan",
@@ -196,34 +195,3 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
 
 def setup(bot):
     bot.add_cog(Events(bot))
-"""
-    @commands.Cog.listener()
-    async def on_message(self, meg):
-        if meg.author.bot:
-            return
-
-        odd = [1,3,5,7,9]
-        even = [0,2,4,6,8]
-
-        num1 = random.choice(odd)
-        num2 = random.choice(even)
-
-        if num1 > num2:
-
-            embed = discord.Embed(title="Random Event",
-                description="Server Is been raided type `ban` to ban them all",
-                color=0x09fa2c)
-            mess = await meg.channel.send(embed=embed)
-            try:
-                await self.bot.wait_for("message", check=lambda m: m.content.startswith(f"ban"), timeout=60)
-                over = discord.Embed(title="Event expired",
-                    description=f"All Reider Was Banned by {m.author.mention}",
-                    color=0xbf1932)
-                await mess.edit(embed=over)
-            except asyncio.TimeoutError:
-                over = discord.Embed(title="Event expired",
-                    description=f"Server got raided no one saved Server",
-                    color=0xbf1932)
-
-                await mess.edit(embed=over)
-"""
