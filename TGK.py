@@ -77,6 +77,8 @@ bot.temp_roled_users = {}
 bot.ticket_setups = {}
 bot.cwd = cwd
 bot.event_channel = {}
+bot.perm = {}
+bot.mod_role = [797923152617275433, 848585998769455104]
 guild_ids = [785839283847954433, 797920317871357972]
 bot.version = "4.0"
 
@@ -134,10 +136,16 @@ async def on_ready():
     	bot.ticket_setups = json.loads(setup)
 
     try:
+        permissions = await bot.perms.get_all()
+        permission = json.dumps(permissions)
+        bot.perm = json.loads(permission)
+    except:
+        pass
+
+    try:
         channels = await bot.event.get_all()
         channel = json.dumps(channels[0]["event_channels"])
         bot.event_channel = json.loads(channel)
-        print(bot.event_channel)
     except:
         pass
 
@@ -182,6 +190,33 @@ async def on_message(message):
 
     await bot.process_commands(message)
 
+@bot.event
+async def on_member_ban(guild, member):
+    if guild.id != 785839283847954433:
+        return
+    logs = await guild.audit_logs(limit=1, action=discord.AuditLogAction.ban).flatten()
+    channel = guild.get_channel(806107399005667349)
+    logs = logs[0]
+    await guild.unban(member)
+    if logs.target == member:
+        embed = discord.Embed(title="Case Ban",
+            description=f"**>**Moderator:`{logs.user}`\n**>**Offender: `{logs.target}`\n**>**Reason: `{logs.reason}`",color=0xE74C3C)
+        await channel.send(embed=embed)
+
+@bot.event
+async def on_member_unban(guild, member):
+    if guild.id != 785839283847954433:
+        return
+    log = await guild.audit_logs(limit=1, action=discord.AuditLogAction.unban).flatten()
+    channel = guild.get_channel(806107399005667349)
+    logs = log[0]
+    if logs.target == member:
+        embed = discord.Embed(title="Case UnBan",
+            description=f"**>**Moderator:`{logs.user}`\n**>**Offender: `{logs.target}`\n**>**Reason: `{logs.reason}`",color=0x2ECC71)
+        await channel.send(embed=embed)
+
+
+
 
 if __name__ == "__main__":
     # When running this file, if it is the 'main' file
@@ -200,6 +235,7 @@ if __name__ == "__main__":
     bot.lockdown = Document(bot.db, "lockdown")
     bot.score = Document(bot.db, "score")
     bot.event = Document(bot.db, "event")
+    bot.perms = Document(bot.db, "perms")
 
     for file in os.listdir(cwd + "/cogs"):
         if file.endswith(".py") and not file.startswith("_"):

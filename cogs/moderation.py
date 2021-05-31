@@ -337,7 +337,7 @@ class Moderation(commands.Cog, description=description, command_attrs=dict(hidde
 
         await self.bot.bans.delete(member.id)
         try:
-            self.bot.muted_users.pop(member.id)
+            self.bot.bot.ban_users.pop(member.id)
         except KeyError:
             pass
 
