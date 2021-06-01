@@ -23,9 +23,26 @@ class Owner(commands.Cog, description=description):
             return ctx.message.author.id == 488614633670967307
         return commands.check(predicate)
 
+    def perm_check():
+        async def predicate(ctx):
+            mod_role = [848971232526467138, 848971232526467137, 848971232526467134, 848971232526467133, 848971232526467132, 848971232514015261]
+            for role in ctx.author.roles[-5:]:
+                if role.id in mod_role:
+                    permissions = await ctx.bot.config.find(role.id)
+                    print(permissions["perm"])
+                    print(f"\n\n{ctx.command.name}\n")
+                    check = permissions['perm']
+            return (ctx.command.name in check)
+        return commands.check(predicate)
+
     @commands.Cog.listener()
     async def on_ready(self):
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
+
+    @commands.command(name="test")
+    @commands.check_any(perm_check())
+    async def test(self, ctx):
+        await ctx.send(f"Ping `{round(self.bot.latency * 1000)}`ms")
 
     @commands.command(
         name="prefix",
@@ -47,6 +64,138 @@ class Owner(commands.Cog, description=description):
     async def deleteprefix(self, ctx):
         await self.bot.config.unset({"_id": ctx.guild.id, "prefix": 1})
         await ctx.send("This guilds prefix has been set back to the default")
+
+    @commands.group(name="permissions", description="Role Permission Managers", aliases=["perm"],invoke_without_command = True)
+    async def permissions(self, ctx):
+        await ctx.send("Use help Commands to know more")
+
+    @permissions.command(name="add", description="add permissions to an role")
+    async def add(self, ctx, role:discord.Role, *,command):
+        command = self.bot.get_command(command)
+
+        if command is None:
+            return await ctx.send("Please Check the command")
+
+        if ctx.command == command:
+            return await ctx.send("You add This Commands to some else Permission.")
+
+        data = await self.bot.config.find(role.id)
+        data["perm"].append(command.name)
+        await self.bot.config.upsert(data)
+
+        await ctx.send("permissions Added")
+
+    @permissions.command(name="rmeove", description="Remove Permission from role")
+    async def remove(self, ctx, role:discord.Role, *,command):
+        command = self.bot.get_command(command)
+
+        if command is None:
+            return await ctx.send("Please Check the command")
+
+        if ctx.command == command:
+            return await ctx.send("You add/Revmove This Commands to some else Permission.")
+
+        data = await self.bot.config.find(role.id)
+        data["event_channels"].remove(command.name)
+        await self.bot.event.upsert(data)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     @commands.command(
     name="blacklist",

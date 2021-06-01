@@ -60,7 +60,7 @@ bot = commands.Bot(
     help_command=Help(),
     intents=intents,
 )
-slash = SlashCommand(bot, sync_commands=True)
+slash = SlashCommand(bot, sync_commands=False)
 # change command_prefix='-' to command_prefix=get_prefix for custom prefixes
 bot.config_token = secret_file["token"]
 bot.connection_url = secret_file["mongo"]
