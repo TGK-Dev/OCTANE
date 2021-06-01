@@ -20,7 +20,7 @@ class Owner(commands.Cog, description=description):
         
     def is_me():
         def predicate(ctx):
-            return ctx.message.author.id == 488614633670967307
+            return ctx.message.author.id in [488614633670967307, 301657045248114690]
         return commands.check(predicate)
 
     def perm_check():
@@ -40,9 +40,10 @@ class Owner(commands.Cog, description=description):
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
 
     @commands.command(name="test")
-    @commands.check_any(perm_check())
+    @commands.check_any(perm_check(), is_me())
     async def test(self, ctx):
         await ctx.send(f"Ping `{round(self.bot.latency * 1000)}`ms")
+
 
     @commands.command(
         name="prefix",
@@ -70,6 +71,7 @@ class Owner(commands.Cog, description=description):
         await ctx.send("Use help Commands to know more")
 
     @permissions.command(name="add", description="add permissions to an role")
+    @commands.has_any_role(785842380565774368, 803635405638991902)
     async def add(self, ctx, role:discord.Role, *,command):
         command = self.bot.get_command(command)
 
@@ -98,6 +100,17 @@ class Owner(commands.Cog, description=description):
         data = await self.bot.config.find(role.id)
         data["event_channels"].remove(command.name)
         await self.bot.event.upsert(data)
+
+    @permissions.command(name="list", description="show list of the permissionss")
+    async def list(self, ctx, role:discord.Role):
+        data = await self.bot.config.find(role.id)
+        embed = discord.Embed(title=f"Permission's for {role.name}", description="")
+        i = 1
+        for permissions in data['perm']:
+            embed.description += f"{i}.{permissions}\n"
+            i += 1
+        await ctx.send(embed=embed)
+
 
 
 
@@ -441,3 +454,17 @@ class Owner(commands.Cog, description=description):
 
 def setup(bot):
     bot.add_cog(Owner(bot))
+
+"""
+@commands.command(name="test")
+    #@commands.check_any(perm_check())
+    async def test(self, ctx):
+        data = await self.bot.config.find(803635405638991902)
+        perm = ['lock', 'unlock', 'slowmode', 'Hide', 'Unhide', 'lockdown', 'inviter', 'mute', 'unmute', 'kick', 'Ban', 'unban', 'purge', 'uerinfo', 'tag', 'blacklist', 'unblacklist', 'Say', 'activity', 'nuke', 'roleinfo', 'role', 'Pings', 'mping', 'setup', 'new', 'pnew', 'close', 'open', 'transcript', 'delete', 'Claim', 'unClaim', 'add', 'remove', 'Warn', 'Warnings', 'delwarn', 'clearwarn', 'tasks']
+        for commands in perm:
+            command = self.bot.get_command(commands)
+            data["perm"].append(command.name)
+        
+        await self.bot.config.upsert(data)
+        print("done")
+"""
