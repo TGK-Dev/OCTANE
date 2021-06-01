@@ -20,7 +20,7 @@ class Owner(commands.Cog, description=description):
         
     def is_me():
         def predicate(ctx):
-            return ctx.message.author.id in [301657045248114690]
+            return ctx.message.author.id in [488614633670967307 , 301657045248114690]
         return commands.check(predicate)
 
     def perm_check():
