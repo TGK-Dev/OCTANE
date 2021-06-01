@@ -25,7 +25,7 @@ class Invites(commands.Cog, description=description):
 
     def is_me():
         def predicate(ctx):
-            return ctx.message.author.id == 488614633670967307
+            return ctx.message.author.id in [488614633670967307, 301657045248114690]
         return commands.check(predicate)
 
     @commands.Cog.listener()

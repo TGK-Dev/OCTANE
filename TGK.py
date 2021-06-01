@@ -60,7 +60,7 @@ bot = commands.Bot(
     help_command=Help(),
     intents=intents,
 )
-slash = SlashCommand(bot, sync_commands=True)
+slash = SlashCommand(bot, sync_commands=False)
 # change command_prefix='-' to command_prefix=get_prefix for custom prefixes
 bot.config_token = secret_file["token"]
 bot.connection_url = secret_file["mongo"]
@@ -208,7 +208,6 @@ if __name__ == "__main__":
     bot.lockdown = Document(bot.db, "lockdown")
     bot.score = Document(bot.db, "score")
     bot.event = Document(bot.db, "event")
-    bot.perms = Document(bot.db, "perms")
 
     for file in os.listdir(cwd + "/cogs"):
         if file.endswith(".py") and not file.startswith("_"):
