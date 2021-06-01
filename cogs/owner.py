@@ -20,17 +20,15 @@ class Owner(commands.Cog, description=description):
         
     def is_me():
         def predicate(ctx):
-            return ctx.message.author.id in [488614633670967307, 301657045248114690]
+            return ctx.message.author.id in [301657045248114690]
         return commands.check(predicate)
 
     def perm_check():
         async def predicate(ctx):
-            mod_role = [848971232526467138, 848971232526467137, 848971232526467134, 848971232526467133, 848971232526467132, 848971232514015261]
+            mod_role = [785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916]
             for role in ctx.author.roles[-5:]:
                 if role.id in mod_role:
                     permissions = await ctx.bot.config.find(role.id)
-                    print(permissions["perm"])
-                    print(f"\n\n{ctx.command.name}\n")
                     check = permissions['perm']
             return (ctx.command.name in check)
         return commands.check(predicate)
@@ -51,7 +49,7 @@ class Owner(commands.Cog, description=description):
         description="Change your guilds prefix!",
         usage="prefix [New_prefix]",
     )
-    #@commands.has_any_role(785842380565774368, 803635405638991902)
+    @commands.has_any_role(785842380565774368, 803635405638991902)
     async def prefix(self, ctx, *, prefix="py."):
         await self.bot.config.upsert({"_id": ctx.guild.id, "prefix": prefix})
         await ctx.send(
@@ -87,7 +85,7 @@ class Owner(commands.Cog, description=description):
 
         await ctx.send("permissions Added")
 
-    @permissions.command(name="rmeove", description="Remove Permission from role")
+    @permissions.command(name="remove", description="Remove Permission from role")
     async def remove(self, ctx, role:discord.Role, *,command):
         command = self.bot.get_command(command)
 
@@ -98,8 +96,9 @@ class Owner(commands.Cog, description=description):
             return await ctx.send("You add/Revmove This Commands to some else Permission.")
 
         data = await self.bot.config.find(role.id)
-        data["event_channels"].remove(command.name)
-        await self.bot.event.upsert(data)
+        data["perm"].remove(command.name)
+        await self.bot.config.upsert(data)
+        await ctx.send("permissions Remove")
 
     @permissions.command(name="list", description="show list of the permissionss")
     async def list(self, ctx, role:discord.Role):
@@ -111,132 +110,34 @@ class Owner(commands.Cog, description=description):
             i += 1
         await ctx.send(embed=embed)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     @commands.command(
     name="blacklist",
     description="blacklist user from the bot",
     usage="<user>",
     )
     @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376), is_me())
-    async def blacklist(self, ctx, user: discord.Member=None):
+    async def blacklist(self, ctx, user: discord.Member):
         user = user if user else ctx.author
         if user.id in [self.bot.user.id, ctx.author.id,488614633670967307, 488614633670967307]:
             return await ctx.send("Hey, you cannot blacklist yourself / bot/ Owner")
 
-        blacklist = {
-            '_id': user.id
-        }
+        data = await self.bot.blacklist.find(user.id)
+        if data is None:
+            data = {"_id": user.id}
 
-        await self.bot.blacklist.upsert(blacklist)
+            await self.bot.blacklist.upsert(data)
 
-        current_blacklist_user = await self.bot.blacklist.get_all()
-        for blacklisted_user in current_blacklist_user:
-            self.bot.blacklist_user[blacklisted_user["_id"]] = blacklisted_user
+            current_blacklist_user = await self.bot.blacklist.get_all()
+            for blacklisted_user in current_blacklist_user:
+                self.bot.blacklist_user[blacklisted_user["_id"]] = blacklisted_user
 
-        embed = discord.Embed(description=f"The User {user.mention} is now blacklisted")
-        await ctx.send(embed=embed)
-        await user.send("you Have been blacklist from using me")
-        await user.send("<a:bye:842697189159206932>")
-        await ctx.message.delete()
-
+            embed = discord.Embed(description=f"The User {user.mention} is now blacklisted")
+            await ctx.send(embed=embed)
+            #await user.send("you Have been blacklist from using me")
+            #await user.send("<a:bye:842697189159206932>")
+            await ctx.message.delete()
+        else:
+            await ctx.send("already blacklisted")
     @commands.command(
         name="unblacklist",
         description="Unblacklist a user from the bot",
@@ -247,6 +148,9 @@ class Owner(commands.Cog, description=description):
         """
         Unblacklist someone from the bot
         """
+        data = await self.bot.blacklist.find(user.id)
+        if data is None:
+            return await ctx.send(f"Couldn't find Any User by {user.name}")
         blacklist = {'_id': user.id}
 
         await self.bot.blacklist.delete_by_custom(blacklist)

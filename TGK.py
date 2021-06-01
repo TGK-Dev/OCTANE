@@ -115,9 +115,6 @@ async def on_ready():
     await bot.change_presence(activity=discord.Game(name=f"Cries in Binary | 00111010 00101000"), status=discord.Status.dnd)
       # This changes the bots 'activity'
 
-    for document in await bot.config.get_all():
-        print(document)
-
     current_blacklist_user = await bot.blacklist.get_all()
     for blacklisted_user in current_blacklist_user:
         bot.blacklist_user[blacklisted_user["_id"]] = blacklisted_user

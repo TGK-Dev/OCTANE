@@ -12,6 +12,7 @@ from discord.ext.buttons import Paginator
 
 description = "Some Basic commands"
 
+
 class Config(commands.Cog, description=description):
     def __init__(self, bot):
         self.bot = bot
@@ -23,8 +24,8 @@ class Config(commands.Cog, description=description):
     @commands.command()
     async def ping(self, ctx):
         message = await ctx.send(f'Ping') 
-        await message.edit(content=f"Ping `{round(self.bot.latency * 1000)}`ms")    
-
+        await message.edit(content=f"Ping `{round(self.bot.latency * 1000)}`ms")
+  
     @commands.command(
         name="stats", description="A useful command that displays bot statistics.", usage="stats"
     )
