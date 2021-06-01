@@ -68,7 +68,7 @@ class Help(HelpCommand):
         await super().prepare_help_command(ctx, command)
 
     def get_ending_note(self):
-        default ="Develop by Jay2404/Utik007\nType {0}{1} [command] for more info on a command.\n".format(self.clean_prefix, self.invoked_with)
+        default ="Develop by Jay2404/utki\nType {0}{1} [command] for more info on a command.\n".format(self.clean_prefix, self.invoked_with)
 
         return self.ending_note or default
 
