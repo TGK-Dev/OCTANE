@@ -17,11 +17,21 @@ class Warns(commands.Cog, description=description):
 
     def is_me():
         def predicate(ctx):
-            return ctx.message.author.id in [488614633670967307, 301657045248114690]
+            return ctx.message.author.id in [488614633670967307 , 301657045248114690]
+        return commands.check(predicate)
+
+    def perm_check():
+        async def predicate(ctx):
+            mod_role = [785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916]
+            for role in ctx.author.roles[-5:]:
+                if role.id in mod_role:
+                    permissions = await ctx.bot.config.find(role.id)
+                    check = permissions['perm']
+            return (ctx.command.name in check)
         return commands.check(predicate)
 		
     @commands.command(name="Warn", description="Gives an Warnings to user", usage="[member] [warn]")
-    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916), is_me())
+    @commands.check_any(perm_check(), is_me())
     async def warn(self, ctx, member: discord.Member, *, reason):
         await ctx.message.delete()
         if member.id in [self.bot.user.id, 488614633670967307, 301657045248114690]:
@@ -70,7 +80,7 @@ class Warns(commands.Cog, description=description):
             pass
 
     @commands.command(name="Warnings", description="Show All Warnings for User", usage="[member]")
-    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916), is_me())
+    @commands.check_any(perm_check(), is_me())
     async def Warnings(self, ctx, member: discord.Member):
         warn_filter = {"user_id": member.id, "guild_id": member.guild.id}
         warns = await self.bot.warns.find_many_by_custom(warn_filter)
@@ -99,7 +109,7 @@ class Warns(commands.Cog, description=description):
         ).start(ctx)
 
     @commands.command(name="delwarn", description="Delete Warning For user", usage="[Warn_id]")
-    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636), is_me())
+    @commands.check_any(perm_check(), is_me())
     async def delwarn(self, ctx, *,_id):
 
         warns_filter = {"_id": ObjectId(_id)}
@@ -111,7 +121,7 @@ class Warns(commands.Cog, description=description):
         await ctx.send(embed=embed)
 
     @commands.command(name="clearwarn", description="Clear all warnings form user", usage="[member]")
-    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902), is_me())
+    @commands.check_any(perm_check(), is_me())
     async def clearwarn(self, ctx, member: discord.Member=None):
         member = member if member else ctx.author
 

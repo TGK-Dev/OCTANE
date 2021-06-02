@@ -12,55 +12,25 @@ class channel(commands.Cog, description=description):
 
     def is_me():
         def predicate(ctx):
-            return ctx.message.author.id in [488614633670967307, 301657045248114690]
+            return ctx.message.author.id in [488614633670967307 , 301657045248114690]
+        return commands.check(predicate)
+
+    def perm_check():
+        async def predicate(ctx):
+            mod_role = [785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916]
+            for role in ctx.author.roles[-5:]:
+                if role.id in mod_role:
+                    permissions = await ctx.bot.config.find(role.id)
+                    check = permissions['perm']
+            return (ctx.command.name in check)
         return commands.check(predicate)
 
     @commands.Cog.listener()
     async def on_ready(self):
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
 
-    @commands.command(
-        name="channelstats",
-        aliases=["cs"],
-        description="Sends a nice fancy embed with some channel stats",
-        usage="[channel]",
-    )
-    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916), is_me())
-    async def channelstats(self, ctx):
-        channel = ctx.channel
-
-        embed = discord.Embed(
-            title=f"Stats for **{channel.name}**",
-            description=f"{'Category: {}'.format(channel.category.name) if channel.category else 'This channel is not in a category'}",
-            color=random.choice(self.bot.color_list),
-        )
-        embed.add_field(name="Channel Guild", value=ctx.guild.name, inline=False)
-        embed.add_field(name="Channel Id", value=channel.id, inline=False)
-        embed.add_field(
-            name="Channel Topic",
-            value=f"{channel.topic if channel.topic else 'No topic.'}",
-            inline=False,
-        )
-        embed.add_field(name="Channel Position", value=channel.position, inline=False)
-        embed.add_field(
-            name="Channel Slowmode Delay", value=channel.slowmode_delay, inline=False
-        )
-        embed.add_field(name="Channel is nsfw?", value=channel.is_nsfw(), inline=False)
-        embed.add_field(name="Channel is news?", value=channel.is_news(), inline=False)
-        embed.add_field(
-            name="Channel Creation Time", value=channel.created_at, inline=False
-        )
-        embed.add_field(
-            name="Channel Permissions Synced",
-            value=channel.permissions_synced,
-            inline=False,
-        )
-        embed.add_field(name="Channel Hash", value=hash(channel), inline=False)
-
-        await ctx.send(embed=embed)
-
     @commands.command(name="lock", description="Lock the given channel For mentioned Role", usage="[Role]", aliases=['l'])
-    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889), is_me())
+    @commands.check_any(perm_check(), is_me())
     async def lock(self, ctx, role: discord.Role = None):
 
         channel = ctx.channel
@@ -76,7 +46,7 @@ class channel(commands.Cog, description=description):
         await channel.send(embed=embed)
 
     @commands.command(name="unlock", description="Unlock the given channel For mentioned Role", usage="[Role]", aliases=['ul'])
-    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889), is_me())
+    @commands.check_any(perm_check(), is_me())
     async def unlock(self, ctx, role: discord.Role = None):
 
         channel = ctx.channel
@@ -92,7 +62,7 @@ class channel(commands.Cog, description=description):
         await channel.send(embed=embed)
 
     @commands.command(name="slowmode", description="Set Slowmode In Current Channel", usage="[slowmode time 1m, 1s 1h max 6h]", aliases=['sm'])
-    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916), is_me())
+    @commands.check_any(perm_check(), is_me())
     async def slowmode(self, ctx, time: str = '0'):
 
         unit = ['h', 'H', 'm', 'M', 's', 'S']
@@ -128,7 +98,7 @@ class channel(commands.Cog, description=description):
 
 
     @commands.command(name="Hide", description="Hide Channels For mentioned Role", usage="[role]")
-    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376), is_me())
+    @commands.check_any(perm_check(), is_me())
     async def hide(self, ctx, role: discord.Role = None):
         channel = ctx.channel
         role = role if role else discord.utils.get(ctx.guild.roles, name="࿐ NEWBIE 〢 0")
@@ -144,7 +114,7 @@ class channel(commands.Cog, description=description):
 
 
     @commands.command(name="Unhide", description="Unhide Channels For mentioned Role", usage="[role]")
-    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376), is_me())
+    @commands.check_any(perm_check(), is_me())
     async def unhide(self, ctx, role: discord.Role = None):
         channel = ctx.channel
         role = role if role else discord.utils.get(ctx.guild.roles, name="࿐ NEWBIE 〢 0")
@@ -158,7 +128,7 @@ class channel(commands.Cog, description=description):
         await ctx.send(embed=embed, delete_after=10)
 
     @commands.command(name="Sync", description="Sync Channels permissions to it's Category", usage="[channel]")
-    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376), is_me())
+    @commands.check_any(perm_check(), is_me())
     async def sync(self, ctx, channel: discord.TextChannel=None):
         channel = channel if channel else ctx.channel
 
@@ -166,7 +136,7 @@ class channel(commands.Cog, description=description):
         await ctx.send("permissions are Synced", delete_after=15)
 
     @commands.group(name="lockdown", description="Put server in Lock",invoke_without_command=True)
-    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889), is_me())
+    @commands.check_any(perm_check(), is_me())
     async def lockdown(self, ctx):
         channels = await self.bot.lockdown.get_all()
 
@@ -185,7 +155,7 @@ class channel(commands.Cog, description=description):
 
 
     @lockdown.command(name="add", description="add channel to the lockdown list")
-    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376), is_me())
+    @commands.check_any(perm_check(), is_me())
     async def add(self, ctx, channel:discord.TextChannel):
 
         data = {
@@ -197,7 +167,7 @@ class channel(commands.Cog, description=description):
         await ctx.send("channel added")
 
     @lockdown.command(name="remove", description="remove channel form lockdown list")
-    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376), is_me())
+    @commands.check_any(perm_check(), is_me())
     async def remove(self, ctx, channel:discord.TextChannel):
 
         data = await self.bot.lockdown.find(ctx.guild.id)
@@ -211,7 +181,7 @@ class channel(commands.Cog, description=description):
         await ctx.send(f"The Channels {channel.mention} is removed from the List")
 
     @lockdown.command(name="list", description="list of lockdown channels list")
-    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916), is_me())
+    @commands.check_any(perm_check(), is_me())
     async def list(self, ctx):
         channels = await self.bot.lockdown.get_all()
 
@@ -228,7 +198,7 @@ class channel(commands.Cog, description=description):
         
 
     @lockdown.command(name="end", description="End Server Lockdown")
-    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376), is_me())
+    @commands.check_any(perm_check(), is_me())
     async def end(self, ctx):
         await ctx.send("Are you Sure Want to Unlock Server[Y/n]")
 

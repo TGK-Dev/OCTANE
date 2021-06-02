@@ -46,7 +46,17 @@ class fun(commands.Cog,  description=description):
 
 	def is_me():
 	    def predicate(ctx):
-	        return ctx.message.author.id in [488614633670967307, 301657045248114690]
+	        return ctx.message.author.id in [488614633670967307 , 301657045248114690]
+	    return commands.check(predicate)
+
+	def perm_check():
+	    async def predicate(ctx):
+	        mod_role = [785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916]
+	        for role in ctx.author.roles[-5:]:
+	            if role.id in mod_role:
+	                permissions = await ctx.bot.config.find(role.id)
+	                check = permissions['perm']
+	        return (ctx.command.name in check)
 	    return commands.check(predicate)
 
 

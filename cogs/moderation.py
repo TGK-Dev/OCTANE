@@ -45,7 +45,17 @@ class Moderation(commands.Cog, description=description, command_attrs=dict(hidde
 
     def is_me():
         def predicate(ctx):
-            return ctx.message.author.id in [488614633670967307, 301657045248114690]
+            return ctx.message.author.id in [488614633670967307 , 301657045248114690]
+        return commands.check(predicate)
+
+    def perm_check():
+        async def predicate(ctx):
+            mod_role = [785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916]
+            for role in ctx.author.roles[-5:]:
+                if role.id in mod_role:
+                    permissions = await ctx.bot.config.find(role.id)
+                    check = permissions['perm']
+            return (ctx.command.name in check)
         return commands.check(predicate)
 
 
@@ -115,7 +125,7 @@ class Moderation(commands.Cog, description=description, command_attrs=dict(hidde
         description="Mutes a given user for x time!",
         usage='<user> [time] [reason]'
     )
-    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916), is_me())
+    @commands.check_any(perm_check(), is_me())
     async def mute(self, ctx, member: discord.Member, time: TimeConverter=None, *,reason):
         await ctx.message.delete()
         role = discord.utils.get(ctx.guild.roles, name="Muted")
@@ -202,7 +212,7 @@ class Moderation(commands.Cog, description=description, command_attrs=dict(hidde
         description="Unmuted a member!",
         usage='<user>'
     )
-    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916), is_me())
+    @commands.check_any(perm_check(), is_me())
     async def unmute(self, ctx, member: discord.Member):
         await ctx.message.delete()
         role = discord.utils.get(ctx.guild.roles, name="Muted")
@@ -235,7 +245,7 @@ class Moderation(commands.Cog, description=description, command_attrs=dict(hidde
 
 
     @commands.command(name="kick", description="kick User from the guild", usage="<user> [reason]")
-    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916), is_me())
+    @commands.check_any(perm_check(), is_me())
     async def kick(self, ctx, member: discord.Member, *, reason=None):
         if member.top_role >= ctx.author.top_role:
             return await ctx.send("You can't You cannot do this action on this user due to role hierarchy.")
@@ -264,7 +274,7 @@ class Moderation(commands.Cog, description=description, command_attrs=dict(hidde
 
 
     @commands.command(name="Ban", description="Ban user From guild", usage="<user> [time] [reason]") 
-    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889), is_me())
+    @commands.check_any(perm_check(), is_me())
     async def ban(self, ctx, member: discord.User, time: TimeConverter=None, *, reason=None):
         await ctx.message.delete()
         try:
@@ -324,7 +334,7 @@ class Moderation(commands.Cog, description=description, command_attrs=dict(hidde
             await log_channel.send(embed=embed)
 
     @commands.command(name="unban", description="Unban user From guild", usage="<user> [reason]")
-    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376), is_me())
+    @commands.check_any(perm_check(), is_me())
     async def unban(self, ctx, member, *, reason=None):
         await ctx.message.delete()
         member = await self.bot.fetch_user(int(member))
@@ -353,7 +363,7 @@ class Moderation(commands.Cog, description=description, command_attrs=dict(hidde
 
 
     @commands.command(name="purge", description="A command which purges the channel it is called in", usage="[amount]", invoke_without_command = True)
-    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889), is_me())
+    @commands.check_any(perm_check(), is_me())
     async def purge(self, ctx, amount=10):
         await ctx.message.delete()
         await ctx.channel.purge(limit=amount)
@@ -364,7 +374,7 @@ class Moderation(commands.Cog, description=description, command_attrs=dict(hidde
         await ctx.send(embed=embed, delete_after=15)
 
     @commands.command(name="uerinfo", description="Give all Infomation about user", usage="[member]", aliases=['whois'])
-    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916), is_me())
+    @commands.check_any(perm_check(), is_me())
     async def uerinfo(self, ctx, member: discord.Member = None):
         await ctx.message.delete()
         def fomat_time(time):
@@ -391,7 +401,7 @@ class Moderation(commands.Cog, description=description, command_attrs=dict(hidde
         await ctx.send(embed=embed)
 
     @commands.command(name="tag", hidden=True)
-    @commands.has_any_role(785842380565774368,799037944735727636, 785845265118265376, 787259553225637889)
+    @commands.check_any(perm_check(), is_me())
     async def tag(self, ctx):
         await ctx.message.delete()
         await ctx.send("**Avoid tagging Owners/Admins.**\nKindly tag available mods/admins for queries.\nOr simply raise a ticket from <#785901543349551104>.\n")

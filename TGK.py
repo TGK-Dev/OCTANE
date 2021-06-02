@@ -60,7 +60,7 @@ bot = commands.Bot(
     help_command=Help(),
     intents=intents,
 )
-slash = SlashCommand(bot, sync_commands=False)
+slash = SlashCommand(bot, sync_commands=True)
 # change command_prefix='-' to command_prefix=get_prefix for custom prefixes
 bot.config_token = secret_file["token"]
 bot.connection_url = secret_file["mongo"]
@@ -114,7 +114,7 @@ async def on_ready():
     )
     await bot.change_presence(activity=discord.Game(name=f"Cries in Binary | 00111010 00101000"), status=discord.Status.dnd)
       # This changes the bots 'activity'
-
+      
     current_blacklist_user = await bot.blacklist.get_all()
     for blacklisted_user in current_blacklist_user:
         bot.blacklist_user[blacklisted_user["_id"]] = blacklisted_user
