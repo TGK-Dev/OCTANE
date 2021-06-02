@@ -88,18 +88,19 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
 
     @commands.Cog.listener()
     async def on_member_update(self, before, after):
-        guild = self.bot.get_guild(797920317871357972)
+        guild = self.bot.get_guild(785839283847954433)
         if after.guild.id != 785839283847954433:
             return
         if len(before.roles) < len(after.roles):
-            guild = self.bot.get_guild(797920317871357972)
+            guild = self.bot.get_guild(785839283847954433)
             # The user has gained a new role, so lets find out which one
             newRole = next(role for role in after.roles if role not in before.roles)
 
             if newRole.id == 786477872029892639:
-                channel = self.bot.get_channel(838041413320835072)
-                embed = discord.Embed(title="New Booster",
-                description=f"{after.mention} Just Boosted The Server Yeye!\nThank you so much for the Boosting our lovely Server",color=0xff73fa)
+                channel = self.bot.get_channel(844934387585777694)
+                embed = discord.Embed(title="<a:boost:849589688573624350> New Booster <a:boost:849589688573624350>",
+                description=f"{after.mention} just boosted the server <a:celebrateyay:821698856202141696>\nThank You for your valuable boost <a:vibe:849590763334402088>",color=0xff73fa)
+                embed.set_footer(text=f"The Gambler's Kingdom", icon_url="https://cdn.discordapp.com/icons/785839283847954433/a_23007c59f65faade4c973506d9e66224.gif?size=1024")
                 await channel.send(embed=embed)
 
     @commands.Cog.listener()
