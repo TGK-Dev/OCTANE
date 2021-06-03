@@ -160,29 +160,6 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
         else:
             return
 
-    @commands.Cog.listener()
-    async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
-        echannel = self.bot.get_channel(payload.channel_id)
-        message = await echannel.fetch_message(payload.message_id)
-        guild = await self.bot.fetch_guild(payload.guild_id)
-        member = await guild.fetch_member(payload.user_id)
-        
-
-        if message.id == 843398585856557068:
-
-        	if payload.emoji.name == "success_tick":
-
-        		unverified = discord.utils.get(guild.roles, id=843399308408782868)
-        		newbiw = discord.utils.get(guild.roles, id=787566421592899614)
-
-        		await member.remove_roles(unverified,)
-        		await member.add_roles(newbiw,)
-
-        	else:
-        		return
-        else:
-        	return
-
     @commands.command(name="joint", hidden=True)
     @commands.has_any_role(785842380565774368,799037944735727636)
     async def joint(self, ctx):
