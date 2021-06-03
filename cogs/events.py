@@ -135,7 +135,6 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
         robot = discord.utils.get(guild.roles, id=810153515610537994)
         count = guild.member_count
         ping = discord.utils.get(guild.roles, id=810400876657115166)
-        unverified = discord.utils.get(guild.roles, id=843399308408782868)
         level = discord.utils.get(guild.roles, id=810132828250832948)
         game = discord.utils.get(guild.roles, id=810135369177759774)
         dono = discord.utils.get(guild.roles, id=810134737829888050)
@@ -149,7 +148,6 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
             embed.set_thumbnail(url=member.avatar_url)
             await channel.send(f"{member.mention}", embed=embed)
             await member.add_roles(ping)
-            await member.add_roles(unverified)
             await member.add_roles(level)
             await member.add_roles(game)
             await member.add_roles(dono)
