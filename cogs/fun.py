@@ -105,13 +105,9 @@ class fun(commands.Cog,  description=description):
 
 
 
-		start_em = discord.Embed(title=":tada: Guess The Number")
+		start_em = discord.Embed(title=":tada: Guess The Number", color=0xffd700)
 		start_em.add_field(name="How to Play:",
-			value=f"<a:yellowrightarrow:801446308778344468> You have to guess the number between 1 to {maxn}.\n\
-			<a:yellowrightarrow:801446308778344468> First to guess the correct number wins, you have unlimited guesses.\n\
-			<a:yellowrightarrow:801446308778344468> `{role.name}` role is required to participate in the event.\n\
-			<a:yellowrightarrow:801446308778344468> Prize of the event is {price}",
-			color=0xffd700)
+			value=f"<a:yellowrightarrow:801446308778344468> You have to guess the number between 1 to {maxn}.\n<a:yellowrightarrow:801446308778344468> First to guess the correct number wins, you have unlimited guesses.\n<a:yellowrightarrow:801446308778344468> `{role.name}` role is required to participate in the event.\n<a:yellowrightarrow:801446308778344468> Prize of the event is {price}")
 		start_em.set_footer(text="Developed and Owned by Jay & utki007")
 		await channel.send(embed=start_em)
 		time = await TimeConverter().convert(ctx, time)

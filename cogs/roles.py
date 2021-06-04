@@ -59,10 +59,7 @@ class roles(commands.Cog,  description=description):
 
         role_color = role.color
         embed = discord.Embed(title=f"Role Infomation for {role.name}", color=role_color, 
-            description=f"**Name**: {role.name}\n**Role ID**: {role.id}\n**Created At**:{fomat_time(role.created_at)}\n\
-            **Role color**: {role.color}\n**Tatol Members**:{len(role.members)}\n\
-            **hoist**: {role.hoist}\n**Mentionable** {role.mentionable}"
-            )
+            description=f"**Name**: {role.name}\n**Role ID**: {role.id}\n**Created At**:{fomat_time(role.created_at)}\n**Role color**: {role.color}\n**Tatol Members**:{len(role.members)}\n**hoist**: {role.hoist}\n**Mentionable** {role.mentionable}")
         await ctx.send(embed=embed, delete_after=60)
         
     #Added Roel/Remove to any User
