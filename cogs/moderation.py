@@ -161,9 +161,9 @@ class Moderation(commands.Cog, description=description, command_attrs=dict(hidde
             embed.set_footer(text=f"{member.id}", icon_url=member.avatar_url)
 
             await log_channel.send(embed=embed)
-        time = await TimeConverter().convert(ctx, time)
+        
         else:
-
+            time = await TimeConverter().convert(ctx, time)
             data = {
                 '_id': member.id,
                 'mutedAt': datetime.datetime.now(),
