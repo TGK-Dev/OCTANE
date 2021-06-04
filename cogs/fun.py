@@ -84,7 +84,7 @@ class fun(commands.Cog,  description=description):
 
 	@commands.command(name="Guess The Number", description="Guess the Number Game",aliases=["gn"])
 	@commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889), is_me())
-	async def guess_number(self, ctx, maxn: int, channel: discord.TextChannel ,time, *,price=None):
+	async def guess_number(self, ctx, channel: discord.TextChannel, maxn: int ,time, *,price=None):
 		if maxn > 10000:
 			return await ctx.send("you can't big number then 10000")
 
