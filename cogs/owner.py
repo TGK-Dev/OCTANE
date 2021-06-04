@@ -26,11 +26,12 @@ class Owner(commands.Cog, description=description):
     def perm_check():
         async def predicate(ctx):
             mod_role = [785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916]
-            for role in ctx.author.roles[-5:]:
-                if role.id in mod_role:
+            for mod in mod_role:
+                role = discord.utils.get(ctx.guild.roles, id=mod)
+                if role in ctx.author.roles:
                     permissions = await ctx.bot.config.find(role.id)
                     check = permissions['perm']
-            return (ctx.command.name in check)
+                    return (ctx.command.name in check)
         return commands.check(predicate)
 
     @commands.Cog.listener()
@@ -42,27 +43,58 @@ class Owner(commands.Cog, description=description):
     async def test(self, ctx):
         await ctx.send(f"Ping `{round(self.bot.latency * 1000)}`ms")
 
+    @commands.group(name="config", description="set Server config")
+    @commands.check_any(perm_check(), is_me())
+    async def config(self, ctx):
+        data = await self.bot.config.find(ctx.guild.id)
 
-    @commands.command(
+        if data is None:
+            data = {"_id": ctx.guild.id, "prefix": "!", "welcome": None, "event": None}
+
+            await self.bot.config.upsert(data)
+            return await ctx.send("Server config Setup Done, now use the `help config` command")
+
+    @config.command(
         name="prefix",
         aliases=["changeprefix", "setprefix"],
         description="Change your guilds prefix!",
         usage="prefix [New_prefix]",
     )
-    @commands.has_any_role(785842380565774368, 803635405638991902)
-    async def prefix(self, ctx, *, prefix="py."):
+    @commands.check_any(perm_check(), is_me())
+    async def prefix(self, ctx, *,prefix):
+        data = await self.bot.config.find(ctx.guild.id)
+        if data is None:
+            return await ctx.send("Please use the `config` command frist")
         await self.bot.config.upsert({"_id": ctx.guild.id, "prefix": prefix})
         await ctx.send(
             f"The guild prefix has been set to `{prefix}`. Use `{prefix}prefix [prefix]` to change it again!"
         )
 
-    @commands.command(
+    @config.command(
         name="deleteprefix", aliases=["dp"], description="Delete your guilds prefix!", usage="")
-    @commands.guild_only()
     @commands.check_any(perm_check(), is_me())
     async def deleteprefix(self, ctx):
         await self.bot.config.unset({"_id": ctx.guild.id, "prefix": 1})
         await ctx.send("This guilds prefix has been set back to the default")
+
+    @config.command(
+        name="welcome", description="Set welcome channel for server",)
+    @commands.check_any(perm_check(), is_me())
+    async def welcome(self, ctx, channel: discord.TextChannel):
+        data = await self.bot.config.find(ctx.guild.id)
+        if data is None:
+            return await ctx.send("Please use the `config` command frist")
+        await self.bot.config.upsert({"_id": ctx.guild.id, "welcome": channel.id})
+        await ctx.send("welcome channel Updated")
+        
+    @config.command(name="event", description="set event channel")
+    @commands.check_any(perm_check(), is_me())
+    async def event(self, ctx, channel: discord.TextChannel):
+        data = self.bot.config.find(ctx.guil.id)
+        if data is None:
+            return await ctx.send("Please use the `config` command frist")
+        await self.bot.upsert({"_id": ctx.guild.id, "event": channel.id})
+        await ctx.send("welcome channel Updated")    
 
     @commands.group(name="permissions", description="Role Permission Managers", aliases=["perm"],invoke_without_command = True)
     @commands.check_any(commands.has_any_role(803635405638991902), is_me())
@@ -241,7 +273,7 @@ class Owner(commands.Cog, description=description):
             await ctx.send(embed=embed)
 
     @commands.command(name="eval", description="Let Owner Run Code within bot",aliases=["exec"])    
-    @commands.check_any(perm_check(), is_me())
+    @is_me()
     async def _eval(self, ctx, *, code):
         code = clean_code(code)
 

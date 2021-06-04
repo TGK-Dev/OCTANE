@@ -51,11 +51,12 @@ class Moderation(commands.Cog, description=description, command_attrs=dict(hidde
     def perm_check():
         async def predicate(ctx):
             mod_role = [785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916]
-            for role in ctx.author.roles[-5:]:
-                if role.id in mod_role:
+            for mod in mod_role:
+                role = discord.utils.get(ctx.guild.roles, id=mod)
+                if role in ctx.author.roles:
                     permissions = await ctx.bot.config.find(role.id)
                     check = permissions['perm']
-            return (ctx.command.name in check)
+                    return (ctx.command.name in check)
         return commands.check(predicate)
 
 
@@ -126,7 +127,7 @@ class Moderation(commands.Cog, description=description, command_attrs=dict(hidde
         usage='<user> [time] [reason]'
     )
     @commands.check_any(perm_check(), is_me())
-    async def mute(self, ctx, member: discord.Member, time: TimeConverter=None, *,reason):
+    async def mute(self, ctx, member: discord.Member, time):
         await ctx.message.delete()
         role = discord.utils.get(ctx.guild.roles, name="Muted")
         if not role:
@@ -146,7 +147,7 @@ class Moderation(commands.Cog, description=description, command_attrs=dict(hidde
             try:
                 em = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **{member.name} Has been Muted**")
                 await ctx.send(embed=em)
-                await member.send(f"You Have Muted for {reason} || {time}")
+                await member.send(f"You Have Muted for {time}")
             except discord.HTTPException:
                 emb = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **The User {member.name} Muted I couldn't DM them.**")
                 await ctx.send(embed=emb)
@@ -160,7 +161,7 @@ class Moderation(commands.Cog, description=description, command_attrs=dict(hidde
             embed.set_footer(text=f"{member.id}", icon_url=member.avatar_url)
 
             await log_channel.send(embed=embed)
-
+        time = await TimeConverter().convert(ctx, time)
         else:
 
             data = {

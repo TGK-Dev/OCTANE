@@ -129,9 +129,15 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
-        guild = member.guild.id 
-        guild = self.bot.get_guild(785839283847954433)
-        channel =  self.bot.get_channel(837285329610080276)
+        guild = member.guild 
+    
+        if member.guild.id != 785839283847954433:
+            return
+        data = await self.bot.config.find(guild.id)
+        if data is None:
+            return
+
+        channel =  self.bot.get_channel(data["welcome"])
         robot = discord.utils.get(guild.roles, id=810153515610537994)
         count = guild.member_count
         ping = discord.utils.get(guild.roles, id=810400876657115166)
@@ -140,25 +146,22 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
         dono = discord.utils.get(guild.roles, id=810134737829888050)
         special = discord.utils.get(guild.roles, id=810134311163920404)
     
-        if member.guild.id == 785839283847954433:
+        embed = discord.Embed(title=f'**WELCOME TO TGK, {member.display_name}!**',
+            #description=f"\n\n:sparkles: Get your favorite roles from <#785882615202316298>,\nand say _Hello_ to everyone in <#785847439579676672> !\n\n**To access Dank Memer, react in <#801394407521517578>.**\n\n:circus_tent: Also check out other fun game bots on the server:\n✦ <#802195590208421908> ✦ <#786117471840895016> ✦ <#807124148165804035> ✦ <#835810935184293928> ✦\n\nMake sure you follow the <#785841560918163501> of the house for a good time here. Also, check out rules and instructions of game bots in respective channels.\n\n:love_letter: To get in touch with staff, simply raise a ticket from <#785901543349551104>.\n\nHave fun!\n\n__Server Member Count:__ {guild.member_count - len([m for m in guild.members if m.bot])}",
+            color=0x000000)
+        embed.set_thumbnail(url=member.avatar_url)
+        await channel.send(f"{member.mention}", embed=embed)
+        await member.add_roles(ping)
+        await member.add_roles(level)
+        await member.add_roles(game)
+        await member.add_roles(dono)
+        await member.add_roles(special)
+
+        try:
+            await member.send(embed=embed)
+        except discord.HTTPException:
+            pass
     
-            embed = discord.Embed(title=f'**WELCOME TO TGK, {member.display_name}!**',
-                description=f"\n\n:sparkles: Get your favorite roles from <#785882615202316298>,\nand say _Hello_ to everyone in <#785847439579676672> !\n\n**To access Dank Memer, react in <#801394407521517578>.**\n\n:circus_tent: Also check out other fun game bots on the server:\n✦ <#802195590208421908> ✦ <#786117471840895016> ✦ <#807124148165804035> ✦ <#835810935184293928> ✦\n\nMake sure you follow the <#785841560918163501> of the house for a good time here. Also, check out rules and instructions of game bots in respective channels.\n\n:love_letter: To get in touch with staff, simply raise a ticket from <#785901543349551104>.\n\nHave fun!\n\n__Server Member Count:__ {guild.member_count - len([m for m in guild.members if m.bot])}",
-                color=0x000000)
-            embed.set_thumbnail(url=member.avatar_url)
-            await channel.send(f"{member.mention}", embed=embed)
-            await member.add_roles(ping)
-            await member.add_roles(level)
-            await member.add_roles(game)
-            await member.add_roles(dono)
-            await member.add_roles(special)
-            try:
-                await member.send(embed=embed)
-            except discord.HTTPException:
-                pass
-    
-        else:
-            return
 
     @commands.command(name="joint", hidden=True)
     @commands.has_any_role(785842380565774368,799037944735727636)

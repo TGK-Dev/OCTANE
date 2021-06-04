@@ -73,7 +73,6 @@ bot.DEFAULTPREFIX = DEFAULTPREFIX
 bot.muted_users = {}
 bot.ban_users = {}
 bot.blacklist_user = {}
-bot.temp_roled_users = {}
 bot.ticket_setups = {}
 bot.cwd = cwd
 bot.event_channel = {}
@@ -114,7 +113,7 @@ async def on_ready():
     )
     await bot.change_presence(activity=discord.Game(name=f"Cries in Binary | 00111010 00101000"), status=discord.Status.dnd)
       # This changes the bots 'activity'
-      
+
     current_blacklist_user = await bot.blacklist.get_all()
     for blacklisted_user in current_blacklist_user:
         bot.blacklist_user[blacklisted_user["_id"]] = blacklisted_user
@@ -148,15 +147,13 @@ async def on_ready():
 
 
     print("\n-----")
-    print(f"Current blacklist:{len(bot.blacklist_user)}\n{bot.blacklist_user}")
+    print(f"Current blacklist:{len(bot.blacklist_user)}")
     print("\n-----")
-    print(f"Current temp Role:{len(bot.temp_roled_users)}\n{bot.temp_roled_users}")
+    print(f"Current Mutes:{len(bot.muted_users)}")
     print("\n-----")
-    print(f"Current Mutes:{len(bot.muted_users)}\n{bot.muted_users}")
+    print(f"Current Bans:{len(bot.ban_users)}")
     print("\n-----")
-    print(f"Current Bans:{len(bot.ban_users)}\n{bot.ban_users}")
-    print("\n-----")
-    print(f"Ticket Setups:\n{bot.ticket_setups}-----{type(bot.ticket_setups)}")
+    print(f"Ticket Setups:\n{bot.ticket_setups}")
     print("\n-----")
     print("Database Connected\n-----")
 
@@ -203,8 +200,6 @@ if __name__ == "__main__":
     bot.invites = Document(bot.db, "invites")
     bot.tasks = Document(bot.db, "tasks")
     bot.lockdown = Document(bot.db, "lockdown")
-    bot.score = Document(bot.db, "score")
-    bot.event = Document(bot.db, "event")
 
     for file in os.listdir(cwd + "/cogs"):
         if file.endswith(".py") and not file.startswith("_"):
