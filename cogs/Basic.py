@@ -13,7 +13,7 @@ from discord.ext.buttons import Paginator
 description = "Some Basic commands"
 
 
-class Config(commands.Cog, description=description):
+class Basic(commands.Cog, description=description):
     def __init__(self, bot):
         self.bot = bot
 
@@ -55,4 +55,4 @@ class Config(commands.Cog, description=description):
         await ctx.send(embed=embed)
         
 def setup(bot):
-    bot.add_cog(Config(bot))
+    bot.add_cog(Basic(bot))
