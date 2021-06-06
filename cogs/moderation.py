@@ -282,7 +282,7 @@ class Moderation(commands.Cog, description=description, command_attrs=dict(hidde
             user = member.name.lower()
             user = await commands.MemberConverter().convert(ctx, user)
             if user.top_role >= ctx.author.top_role:
-                return await ctx.send("You can't You cannot do this action on this user due to role hierarchy.")
+                return await ctx.send("You cannot do this action on this user due to role hierarchy.")
         except:
            pass
 
