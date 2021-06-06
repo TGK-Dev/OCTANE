@@ -287,7 +287,7 @@ class Moderation(commands.Cog, description=description, command_attrs=dict(hidde
            pass
 
         if time == None:
-            await ctx.guild.ban(user=member, reason=reason)
+            await ctx.guild.ban(user=member, reason=reason, delete_message_days=0)
 
             try:
                 await member.send(f"You Have Been Banned | {reason}")
