@@ -48,6 +48,7 @@ class Basic(commands.Cog, description=description):
         embed.add_field(name="Total Guilds:", value=serverCount)
         embed.add_field(name="Total Users:", value=memberCount)
         embed.add_field(name="Bot Developers:", value="<@488614633670967307>\n<@301657045248114690>")
+        embed.add_field(name="Embed Format:" , value="<@413651113485533194>\n<@651711446081601545>")
 
         embed.set_footer(text=f"Developed by Jay & Utik007 | {self.bot.user.name}")
         embed.set_author(name=self.bot.user.name, icon_url=self.bot.user.avatar_url)
