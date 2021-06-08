@@ -5,11 +5,6 @@ import discord
 from discord.ext import commands
 from utils.util import Pag
 
-from discord_slash import SlashContext
-from discord_slash import cog_ext
-from discord_slash.utils.manage_commands import create_choice
-from discord_slash.utils.manage_commands import create_option
-
 guild_ids = [797920317871357972, 785839283847954433]
 # Requires: pip install DiscordUtils
 
