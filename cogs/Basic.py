@@ -1,6 +1,7 @@
 import asyncio
 import discord
 import os
+import time
 import platform
 import random
 import traceback
@@ -23,8 +24,11 @@ class Basic(commands.Cog, description=description):
 
     @commands.command()
     async def ping(self, ctx):
-        message = await ctx.send(f'Ping') 
-        await message.edit(content=f"Ping `{round(self.bot.latency * 1000)}`ms")
+        start_time = time.time()
+        message = await ctx.send("Testing Ping...")
+        end_time = time.time()
+
+        await message.edit(content=f"Pong! {round(self.bot.latency * 1000)}ms\nAPI: {round((end_time - start_time) * 1000)}ms")
   
     @commands.command(
         name="stats", description="A useful command that displays bot statistics.", usage="stats"
