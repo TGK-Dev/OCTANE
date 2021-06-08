@@ -14,9 +14,6 @@ import motor.motor_asyncio
 from traceback import format_exception
 
 from discord.ext import commands
-from discord_slash import SlashCommand
-from discord_slash.utils.manage_commands import create_choice
-from discord_slash.utils.manage_commands import create_option
 from pathlib import Path
 #from better_help import Help
 
@@ -60,7 +57,6 @@ bot = commands.Bot(
     help_command=Help(),
     intents=intents,
 )
-slash = SlashCommand(bot, sync_commands=True)
 # change command_prefix='-' to command_prefix=get_prefix for custom prefixes
 bot.config_token = secret_file["token"]
 bot.connection_url = secret_file["mongo"]
@@ -200,6 +196,8 @@ if __name__ == "__main__":
     bot.invites = Document(bot.db, "invites")
     bot.tasks = Document(bot.db, "tasks")
     bot.lockdown = Document(bot.db, "lockdown")
+    bot.event = Document(bot.db, "event")
+    bot.score = Document(bot.db, "score")
 
     for file in os.listdir(cwd + "/cogs"):
         if file.endswith(".py") and not file.startswith("_"):
