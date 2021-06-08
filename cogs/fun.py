@@ -150,7 +150,7 @@ class fun(commands.Cog,  description=description):
 			await winner.reply(f"{message.author.mention}", embed=done_embed)
 
 			dm_embed = discord.Embed(description=f"{winner.author.name}\n{winner.author.id} Is Winner")
-			await ctx.author.send(embed=embed)
+			await ctx.author.send(embed=dm_embed)
 		except asyncio.TimeoutError:
 			overwrite = channel.overwrites_for(role)			
 			if role == ctx.guild.default_role:
