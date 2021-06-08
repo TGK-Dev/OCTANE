@@ -55,11 +55,11 @@ class Event(commands.Cog,  description=description):
 		if message.author.id in self.bot.blacklist_user:
 		    return
 
-		trinnger1 = random.randint(500,550)
-		trinnger2 = random.randint(500,1000)
+		trinnger1 = random.randint(0,550)
+		trinnger2 = random.randint(530,1000)
 
 		trinnger3 = random.randint(1,50)
-		trinnger4 = random.randint(20,500)
+		trinnger4 = random.randint(40,500)
 		channel = message.channel
 
 		if channel.id in self.bot.event_channel:
@@ -218,7 +218,7 @@ class Event(commands.Cog,  description=description):
 		embed = discord.Embed(description=f"The user {member.mention} Has Total: {data['score']}", color=0x2ECC71)
 		await ctx.send(embed=embed)
 
-	@event.command(name="leaderboard", description="Chat event leaderboard")
+	@event.command(name="leaderboard", description="Chat event leaderboard", aliases=["lb"])
 	@commands.cooldown(1, 60, commands.BucketType.user)
 	async def leaderboard(self, ctx):
 		if ctx.channel.id != 785849567518130176:
