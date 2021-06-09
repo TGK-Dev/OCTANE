@@ -135,7 +135,7 @@ class fun(commands.Cog,  description=description):
 				overwrite.send_messages = None
 			await channel.set_permissions(role, overwrite=overwrite)
 
-			done_embed = discord.Embed(title=f":tada: Congratulations, {message.author.display_name}!",
+			done_embed = discord.Embed(title=f":tada: Congratulations, {winner.author.display_name}!",
 				description="The number you guessed was right! The game has ended and the channel locked, thanks for playing!",
 				color=0x11806A)
 
@@ -143,7 +143,7 @@ class fun(commands.Cog,  description=description):
 			done_embed.add_field(name="Winner:", value=winner.author.mention)
 			done_embed.set_footer(text="Developed and Owned by Jay & utki007", icon_url="https://cdn.discordapp.com/icons/785839283847954433/a_23007c59f65faade4c973506d9e66224.gif?size=1024")
 
-			await winner.reply(f"{message.author.mention}", embed=done_embed)
+			await winner.reply(f"{winner.author.mention}", embed=done_embed)
 
 			dm_embed = discord.Embed(description=f"{winner.author.name}\n{winner.author.id} Is Winner")
 			await ctx.author.send(embed=dm_embed)
@@ -163,63 +163,3 @@ class fun(commands.Cog,  description=description):
 
 def setup(bot):
 	bot.add_cog(fun(bot))
-
-"""
-@commands.Cog.listener()
-async def on_message(self, message):
-	trinnger1 = random.randint(1,100)
-	trinnger2 = random.randint(1,100)
-
-	print(f"trinnger1 = {trinnger1}")
-	print(f"trinnger2 = {trinnger2}")
-	print(f"{int(trinnger2/trinnger1)}")
-
-	if message.author.bot:
-		return
-
-	if int(trinnger2/trinnger1) == 0:
-
-		embed = discord.Embed(title="Random Chat event", 
-			description="server Is getting Raided type ` ban ` to ban them",
-			color=0x2ECC71)
-
-		await message.channel.send(embed=embed)
-		try:
-			win_mess = await self.bot.wait_for("message", check= lambda m: m.content.startswith("ban") or m.content.startswith("Ban"), timeout=15)
-			win_embed = discord.Embed(title="Random Chat event",
-				description=f"All Raider are now Banned Thanks to {win_mess.author.mention}",
-				color=0xE74C3C)
-
-			await win_mess.channel.send("Event is Over", embed=win_embed)
-
-		except asyncio.TimeoutError:
-			
-			lose_embed = discord.Embed(title="Random Chat Event",
-				description="Server is Now Raided",
-				color=0xE74C3C)
-
-			await message.channel.send(embed=embed)
-
-	elif int(trinnger2/trinnger1) == 5:
-
-		embed = discord.Embed(title="Random Chat event", 
-			description="React this message with :thumbsup: Frist is The Winner",
-			color=0x2ECC71)
-
-		rect_mess = await message.channel.send(embed=embed)
-		try:
-			reaction,  = await self.bot.wait_for("reaction_add", check= lambda reaction: reaction.RawReactionActionEvent.message_id == rect_mess.id and reaction.emoji == '👍', timeout=15)
-			win_embed = discord.Embed(title="Random Chat event",
-				description=f"the <@{reaction.user_id}> is Fast As Fast",
-				color=0xE74C3C)
-
-			await win_mess.channel.send("Event is Over", embed=win_embed)
-
-		except asyncio.TimeoutError:
-			
-			lose_embed = discord.Embed(title="Random Chat Event",
-				description="Server is Now Raided",
-				color=0xE74C3C)
-
-			await message.channel.send(embed=embed)
-"""
