@@ -56,7 +56,7 @@ class Event(commands.Cog,  description=description):
 		    return
 
 		trinnger1 = random.randint(0,550)
-		trinnger2 = random.randint(530,1000)
+		trinnger2 = random.randint(520,1000)
 
 		trinnger3 = random.randint(1,50)
 		trinnger4 = random.randint(40,500)

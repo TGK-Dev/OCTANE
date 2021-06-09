@@ -74,8 +74,7 @@ bot.cwd = cwd
 bot.event_channel = {}
 bot.perm = {}
 bot.mod_role = [797923152617275433, 848585998769455104]
-guild_ids = [785839283847954433, 797920317871357972]
-bot.version = "4.0"
+bot.version = "3.0"
 
 bot.colors = {
     "WHITE": 0xFFFFFF,
