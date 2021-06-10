@@ -9,7 +9,6 @@ import utils.json_loader
 
 
 from discord.ext import commands
-from discord.ext.buttons import Paginator
 
 description = "Some Basic commands"
 
