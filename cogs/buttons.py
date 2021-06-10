@@ -14,7 +14,7 @@ class Buttons(commands.Cog):
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
 
     @commands.command(name="tictactoe", description="tictactoe game with buttons", aliases=["ttt"])
-    @commands.cooldown(2, 1800, commands.BucketType.user)
+    @commands.cooldown(1, 600, commands.BucketType.user)
     async def tictactoe(self, ctx, member: discord.Member):
         if ctx.author == member:
             return await ctx.send("You can't play against yourself!")
