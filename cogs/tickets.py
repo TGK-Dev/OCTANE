@@ -456,21 +456,19 @@ class tickets(commands.Cog, description=description):
         m = await ctx.send(embed=start_embed, components=buttons, content=ctx.author.mention)
         try:
             res = await self.bot.wait_for("button_click", check=lambda res:res.user.id == ctx.author.id and res.channel.id == ctx.channel.id and str(res.message.id) == str(m.id), timeout=30)
-
+            await res.respond(type=6)
             if res.component.label.lower() == "yes":
 
-                await m.edit(components = [])
-                m = await ctx.send(embed=delete_embed, components = cancel)
+                await m.edit(embed=delete_embed ,components = cancel)
                 try:
                     res = await self.bot.wait_for("button_click", check=lambda res:res.user.id == ctx.author.id and res.channel.id == ctx.channel.id and str(res.message.id) == str(m.id), timeout=10)
-                    await m.delete()
                     await m.edit(embed=cancel_embed, components = [])
                 except asyncio.TimeoutError:
-                    ticket_filter = {"ticket_id": channel.id}
-                    await self.bot.ticket.delete_by_custom(ticket_filter)
+                    #ticket_filter = {"ticket_id": channel.id}
+                    #await self.bot.ticket.delete_by_custom(ticket_filter)
                     await m.edit(components = [])
                     await asyncio.sleep(0.5)
-                    await channel.delete()
+                    #await channel.delete()
             if res.component.label.lower() == "no":
                 return await m.edit(embed=no_embed, components= [])
         except asyncio.TimeoutError:
