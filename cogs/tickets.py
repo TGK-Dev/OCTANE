@@ -6,6 +6,7 @@ import io
 import json
 import random
 #----------------------
+from discord_components import DiscordComponents, Button, ButtonStyle, InteractionType
 from bson.objectid import ObjectId
 from copy import deepcopy
 from discord import message
@@ -321,27 +322,44 @@ class tickets(commands.Cog, description=description):
     @commands.check_any(commands.has_any_role(831405039830564875),perm_check(), is_me())
     async def delete(self, ctx):
         channel = ctx.channel
-        async with ctx.typing():
-            if ctx.channel.category.id == 829230513516445736:
-                await ctx.send("Are Your sure?[Y/N]")
+        buttons = [
+            [
+                Button(style=ButtonStyle.green, label="Yes"),
+                Button(style=ButtonStyle.red, label="No")
+            ]
+        ]
+        cancel = [
+            [
+                Button(style=ButtonStyle.red, label="Focre Stop")
+            ]
+        ]
+        start_embed = discord.Embed(description=f"Are you Sure want to delete this ticket")
+        no_embed = discord.Embed(description="Alright whatever just come hit me up when you wanna delete the ticket")
+        cancel_embed = discord.Embed(description=f"Canceling the command Reason: TimeoutError or Focre Stop by Admin")
+        delete_embed = discord.Embed(description=f"Deleting This Ticket Now you have 10s to cancel it by taping on below buttons")
+        m = await ctx.send(embed=start_embed, components=buttons, content=ctx.author.mention)
+        try:
+            res = await self.bot.wait_for("button_click", check=lambda res:res.user.id == ctx.author.id and res.channel.id == ctx.channel.id and str(res.message.id) == str(m.id), timeout=30)
+
+            if res.component.label.lower() == "yes":
+
+                await m.edit(components = [])
+                await m.delete()
+                m = await ctx.send(embed=delete_embed, components = cancel)
                 try:
-
-                    await self.bot.wait_for("message", check=lambda m: m.content.startswith("Y") or m.content.startswith("y"), timeout=60)
-                    embed_delete = discord.Embed(description="`Deleting this ticket in 10 seconds type >fstop/>fs to cancel`")
-                    await ctx.send(embed=embed_delete)
-                    try:
-                        await self.bot.wait_for("message",check=lambda m: m.content.startswith(">fstop") or m.content.startswith(">fs"), timeout=10)
-                        embed = discord.Embed(description="`canceling the command`")
-                        return await ctx.send(embed=embed)
-                    except asyncio.TimeoutError:
-
-                        ticket_filter = {"ticket_id": channel.id}
-                        await self.bot.ticket.delete_by_custom(ticket_filter)
-                        await channel.delete()
-
+                    res = await self.bot.wait_for("button_click", check=lambda res:res.user.id == ctx.author.id and res.channel.id == ctx.channel.id and str(res.message.id) == str(m.id), timeout=10)
+                    await m.edit(embed=cancel_embed, components = [])
                 except asyncio.TimeoutError:
-                    embed = discord.Embed(description="`Time out canceling the command`")
-                    await ctx.send(embed=embed)
+                    ticket_filter = {"ticket_id": channel.id}
+                    await self.bot.ticket.delete_by_custom(ticket_filter)
+                    await m.edit(components = [])
+                    await asyncio.sleep(0.5)
+                    await channel.delete()
+            if res.component.label.lower() == "no":
+                return await m.edit(embed=no_embed, components= [])
+        except asyncio.TimeoutError:
+            print("TimeoutError")
+            await m.edit(embed=cancel_embed, components = [])
 
     @commands.command(name="Claim", description="Claim Tickets to provide Support", usage="")
     @commands.check_any(commands.has_any_role(831405039830564875),perm_check(), is_me())
@@ -415,6 +433,50 @@ class tickets(commands.Cog, description=description):
             embed = discord.Embed(description=f"<:allow:819194696874197004> | Removed {target.mention} to the Tick")
 
             await ctx.send(embed=embed)
+
+    @commands.command(name="dtest", description="new delete command")
+    @commands.check_any(perm_check(), is_me())
+    async def dtest(self, ctx):
+        channel = ctx.channel
+        buttons = [
+            [
+                Button(style=ButtonStyle.green, label="Yes"),
+                Button(style=ButtonStyle.red, label="No")
+            ]
+        ]
+        cancel = [
+            [
+                Button(style=ButtonStyle.red, label="Focre Stop")
+            ]
+        ]
+        start_embed = discord.Embed(description=f"Are you Sure want to delete this ticket")
+        no_embed = discord.Embed(description="Alright whatever just come hit me up when you wanna delete the ticket")
+        cancel_embed = discord.Embed(description=f"Canceling the command Reason: TimeoutError or Focre Stop by Admin")
+        delete_embed = discord.Embed(description=f"Deleting This Ticket Now you have 10s to cancel it by taping on below buttons")
+        m = await ctx.send(embed=start_embed, components=buttons, content=ctx.author.mention)
+        try:
+            res = await self.bot.wait_for("button_click", check=lambda res:res.user.id == ctx.author.id and res.channel.id == ctx.channel.id and str(res.message.id) == str(m.id), timeout=30)
+
+            if res.component.label.lower() == "yes":
+
+                await m.edit(components = [])
+                m = await ctx.send(embed=delete_embed, components = cancel)
+                try:
+                    res = await self.bot.wait_for("button_click", check=lambda res:res.user.id == ctx.author.id and res.channel.id == ctx.channel.id and str(res.message.id) == str(m.id), timeout=10)
+                    await m.delete()
+                    await m.edit(embed=cancel_embed, components = [])
+                except asyncio.TimeoutError:
+                    ticket_filter = {"ticket_id": channel.id}
+                    await self.bot.ticket.delete_by_custom(ticket_filter)
+                    await m.edit(components = [])
+                    await asyncio.sleep(0.5)
+                    await channel.delete()
+            if res.component.label.lower() == "no":
+                return await m.edit(embed=no_embed, components= [])
+        except asyncio.TimeoutError:
+            print("TimeoutError")
+            await m.edit(embed=cancel_embed, components = [])
+
 
 def setup(bot):
     bot.add_cog(tickets(bot))
