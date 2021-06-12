@@ -3,7 +3,7 @@ import discord
 import random
 
 from discord.ext import commands
-
+from discord_components import DiscordComponents, Button, ButtonStyle, InteractionType
 description="Channel Management Commands"
 
 class channel(commands.Cog, description=description):
@@ -139,58 +139,107 @@ class channel(commands.Cog, description=description):
     @commands.group(name="lockdown", description="Put server in Lock",invoke_without_command=True)
     @commands.check_any(perm_check(), is_me())
     async def lockdown(self, ctx):
-        channels = await self.bot.lockdown.get_all()
+        conform = [
+            [
+                Button(style=ButtonStyle.green, label="Yes"),
+                Button(style=ButtonStyle.red, label="No")
+            ]
+        ]
+        m = await ctx.send("Are you Sure Want to lock Server", components=conform)
 
-        role = ctx.guild.default_role
+        try:
+            res = await self.bot.wait_for("button_click", check=lambda res:res.user.id == ctx.author.id and res.channel.id == ctx.channel.id and str(res.message.id) == str(m.id), timeout=30)
+            await res.respond(type=6)
+            if res.component.label.lower() == "no":
+                no_embed = discord.Embed(title="Server Lockdown", description="You are **not muted tbh**.  The server is currently under maintenance. We regret the inconvenience caused. <:so_sad:810172533692694538>", color=0xE74C3C)
+                return await m.edit(embed=no_embed, components = [], content=None)
+            if res.component.label.lower() == "yes":
+                channels = await self.bot.config.find(ctx.guild.id)
+                role = ctx.guild.default_role
 
-        for channel in channels:
-            channel =  self.bot.get_channel(channel["channel"])
-            overwrite = channel.overwrites_for(role)
-            overwrite.send_messages = False
-            await channel.set_permissions(role, overwrite=overwrite)
-            embed = discord.Embed(title="Server Lockdown", description="You are **not muted tbh**.  The server is currently under maintenance. We regret the inconvenience caused. <:so_sad:810172533692694538>", color=0xE74C3C)
-            await channel.send(embed=embed)
-        embed = discord.Embed(description=f"Channel are locked \n Total channel lock: {len(channels)}")
-        await ctx.send(embed=embed)
+                for channel in channels["lockdown_channels"]:
+                    channel = self.bot.get_channel(channel)
+                    overwrite = channel.overwrites_for(role)
+                    overwrite.send_messages = False
+                    await channel.set_permissions(role, overwrite=overwrite)
+                    embed = discord.Embed(title="Server Lockdown", description="You are **not muted tbh**.  The server is currently under maintenance. We regret the inconvenience caused. <:so_sad:810172533692694538>", color=0xE74C3C)
+                    await channel.send(embed=embed)
+                await m.edit(embed=embed, components = [])
+        except asyncio.TimeoutError:
+            await ctx.send("TimeoutError canceling the command")
 
 
 
     @lockdown.command(name="add", description="add channel to the lockdown list")
     @commands.check_any(perm_check(), is_me())
     async def add(self, ctx, channel:discord.TextChannel):
-
-        data = {
-            "channel": channel.id
-        }
-
-        await self.bot.lockdown.insert(data)  
-
-        await ctx.send("channel added")
+        data = await self.bot.config.find(ctx.guild.id)
+        if data is None:
+            return await ctx.send("Your Server config is not done yet please use config command")
+        data["lockdown_channels"].append(channel.id)
+        lsit_embed = discord.Embed(description=f"you want to add the {channel.name} to list")
+        conform = [
+            [
+                Button(style=ButtonStyle.green, label="Yes"),
+                Button(style=ButtonStyle.red, label="No")
+            ]
+        ]
+        m = await ctx.send(embed=lsit_embed, components=conform)
+        try:
+            res = await self.bot.wait_for("button_click", check=lambda res: res.user.id == ctx.author.id and res.channel.id == ctx.channel.id and str(res.message.id) == str(m.id), timeout=60)
+            await res.respond(type=6)
+            if res.component.label.lower() == "yes":
+                await self.bot.config.upsert(data)
+                config = discord.Embed(description="list updated")
+                return await m.edit(embed=config, components=[])
+            if res.component.label.lower() == "no":
+                config = discord.Embed(description="Commands canceling")
+                return await m.edit(components = [], embed=config)
+        except asyncio.TimeoutError:
+            config = discord.Embed(description="Commands canceling")
+            await m.edit(components = [], embed=config)
 
     @lockdown.command(name="remove", description="remove channel form lockdown list")
     @commands.check_any(perm_check(), is_me())
     async def remove(self, ctx, channel:discord.TextChannel):
-
-        data = await self.bot.lockdown.find(ctx.guild.id)
-
+        data = await self.bot.config.find(ctx.guild.id)
         if data is None:
-            return await ctx.send("There IS no channel in lockdown list add them by `lockdown add` command")
-        channel = { "lockdown_channels": [channel.id]}
-        await self.bot.lockdown.delete_by_custom(channel)
-        #data["lockdown_channels"].pop(channel.id)
-        #await self.bot.lockdown.upsert(data)
-        await ctx.send(f"The Channels {channel.mention} is removed from the List")
+            return await ctx.send("Your Server config is not done yet please use config command")
+        data["lockdown_channels"].remove(channel.id)
+
+        lsit_embed = discord.Embed(description=f"you want to remove the {channel.name} form list")
+        conform = [
+            [
+                Button(style=ButtonStyle.green, label="Yes"),
+                Button(style=ButtonStyle.red, label="No")
+            ]
+        ]
+        m = await ctx.send(embed=lsit_embed, components=conform)
+        try:
+            res = await self.bot.wait_for("button_click", check=lambda res: res.user.id == ctx.author.id and res.channel.id == ctx.channel.id and str(res.message.id) == str(m.id), timeout=60)
+            await res.respond(type=6)
+            if res.component.label.lower() == "yes":
+                await self.bot.config.upsert(data)
+                config = discord.Embed(description="list updated")
+                return await m.edit(embed=config, components=[])
+            if res.component.label.lower() == "no":
+                config = discord.Embed(description="Commands canceling")
+                return await m.edit(components = [], embed=config)
+        except asyncio.TimeoutError:
+            config = discord.Embed(description="Commands canceling")
+            await m.edit(components = [], embed=config)
+
 
     @lockdown.command(name="list", description="list of lockdown channels list")
     @commands.check_any(perm_check(), is_me())
     async def list(self, ctx):
-        channels = await self.bot.lockdown.get_all()
+        channels = await self.bot.config.find(ctx.guild.id)
 
         embed = discord.Embed(title="Lockdown Channels List", description="", color=0x9B59B6)
         try:
             i = 1
-            for channel in channels:
-                channel = self.bot.get_channel(channel["channel"])
+            for channel in channels['lockdown_channels']:
+                channel = self.bot.get_channel(channel)
                 embed.description += f"{i}.{channel.mention}\n"
                 i += 1
             await ctx.send(embed=embed)
@@ -201,22 +250,32 @@ class channel(commands.Cog, description=description):
     @lockdown.command(name="end", description="End Server Lockdown")
     @commands.check_any(perm_check(), is_me())
     async def end(self, ctx):
-        await ctx.send("Are you Sure Want to Unlock Server[Y/n]")
+        conform = [
+            [
+                Button(style=ButtonStyle.green, label="Yes"),
+                Button(style=ButtonStyle.red, label="No")
+            ]
+        ]
+        m = await ctx.send("Are you Sure Want to Unlock Server", components=conform)
 
         try:
-            await self.bot.wait_for("message", check=lambda m: m.author == ctx.author and m.channel.id == ctx.channel.id and m.content.startswith("Y") or m.content.startswith("y"), timeout=30)
+            res = await self.bot.wait_for("button_click", check=lambda res:res.user.id == ctx.author.id and res.channel.id == ctx.channel.id and str(res.message.id) == str(m.id), timeout=30)
+            await res.respond(type=6)
+            if res.component.label.lower() == "no":
+                embed = discord.Embed(description="Let me know when you want to unlock the Server")
+                return await m.edit(embed=embed, components= [])
+            if res.component.label.lower() == "yes":
+                channels = await self.bot.config.find(ctx.guild.id)
+                role = ctx.guild.default_role
 
-            channels = await self.bot.lockdown.get_all()
-            role = ctx.guild.default_role
-
-            for channel in channels:
-                channel = self.bot.get_channel(channel["channel"])
-                overwrite = channel.overwrites_for(role)
-                overwrite.send_messages = None
-                await channel.set_permissions(role, overwrite=overwrite)
-                embed = discord.Embed(title="Server UnLockdown", description="Server is now unlock", color=0x2ECC71)
-                await channel.send(embed=embed)
-            await ctx.send("Ok we are back UP")
+                for channel in channels["lockdown_channels"]:
+                    channel = self.bot.get_channel(channel)
+                    overwrite = channel.overwrites_for(role)
+                    overwrite.send_messages = None
+                    await channel.set_permissions(role, overwrite=overwrite)
+                    embed = discord.Embed(title="Server UnLockdown", description="Server is now unlock", color=0x2ECC71)
+                    await channel.send(embed=embed)
+                await m.edit(embed=embed, components = [])
         except asyncio.TimeoutError:
             await ctx.send("TimeoutError canceling the command")
 
