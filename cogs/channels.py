@@ -234,7 +234,8 @@ class channel(commands.Cog, description=description):
     @commands.check_any(perm_check(), is_me())
     async def list(self, ctx):
         channels = await self.bot.config.find(ctx.guild.id)
-
+        if channels['lockdown_channels'] is None:
+            return await ctx.send("No channels has Added Yet")
         embed = discord.Embed(title="Lockdown Channels List", description="", color=0x9B59B6)
         try:
             i = 1
