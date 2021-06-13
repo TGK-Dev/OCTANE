@@ -330,7 +330,7 @@ class tickets(commands.Cog, description=description):
         ]
         cancel = [
             [
-                Button(style=ButtonStyle.red, label="Focre Stop")
+                Button(style=ButtonStyle.red, label="Force Stop")
             ]
         ]
         start_embed = discord.Embed(description=f"Are you Sure want to delete this ticket")
