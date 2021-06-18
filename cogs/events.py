@@ -2,6 +2,7 @@ import datetime
 import discord
 
 from discord.ext import commands
+from discord_components import DiscordComponents, Button, ButtonStyle, InteractionType
 
 class Events(commands.Cog, command_attrs=dict(hidden=True)):
     def __init__(self, bot):
@@ -50,6 +51,11 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
     @commands.Cog.listener()
     async def on_message(self, message):
         word_list = ['vote link','vote Link','Vote link', 'pls vote', 'pls Vote', 'Pls vote']
+        components = [
+            [
+                Button(style=ButtonStyle.URL, label="Vote Here", url="https://top.gg/servers/785839283847954433/vote"),
+            ]
+        ]
 
         if message.author.bot:
             return
@@ -58,7 +64,7 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
         if len(messageContent) > 0:
             for word in word_list:
                 if word in messageContent:
-                    return await message.reply('**Vote for us here**:\nhttps://top.gg/servers/785839283847954433/vote\n\n__**Voting Perks**__\n❥ Special "Voted" Role.\n❥ 2,500 Casino Cash. Collect using ,collectincome in #:game_die:。casino.\n❥ Access to Dank Memer Premium with 2x Amaari.\n❥ Guild wide 1x Amaari.', mention_author=False)
+                    return await message.reply('__**Voting Perks**__\n❥ Special "Voted" Role.\n❥ 2,500 Casino Cash. Collect using ,collectincome in #:game_die:。casino.\n❥ Access to Dank Memer Premium with 2x Amaari.\n❥ Guild wide 1x Amaari.\n\n**Vote for us here**', mention_author=False, components=components)
 
     @commands.Cog.listener()
     async def on_member_update(self, before, after):
