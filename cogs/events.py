@@ -59,7 +59,7 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
         if message.author.bot:
             return
 
-        messageContent = message.content
+        messageContent = message.content.lower()
         if len(messageContent) > 0:
             for word in word_list:
                 if word in messageContent:
