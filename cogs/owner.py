@@ -49,7 +49,7 @@ class Owner(commands.Cog, description=description):
         data = await self.bot.config.find(ctx.guild.id)
 
         if data is None:
-            data = {"_id": ctx.guild.id, "prefix": "!", "welcome": None, "event": None}
+            data = {"_id": ctx.guild.id, "prefix": "!", "welcome": None, "event": None, "lockdown_channels": []}
 
             await self.bot.config.upsert(data)
             return await ctx.send("Server config Setup Done, now use the `help config` command")

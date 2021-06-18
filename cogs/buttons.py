@@ -22,7 +22,7 @@ class Buttons(commands.Cog):
         acceptdenycomps = [
             [
                 Button(style=ButtonStyle.green, label="Accept"),
-                Button(style=ButtonStyle.red, label="Decline")
+                Button(style=ButtonStyle.red, label="Decline"),
             ]
         ]
         #
@@ -172,7 +172,6 @@ class Buttons(commands.Cog):
                         embed=Embed(color=0xED564E, title="Timeout!", description="No-one reacted. ☹️"),
                         components=[
                             Button(style=ButtonStyle.red, label="Oh-no! Timeout reached!", disabled=True),
-                            Button(style=ButtonStyle.URL, label="View creator", url="https://github.com/PythonSerious")
                         ],
                     )
                     return
