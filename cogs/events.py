@@ -56,7 +56,6 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
                 Button(style=ButtonStyle.URL, label="Vote Here", url="https://top.gg/servers/785839283847954433/vote"),
             ]
         ]
-
         if message.author.bot:
             return
 
@@ -65,6 +64,11 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
             for word in word_list:
                 if word in messageContent:
                     return await message.reply('__**Voting Perks**__\n❥ Special "Voted" Role.\n❥ 2,500 Casino Cash. Collect using ,collectincome in #:game_die:。casino.\n❥ Access to Dank Memer Premium with 2x Amaari.\n❥ Guild wide 1x Amaari.\n\n**Vote for us here**', mention_author=False, components=components)
+
+            for word in ['when heist', 'where heist', 'heist when', 'where is the heist']:
+                if word in messageContent:
+                    return await message.reply('We have normal heist in <#804708111301738576> and special heist in <#812992825801179136>')
+
 
     @commands.Cog.listener()
     async def on_member_update(self, before, after):
