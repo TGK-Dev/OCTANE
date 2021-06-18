@@ -315,7 +315,9 @@ class tickets(commands.Cog, description=description):
 
         await channel.send(f"{ctx.channel.name} / {ticket}", file=transcript_file)
         await message.edit(content=f"{ctx.author.mention} transcript Saved")
-        await ctx.send(file=transcript_file)
+        channel_file = discord.File(io.BytesIO(transcript.encode()),
+            filename=f"transcript-{ctx.channel.name}.html")
+        await ctx.send(f"{ctx.channel.name} / {ticket}", file=channel_file)
 
         
     @commands.command(name="delete", description="delete the ticket", usage="")
