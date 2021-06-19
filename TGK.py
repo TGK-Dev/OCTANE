@@ -172,10 +172,7 @@ async def on_message(message):
             prefix = bot.DEFAULTPREFIX
         else:
             prefix = data["prefix"]
-        await message.channel.send(f"My prefix here is `{prefix}`", delete_after=15)
-
-    if message.content.startswith(f"<@!488614633670967307>") and len(message.content) == len(f"<@!488614633670967307>"):
-        await message.channel.send("please don't Tag As i am  On very Long Break you ping any Staff or make ticket from <#785901543349551104>")
+        await message.channel.send(f"My prefix here is `{prefix}`", delete_after=15)    
 
     await bot.process_commands(message)
 
