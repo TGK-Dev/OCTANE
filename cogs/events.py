@@ -12,7 +12,7 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
     async def on_ready(self):
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
 
-
+    
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
         # Ignore these errors
@@ -89,31 +89,59 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
 
     @commands.Cog.listener()
     async def on_member_ban(self, guild, member):
-        if guild.id != 785839283847954433:
-            return
+        #if guild.id != 785839283847954433:
+            #return
         logs = await guild.audit_logs(limit=1, action=discord.AuditLogAction.ban).flatten()
         channel = self.bot.get_channel(806107399005667349)
         logs = logs[0]
         if logs.user.id == 816699167824281621:
             return
         if logs.target == member:
-            embed = discord.Embed(title="Case Ban",
-                description=f"**>**Moderator:`{logs.user}`\n**>**Offender: `{logs.target}`\n**>**Reason: `{logs.reason}`",color=0xE74C3C)
-            await channel.send(embed=embed)
+            data = await self.bot.config.find(guild.id)
+            if data is None:
+                return
+            if logs.reason is None:
+                logs.reason = "None"
+            log_channel = self.bot.get_channel(855784930494775296)
+            log_embed = discord.Embed(title=f"🔨 Ban | Case ID: {data['case']}",
+                description=f" **Offender**: {logs.target.name} | {logs.target.mention} \n**Reason**: {logs.reason}\n **Moderator**: {logs.user.name} {logs.user.mention}", color=0xE74C3C)
+            log_embed.set_thumbnail(url=member.avatar_url)
+            log_embed.timestamp = datetime.datetime.utcnow()
+            log_embed.set_footer(text=f"ID: {member.id}")
+
+            await log_channel.send(embed=log_embed)
+
+            data["case"] += 1
+            await self.bot.config.upsert(data)
 
     @commands.Cog.listener()
     async def on_member_unban(self, guild, member):
-        if guild.id != 785839283847954433:
-            return
+        #if guild.id != 785839283847954433:
+            #return
         log = await guild.audit_logs(limit=1, action=discord.AuditLogAction.unban).flatten()
         channel = self.bot.get_channel(806107399005667349)
         logs = log[0]
+        data = await self.bot.config.find(guild.id)
+
         if logs.user.id == 816699167824281621:
             return
         if logs.target == member:
-            embed = discord.Embed(title="Case UnBan",
-                description=f"**>**Moderator:`{logs.user}`\n**>**Offender: `{logs.target}`\n**>**Reason: `{logs.reason}`",color=0x2ECC71)
-            await channel.send(embed=embed)
+            data = await self.bot.config.find(guild.id)
+            if data is None:
+                return
+            if logs.reason is None:
+                logs.reason = "None"
+            log_channel = self.bot.get_channel(855784930494775296)
+            log_embed = discord.Embed(title=f"🔓 UnBan | Case ID: {data['case']}",
+                description=f" **Offender**: {logs.target.name} | {logs.target.mention} \n**Reason**: {logs.reason}\n **Moderator**: {logs.user.name} {logs.user.mention}", color=0x2ECC71)
+            log_embed.set_thumbnail(url=member.avatar_url)
+            log_embed.timestamp = datetime.datetime.utcnow()
+            log_embed.set_footer(text=f"ID: {member.id}")
+
+            await log_channel.send(embed=log_embed)
+
+            data["case"] += 1
+            await self.bot.config.upsert(data)
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
