@@ -81,7 +81,7 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
                     log_channel = self.bot.get_channel(855784930494775296)
                     data = await self.bot.config.find(guild.id)
                     log_embed = discord.Embed(title=f"🔊 UnMute | Case ID: {data['case']}",
-                    	description=f"➤**Offender**: {member.name} | {member.mention} \n➤ **Moderator**: {self.bot.user.name} : {self.bot.user.mention} \n➤ **Reason**: Temporary Mute expired", color=0x2ECC71)
+                    	description=f"**Offender**: {member.name} | {member.mention} \n**Moderator**: {self.bot.user.name} | {self.bot.user.mention} \n**Reason**: Temporary Mute expired", color=0x2ECC71)
                     log_embed.set_thumbnail(url=member.avatar_url)
                     log_embed.timestamp = datetime.datetime.utcnow()
                     log_embed.set_footer(text=f"ID: {member.id}")
