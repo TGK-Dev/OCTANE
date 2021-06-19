@@ -43,16 +43,18 @@ class Owner(commands.Cog, description=description):
     async def test(self, ctx):
         await ctx.send(f"Ping `{round(self.bot.latency * 1000)}`ms")
 
-    @commands.group(name="config", description="set Server config")
+    @commands.group(name="config", description="set Server config", invoke_without_command=True)
     @commands.check_any(perm_check(), is_me())
     async def config(self, ctx):
         data = await self.bot.config.find(ctx.guild.id)
 
         if data is None:
-            data = {"_id": ctx.guild.id, "prefix": "!", "welcome": None, "event": None, "lockdown_channels": []}
+            data = {"_id": ctx.guild.id, "prefix": "!", "case": 0,"welcome": None, "event": None, "lockdown_channels": []}
 
             await self.bot.config.upsert(data)
             return await ctx.send("Server config Setup Done, now use the `help config` command")
+        else:
+            await ctx.send("config set is Done")
 
     @config.command(
         name="prefix",
