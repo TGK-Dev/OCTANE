@@ -67,7 +67,7 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
 
             for word in ['when heist', 'where heist', 'heist when', 'where is the heist']:
                 if word in messageContent:
-                    return await message.reply('We have normal heist in <#804708111301738576> and special heist in <#812992825801179136>')
+                    return await message.reply('We have daily heist in <#804708111301738576>, and heists for special requirements and occasions in <#812992825801179136>', delete_after=30)
 
 
     @commands.Cog.listener()
