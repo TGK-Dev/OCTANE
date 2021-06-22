@@ -3,15 +3,18 @@ import contextlib
 import io
 import logging
 import os
+from dotenv import load_dotenv
 
 # Third party libraries
 import textwrap
-
+import datetime
 import discord
 import json
 import motor.motor_asyncio
 
 from traceback import format_exception
+from pypresence import Presence
+import time
 
 from discord.ext import commands
 from pathlib import Path
@@ -25,6 +28,7 @@ from utils.mongo import Document
 from utils.util import Pag
 from utils.util import clean_code
 
+load_dotenv()
 cwd = Path(__file__).parents[0]
 cwd = str(cwd)
 print(f"{cwd}\n-----")
@@ -48,7 +52,6 @@ async def get_prefix(bot, message):
 
 intents = discord.Intents.all()  # Help command requires member intents
 DEFAULTPREFIX = "!"
-secret_file = utils.json_loader.read_json("secrets")
 bot = commands.Bot(
     description="commands List of Me",
     command_prefix=get_prefix,
@@ -58,10 +61,9 @@ bot = commands.Bot(
     intents=intents,
 )
 # change command_prefix='-' to command_prefix=get_prefix for custom prefixes
-bot.config_token = secret_file["token"]
-bot.connection_url = secret_file["mongo"]
-
-bot.joke_api_key = secret_file["x-rapidapi-key"]
+bot.config_token = os.getenv('TOKEN')
+bot.connection_url = str(os.getenv('MONGO'))
+bot.joke_api_key = os.getenv('DAD')
 
 logging.basicConfig(level=logging.INFO)
 
@@ -75,6 +77,7 @@ bot.event_channel = {}
 bot.perm = {}
 bot.mod_role = [797923152617275433, 848585998769455104]
 bot.version = "3.0"
+bot.uptime = datetime.datetime.utcnow()
 
 bot.colors = {
     "WHITE": 0xFFFFFF,
@@ -106,8 +109,7 @@ async def on_ready():
     print(
         f"-----\nLogged in as: {bot.user.name} : {bot.user.id}\n-----\nMy current prefix is: {bot.DEFAULTPREFIX}\n-----"
     )
-    await bot.change_presence(activity=discord.Game(name=f"Cries in Binary | 00111010 00101000"), status=discord.Status.dnd)
-      # This changes the bots 'activity'
+    
 
     current_blacklist_user = await bot.blacklist.get_all()
     for blacklisted_user in current_blacklist_user:
@@ -175,6 +177,7 @@ async def on_message(message):
         await message.channel.send(f"My prefix here is `{prefix}`", delete_after=15)    
 
     await bot.process_commands(message)
+
 
 
 if __name__ == "__main__":
