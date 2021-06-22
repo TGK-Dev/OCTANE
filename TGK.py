@@ -13,8 +13,6 @@ import json
 import motor.motor_asyncio
 
 from traceback import format_exception
-from pypresence import Presence
-import time
 
 from discord.ext import commands
 from pathlib import Path
