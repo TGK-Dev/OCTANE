@@ -6,6 +6,7 @@ DiscordUtils==1.2.8
 dnspython==1.16.0
 humanfriendly==9.2
 emojis==0.6.0
+python-dotenv==0.17.1
 eight-ball==3.0.3
 motor==2.3.1
 Paginator==0.5.1
