@@ -107,7 +107,9 @@ async def on_ready():
     print(
         f"-----\nLogged in as: {bot.user.name} : {bot.user.id}\n-----\nMy current prefix is: {bot.DEFAULTPREFIX}\n-----"
     )
-    
+    await bot.change_presence(
+        activity=discord.Game(name="Cries in Binary | 00111010 00101000")
+    ) 
 
     current_blacklist_user = await bot.blacklist.get_all()
     for blacklisted_user in current_blacklist_user:
