@@ -69,24 +69,6 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
                 if word in messageContent:
                     return await message.reply('We have daily heist in <#804708111301738576>, and heists for special requirements and occasions in <#812992825801179136>', delete_after=30)
 
-
-    @commands.Cog.listener()
-    async def on_member_update(self, before, after):
-        guild = self.bot.get_guild(785839283847954433)
-        if after.guild.id != 785839283847954433:
-            return
-        if len(before.roles) < len(after.roles):
-            guild = self.bot.get_guild(785839283847954433)
-            # The user has gained a new role, so lets find out which one
-            newRole = next(role for role in after.roles if role not in before.roles)
-
-            if newRole.id == 786477872029892639:
-                channel = self.bot.get_channel(844934387585777694)
-                embed = discord.Embed(title="<a:boost:849589688573624350> New Booster <a:boost:849589688573624350>",
-                description=f"{after.mention} just boosted the server <a:celebrateyay:821698856202141696>\nThank You for your valuable boost <a:vibe:849590763334402088>",color=0xff73fa)
-                embed.set_footer(text=f"The Gambler's Kingdom", icon_url="https://cdn.discordapp.com/icons/785839283847954433/a_23007c59f65faade4c973506d9e66224.gif?size=1024")
-                await channel.send(embed=embed)
-
     @commands.Cog.listener()
     async def on_member_ban(self, guild, member):
         #if guild.id != 785839283847954433:
@@ -163,7 +145,7 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
         special = discord.utils.get(guild.roles, id=810134311163920404)
     
         embed = discord.Embed(title=f'**WELCOME TO TGK, {member.display_name}!**',
-            description=f"\n\n:sparkles: Get your favorite roles from <#848631258137362452>,\nand say _Hello_ to everyone in <#785847439579676672> !\n\n**To access Dank Memer, react in <#801394407521517578>.**\n\n:circus_tent: Also check out other fun game bots on the server:\n✦ <#802195590208421908> ✦ <#786117471840895016> ✦ <#807124148165804035> ✦ <#835810935184293928> ✦\n\nMake sure you follow the <#785841560918163501> of the house for a good time here. Also, check out rules and instructions of game bots in respective channels.\n\n:love_letter: To get in touch with staff, simply raise a ticket from <#785901543349551104>.\n\nHave fun!\n\n__Server Member Count:__ {guild.member_count - len([m for m in guild.members if m.bot])}",
+            description=f"\n\nGet your favorite roles from [self-roles](https://discord.gg/58bc5QWE4q),\nand say _Hello_ to everyone in [chat](https://discord.gg/yEPYYDZ3dD)!\n\nAlso check out other fun game bots on the server:\n✦ [Casino](https://discord.gg/DJycdCqnqt) ✦ [Mudae](https://discord.gg/ujCHVRctHY) ✦ [Akinator](https://discord.gg/fzDTdGZFh6) ✦ [Pokemon](https://discord.gg/DpJ4mAUC9m)\n\nMake sure you follow the [rules](https://discord.gg/NmD4JGCaNc) of the house for a good time here. Also, check out rules and instructions of game bots in respective channels.\n\n:love_letter: To get in touch with staff, simply raise a ticket from [support](https://discord.gg/T8VWyvDfeB).\n\nHave fun!\n\n__Server Member Count:__ {guild.member_count - len([m for m in guild.members if m.bot])}",
             color=0x000000)
         embed.set_thumbnail(url=member.avatar_url)
         await channel.send(f"{member.mention}", embed=embed)
@@ -182,8 +164,9 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
     @commands.command(name="joint", hidden=True)
     @commands.has_any_role(785842380565774368,799037944735727636)
     async def joint(self, ctx):
+        guild = ctx.guild
         embed = discord.Embed(title=f'**WELCOME TO TGK, {ctx.author.display_name}!**',
-            description=f"\n\n:sparkles: Get your favorite roles from [Self Roles](https://discord.gg/6WmKQZrKD9),\nand say _Hello_ to everyone in [Chat](https://discord.gg/B2FDCggkES) !\n\n**To access Dank Memer, react in [Dank Bifrost](https://discord.gg/BUtTb7FVxJ).**\n\n:circus_tent: Also check out other fun game bots on the server:\n✦ [Pokemon](https://discord.gg/6dGkammu6P)  ✦ [Casino](https://discord.gg/f4YzaVyhRE)  ✦[Akinator](https://discord.gg/HyVgTrF2E5)  ✦ [Mudae](https://discord.gg/u2XJ8SaY) ✦\n\nMake sure you follow the [Rules](https://discord.gg/Z4rbTcvDyb) of the house for a good time here. Also, check out rules and instructions of game bots in respective channels.\n\n:love_letter: To get in touch with staff, simply raise a ticket from [Server Support](https://discord.gg/gJhmaFJmra).\n\nHave fun!\n\n__Server Member Count:__ {ctx.author.guild.member_count}",
+            description=f"\n\nGet your favorite roles from [self-roles](https://discord.gg/58bc5QWE4q),\nand say _Hello_ to everyone in [chat](https://discord.gg/yEPYYDZ3dD)!\n\nAlso check out other fun game bots on the server:\n✦ [Casino](https://discord.gg/DJycdCqnqt) ✦ [Mudae](https://discord.gg/ujCHVRctHY) ✦ [Akinator](https://discord.gg/fzDTdGZFh6) ✦ [Pokemon](https://discord.gg/DpJ4mAUC9m)\n\nMake sure you follow the [rules](https://discord.gg/NmD4JGCaNc) of the house for a good time here. Also, check out rules and instructions of game bots in respective channels.\n\n:love_letter: To get in touch with staff, simply raise a ticket from [support](https://discord.gg/T8VWyvDfeB).\n\nHave fun!\n\n__Server Member Count:__ {guild.member_count - len([m for m in guild.members if m.bot])}",
             color=0x2ECC71)
         embed.set_thumbnail(url=ctx.author.avatar_url)
         await ctx.send(embed=embed)
