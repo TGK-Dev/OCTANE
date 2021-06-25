@@ -21,7 +21,7 @@ description = "Ticket System For the Server Support"
 class tickets(commands.Cog, description=description):
     def __init__(self, bot):
         self.bot = bot
-        self.setup = self.bot.ticket_setup.get_all()
+        #self.setup = self.bot.ticket_setup.get_all()
 
     def is_me():
         def predicate(ctx):
@@ -261,7 +261,7 @@ class tickets(commands.Cog, description=description):
                 await ctx.send("ticket Is Closed already")
             else:
                 await ctx.channel.edit(sync_permissions=True)
-                embed = discord.Embed(description=f"Ticket Closed By {ctx.author.mention}")
+                embed = discord.Embed(color=0x2f3136 ,description=f"Ticket Closed By {ctx.author.mention}")
                 await ctx.send(embed=embed)
         else:
             await ctx.send("You can't use this command here")
@@ -270,12 +270,13 @@ class tickets(commands.Cog, description=description):
     @commands.check_any(commands.has_any_role(831405039830564875),perm_check(), is_me())
     async def open(self, ctx):
         if ctx.channel.permissions_synced==False:
+            await ctx.message.delete()
             return await ctx.send("Ticket already Opned")
         else:
 
             ticket_filter = {"ticket_id": ctx.channel.id}
             tickets = await self.bot.ticket.find_many_by_custom(ticket_filter)
-            prole = discord.utils.get(guild.roles, id=831405039830564875)
+            #prole = discord.utils.get(guild.roles, id=831405039830564875)
 
             if not bool(tickets):
                 return await ctx.send(f"Couldn't find any Close Tickets")
@@ -288,10 +289,11 @@ class tickets(commands.Cog, description=description):
 
             await ctx.channel.set_permissions(member, view_channel=True, send_messages=True, attach_files=True, embed_links=True)
 
-            embed = discord.Embed(color=0x02ff06, description=f"ticket open by {ctx.author.mention}")
+            embed = discord.Embed(color=0x2f3136 , description=f"ticket open by {ctx.author.mention}")
 
-            await ctx.send(embed=embed)
             await ctx.message.delete()
+            await ctx.send(content=f"{member.mention}",embed=embed)
+            
            
 
 

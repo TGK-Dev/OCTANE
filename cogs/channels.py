@@ -1,10 +1,32 @@
 import asyncio
 import discord
 import random
+import re
 
 from discord.ext import commands
 from discord_components import DiscordComponents, Button, ButtonStyle, InteractionType
+from humanfriendly import format_timespan
+
+time_regex = re.compile("(?:(\d{1,5})(h|s|m|d))+?")
+time_dict = {"h": 3600, "s": 1, "m": 60, "d": 86400}
+
 description="Channel Management Commands"
+
+class TimeConverter(commands.Converter):
+    async def convert(self, ctx, argument):
+        args = argument.lower()
+        matches = re.findall(time_regex, args)
+        time = 0
+        for key, value in matches:
+            try:
+                time += time_dict[value] * float(key)
+            except KeyError:
+                raise commands.BadArgument(
+                    f"{value} is an invalid time key! h|m|s|d are valid arguments"
+                )
+            except ValueError:
+                raise commands.BadArgument(f"{key} is not a number!")
+        return round(time)
 
 class channel(commands.Cog, description=description):
     def __init__(self, bot):
@@ -32,7 +54,7 @@ class channel(commands.Cog, description=description):
 
     @commands.command(name="lock", description="Lock the given channel For mentioned Role", usage="[Role]", aliases=['l'])
     @commands.check_any(perm_check(), is_me())
-    async def lock(self, ctx, role: discord.Role = None):
+    async def lock(self, ctx, *,role: discord.Role = None):
 
         channel = ctx.channel
         role = role if role else ctx.guild.default_role
@@ -43,12 +65,12 @@ class channel(commands.Cog, description=description):
         await ctx.message.delete()
         await channel.set_permissions(role, overwrite=overwrite)
 
-        embed = discord.Embed(color=0x02ff06, description=f'The {channel.name} is Lock for {role.mention}')
+        embed = discord.Embed(color=0x2f3136 , description=f'<:allow:819194696874197004> | Locked {channel.mention} for {role.mention}')
         await channel.send(embed=embed)
 
     @commands.command(name="unlock", description="Unlock the given channel For mentioned Role", usage="[Role]", aliases=['ul'])
     @commands.check_any(perm_check(), is_me())
-    async def unlock(self, ctx, role: discord.Role = None):
+    async def unlock(self, ctx, *,role: discord.Role = None):
 
         channel = ctx.channel
         role = role if role else ctx.guild.default_role
@@ -59,44 +81,31 @@ class channel(commands.Cog, description=description):
         await ctx.message.delete()
         await channel.set_permissions(role, overwrite=overwrite)
 
-        embed = discord.Embed(color=0x02ff06, description=f'The {channel.name} is unlock for {role.mention}')
+        embed = discord.Embed(color=0x2f3136 , description=f'<:allow:819194696874197004> | Unlocked {channel.mention} for {role.mention}')
         await channel.send(embed=embed)
 
     @commands.command(name="slowmode", description="Set Slowmode In Current Channel", usage="[slowmode time 1m, 1s 1h max 6h]", aliases=['sm'])
     @commands.check_any(perm_check(), is_me())
-    async def slowmode(self, ctx, time: str = '0'):
-
-        unit = ['h', 'H', 'm', 'M', 's', 'S']
-
-        cd = 0
-        if time[-1] in unit:
-            unit = time[-1]
-            cd = int(time[:-1])
-            if unit == 'h' or unit == 'H':
-                cd = cd * 60 * 60
-            elif unit == 'm' or unit == 'M':
-                cd = cd * 60
-            else:
-                cd = cd
-        else:
-            cd = int(time) if time else 0
-
-
+    async def slowmode(self, ctx, time:TimeConverter=None):
         await ctx.message.delete()
-        if cd > 21600:
-            await ctx.send(f"Slowmode interval can't be greater than 6 hours.")
-        elif cd == 0:
-            await ctx.channel.edit(slowmode_delay=cd)
-            await ctx.send(f"Slowmode has been removed!! 🎉")
-        else:
-            await ctx.channel.edit(slowmode_delay=cd)
-            if unit == 'h' or unit == 'H':
-                await ctx.send(f'Slowmode interval is now **{int(cd/3600)} hours**.')
-            elif unit == 'm' or unit == 'M':
-                await ctx.send(f'Slowmode interval is now **{int(cd/60)} mins**.')
-            else:
-                await ctx.send(f'Slowmode interval is now **{cd} secs**.')
+        channel = ctx.channel
 
+        if time is None or time == 0:
+            time = 0
+            await ctx.channel.edit(slowmode_delay=time)
+            embed = discord.Embed(description=f"<:allow:819194696874197004> | Removed slowmode from {channel.mention}",
+                color=0x2f3136)
+            return await ctx.send(embed=embed)
+
+        if time >= 21600:
+            return await ctx.send(f"Slowmode interval can't be greater than 6 hours.", delete_after=30)
+                
+        
+        await ctx.channel.edit(slowmode_delay=time)
+            
+        embed = discord.Embed(description=f"<:allow:819194696874197004> | Set {channel.mention} slowmode to {format_timespan(time)}",
+            color=0x2f3136)
+        await ctx.send(embed=embed)
 
     @commands.command(name="Hide", description="Hide Channels For mentioned Role", usage="[role]")
     @commands.check_any(perm_check(), is_me())
