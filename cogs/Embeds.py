@@ -25,50 +25,59 @@ class Embeds(commands.Cog, description=description):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        print(f"{self.__class__.__name__} Cog has been loaded\n-----")
+        print(f"{self.__class__.__name__} Cog is loaded\n-----")
 
-    @commands.command(name="embed", description="Create An Embed")
-    @commands.check_any(perm_check(), is_me())
+    @commands.command(name="embed", description="Commands to make an embed")
+    @commands.check_any(is_me(), perm_check())
     async def embed(self, ctx, channel: discord.TextChannel=None):
-    	channel = channel if channel else ctx.channel
-    	data = {'type': 'rich'}
-    	try:
-    		msg = await ctx.send("Send Embeds title don't want title type `None`")
-    		title = await self.bot.wait_for('message', check=lambda m: m.author.id == ctx.author.id and m.channel.id == ctx.channel.id, timeout=30)
-    		if str(title.content.lower()) == "none":
-    			await msg.delete()
-    			print(f'None print | {data}')
-    		else:
-	    		data['title'] = title.content
-	    		await msg.delete()
-	    		print(f'Not None print | {data}')
-    		
+        channel = channel if channel else ctx.channel
 
-    		msg = await ctx.send("Send Embeds description")
-    		description = await self.bot.wait_for('message', check=lambda m: m.author.id == ctx.author.id and m.channel.id == ctx.channel.id, timeout=30)
+        data = {'type': 'rich'}
+        try:
+            await ctx.send("Send Embed Titile if dont wan't title send `None`")
+            title = await self.bot.wait_for("message", check=lambda m: m.author.id == ctx.author.id and m.channel.id == ctx.channel.id, timeout=30)
 
-    		data['description'] = description.content
-    		await msg.delete()
-    		
+            await ctx.send("Send Embed description if don't description send `None`")
+            description = await self.bot.wait_for("message", check=lambda m: m.author.id == ctx.author.id and m.channel.id == ctx.channel.id, timeout=30)
 
-    		msg = await ctx.send("Send Embeds Color Hex Code like `2f3136`")
-    		color = await self.bot.wait_for('message', check=lambda m: m.author.id == ctx.author.id and m.channel.id == ctx.channel.id, timeout=30)
-    		color = int(color.content, 16)
+            await ctx.send("Send Embed footer if don't wan't footer send `None`")
+            footer = await self.bot.wait_for("message", check=lambda m: m.author.id == ctx.author.id and m.channel.id == ctx.channel.id, timeout=30)            
 
-    		data['color'] = color
-    		await msg.delete()
-    		
+            await ctx.send("Send Embed color like `2f3136` if don't wan't color send `None`")
+            color = await self.bot.wait_for("message", check=lambda m: m.author.id == ctx.author.id and m.channel.id == ctx.channel.id, timeout=30)            
 
-    		embed = discord.Embed()
+            if str(title.content.lower()) == 'none':
+                pass
+            else:
+                data['title'] = title.content
 
-    		await channel.send(embed=embed.from_dict(data))
-    		print(data)
-    	except asyncio.TimeoutError:
-    		await ctx.send("TimeoutError Try Again later")
+            if str(description.content.lower()) == 'none':
+                pass
+            else:
+                data['description'] = description.content
+
+            if str(footer.content.lower()) == 'none':
+                pass
+            else:
+                data['footer'] = {'text': f'{footer.content}'}
+
+            if str(color.content.lower()) == 'none':
+                pass
+            else:
+                color = int(color.content, 16)
+                data['color'] = color
+
+            embed = discord.Embed
+
+            await ctx.send(embed=embed.from_dict(data))
+            await ctx.send("Your Embed has been sent")
+
+        except asyncio.TimeoutError:
+            await ctx.send("TimeoutError try again later.")
+
 
 
 
 
 def setup(bot):
     bot.add_cog(Embeds(bot))
-
