@@ -1,5 +1,6 @@
 from discord.ext import commands
 import discord
+from discord_components import DiscordComponents, Button, ButtonStyle, InteractionType
 import asyncio
 
 description= "An Commands To edit / Create Embeds"
@@ -27,7 +28,7 @@ class Embeds(commands.Cog, description=description):
     async def on_ready(self):
         print(f"{self.__class__.__name__} Cog is loaded\n-----")
 
-    @commands.command(name="embed", description="Commands to make an embed")
+    @commands.group(name="embed", description="Commands to make an embed", invoke_without_command=True)
     @commands.check_any(is_me(), perm_check())
     async def embed(self, ctx, channel: discord.TextChannel=None):
         channel = channel if channel else ctx.channel
@@ -75,6 +76,88 @@ class Embeds(commands.Cog, description=description):
         except asyncio.TimeoutError:
             await ctx.send("TimeoutError try again later.")
 
+    @embed.command(title="save", description="save embed in DataBase")
+    @commands.check_any(is_me(), perm_check())
+    async def save(self, ctx):
+        data = {'type': 'rich'}
+
+        try:
+            await ctx.send("Send Embed Titile if dont wan't title send `None`")
+            title = await self.bot.wait_for("message", check=lambda m: m.author.id == ctx.author.id and m.channel.id == ctx.channel.id, timeout=30)
+
+            await ctx.send("Send Embed description if don't description send `None`")
+            description = await self.bot.wait_for("message", check=lambda m: m.author.id == ctx.author.id and m.channel.id == ctx.channel.id, timeout=30)
+
+            await ctx.send("Send Embed footer if don't wan't footer send `None`")
+            footer = await self.bot.wait_for("message", check=lambda m: m.author.id == ctx.author.id and m.channel.id == ctx.channel.id, timeout=30)            
+
+            await ctx.send("Send Embed color like `2f3136` if don't wan't color send `None`")
+            color = await self.bot.wait_for("message", check=lambda m: m.author.id == ctx.author.id and m.channel.id == ctx.channel.id, timeout=30)            
+
+            if str(title.content.lower()) == 'none':
+                pass
+            else:
+                data['title'] = title.content
+
+            if str(description.content.lower()) == 'none':
+                pass
+            else:
+                data['description'] = description.content
+
+            if str(footer.content.lower()) == 'none':
+                pass
+            else:
+                data['footer'] = {'text': f'{footer.content}'}
+
+            if str(color.content.lower()) == 'none':
+                pass
+            else:
+                color = int(color.content, 16)
+                data['color'] = color
+
+            embed = discord.Embed
+
+            buttons = [
+                [
+                    Button(style=ButtonStyle.green, label="Yes"),
+                    Button(style=ButtonStyle.red, label="No")
+                ]
+            ]
+            try:
+                m = await ctx.send("You Want to save this Embed", embed=embed.from_dict(data), components=buttons)
+
+                res = await self.bot.wait_for("button_click", check=lambda res:res.user.id == ctx.author.id and res.channel.id == ctx.channel.id and str(res.message.id) == str(m.id), timeout=30)
+
+                if res.component.label.lower() == 'yes':
+                    await self.bot.embed.insert(data)
+                    await res.respond(type=6)
+
+                buttons = [
+                    [
+                        Button(style=ButtonStyle.green, label="Yes", disabled=True),
+                        Button(style=ButtonStyle.red, label="No", disabled=True)
+                    ]
+                ]       
+                await m.edit(components=buttons)
+                await ctx.send("Your Embed has been Save")
+            except asyncio.TimeoutError:
+                await ctx.send("TimeoutError try again later.")
+
+        except asyncio.TimeoutError:
+            await ctx.send("TimeoutError try again later.")
+
+    @embed.command(name="send", description="send an prefix embed")
+    @commands.check_any(is_me(), perm_check())
+    async def send(self, ctx, *,title):
+        filter_dict = {'title': title }
+        data = await self.bot.embed.find_by_custom(filter_dict)
+        if data is None:
+            print(data)
+            return(f"Error Can't Find Any Embed name with {title}")
+
+        embed = discord.Embed
+
+        await ctx.send(embed=embed.from_dict(data))
 
 
 
