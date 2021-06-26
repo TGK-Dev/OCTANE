@@ -5,6 +5,7 @@ import io
 import os
 import random
 import textwrap
+from discord_components import DiscordComponents, Button, ButtonStyle, InteractionType
 
 from discord.ext import commands
 from discord.ext.buttons import Paginator
@@ -105,7 +106,7 @@ class Owner(commands.Cog, description=description):
 
     @permissions.command(name="add", description="add permissions to an role")
     @commands.check_any(commands.has_any_role(803635405638991902), is_me())
-    async def add(self, ctx, role:discord.Role, *,command):
+    async def add(self, ctx, *,command):
         command = self.bot.get_command(command)
 
         if command is None:
@@ -114,11 +115,76 @@ class Owner(commands.Cog, description=description):
         if ctx.command == command:
             return await ctx.send("You add This Commands to some else Permission.")
 
-        data = await self.bot.config.find(role.id)
-        data["perm"].append(command.name)
-        await self.bot.config.upsert(data)
+        buttons = [
+            [
+                Button(style=ButtonStyle.green, label="Head Admin"),
+                Button(style=ButtonStyle.red, label="Admin"),
+                Button(style=ButtonStyle.blue, label="Mod"),
+                Button(style=ButtonStyle.grey, label="jrMod"),
 
-        await ctx.send("permissions Added")
+            ]
+        ]
+
+        dbuttons = [
+            [
+            Button(style=ButtonStyle.green, label="Head Admin", disabled=True),
+            Button(style=ButtonStyle.red, label="Admin", disabled=True),
+            Button(style=ButtonStyle.blue, label="Mod", disabled=True),
+            Button(style=ButtonStyle.grey, label="jrMod", disabled=True),
+
+            ]
+        ]
+
+        m = await ctx.send("Select Role you want to add", components=buttons)
+        try:
+            res = await self.bot.wait_for("button_click", check=lambda res:res.user.id == ctx.author.id and res.channel.id == ctx.channel.id and str(res.message.id) == str(m.id), timeout=5)
+            if str(res.component.label.lower()) == "head admin":
+                data = await self.bot.config.find(799037944735727636)
+                if str(command.name) in data['perm']:
+                    await res.respond(type=6)
+                    return await m.edit(content=f"That Role already has {command.name} permissions",components=dbuttons)
+                data['perm'].append(command.name)
+                await self.bot.config.upsert(data)
+
+            if str(res.component.label.lower()) == "admin":
+                data = await self.bot.config.find(785845265118265376)
+                if str(command.name) in data['perm']:
+                    await res.respond(type=6)
+                    return await m.edit(content=f"That Role already has {command.name} permissions",components=dbuttons)
+                data['perm'].append(command.name)
+                await self.bot.config.upsert(data)
+                
+            if str(res.component.label.lower()) == "mod":
+                data = await self.bot.config.find(787259553225637889)
+                if str(command.name) in data['perm']:
+                    await res.respond(type=6)
+                    return await m.edit(content=f"That Role already has {command.name} permissions",components=dbuttons)
+                data['perm'].append(command.name)
+                await self.bot.config.upsert(data)
+                
+            if str(res.component.label.lower()) == "jrmod":
+                data = await self.bot.config.find(843775369470672916)
+                if str(command.name) in data['perm']:
+                    await res.respond(type=6)
+                    return await m.edit(content=f"That Role already has {command.name} permissions",components=dbuttons)
+                data['perm'].append(command.name)
+                await self.bot.config.upsert(data)
+
+            buttons = [
+                [
+                Button(style=ButtonStyle.green, label="Head Admin", disabled=True),
+                Button(style=ButtonStyle.red, label="Admin", disabled=True),
+                Button(style=ButtonStyle.blue, label="Mod", disabled=True),
+                Button(style=ButtonStyle.grey, label="jrMod", disabled=True),
+
+                ]
+            ]
+            await res.respond(type=6)
+            await m.edit(content="Command Permission Added",components=buttons)
+
+
+        except asyncio.TimeoutError:
+            await m.edit(content="TimeoutError", components=[])
 
     @permissions.command(name="remove", description="Remove Permission from role")
     @commands.check_any(commands.has_any_role(803635405638991902), is_me())
