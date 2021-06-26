@@ -197,6 +197,7 @@ if __name__ == "__main__":
     bot.lockdown = Document(bot.db, "lockdown")
     bot.event = Document(bot.db, "event")
     bot.score = Document(bot.db, "score")
+    bot.embed = Document(bot.db, "embed")
 
     for file in os.listdir(cwd + "/cogs"):
         if file.endswith(".py") and not file.startswith("_"):
