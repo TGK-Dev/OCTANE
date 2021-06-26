@@ -46,6 +46,33 @@ class Embeds(commands.Cog, description=description):
 
             await ctx.send("Send Embed color like `2f3136` if don't wan't color send `None`")
             color = await self.bot.wait_for("message", check=lambda m: m.author.id == ctx.author.id and m.channel.id == ctx.channel.id, timeout=30)            
+            data['fields'] = []
+
+            while True:
+                try:
+                    temp = {}
+                    await ctx.send("Send Your Feilds Name send none to stop Adding Feilds")
+
+                    name = await self.bot.wait_for("message", check=lambda m: m.author.id == ctx.author.id and m.channel.id == ctx.channel.id, timeout=60)
+                    if str(name.content.lower()) == "none":
+                        break
+                    else:
+
+                        temp['name'] = name.content
+
+                    await ctx.send("Send Your Feilds Value")
+                    value = await self.bot.wait_for("message", check=lambda m: m.author.id == ctx.author.id and m.channel.id == ctx.channel.id, timeout=60)
+                    temp['value'] = value.content
+
+                    await ctx.send("Send True or False for your feild inline")
+                    inline = await self.bot.wait_for("message", check=lambda m: m.author.id == ctx.author.id and m.channel.id == ctx.channel.id, timeout=60)
+                    temp['inline'] = inline.content
+                    data['fields'].append(temp)
+                    del temp
+
+                except asyncio.TimeoutError:
+                    await ctx.send("Feilds setup TimeoutError")
+                    break
 
             if str(title.content.lower()) == 'none':
                 pass
@@ -67,6 +94,7 @@ class Embeds(commands.Cog, description=description):
             else:
                 color = int(color.content, 16)
                 data['color'] = color
+
 
             embed = discord.Embed
 
@@ -93,6 +121,33 @@ class Embeds(commands.Cog, description=description):
 
             await ctx.send("Send Embed color like `2f3136` if don't wan't color send `None`")
             color = await self.bot.wait_for("message", check=lambda m: m.author.id == ctx.author.id and m.channel.id == ctx.channel.id, timeout=30)            
+
+            data['fields'] = []
+            while True:
+                try:
+                    temp = {}
+                    await ctx.send("Send Your Feilds Name send none to stop Adding Feilds")
+
+                    name = await self.bot.wait_for("message", check=lambda m: m.author.id == ctx.author.id and m.channel.id == ctx.channel.id, timeout=60)
+                    if str(name.content.lower()) == "none":
+                        break
+                    else:
+
+                        temp['name'] = name.content
+
+                    await ctx.send("Send Your Feilds Value")
+                    value = await self.bot.wait_for("message", check=lambda m: m.author.id == ctx.author.id and m.channel.id == ctx.channel.id, timeout=60)
+                    temp['value'] = value.content
+
+                    await ctx.send("Send True or False for your feild inline")
+                    inline = await self.bot.wait_for("message", check=lambda m: m.author.id == ctx.author.id and m.channel.id == ctx.channel.id, timeout=60)
+                    temp['inline'] = inline.content
+                    data['fields'].append(temp)
+                    del temp
+
+                except asyncio.TimeoutError:
+                    await ctx.send("Feilds setup TimeoutError")
+                    break
 
             if str(title.content.lower()) == 'none':
                 pass
