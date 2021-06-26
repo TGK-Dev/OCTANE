@@ -418,7 +418,7 @@ class tickets(commands.Cog, description=description):
             overwrite.send_messages = True
 
             await channel.set_permissions(target, overwrite=overwrite)
-            embed = discord.Embed(description=f"<:allow:819194696874197004> | Added {target.mention} to the Tick")
+            embed = discord.Embed(description=f"<:allow:819194696874197004> | Added {target.mention} to the Ticket")
 
             await ctx.send(embed=embed)
 
