@@ -249,7 +249,7 @@ class tickets(commands.Cog, description=description):
         await channel.set_permissions(member, view_channel=True, send_messages=True, attach_files=True, embed_links=True)
         await channel.set_permissions(prole, overwrite=poverwrite)
 
-        await channel.send(f"{member.mention}", embed=embed)
+        await channel.send(f"{member.mention}\n{prole.mention}", embed=embed)
         await ctx.message.delete()
 
     @commands.command(name="close", description="close The ticket", usage="")
