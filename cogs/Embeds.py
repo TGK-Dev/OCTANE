@@ -183,9 +183,7 @@ class Embeds(commands.Cog, description=description):
 
                 res = await self.bot.wait_for("button_click", check=lambda res:res.user.id == ctx.author.id and res.channel.id == ctx.channel.id and str(res.message.id) == str(m.id), timeout=30)
 
-                if res.component.label.lower() == 'yes':
-                    await self.bot.embed.insert(data)
-                    await res.respond(type=6)
+                
 
                 buttons = [
                     [
@@ -193,8 +191,16 @@ class Embeds(commands.Cog, description=description):
                         Button(style=ButtonStyle.red, label="No", disabled=True)
                     ]
                 ]       
-                await m.edit(components=buttons)
-                await ctx.send("Your Embed has been Save")
+
+                if res.component.label.lower() == 'yes':
+                    await self.bot.embed.insert(data)                    
+                    await res.respond(type=6)
+                    await m.edit(components=buttons)
+                    await ctx.send("Your Embed has been Save")
+                if res.component.label.lower() == 'no':                    
+                    await res.respond(type=6)
+                    await m.edit(components=buttons)
+                    await ctx.send("Ok, not saving this time")
             except asyncio.TimeoutError:
                 await ctx.send("TimeoutError try again later.")
 
