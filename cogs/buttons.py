@@ -218,7 +218,6 @@ class Buttons(commands.Cog):
     @commands.command(name="calculator", description="an Calculator made with ueing button", aliases=['cal'])
     @commands.cooldown(3, 60, commands.BucketType.user)
     async def calculator(self, ctx):
-        thing = ""
         base_embed = discord.Embed(title=f"{ctx.author.display_name}'s calculator",
             color=0x2f3136,
             description=f"")
@@ -250,6 +249,13 @@ class Buttons(commands.Cog):
                 Button(style=ButtonStyle.grey, label="."),
                 Button(style=ButtonStyle.blue, label="-"),
                 Button(style=ButtonStyle.green, label="="),
+            ],
+            [
+                Button(style=ButtonStyle.grey, label="(",),
+                Button(style=ButtonStyle.grey, label=")",),
+                Button(style=ButtonStyle.grey, label="❌", disabled=True),
+                Button(style=ButtonStyle.blue, label="❌", disabled=True),
+                Button(style=ButtonStyle.green, label="❌", disabled=True),
             ]
         ]
         dbutton = [
@@ -280,13 +286,20 @@ class Buttons(commands.Cog):
                 Button(style=ButtonStyle.grey, label=".", disabled=True),
                 Button(style=ButtonStyle.blue, label="-", disabled=True),
                 Button(style=ButtonStyle.green, label="=", disabled=True),
+            ],
+            [
+                Button(style=ButtonStyle.grey, label="(", disabled=True),
+                Button(style=ButtonStyle.grey, label=")", disabled=True),
+                Button(style=ButtonStyle.grey, label="❌", disabled=True),
+                Button(style=ButtonStyle.blue, label="❌", disabled=True),
+                Button(style=ButtonStyle.green, label="❌", disabled=True),
             ]
         ]
         m = await ctx.send(embed=base_embed, components=button)
         embeds = m.embeds
         for embed in embeds:
           data = embed.to_dict()
-        valid = ["1","2","3","4","5","6","7","8","9","00","0","-","+","*","/"]
+        valid = ["1","2","3","4","5","6","7","8","9","00","0","-","+","*","/", "(", ")"]
         while True:
             try:
                 res = await self.bot.wait_for("button_click", check=lambda res:res.user.id == ctx.author.id and res.channel.id == ctx.channel.id and str(res.message.id) == str(m.id), timeout=60)
@@ -295,9 +308,16 @@ class Buttons(commands.Cog):
                     await m.edit(content="Calculator Closed",components=dbutton)
 
                 if str(res.component.label.lower()) in valid:
-                    thing = f"{thing}{res.component.label.lower()}"
-                    data['description'] = f"```\n{thing}\n```"
-                    await m.edit(embed=embed.from_dict(data))
+                    try:
+                        thing = data['description']
+                        thing = thing.replace('`', '')
+                        thing = thing.replace('\n', '')
+                        data['description'] = f"```\n{thing}{res.component.label.lower()}\n```"
+                        thing = ""
+                        await m.edit(embed=embed.from_dict(data))
+                    except KeyError:
+                        data['description'] = f"```\n{res.component.label.lower()}\n```"
+                        await m.edit(embed=embed.from_dict(data))
 
                 if str(res.component.label.lower()) == "⌫":
                     string = str(data['description'])
@@ -324,8 +344,9 @@ class Buttons(commands.Cog):
                     await m.edit(embed=embed.from_dict(data))
 
                 if str(res.component.label.lower()) == "clear":
-                    data.pop('description')
-                    data.pop('fields')
+                    del data["description"]
+                    del data["fields"]
+                    data["fields"] = []
                     await m.edit(embed=embed.from_dict(data))
 
             except asyncio.TimeoutError:
