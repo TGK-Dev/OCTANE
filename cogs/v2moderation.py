@@ -8,6 +8,7 @@ from copy import deepcopy
 from dateutil.relativedelta import relativedelta
 from discord.ext import commands
 from discord.ext import tasks
+from typed_flags import TypedFlags
 
 time_regex = re.compile("(?:(\d{1,5})(h|s|m|d))+?")
 time_dict = {"h": 3600, "s": 1, "m": 60, "d": 86400}
@@ -153,12 +154,22 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
     @commands.command(
         name='mute',
         description="Mutes a given user for x time!",
-        usage='<user> [time] [**Reason**]'
+        usage='<user> --reason <reason> --time <time>'
     )
     @commands.check_any(perm_check(), is_me())
-    async def mute(self, ctx, member: discord.Member, time=None, *,reason=None):
-        await ctx.message.delete()
-        reason = reason if reason else "No Reason Provided"
+    async def mute(self, ctx, member: discord.Member, *,args: TypedFlags):
+        #await ctx.message.delete()
+        flags = args
+        try:
+            reason = flags['reason']
+        except KeyError:
+            reason = "No Reason Provided"
+
+        try:
+            time = flags['time']
+        except KeyError:
+            time = None
+
         role = discord.utils.get(ctx.guild.roles, name="Muted")
         if not role:
             await ctx.send("No muted role was found! Please create one called `Muted`")
@@ -176,17 +187,17 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
 
             try:
                 await member.send(f"You Have Muted in {ctx.guild.name}")
-                em = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **{member.name} Has been Muted**")
+                em = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004>|**{member.name} Has been Muted**")
                 await ctx.send(embed=em)
             except discord.HTTPException:
-                emb = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **The User {member.name} Muted I couldn't DM them.**")
+                em = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004>|**{member.name} Has been Muted**")
                 await ctx.send(embed=emb)
 
             data = await self.bot.config.find(ctx.guild.id)
             log_channel = self.bot.get_channel(855784930494775296)
 
             log_embed = discord.Embed(title=f"🔇 Mute | Case ID: {data['case']}",
-                description=f" **Offender**: {member.name} | {member.mention}\n **Reason**: {reason}\n Duration: None \n **Moderator**: {ctx.author.name} | {ctx.author.mention}",
+                description=f" **Offender**: {member.name} | {member.mention}\n **Reason**: {reason}\n **Duration**: None \n **Moderator**: {ctx.author.name} | {ctx.author.mention}",
                 color=0x706e6d)
             log_embed.set_thumbnail(url=member.avatar_url)
             log_embed.timestamp = datetime.datetime.utcnow()
@@ -198,7 +209,6 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
             await self.bot.config.upsert(data)
 
         else:
-
 
             time = await TimeConverter().convert(ctx, time)
 
@@ -221,7 +231,7 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
                 
             except discord.HTTPException:
                 pass
-            em = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **{member.display_name} Has been Muted**")
+            em = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004>|**{member.display_name} Has been Muted for {time}**")
             await ctx.send(embed=em)
 
 
@@ -229,7 +239,7 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
             log_channel = self.bot.get_channel(855784930494775296)
 
             log_embed = discord.Embed(title=f"🔇 Mute | Case ID: {case['case']}",
-                description=f" **Offender**: {member.name} | {member.mention}\n **Reason**: {reason}\n Duration: {time} \n **Moderator**: {ctx.author.name} | {ctx.author.mention}",
+                description=f" **Offender**: {member.name} | {member.mention}\n **Reason**: {reason}\n **Duration**: {time} \n **Moderator**: {ctx.author.name} | {ctx.author.mention}",
                 color=0x706e6d)
             log_embed.set_thumbnail(url=member.avatar_url)
             log_embed.timestamp = datetime.datetime.utcnow()
@@ -264,7 +274,8 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
             return
 
         await member.remove_roles(role)
-        await ctx.send(f"Unmuted `{member.display_name}`")
+        embed = discord.Embed(description=f"<:allow:819194696874197004>|{member.mention} unmuted",color=0x2ECC71)
+        await ctx.send(embed=embed)
 
         log_channel = self.bot.get_channel(855784930494775296)
         data = await self.bot.config.find(ctx.guild.id)
@@ -292,7 +303,7 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
         	pass
         await ctx.guild.kick(user=member, reason=reason)
 
-        emb = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **The User {member.name} Has Been kicked.**")
+        emb = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **{member.name} Has Been kicked.**")
         await ctx.send(embed=emb)
 
         log_channel = self.bot.get_channel(855784930494775296)
@@ -306,9 +317,22 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
         data["case"] += 1
         await self.bot.config.upsert(data)
 
-    @commands.command(name="Ban", description="Ban user From guild", usage="<user> [time] [reason]") 
+    @commands.command(name="Ban",
+        description="Ban user From guild",
+        usage='<user> --reason <reason> --time <time>')
     @commands.check_any(perm_check(), is_me())
-    async def ban(self, ctx, member: discord.User, time: TimeConverter=None, *, reason=None):
+    async def ban(self, ctx, member: discord.User,*,args: TypedFlags):
+        flags = args
+        try:
+            reason = flags['reason']
+        except KeyError:
+            reason = "No Reason Provided"
+
+        try:
+            time = flags['time']
+        except KeyError:
+            time = None
+
         await ctx.message.delete()
         try:
             user = member.name.lower()
@@ -327,7 +351,7 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
 
             await ctx.guild.ban(user=member, reason=reason, delete_message_days=0)
 
-            em = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **{member.name}** Has been Banned")
+            em = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004>|**{member.name}** Has been Banned")
             await ctx.send(embed=em)
 
             log_channel = self.bot.get_channel(855784930494775296)
@@ -361,7 +385,7 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
                 await member.send(f"You Have Been Banned from {ctx.guild.name} for {time} Reason: {reason}")
             except discord.HTTPException:
                 await ctx.guild.ban(user=member, reason=reason)
-                emb = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **The User {member.name}** Has Been Banned")
+                emb = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004>|**{member.name}** Has Been Banned for {time}")
                 await ctx.send(embed=emb)
 
             await ctx.guild.ban(user=member, reason=reason, delete_message_days=0)
@@ -388,7 +412,7 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
         await ctx.guild.unban(member, reason=reason)
 
         embed = discord.Embed(
-            description=f"<:allow:819194696874197004> **The User {member.name}** Has Been Unbanned"
+            description=f"<:allow:819194696874197004>|**{member.name}** Has Been Unbanned"
         )
         await ctx.send(embed=embed)
 
@@ -436,7 +460,7 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
         embed = discord.Embed(title=f'{member.name}', color=usercolor)
         embed.set_thumbnail(url=member.avatar_url)
         embed.add_field(name='Account Name:', value=f'{member.name}', inline=False)
-        embed.add_field(name='Created at:', value=fomat_time(member.created_at))
+        embed.add_field(name='Created at:', value=f"{fomat_time(member.created_at)}\n")
         embed.add_field(name='Joined at', value=fomat_time(member.joined_at))
         embed.add_field(name='Account Status', value=str(member.status).title())
         embed.add_field(name='Account Activity', value=f"{str(member.activity.type).title().split('.')[1]} {member.activity.name}" if member.activity is not None else "None")
@@ -449,11 +473,11 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
         embed.set_footer(text=f'ID {member.id}', icon_url=member.avatar_url)
         await ctx.send(embed=embed)
 
-    @commands.command(name="tag", hidden=True)
-    @commands.check_any(perm_check(), is_me())
-    async def tag(self, ctx):
-        await ctx.message.delete()
-        await ctx.send("**Avoid tagging Owners/Admins.**\nKindly tag available mods/admins for queries.\nOr simply raise a ticket from <#785901543349551104>.\n")
+    @commands.command(name="flags")
+    @commands.check_any(is_me())
+    async def flags(self, ctx, user: discord.Member, *,args: TypedFlags):
+        data = args.lower()
+        await ctx.send(f'{user.name}|{args}')
 
 
 def setup(bot):
