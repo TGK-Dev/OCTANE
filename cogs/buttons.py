@@ -258,43 +258,7 @@ class Buttons(commands.Cog):
                 Button(style=ButtonStyle.green, label="❌", disabled=True),
             ]
         ]
-        dbutton = [
-            [
-                Button(style=ButtonStyle.grey, label=1, disabled=True),
-                Button(style=ButtonStyle.grey, label=2, disabled=True),
-                Button(style=ButtonStyle.grey, label=3, disabled=True),
-                Button(style=ButtonStyle.blue, label="*", disabled=True),
-                Button(style=ButtonStyle.red, label="Exit", disabled=True),
-            ],
-            [
-                Button(style=ButtonStyle.grey, label=4, disabled=True),
-                Button(style=ButtonStyle.grey, label=5, disabled=True),
-                Button(style=ButtonStyle.grey, label=6, disabled=True),
-                Button(style=ButtonStyle.blue, label="/", disabled=True),
-                Button(style=ButtonStyle.red, label="⌫", disabled=True),
-            ],
-            [
-                Button(style=ButtonStyle.grey, label=7, disabled=True),
-                Button(style=ButtonStyle.grey, label=8, disabled=True),
-                Button(style=ButtonStyle.grey, label=9, disabled=True),
-                Button(style=ButtonStyle.blue, label="+", disabled=True),
-                Button(style=ButtonStyle.red, label="Clear", disabled=True),
-            ],
-            [
-                Button(style=ButtonStyle.grey, label="00", disabled=True),
-                Button(style=ButtonStyle.grey, label="0", disabled=True),
-                Button(style=ButtonStyle.grey, label=".", disabled=True),
-                Button(style=ButtonStyle.blue, label="-", disabled=True),
-                Button(style=ButtonStyle.green, label="=", disabled=True),
-            ],
-            [
-                Button(style=ButtonStyle.grey, label="(", disabled=True),
-                Button(style=ButtonStyle.grey, label=")", disabled=True),
-                Button(style=ButtonStyle.grey, label="❌", disabled=True),
-                Button(style=ButtonStyle.blue, label="❌", disabled=True),
-                Button(style=ButtonStyle.green, label="❌", disabled=True),
-            ]
-        ]
+
         m = await ctx.send(embed=base_embed, components=button)
         embeds = m.embeds
         for embed in embeds:
@@ -305,7 +269,7 @@ class Buttons(commands.Cog):
                 res = await self.bot.wait_for("button_click", check=lambda res:res.user.id == ctx.author.id and res.channel.id == ctx.channel.id and str(res.message.id) == str(m.id), timeout=60)
                 await res.respond(type=6)
                 if str(res.component.label.lower()) == "exit":
-                    await m.edit(content="Calculator Closed",components=dbutton)
+                    await m.edit(content="Calculator Closed",components=[])
 
                 if str(res.component.label.lower()) in valid:
                     try:
@@ -333,7 +297,7 @@ class Buttons(commands.Cog):
                         thing = data['description']
                     except KeyError:
                         data['description'] = "```\nYou can't calculator an empty value Calculator is Closed\n```"
-                        return await m.edit(components=dbutton, embed=embed.from_dict(data))
+                        return await m.edit(components=[], embed=embed.from_dict(data))
                     thing = thing.replace('py', '')
                     thing = thing.replace('`', '')
                     thing = thing.replace('\n', '')
@@ -356,7 +320,7 @@ class Buttons(commands.Cog):
                     await m.edit(embed=embed.from_dict(data))
 
             except asyncio.TimeoutError:
-                await m.edit(content="Calculator Closed",components=dbutton)
+                await m.edit(content="Calculator Closed",components=[])
 
 
 def setup(bot):
