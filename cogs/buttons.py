@@ -9,6 +9,12 @@ class Buttons(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+
+    def is_me():
+        def predicate(ctx):
+            return ctx.message.author.id in [488614633670967307 , 301657045248114690]
+        return commands.check(predicate)
+
     @commands.Cog.listener()
     async def on_ready(self):
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
@@ -209,8 +215,125 @@ class Buttons(commands.Cog):
                     )
                     return
 
+    @commands.command(name="calculator", description="an Calculator made with ueing button", aliases=['cal'])
+    @commands.cooldown(3, 60, commands.BucketType.user)
+    async def calculator(self, ctx):
+        thing = ""
+        base_embed = discord.Embed(title=f"{ctx.author.display_name}'s calculator",
+            color=0x2f3136,
+            description=f"")
+        button = [
+            [
+                Button(style=ButtonStyle.grey, label=1),
+                Button(style=ButtonStyle.grey, label=2),
+                Button(style=ButtonStyle.grey, label=3),
+                Button(style=ButtonStyle.blue, label="*"),
+                Button(style=ButtonStyle.red, label="Exit"),
+            ],
+            [
+                Button(style=ButtonStyle.grey, label=4),
+                Button(style=ButtonStyle.grey, label=5),
+                Button(style=ButtonStyle.grey, label=6),
+                Button(style=ButtonStyle.blue, label="/"),
+                Button(style=ButtonStyle.red, label="⌫"),
+            ],
+            [
+                Button(style=ButtonStyle.grey, label=7),
+                Button(style=ButtonStyle.grey, label=8),
+                Button(style=ButtonStyle.grey, label=9),
+                Button(style=ButtonStyle.blue, label="+"),
+                Button(style=ButtonStyle.red, label="Clear"),
+            ],
+            [
+                Button(style=ButtonStyle.grey, label="00"),
+                Button(style=ButtonStyle.grey, label="0"),
+                Button(style=ButtonStyle.grey, label="."),
+                Button(style=ButtonStyle.blue, label="-"),
+                Button(style=ButtonStyle.green, label="="),
+            ]
+        ]
+        dbutton = [
+            [
+                Button(style=ButtonStyle.grey, label=1, disabled=True),
+                Button(style=ButtonStyle.grey, label=2, disabled=True),
+                Button(style=ButtonStyle.grey, label=3, disabled=True),
+                Button(style=ButtonStyle.blue, label="*", disabled=True),
+                Button(style=ButtonStyle.red, label="Exit", disabled=True),
+            ],
+            [
+                Button(style=ButtonStyle.grey, label=4, disabled=True),
+                Button(style=ButtonStyle.grey, label=5, disabled=True),
+                Button(style=ButtonStyle.grey, label=6, disabled=True),
+                Button(style=ButtonStyle.blue, label="/", disabled=True),
+                Button(style=ButtonStyle.red, label="⌫", disabled=True),
+            ],
+            [
+                Button(style=ButtonStyle.grey, label=7, disabled=True),
+                Button(style=ButtonStyle.grey, label=8, disabled=True),
+                Button(style=ButtonStyle.grey, label=9, disabled=True),
+                Button(style=ButtonStyle.blue, label="+", disabled=True),
+                Button(style=ButtonStyle.red, label="Clear", disabled=True),
+            ],
+            [
+                Button(style=ButtonStyle.grey, label="00", disabled=True),
+                Button(style=ButtonStyle.grey, label="0", disabled=True),
+                Button(style=ButtonStyle.grey, label=".", disabled=True),
+                Button(style=ButtonStyle.blue, label="-", disabled=True),
+                Button(style=ButtonStyle.green, label="=", disabled=True),
+            ]
+        ]
+        m = await ctx.send(embed=base_embed, components=button)
+        embeds = m.embeds
+        for embed in embeds:
+          data = embed.to_dict()
+        valid = ["1","2","3","4","5","6","7","8","9","00","0","-","+","*","/"]
+        while True:
+            try:
+                res = await self.bot.wait_for("button_click", check=lambda res:res.user.id == ctx.author.id and res.channel.id == ctx.channel.id and str(res.message.id) == str(m.id), timeout=60)
+                await res.respond(type=6)
+                if str(res.component.label.lower()) == "exit":
+                    await m.edit(content="Calculator Closed",components=dbutton)
 
+                if str(res.component.label.lower()) in valid:
+                    thing = f"{thing}{res.component.label.lower()}"
+                    data['description'] = f"```\n{thing}\n```"
+                    print(data)
+                    await m.edit(embed=embed.from_dict(data))
 
+                if str(res.component.label.lower()) == "⌫":
+                    string = str(data['description'])
+                    index = len(string)-5
+                    if len(string) > index:
+                        string = string[0 : index : ] + string[index + 1 : :]
+                    data['description'] = string
+                    print(data)
+                    await m.edit(embed=embed.from_dict(data))
+
+                if str(res.component.label.lower()) == "=":
+                    thing = data['description']
+                    if len(thing) <= 0:
+                        embeds = m.embeds
+                        for embed in embeds:
+                          data = embed.to_dict()
+                        data['description'] = "YOu can't calculator an empty Value"
+                        return await m.edit(embed=embed.from_dict(data), components=dbutton)
+                    thing = thing.replace('`', '')
+                    thing = thing.replace('\n', '')
+                    ans = eval(thing)
+                    print(ans)
+                    data["fields"] = []
+                    fields = {'name': 'Answer', 'value': f'```\n{ans}\n```', 'inline':False}
+                    data['fields'].append(fields)
+                    await m.edit(embed=embed.from_dict(data))
+                    print(data)
+
+                if str(res.component.label.lower()) == "clear":
+                    data.pop('description')
+                    data.pop('fields')
+                    await m.edit(embed=embed.from_dict(data))
+
+            except asyncio.TimeoutError:
+                await m.edit(content="Calculator Closed",components=dbutton)
 
 
 def setup(bot):
