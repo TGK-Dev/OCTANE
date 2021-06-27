@@ -297,7 +297,6 @@ class Buttons(commands.Cog):
                 if str(res.component.label.lower()) in valid:
                     thing = f"{thing}{res.component.label.lower()}"
                     data['description'] = f"```\n{thing}\n```"
-                    print(data)
                     await m.edit(embed=embed.from_dict(data))
 
                 if str(res.component.label.lower()) == "⌫":
@@ -306,7 +305,6 @@ class Buttons(commands.Cog):
                     if len(string) > index:
                         string = string[0 : index : ] + string[index + 1 : :]
                     data['description'] = string
-                    print(data)
                     await m.edit(embed=embed.from_dict(data))
 
                 if str(res.component.label.lower()) == "=":
@@ -320,12 +318,10 @@ class Buttons(commands.Cog):
                     thing = thing.replace('`', '')
                     thing = thing.replace('\n', '')
                     ans = eval(thing)
-                    print(ans)
                     data["fields"] = []
                     fields = {'name': 'Answer', 'value': f'```\n{ans}\n```', 'inline':False}
                     data['fields'].append(fields)
                     await m.edit(embed=embed.from_dict(data))
-                    print(data)
 
                 if str(res.component.label.lower()) == "clear":
                     data.pop('description')
