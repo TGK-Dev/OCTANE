@@ -312,11 +312,12 @@ class Buttons(commands.Cog):
                         thing = data['description']
                         thing = thing.replace('`', '')
                         thing = thing.replace('\n', '')
-                        data['description'] = f"```\n{thing}{res.component.label.lower()}\n```"
+                        thing = thing.replace('py', '')
+                        data['description'] = f"```py\n{thing}{res.component.label.lower()}\n```"
                         thing = ""
                         await m.edit(embed=embed.from_dict(data))
                     except KeyError:
-                        data['description'] = f"```\n{res.component.label.lower()}\n```"
+                        data['description'] = f"```py\n{res.component.label.lower()}\n```"
                         await m.edit(embed=embed.from_dict(data))
 
                 if str(res.component.label.lower()) == "⌫":
@@ -328,20 +329,25 @@ class Buttons(commands.Cog):
                     await m.edit(embed=embed.from_dict(data))
 
                 if str(res.component.label.lower()) == "=":
-                    thing = data['description']
-                    if len(thing) <= 0:
-                        embeds = m.embeds
-                        for embed in embeds:
-                          data = embed.to_dict()
-                        data['description'] = "YOu can't calculator an empty Value"
-                        return await m.edit(embed=embed.from_dict(data), components=dbutton)
+                    try:
+                        thing = data['description']
+                    except KeyError:
+                        data['description'] = "```\nYou can't calculator an empty value Calculator is Closed\n```"
+                        return await m.edit(components=dbutton, embed=embed.from_dict(data))
+                    thing = thing.replace('py', '')
                     thing = thing.replace('`', '')
                     thing = thing.replace('\n', '')
-                    ans = eval(thing)
-                    data["fields"] = []
-                    fields = {'name': 'Answer', 'value': f'```\n{ans}\n```', 'inline':False}
-                    data['fields'].append(fields)
-                    await m.edit(embed=embed.from_dict(data))
+                    try:
+                        ans = eval(thing)
+                        data["fields"] = []
+                        fields = {'name': 'Answer', 'value': f'```\n{ans}\n```', 'inline':False}
+                        data['fields'].append(fields)
+                        await m.edit(embed=embed.from_dict(data))
+                    except :
+                        data["fields"] = []
+                        fields = {'name': 'Answer', 'value': f'```\nMaybe Fix Your Maths but mybe try 3*(2+5) not 3(2+5)\n```', 'inline':False}
+                        data['fields'].append(fields)
+                        await m.edit(embed=embed.from_dict(data))
 
                 if str(res.component.label.lower()) == "clear":
                     del data["description"]
