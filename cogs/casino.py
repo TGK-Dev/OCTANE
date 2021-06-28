@@ -183,6 +183,113 @@ class casino(commands.Cog, description=description):
 				done_embed.set_author(name=f"{ctx.author.name}", icon_url=ctx.author.avatar_url)
 				await m.edit(embed=done_embed, components=[])
 
+	@commands.command(name="add-money", description="add money to Member Account")
+	@commands.check_any(perm_check(), is_me())
+	async def add_money(self, ctx, user: discord.Member, amount: int):
+		if amount <= 0: return await ctx.send("YOu Can't joke with someone by adding 0$ to there Account")
+
+		data = await self.bot.casino.find(user.id)
+		if data is None:
+			data = {'_id': user.id, 'cash': 0, 'vault': 0}
+		embed = discord.Embed(description=f"{ctx.author.mention} Where you want to add {user.mention} money", color=user.color)
+		embed.timestamp = datetime.datetime.utcnow()
+		embed.set_footer(text=ctx.author.name, icon_url=ctx.author.avatar_url)
+		buttons = [
+			[
+				Button(style=ButtonStyle.green, label="Vault"),
+				Button(style=ButtonStyle.blue, label="Cash"),
+				Button(style=ButtonStyle.red, label="Cancel")
+			]
+		]
+
+		m = await ctx.reply(embed=embed, components=buttons)
+		try:
+			res = await self.bot.wait_for("button_click", check=lambda res:res.user.id == ctx.author.id and res.channel.id == ctx.channel.id and str(res.message.id) == str(m.id), timeout=15)
+			await res.respond(type=6)
+			if str(res.component.label.lower()) == "vault":
+				data['vault'] += amount
+				await self.bot.casino.upsert(data)
+
+				embed = discord.Embed(description=f"{ctx.author.mention} You have successfully Add {amount} to {user.mention}'s {res.component.label.lower()}")
+				embed.timestamp = datetime.datetime.utcnow()
+				embed.set_author(name=f"{ctx.author.name}", icon_url=ctx.author.avatar_url)
+
+				return await m.edit(components=[], embed=embed)
+
+			if str(res.component.label.lower()) == "cash":
+				data['cash'] += amount
+				await self.bot.casino.upsert(data)
+
+				embed = discord.Embed(description=f"{ctx.author.mention} You have successfully Add {amount} to {user.mention}'s {res.component.label.lower()}")
+				embed.timestamp = datetime.datetime.utcnow()
+				embed.set_author(name=f"{ctx.author.name}", icon_url=ctx.author.avatar_url)
+
+				return await m.edit(components=[], embed=embed)
+
+			if str(res.component.label.lower()) == "cancel":
+
+				embed = discord.Embed(description=f"Canceling the command\n**Reason**: Canceled by Staff")
+				embed.timestamp = datetime.datetime.utcnow()
+				embed.set_author(name=f"{ctx.author.name}", icon_url=ctx.author.avatar_url)
+				return await m.edit(embed=embed, components=[])
+
+		except asyncio.TimeoutError:
+			embed = discord.Embed(description="Canceling command\n**Reason: TimeoutError**")
+			await m.edit(embed=embed, components=[])
+
+	@commands.command(nmae="bet", description="Simpal bet command")
+	@commands.check_any(is_me(), perm_check())
+	async def bet(self, ctx, amount: int):
+		data = await self.bot.casino.find(ctx.author.id)
+		if data is None: return await ctx.reply("I think You need To work frist to Earn some to become poor")
+			
+		if data['cash'] < amount: return await ctx.send(f"You can bet more than you cash you currently have {data['cash']} in you hand")
+
+		player = random.randint(1, 20)
+		compter = random.randint(5, 20)
+
+		if player > compter:
+			data['cash'] += amount*2
+			embed = discord.Embed(color=0x2ECC71,title="You won the bet",
+				description=f"You bet was **{amount}**\nYour price is **{amount*2}**\nNow you have **{data['cash']}**")
+
+			embed.timestamp = datetime.datetime.utcnow()
+			embed.set_author(name=f"{ctx.author.name}", icon_url=ctx.author.avatar_url)
+
+			embed.add_field(name="Your Number", value=player)
+			embed.add_field(name=f"{self.bot.user.name}", value=compter)
+
+			await self.bot.casino.upsert(data)
+			return await ctx.reply(embed=embed, mention_author=False)
+
+		if player < compter:
+			data['cash'] -= amount
+			embed = discord.Embed(color=0xE74C3C,title="You lost the bet",
+				description=f"You bet was **{amount}**\nNow you have **{data['cash']}**")
+
+			embed.timestamp = datetime.datetime.utcnow()
+			embed.set_author(name=f"{ctx.author.name}", icon_url=ctx.author.avatar_url)
+
+			embed.add_field(name="Your Number", value=player)
+			embed.add_field(name=f"{self.bot.user.name}", value=compter)
+
+			await self.bot.casino.upsert(data)
+			return await ctx.reply(embed=embed, mention_author=False)
+
+		if player == compter:
+			data['cash'] - amount
+			embed = discord.Embed(color=0xA84300,title="Your bet is tie",
+				description=f"You bet was **{amount}**\nYou Cash is has't been charge")
+
+			embed.timestamp = datetime.datetime.utcnow()
+			embed.set_author(name=f"{ctx.author.name}", icon_url=ctx.author.avatar_url)
+
+			embed.add_field(name="Your Number", value=player)
+			embed.add_field(name=f"{self.bot.user.name}", value=compter)
+
+			await self.bot.casino.upsert(data)
+			return await ctx.reply(embed=embed, mention_author=False)
+
 
 def setup(bot):
     bot.add_cog(casino(bot))
