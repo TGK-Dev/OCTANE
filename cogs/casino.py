@@ -47,6 +47,7 @@ class casino(commands.Cog, description=description):
 		await ctx.send(embed=embed)
 
 	@commands.command(name="crime", description="Do some Bad thing change to get big or lost big")
+	@commands.check_any(perm_check(), is_me())
 	@commands.cooldown(1, 30, commands.BucketType.user)
 	async def crime(self, ctx):
 		trinnger1 = random.randint(1, 100)
