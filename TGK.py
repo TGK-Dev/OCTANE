@@ -110,6 +110,9 @@ async def on_ready():
         activity=discord.Game(name="Cries in Binary | 00111010 00101000")
     )
 
+    bot.load_extension('jishaku')
+    print("jishaku has been loaded\n-----")
+
     current_blacklist_user = await bot.blacklist.get_all()
     for blacklisted_user in current_blacklist_user:
         bot.blacklist_user[blacklisted_user["_id"]] = blacklisted_user
@@ -152,9 +155,7 @@ async def on_ready():
     print(f"Ticket Setups:\n{bot.ticket_setups}")
     print("\n-----")
     print("Database Connected\n-----")
-    bot.load_extension('jishaku')
-    print("jishaku has been loaded\n-----")
-
+    
 @bot.event
 async def on_message(message):
     # Ignore messages sent by yourself
