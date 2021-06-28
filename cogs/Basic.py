@@ -5,6 +5,8 @@ import time
 import platform
 import random
 import traceback
+import datetime
+from humanfriendly import format_timespan
 import utils.json_loader
 
 
@@ -27,7 +29,17 @@ class Basic(commands.Cog, description=description):
         message = await ctx.send("Testing Ping...")
         end_time = time.time()
 
-        await message.edit(content=f"Pong! {round(self.bot.latency * 1000)}ms\nAPI: {round((end_time - start_time) * 1000)}ms")
+        start = self.bot.uptime
+        now = datetime.datetime.utcnow()
+        newtime = (now - start)
+        total_s = newtime.total_seconds()
+
+        embed = discord.Embed(title="Pingss", color=ctx.author.colour,
+            description=f"**Response TIme** {round(self.bot.latency * 1000)}ms\n**API**: {round((end_time - start_time) * 1000)}ms\n**My Life Span**: {format_timespan(total_s)}")
+
+        await message.delete()
+        await ctx.send(embed=embed)
+        
   
     @commands.command(
         name="stats", description="A useful command that displays bot statistics.", usage="stats"
