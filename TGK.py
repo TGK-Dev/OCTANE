@@ -54,7 +54,7 @@ bot = commands.Bot(
     description="commands List of Me",
     command_prefix=get_prefix,
     case_insensitive=True,
-    owner_id=488614633670967307,
+    owner_ids=[391913988461559809 , 488614633670967307, 301657045248114690],
     help_command=Help(),
     intents=intents,
 )
@@ -100,7 +100,6 @@ bot.colors = {
 }
 bot.color_list = [c for c in bot.colors.values()]
 
-
 @bot.event
 async def on_ready():
     # On ready, print some details to standard out
@@ -109,7 +108,7 @@ async def on_ready():
     )
     await bot.change_presence(
         activity=discord.Game(name="Cries in Binary | 00111010 00101000")
-    ) 
+    )
 
     current_blacklist_user = await bot.blacklist.get_all()
     for blacklisted_user in current_blacklist_user:
@@ -153,6 +152,8 @@ async def on_ready():
     print(f"Ticket Setups:\n{bot.ticket_setups}")
     print("\n-----")
     print("Database Connected\n-----")
+    bot.load_extension('jishaku')
+    print("jishaku has been loaded\n-----")
 
 @bot.event
 async def on_message(message):
