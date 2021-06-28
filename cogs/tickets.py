@@ -326,6 +326,8 @@ class tickets(commands.Cog, description=description):
     @commands.command(name="delete", description="delete the ticket", usage="")
     @commands.check_any(commands.has_any_role(831405039830564875),perm_check(), is_me())
     async def delete(self, ctx):
+        if ctx.channel.category.id != 829230513516445736:
+            return await ctx.send("This not an ticket")
         channel = ctx.channel
         buttons = [
             [
