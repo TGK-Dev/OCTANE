@@ -197,7 +197,7 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
             log_channel = self.bot.get_channel(855784930494775296)
 
             log_embed = discord.Embed(title=f"🔇 Mute | Case ID: {data['case']}",
-                description=f" **Offender**: {member.name} | {member.mention}\n **Reason**: {reason}\n **Duration**: None \n **Moderator**: {ctx.author.name} | {ctx.author.mention}",
+                description=f" **Offender**: {member.name} | {member.mention}\n **Reason**: {reason}\n **Duration**: None \n **Moderator**: {ctx.author.display_name} | {ctx.author.mention}",
                 color=0x706e6d)
             log_embed.set_thumbnail(url=member.avatar_url)
             log_embed.timestamp = datetime.datetime.utcnow()
@@ -239,7 +239,7 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
             log_channel = self.bot.get_channel(855784930494775296)
 
             log_embed = discord.Embed(title=f"🔇 Mute | Case ID: {case['case']}",
-                description=f" **Offender**: {member.name} | {member.mention}\n **Reason**: {reason}\n **Duration**: {time} \n **Moderator**: {ctx.author.name} | {ctx.author.mention}",
+                description=f" **Offender**: {member.name} | {member.mention}\n **Reason**: {reason}\n **Duration**: {time} \n **Moderator**: {ctx.author.display_name} | {ctx.author.mention}",
                 color=0x706e6d)
             log_embed.set_thumbnail(url=member.avatar_url)
             log_embed.timestamp = datetime.datetime.utcnow()
@@ -280,7 +280,7 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
         log_channel = self.bot.get_channel(855784930494775296)
         data = await self.bot.config.find(ctx.guild.id)
         log_embed = discord.Embed(title=f"🔊 UnMute | Case ID: {data['case']}",
-            description=f" **Offender**: {member.name} | {member.mention} \n **Moderator**: {ctx.author.name} {ctx.author.mention}", color=0x2ECC71)
+            description=f" **Offender**: {member.name} | {member.mention} \n **Moderator**: {ctx.author.display_name} {ctx.author.mention}", color=0x2ECC71)
         log_embed.set_thumbnail(url=member.avatar_url)
         log_embed.timestamp = datetime.datetime.utcnow()
         log_embed.set_footer(text=f"ID: {member.id}")
@@ -309,7 +309,7 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
         log_channel = self.bot.get_channel(855784930494775296)
         data = await self.bot.config.find(ctx.guild.id)
         log_embed = discord.Embed(title=f"👢 Kick | Case ID: {data['case']}",
-            description=f" **Offender**: {member.name} | {member.mention}\n **Moderator**: {ctx.author.name} | {ctx.author.mention}\n **Reason**: {reason}.", color=0xE74C3C)
+            description=f" **Offender**: {member.name} | {member.mention}\n **Moderator**: {ctx.author.display_name} | {ctx.author.mention}\n **Reason**: {reason}.", color=0xE74C3C)
         log_embed.set_thumbnail(url=member.avatar_url)
         log_embed.timestamp = datetime.datetime.utcnow()
         await log_channel.send(embed=log_embed)
@@ -357,7 +357,7 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
             log_channel = self.bot.get_channel(855784930494775296)
             data = await self.bot.config.find(ctx.guild.id)
             log_embed = discord.Embed(title=f"🔨 Ban | Case ID: {data['case']}",
-                description=f" **Offender**: {member.name} | {member.mention} \n**Reason**: {reason}\n **Moderator**: {ctx.author.name} {ctx.author.mention}", color=0xE74C3C)
+                description=f" **Offender**: {member.name} | {member.mention} \n**Reason**: {reason}\n **Moderator**: {ctx.author.display_name} {ctx.author.mention}", color=0xE74C3C)
             log_embed.set_thumbnail(url=member.avatar_url)
             log_embed.timestamp = datetime.datetime.utcnow()
             log_embed.set_footer(text=f"ID: {member.id}")
@@ -394,7 +394,7 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
             log_channel = self.bot.get_channel(855784930494775296)
 
             log_embed = discord.Embed(title=f"🔨 Ban | Case ID: {case['case']}",
-                description=f" **Offender**: {member.name} | {member.mention} \n**Reason**: {reason}\n **Duration**: {time}\n **Moderator**: {ctx.author.name} {ctx.author.mention}", color=0xE74C3C)
+                description=f" **Offender**: {member.name} | {member.mention} \n**Reason**: {reason}\n **Duration**: {time}\n **Moderator**: {ctx.author.display_name} {ctx.author.mention}", color=0xE74C3C)
             log_embed.set_thumbnail(url=member.avatar_url)
             log_embed.set_footer(text=f"ID: {member.id}")
             log_embed.timestamp = datetime.datetime.utcnow()
@@ -426,7 +426,7 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
         log_channel = self.bot.get_channel(855784930494775296)
 
         log_embed = discord.Embed(title=f"🔓 UnBan | Case ID: {case['case']}",
-            description=f" **Offender**: {member.name} | {member.mention}\n **Moderator**: {ctx.author.name} {ctx.author.mention}", color=0x2ECC71)
+            description=f" **Offender**: {member.name} | {member.mention}\n **Moderator**: {ctx.author.display_name} {ctx.author.mention}", color=0x2ECC71)
         log_embed.set_thumbnail(url=member.avatar_url)
         log_embed.set_footer(text=f"ID: {member.id}")
         log_embed.timestamp = datetime.datetime.utcnow()
@@ -456,11 +456,12 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
         member = member if member else ctx.author
         usercolor = member.color
 
-        
+        today = (datetime.datetime.utcnow() - member.created_at).total_seconds()
+
         embed = discord.Embed(title=f'{member.name}', color=usercolor)
         embed.set_thumbnail(url=member.avatar_url)
         embed.add_field(name='Account Name:', value=f'{member.name}', inline=False)
-        embed.add_field(name='Created at:', value=f"{fomat_time(member.created_at)}\n")
+        embed.add_field(name='Created at:', value=f"{fomat_time(member.created_at)}\n{format_timespan(today)}")
         embed.add_field(name='Joined at', value=fomat_time(member.joined_at))
         embed.add_field(name='Account Status', value=str(member.status).title())
         embed.add_field(name='Account Activity', value=f"{str(member.activity.type).title().split('.')[1]} {member.activity.name}" if member.activity is not None else "None")
