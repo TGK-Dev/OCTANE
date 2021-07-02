@@ -70,10 +70,10 @@ class Warns(commands.Cog, description=description):
 
         log_embed = discord.Embed(title=f"⚠️ Warn | Case ID: {data['case']}",
             description=f" **Offender**: {member.name} | {member.mention}\n **Reason**: {reason}\n**Moderator**: {ctx.author.display_name} | {ctx.author.mention}",
-            color=0x706e6d)
+            color=0xE74C3C)
         log_embed.set_thumbnail(url=member.avatar_url)
         log_embed.timestamp = datetime.datetime.utcnow()
-        log_embed.set_footer(text=f"ID: {member.id}")
+        log_embed.set_footer(text=f"ID: {member.id} Warns Count {current_warn_count}")
 
         await log_channel.send(embed=log_embed)
 
