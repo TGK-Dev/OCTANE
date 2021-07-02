@@ -65,20 +65,20 @@ class Warns(commands.Cog, description=description):
             emb = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **The User {member.name} Has Been Warned I couldn't DM them.| Warnings Count {current_warn_count}**")
             await ctx.send(embed=emb)
         
-        try:
-            log_channel = self.bot.get_channel(803687264110247987)
+        data = await self.bot.config.find(ctx.guild.id)
+        log_channel = self.bot.get_channel(855784930494775296)
 
-            embed = discord.Embed(color=0x06f79e, title=f"Warned | {member.name}")
-            embed.add_field(name="User", value=f"{member.name}", inline=False)
-            embed.add_field(name="Moderator", value=f"{ctx.author.mention}", inline=False)
-            embed.add_field(name="Reason", value=f"{reason}", inline=False)
-            embed.add_field(name="Warnings Count", value=f"{current_warn_count}")
-            embed.add_field(name="threshold Action", value="None")
-            embed.set_footer(text=f"{member.id}", icon_url=member.avatar_url)
+        log_embed = discord.Embed(title=f"⚠️ Warn | Case ID: {data['case']}",
+            description=f" **Offender**: {member.name} | {member.mention}\n **Reason**: {reason}\n**Moderator**: {ctx.author.display_name} | {ctx.author.mention}",
+            color=0x706e6d)
+        log_embed.set_thumbnail(url=member.avatar_url)
+        log_embed.timestamp = datetime.datetime.utcnow()
+        log_embed.set_footer(text=f"ID: {member.id}")
 
-            await log_channel.send(embed=embed)
-        except:
-            pass
+        await log_channel.send(embed=log_embed)
+
+        data["case"] += 1
+        await self.bot.config.upsert(data)
 
     @commands.command(name="Warnings", description="Show All Warnings for User", usage="[member]")
     @commands.check_any(perm_check(), is_me())
