@@ -1,17 +1,57 @@
 import datetime
 import discord
 
-from discord.ext import commands
+from discord.ext import commands, tasks
 from discord_components import DiscordComponents, Button, ButtonStyle, InteractionType
 
 class Events(commands.Cog, command_attrs=dict(hidden=True)):
     def __init__(self, bot):
         self.bot = bot
+        self.update_task = self.check_update_task.start()
+
+    @tasks.loop(seconds=3600)
+    async def check_update_task(self):
+
+        self.bot.blacklist_user = {}
+        current_blacklist_user = await self.bot.blacklist.get_all()
+        for blacklisted_user in current_blacklist_user:
+            self.bot.blacklist_user[blacklisted_user["_id"]] = blacklisted_user
+
+        self.bot.muted_users = {}
+        currentMutes = await self.bot.mutes.get_all()
+        for mute in currentMutes:
+            self.bot.muted_users[mute["_id"]] = mute
+
+        self.bot.ban_users = {}
+        currentBans = await self.bot.bans.get_all()
+        for ban in currentBans:
+            self.bot.ban_users[ban["_id"]] = ban
+
+        self.bot.free_users = {}
+        currentFree = await self.bot.free.get_all()
+        for free in currentFree:
+            self.bot.free_users[ban["_id"]] = free
+
+        print("\n-----")
+        print(f"Current blacklist:{len(self.bot.blacklist_user)}")
+        print("\n-----")
+        print(f"Current Mutes:{len(self.bot.muted_users)}")
+        print("\n-----")
+        print(f"Current Bans:{len(self.bot.ban_users)}")
+        print("\n-----")
+        print(f"Current Free users:{len(self.bot.free_users)}")
+        print("\n-----")
+        print("Database Connected\n-----Database checked")
+
+    @check_update_task.before_loop
+    async def before_check_current_free(self):
+        await self.bot.wait_until_ready()
+
 
     @commands.Cog.listener()
     async def on_ready(self):
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
-    
+    """
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
         # Ignore these errors
@@ -46,7 +86,7 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
                 description=f"<:dnd:840490624670892063> | Error: `{error}`")
             await ctx.send(embed=embed)
             #mess = await ctx.send_help(ctx.command, )      
-
+    """
     @commands.Cog.listener()
     async def on_message(self, message):
         word_list = ['vote link','vote Link','Vote link', 'pls vote', 'pls Vote', 'Pls vote']
