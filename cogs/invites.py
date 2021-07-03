@@ -56,7 +56,9 @@ class Invites(commands.Cog, description=description):
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
-        inviter = await self.tracker.fetch_inviter(member)  # inviter is the member who invited
+        inviter = await self.tracker.fetch_inviter(member)
+        if inviter is None:
+            return
         data = await self.bot.invites.find(inviter.id)
         
         if data is None:
