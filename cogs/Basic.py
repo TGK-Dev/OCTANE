@@ -35,7 +35,7 @@ class Basic(commands.Cog, description=description):
         total_s = newtime.total_seconds()
 
         embed = discord.Embed(title="Pingss", color=ctx.author.colour,
-            description=f"**Response TIme** {round(self.bot.latency * 1000)}ms\n**API**: {round((end_time - start_time) * 1000)}ms\n**My Life Span**: {format_timespan(total_s)}")
+            description=f"**Response TIme** {round(self.bot.latency * 1000)}ms\n**API**: {round((end_time - start_time) * 1000)}ms\n**My Age**: {format_timespan(total_s)}")
 
         await message.delete()
         await ctx.send(embed=embed)
