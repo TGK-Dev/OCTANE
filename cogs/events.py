@@ -51,7 +51,7 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
     @commands.Cog.listener()
     async def on_ready(self):
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
-    """
+    
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
         # Ignore these errors
@@ -86,7 +86,7 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
                 description=f"<:dnd:840490624670892063> | Error: `{error}`")
             await ctx.send(embed=embed)
             #mess = await ctx.send_help(ctx.command, )      
-    """
+    
     @commands.Cog.listener()
     async def on_message(self, message):
         word_list = ['vote link','vote Link','Vote link', 'pls vote', 'pls Vote', 'Pls vote']
