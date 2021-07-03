@@ -39,13 +39,11 @@ class freeloader(commands.Cog):
 
 	        time = value['time']
 	        removeTime = (currentTime - time)
-	        print(removeTime)
 	        removeTime = removeTime.total_seconds()
-	        print(removeTime)
+
 
 	        if removeTime >= 1209600:
 	        	await self.bot.free.delete(value['_id'])
-	        	print(value)
 	        	try:
 	        		self.bot.free_users.pop(value['_id'])
 	        	except KeyError:
@@ -78,8 +76,6 @@ class freeloader(commands.Cog):
 				"BanDuration": 50400
 		}
 		#await self.bot.bans.upsert(ban)
-		print(f'{ban}\n------')
-		print(f'{data}\n------')
 		#await self.bot.free.delete(member.id)
 		try:
 			than = data['time']
@@ -103,7 +99,6 @@ class freeloader(commands.Cog):
 
 			data["case"] += 1
 			#await self.bot.config.upsert(data)
-			print(f'{data}\n------')
 
 
 		except discord.HTTPException:
@@ -122,13 +117,11 @@ class freeloader(commands.Cog):
 			await log_channel.send(embed=log_embed)
 
 			data["case"] += 1
-			print(f'{data}\n------')
 			#await self.bot.config.upsert(data)
 
 	@commands.command(name="fban", description="add User to freeloader")
 	@commands.check_any(is_me(), perm_check())
 	async def fban(self , ctx, user:int):
-		print(user)
 		user = await self.bot.fetch_user(user)
 		if user is None:
 			return await ctx.reply("please Enter valid Id")
@@ -151,7 +144,6 @@ class freeloader(commands.Cog):
 		        )
 
 		await ctx.reply(embed=embed, mention_author=False)
-		print(data)
 
 	@commands.command(name="funban", description="Remove user from freeloader")
 	@commands.check_any(is_me(), perm_check())
