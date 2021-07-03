@@ -73,6 +73,7 @@ bot.ticket_setups = {}
 bot.cwd = cwd
 bot.event_channel = {}
 bot.perm = {}
+bot.free_users = {}
 bot.mod_role = [797923152617275433, 848585998769455104]
 bot.version = "3.0"
 bot.uptime = datetime.datetime.utcnow()
@@ -124,6 +125,10 @@ async def on_ready():
     for ban in currentBans:
         bot.ban_users[ban["_id"]] = ban
 
+    currentFree = await bot.free.get_all()
+    for free in currentFree:
+        bot.free_users[ban["_id"]] = free
+
     datas = await bot.ticket_setup.get_all()
     for data in datas:
     	setup = json.dumps(data)
@@ -151,9 +156,10 @@ async def on_ready():
     print("\n-----")
     print(f"Current Bans:{len(bot.ban_users)}")
     print("\n-----")
-    print(f"Ticket Setups:\n{bot.ticket_setups}")
+    print(f"Current Free users:{len(bot.free_users)}")
     print("\n-----")
     print("Database Connected\n-----")
+
     
 @bot.event
 async def on_message(message):
@@ -200,6 +206,7 @@ if __name__ == "__main__":
     bot.score = Document(bot.db, "score")
     bot.embed = Document(bot.db, "embed")
     bot.casino = Document(bot.db, "casino")
+    bot.free = Document(bot.db, "free")
 
     for file in os.listdir(cwd + "/cogs"):
         if file.endswith(".py") and not file.startswith("_"):
