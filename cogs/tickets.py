@@ -101,6 +101,7 @@ class tickets(commands.Cog, description=description):
                 await channel.send(f"{member.mention}", embed=embed)
 
                 await message.remove_reaction(payload.emoji, member)
+                await echannel.send(f"{member.mention} your Ticket has been created {channel.mention} Please Move there for support", delete_after=20)
 
                 return
 
@@ -133,6 +134,7 @@ class tickets(commands.Cog, description=description):
                 await channel.send(f"{member.mention}\n{prole.mention}", embed=embed)
 
                 await message.remove_reaction(payload.emoji, member)
+                await echannel.send(f"{member.mention} your Ticket has been created {channel.mention} Please Move there for Partnership", delete_after=20)
 
                 return
 
