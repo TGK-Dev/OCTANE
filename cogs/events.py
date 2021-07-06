@@ -1,6 +1,10 @@
 import datetime
 import discord
 
+from discord_slash import cog_ext, SlashContext, cog_ext, SlashContext
+from discord_slash.utils.manage_commands import create_option, create_choice, create_permission
+from discord_slash.model import SlashCommandPermissionType
+
 from discord.ext import commands, tasks
 from discord_components import DiscordComponents, Button, ButtonStyle, InteractionType
 
@@ -32,17 +36,6 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
         for free in currentFree:
             self.bot.free_users[ban["_id"]] = free
 
-        print("\n-----")
-        print(f"Current blacklist:{len(self.bot.blacklist_user)}")
-        print("\n-----")
-        print(f"Current Mutes:{len(self.bot.muted_users)}")
-        print("\n-----")
-        print(f"Current Bans:{len(self.bot.ban_users)}")
-        print("\n-----")
-        print(f"Current Free users:{len(self.bot.free_users)}")
-        print("\n-----")
-        print("Database Connected\n-----Database checked")
-
     @check_update_task.before_loop
     async def before_check_current_free(self):
         await self.bot.wait_until_ready()
@@ -51,6 +44,18 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
     @commands.Cog.listener()
     async def on_ready(self):
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
+
+    @commands.Cog.listener()
+    async def on_slash_command_error(self, ctx, ex):
+        if isinstance(ex, commands.MissingPermissions):
+            await ctx.send("Hey! You lack permission to use this command.")
+        elif isinstance(ex, commands.MissingAnyRole):
+            await ctx.send("Hey! You lack permission to use this command.")
+        else:
+            embed = discord.Embed(color=0xE74C3C, 
+                description=f"Error: `{ex}`")
+            await ctx.send(embed=embed)
+
     
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
