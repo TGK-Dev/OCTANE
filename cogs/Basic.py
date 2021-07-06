@@ -34,8 +34,14 @@ class Basic(commands.Cog, description=description):
         newtime = (now - start)
         total_s = newtime.total_seconds()
 
+        dstart = datetime.datetime.utcnow()
+        await self.bot.config.find(ctx.guild.id)
+        dend = datetime.datetime.utcnow()
+        dping = (dend - dstart)
+        dping = dping.total_seconds()
+
         embed = discord.Embed(title="Pingss", color=ctx.author.colour,
-            description=f"**Response TIme** {round(self.bot.latency * 1000)}ms\n**API**: {round((end_time - start_time) * 1000)}ms\n**My Age**: {format_timespan(total_s)}")
+            description=f"**Response TIme** {round(self.bot.latency * 1000)}ms\n**API**: {round((end_time - start_time) * 1000)}ms\n**Database Ping: {round(dping * 1000)}Ms\n**My Age**: {format_timespan(total_s)}")
 
         await message.delete()
         await ctx.send(embed=embed)
