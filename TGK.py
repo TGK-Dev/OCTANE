@@ -16,6 +16,7 @@ from traceback import format_exception
 
 from discord.ext import commands
 from pathlib import Path
+from discord_slash import SlashCommand
 #from better_help import Help
 
 # Local code
@@ -57,7 +58,10 @@ bot = commands.Bot(
     owner_ids=[391913988461559809 , 488614633670967307, 301657045248114690],
     help_command=Help(),
     intents=intents,
-)
+    )
+
+slash = SlashCommand(bot, sync_commands=True, sync_on_cog_reload=True)
+
 # change command_prefix='-' to command_prefix=get_prefix for custom prefixes
 bot.config_token = os.getenv('TOKEN')
 bot.connection_url = str(os.getenv('MONGO'))
@@ -69,6 +73,7 @@ bot.DEFAULTPREFIX = DEFAULTPREFIX
 bot.muted_users = {}
 bot.ban_users = {}
 bot.blacklist_user = {}
+bot.guild_id = [797920317871357972]
 bot.ticket_setups = {}
 bot.cwd = cwd
 bot.event_channel = {}
