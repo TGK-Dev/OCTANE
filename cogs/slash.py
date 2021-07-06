@@ -92,12 +92,12 @@ class slash(commands.Cog):
 			except discord.HTTPException:
 				pass
 
-			#await ctx.guild.ban(user, reason=reason, delete_message_days=0)
+			await ctx.guild.ban(user, reason=reason, delete_message_days=0)
 
 			em = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004>|**{user.name}** Has been Banned for {reason}")
 			await ctx.send(embed=em)
 
-			log_channel = self.bot.get_channel(855735577348931604)
+			log_channel = self.bot.get_channel(855784930494775296)
 			data = await self.bot.config.find(ctx.guild.id)
 			log_embed = discord.Embed(title=f"🔨 Ban | Case ID: {data['case']}",
 			    description=f" **Offender**: {user} | {user.mention} \n**Reason**: {reason}\n **Moderator**: {ctx.author} {ctx.author.mention}", color=0xE74C3C)
@@ -127,13 +127,13 @@ class slash(commands.Cog):
 		except:
 			pass
 
-		#await ctx.guild.ban(user, reason=reason, delete_message_days=0)
+		await ctx.guild.ban(user, reason=reason, delete_message_days=0)
 
 		em = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004>|**{user.mention}** Has been Banned for {reason}")
 		await ctx.send(embed=em)
 
 		case = await self.bot.config.find(ctx.guild.id)
-		log_channel = self.bot.get_channel(855735577348931604)
+		log_channel = self.bot.get_channel(855784930494775296)
 
 		log_embed = discord.Embed(title=f"🔨 Ban | Case ID: {case['case']}",
 		    description=f" **Offender**: {user} | {user.mention} \n**Reason**: {reason}\n **Duration**: {time}\n **Moderator**: {ctx.author} {ctx.author.mention}", color=0xE74C3C)
@@ -170,11 +170,11 @@ class slash(commands.Cog):
 			await user.send(f"You Have Been kicked from {ctx.guild} for {reason}")
 		except:
 			pass
-		#await ctx.guild.kick(user=user, reason=reason)
+		await ctx.guild.kick(user=user, reason=reason)
 		emb = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **{user.name} Has Been kicked for {reason}**")
 		await ctx.send(embed=emb)
 
-		log_channel = self.bot.get_channel(855735577348931604)
+		log_channel = self.bot.get_channel(855784930494775296)
 		data = await self.bot.config.find(ctx.guild.id)
 		log_embed = discord.Embed(title=f"👢 Kick | Case ID: {data['case']}",
 		    description=f" **Offender**: {user} | {user.mention}\n **Moderator**: {ctx.author.display_name} | {ctx.author.mention}\n **Reason**: {reason}.", color=0xE74C3C)
@@ -192,7 +192,7 @@ class slash(commands.Cog):
 		]
 	)
 	@commands.check_any(commands.has_any_role(785842380565774368,803635405638991902,799037944735727636,785845265118265376,787259553225637889,843775369470672916), commands.is_owner())
-	async def kick(self, ctx: SlashContext, user, reason, time=None):
+	async def mute(self, ctx: SlashContext, user, reason, time=None):
 		role = discord.utils.get(ctx.guild.roles, name="Muted")
 		if not role:
 		    await ctx.send("No muted role was found! Please create one called `Muted`")
@@ -216,7 +216,7 @@ class slash(commands.Cog):
 			await ctx.send(embed=em)
 
 			data = await self.bot.config.find(ctx.guild.id)
-			log_channel = self.bot.get_channel(855735577348931604)
+			log_channel = self.bot.get_channel(855784930494775296)
 
 			log_embed = discord.Embed(title=f"🔇 Mute | Case ID: {data['case']}",
 				description=f" **Offender**: {user} | {user.mention}\n **Reason**: {reason}\n **Duration**: None \n **Moderator**: {ctx.author.display_name} | {ctx.author.mention}",
@@ -256,7 +256,7 @@ class slash(commands.Cog):
 
 
 		case = await self.bot.config.find(ctx.guild.id)
-		log_channel = self.bot.get_channel(855735577348931604)
+		log_channel = self.bot.get_channel(855784930494775296)
 
 		log_embed = discord.Embed(title=f"🔇 Mute | Case ID: {case['case']}",
 		    description=f" **Offender**: {user.name} | {user.mention}\n **Reason**: {reason}\n **Duration**: {time} \n **Moderator**: {ctx.author.display_name} | {ctx.author.mention}",
@@ -296,7 +296,7 @@ class slash(commands.Cog):
 		embed = discord.Embed(description=f"<:allow:819194696874197004>|{user} unmuted",color=0x2ECC71)
 		await ctx.send(embed=embed)
 
-		log_channel = self.bot.get_channel(855735577348931604)
+		log_channel = self.bot.get_channel(855784930494775296)
 		data = await self.bot.config.find(ctx.guild.id)
 		log_embed = discord.Embed(title=f"🔊 UnMute | Case ID: {data['case']}",
 			description=f" **Offender**: {user.name} | {user.mention} \n**Reason**: {reason}\n**Moderator**: {ctx.author.display_name} {ctx.author.mention}", color=0x2ECC71)
