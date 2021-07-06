@@ -41,7 +41,7 @@ class Basic(commands.Cog, description=description):
         dping = dping.total_seconds()
 
         embed = discord.Embed(title="Pingss", color=ctx.author.colour,
-            description=f"**Response TIme** {round(self.bot.latency * 1000)}ms\n**API**: {round((end_time - start_time) * 1000)}ms\n**Database Ping: {round(dping * 1000)}Ms\n**My Age**: {format_timespan(total_s)}")
+            description=f"**Response TIme** {round(self.bot.latency * 1000)}ms\n**API**: {round((end_time - start_time) * 1000)}ms\n**Database Ping**: {round(dping * 1000)}Ms\n**My Age**: {format_timespan(total_s)}")
 
         await message.delete()
         await ctx.send(embed=embed)
