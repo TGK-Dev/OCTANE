@@ -94,7 +94,7 @@ class slash(commands.Cog):
 
 			await ctx.guild.ban(user, reason=reason, delete_message_days=0)
 
-			em = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004>|**{user.name}** Has been Banned for {reason}")
+			em = discord.Embed(color=0x06f79e, description=f"**{user.name}** Has been Banned for {reason}")
 			await ctx.send(embed=em)
 
 			log_channel = self.bot.get_channel(855784930494775296)
@@ -129,7 +129,7 @@ class slash(commands.Cog):
 
 		await ctx.guild.ban(user, reason=reason, delete_message_days=0)
 
-		em = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004>|**{user.mention}** Has been Banned for {reason}")
+		em = discord.Embed(color=0x06f79e, description=f"**{user.mention}** Has been Banned for {reason}")
 		await ctx.send(embed=em)
 
 		case = await self.bot.config.find(ctx.guild.id)
@@ -170,8 +170,10 @@ class slash(commands.Cog):
 			await user.send(f"You Have Been kicked from {ctx.guild} for {reason}")
 		except:
 			pass
+
 		await ctx.guild.kick(user=user, reason=reason)
-		emb = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004> **{user.name} Has Been kicked for {reason}**")
+		emb = discord.Embed(color=0x06f79e, description=f"**{user.name}** Has Been kicked for {reason}")
+
 		await ctx.send(embed=emb)
 
 		log_channel = self.bot.get_channel(855784930494775296)
@@ -212,7 +214,7 @@ class slash(commands.Cog):
 			except:
 				pass
 
-			em = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004>|**{user.name} Has been Muted for {reason}**")
+			em = discord.Embed(color=0x06f79e, description=f"**{user.name}** Has been Muted for {reason}")
 			await ctx.send(embed=em)
 
 			data = await self.bot.config.find(ctx.guild.id)
@@ -251,7 +253,7 @@ class slash(commands.Cog):
 		    
 		except discord.HTTPException:
 		    pass
-		em = discord.Embed(color=0x06f79e, description=f"<:allow:819194696874197004>|**{user.display_name} Has been Muted for {reason}**")
+		em = discord.Embed(color=0x06f79e, description=f"**{user.display_name}** Has been Muted for {reason}**")
 		await ctx.send(embed=em)
 
 
@@ -293,7 +295,7 @@ class slash(commands.Cog):
 			return
 
 		await user.remove_roles(role)
-		embed = discord.Embed(description=f"<:allow:819194696874197004>|{user} unmuted",color=0x2ECC71)
+		embed = discord.Embed(description=f"{user} Has been Unmuted",color=0x2ECC71)
 		await ctx.send(embed=embed)
 
 		log_channel = self.bot.get_channel(855784930494775296)

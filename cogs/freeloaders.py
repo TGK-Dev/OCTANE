@@ -63,8 +63,6 @@ class freeloader(commands.Cog):
 		if member.guild.id != 785839283847954433:
 			return
 
-		if member.id == 391913988461559809:
-			await member.guild.kick(member)
 		guild = self.bot.get_guild(785839283847954433)
 		data = await self.bot.free.find(member.id)
 		if data is None:
