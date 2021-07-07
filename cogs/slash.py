@@ -275,7 +275,7 @@ class slash(commands.Cog):
 	@cog_ext.cog_slash(name="Unmute", description="Unmute an User", guild_ids=guild_ids,
 		options=[
 				create_option(name="user", description="Select which User need be Unmuted", option_type=6, required=True),
-				create_option(name="reason", description="reason why your unmuting user early", option_type=3, required=True)
+				create_option(name="reason", description="reason why your unmuting user early", option_type=3, required=False)
 			]
 		)
 	@commands.check_any(commands.has_any_role(785842380565774368,803635405638991902,799037944735727636,785845265118265376,787259553225637889,843775369470672916), commands.is_owner())
@@ -284,6 +284,7 @@ class slash(commands.Cog):
 		if not role:
 		    await ctx.send("No muted role was found! Please create one called `Muted`")
 		    return
+	    reason = reason if reason else "N/A"
 		await self.bot.mutes.delete(user.id)
 		try:
 			self.bot.muted_users.pop(user.id)
