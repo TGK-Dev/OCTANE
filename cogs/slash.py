@@ -284,7 +284,7 @@ class slash(commands.Cog):
 		if not role:
 		    await ctx.send("No muted role was found! Please create one called `Muted`")
 		    return
-	    reason = reason if reason else "N/A"
+		reason = reason if reason else "N/A"
 		await self.bot.mutes.delete(user.id)
 		try:
 			self.bot.muted_users.pop(user.id)
