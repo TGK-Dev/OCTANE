@@ -17,12 +17,11 @@ from traceback import format_exception
 from discord.ext import commands
 from pathlib import Path
 from discord_slash import SlashCommand
-#from better_help import Help
+from better_help import Help
 
 # Local code
 import utils.json_loader
 
-from utils.help import Help
 from utils.mongo import Document
 from utils.util import Pag
 from utils.util import clean_code
@@ -56,7 +55,7 @@ bot = commands.Bot(
     command_prefix=get_prefix,
     case_insensitive=True,
     owner_ids=[391913988461559809 , 488614633670967307, 301657045248114690],
-    help_command=Help(),
+    help_command=Help(ending_note=f"Made By Jay and Utik",show_cooldown=False,show_brief=True,timeout=60,timeout_delete=True),
     intents=intents,
     )
 
@@ -79,6 +78,7 @@ bot.cwd = cwd
 bot.event_channel = {}
 bot.perm = {}
 bot.free_users = {}
+bot.giveaway = {}
 bot.mod_role = [797923152617275433, 848585998769455104]
 bot.version = "3.0"
 bot.uptime = datetime.datetime.utcnow()
@@ -132,7 +132,11 @@ async def on_ready():
 
     currentFree = await bot.free.get_all()
     for free in currentFree:
-        bot.free_users[ban["_id"]] = free
+        bot.free_users[free["_id"]] = free
+
+    currentGive = await bot.give.get_all()
+    for give in currentGive:
+        bot.giveaway[give["_id"]] = give
 
     datas = await bot.ticket_setup.get_all()
     for data in datas:
@@ -212,6 +216,7 @@ if __name__ == "__main__":
     bot.embed = Document(bot.db, "embed")
     bot.casino = Document(bot.db, "casino")
     bot.free = Document(bot.db, "free")
+    bot.give = Document(bot.db, "give")
 
     for file in os.listdir(cwd + "/cogs"):
         if file.endswith(".py") and not file.startswith("_"):
