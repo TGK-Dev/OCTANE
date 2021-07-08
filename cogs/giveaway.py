@@ -34,9 +34,9 @@ class giveaway(commands.Cog):
 		self.giveaway_task = self.check_givaway.start()
 
 	def is_me():
-        def predicate(ctx):
-            return ctx.message.author.id in [488614633670967307 , 301657045248114690]
-        return commands.check(predicate)
+		def predicate(ctx):
+			return ctx.message.author.id in [488614633670967307 , 301657045248114690]
+		return commands.check(predicate)
 
 
 	@tasks.loop(seconds=5)
