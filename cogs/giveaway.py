@@ -7,11 +7,14 @@ from discord.ext import commands, tasks
 from copy import deepcopy
 from dateutil.relativedelta import relativedelta
 from humanfriendly import format_timespan
+from discord_slash import cog_ext, SlashContext, cog_ext, SlashContext
+from discord_slash.utils.manage_commands import create_option, create_choice, create_permission
+from discord_slash.model import SlashCommandPermissionType
 
 
 time_regex = re.compile("(?:(\d{1,5})(h|s|m|d))+?")
 time_dict = {"h": 3600, "s": 1, "m": 60, "d": 86400}
-
+guild_ids=[785839283847954433]
 class TimeConverter(commands.Converter):
     async def convert(self, ctx, argument):
         args = argument.lower()
@@ -62,13 +65,13 @@ class giveaway(commands.Cog):
 
 					gdata['fields'] = []
 					field = {'name': "No valid entrants!", 'value': "so a winner could not be determined!", 'inline': False}
-					gdata['fields'].append(fields)
+					gdata['fields'].append(field)
 					await message.edit(embed=embed.from_dict(gdata))
 					await message.reply("No valid entrants, so a winner not be determined!")
 
-					await self.bot.free.delete(message.id)
+					await self.bot.give.delete((value['_id']))
 					try:
-					    return self.bot.giveaway.pop(message)
+					    return self.bot.giveaway.pop((value['_id']))
 					except KeyError:
 					    return
 
@@ -96,24 +99,91 @@ class giveaway(commands.Cog):
 	async def on_ready(self):
 		print(f"{self.__class__.__name__} has been loaded \n------")
 
+	@commands.Cog.listener()
+	async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
+		giveaway = deepcopy(self.bot.giveaway)
+		guild = self.bot.get_guild(payload.guild_id)
+		channel = self.bot.get_channel(payload.channel_id)
+		message = await channel.fetch_message(payload.message_id)
+		users = await guild.fetch_member(payload.user_id)
+		if users.id == self.bot.user.id:
+			return
+		if message.id in giveaway:
+			data = await self.bot.give.find(message.id)
+			if data['r_req'] == None:
+				return
+			else:
+				r_role = discord.utils.get(guild.roles, id=data['r_req'])
+				b_role = discord.utils.get(guild.roles, id=data['b_role'])
+				if b_role == None:
+					pass
+			if b_role and b_role in users.roles:
+				return
+			elif b_role in users.roles:
+				return
+			elif b_role in users.roles:
+				return
+			elif b_role in users.roles:
+				return
+			else:
+				await message.remove_reaction(payload.emoji, users)
+				try:
+					embed= discord.Embed(title="Entry Decline",description=f"You need `{r_role.name}` to Enter this [giveaway]({message.jump_url})", color=0xE74C3C)
+					await users	.send(embed=embed)
+				except discord.HTTPException:
+					pass
+					
 
-	@commands.command(name="gstart", description="giveaway commands Testing")
-	@commands.check_any(is_me())
-	async def gstart(self, ctx, time:TimeConverter, *,price):
-		embed = discord.Embed(title=price, color=0x3498DB,
-			description=f"React this message to Enter!\nEnds: **{format_timespan(time)}**\nHosted by: {ctx.author.mention}")
-		await ctx.message.delete()
+
+	@cog_ext.cog_slash(name="gstart",description="an giveaway commands", guild_ids=guild_ids,
+		options=[
+				create_option(name="time", description="how long giveaway should last", option_type=3, required=True),
+				create_option(name="price", description="price of the giveaway", option_type=3, required=True),
+				create_option(name="r_req", description="required role to Event the giveaway",option_type=8, required=False),
+				create_option(name="b_role", description="bypass role to bypass the required role",option_type=8, required=False)
+			]
+		)
+	@commands.check_any(commands.has_any_role(785842380565774368, 799037944735727636, 785845265118265376))
+	async def gstart(self, ctx, time, price, r_req=None, b_role=None):
+		time = await TimeConverter().convert(ctx, time)
+		r_req = r_req if r_req else None
+		b_role = b_role if b_role else None
+		descript = ""
+		if r_req == None:
+			descript = f'React this message to Enter!\nEnds: **{format_timespan(time)}**\nHosted by: {ctx.author.mention}'
+		else:
+			if b_role == None:
+				pass
+			else:
+				descript = f'React this message to Enter!\nEnds: **{format_timespan(time)}**\nRequired Role: {r_req.mention}\nHosted by: {ctx.author.mention}'
+			if r_req and b_role != None:
+				descript = f'React this message to Enter!\nEnds: **{format_timespan(time)}**\nRequired Role: {r_req.mention}\nBypass Role: {b_role.mention}\nHosted by: {ctx.author.mention}'
+		embed = discord.Embed(title=price, color=0x3498DB, description=descript)
+		embed.timestamp = (datetime.datetime.utcnow() + datetime.timedelta(seconds=time))
+		embed.set_footer(text=f"Ends At")
+		#await ctx.message.delete()
 		mesg = await ctx.send(embed=embed)
 		data = {"_id": mesg.id,
 				"guild": ctx.guild.id,
 				"channel": ctx.channel.id,
-				"end_time": time,
 				"host": ctx.author.id,
+				"end_time": time,
 				"start_time": datetime.datetime.now()
 				}
+		try:
+			data['r_req'] = r_req.id
+		except:
+			data['r_req'] = None
+
+		try:
+			data['b_role'] = b_role.id
+		except:
+			data['b_role'] = None
+
 		await self.bot.give.upsert(data)
 		self.bot.giveaway[mesg.id] = data
 		await mesg.add_reaction("🎉")
+		
 
 	@commands.command(name="gend", description="Force to end giveaway before Time")
 	async def gend(self, ctx, message_id: int):
@@ -157,6 +227,20 @@ class giveaway(commands.Cog):
 			return self.bot.giveaway.pop((message.id))
 		except KeyError:
 			return
+
+	@commands.command(name="greroll", description="Reroll the giveaway for new winner")
+	async def greroll(self, ctx, message_id:int):
+		channel = ctx.channel
+		message = await channel.fetch_message(message_id)
+		if message.author.id != self.bot.user.id:
+			return await ctx.send("That message is not an giveaway")
+		users = await message.reactions[0].users().flatten()
+		users.pop(users.index(ctx.guild.me))
+		if len(users) == 0:
+			return await ctx.send("No winner found as there no reactions")
+
+		winner = random.choice(users)
+		await ctx.send(f"New winner is {winner.mention}")
 
 
 
