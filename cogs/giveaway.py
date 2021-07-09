@@ -101,7 +101,7 @@ class giveaway(commands.Cog):
 	@commands.check_any(is_me())
 	async def gstart(self, ctx, time:TimeConverter, *,price):
 		embed = discord.Embed(title=price, color=0x3498DB,
-			description=f"React this message to Enter!\nEnds: {format_timespan(time)})\nHosted by: {ctx.author.mention}")
+			description=f"React this message to Enter!\nEnds: **{format_timespan(time)}**\nHosted by: {ctx.author.mention}")
 		await ctx.message.delete()
 		mesg = await ctx.send(embed=embed)
 		data = {"_id": mesg.id,
