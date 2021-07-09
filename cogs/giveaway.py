@@ -97,9 +97,9 @@ class giveaway(commands.Cog):
 		print(f"{self.__class__.__name__} has been loaded \n------")
 
 
-	@commands.command(name="giveaway", description="giveaway commands Testing")
+	@commands.command(name="gstart", description="giveaway commands Testing")
 	@commands.check_any(is_me())
-	async def giveaway(self, ctx, time:TimeConverter, *,price):
+	async def gstart(self, ctx, time:TimeConverter, *,price):
 		embed = discord.Embed(title=price, color=0x3498DB,
 			description=f"React this message to Enter!\nEnds: {format_timespan(time)})\nHosted by: {ctx.author.mention}")
 		await ctx.message.delete()
@@ -114,6 +114,51 @@ class giveaway(commands.Cog):
 		await self.bot.give.upsert(data)
 		self.bot.giveaway[mesg.id] = data
 		await mesg.add_reaction("🎉")
+
+	@commands.command(name="gend", description="Force to end giveaway before Time")
+	async def gend(self, ctx, message_id: int):
+		channel = ctx.channel
+		message = await channel.fetch_message(message_id)
+		data = await self.bot.give.find(message.id)
+		if data is None:
+			return await ctx.send(f"Error NO giveaway found with {message_id} Please Check your id")
+		users = await message.reactions[0].users().flatten()
+		users.pop(users.index(ctx.guild.me))
+		#users.pop(users.index(host))
+		if len(users) == 0:
+			embeds = message.embeds
+			for embed in embeds:
+				gdata = embed.to_dict()
+
+			gdata['fields'] = []
+			field = {'name': "No valid entrants!", 'value': "so a winner could not be determined!", 'inline': False}
+			gdata['fields'].append(field)
+			await message.edit(embed=embed.from_dict(gdata))
+			await message.reply("No valid entrants, so a winner not be determined!")
+
+			await self.bot.give.delete_by_id(message.id)
+			try:
+			    return self.bot.giveaway.pop(message)
+			except KeyError:
+			    return
+
+		winner = random.choice(users)
+		embeds = message.embeds
+		for embed in embeds:
+			gdata = embed.to_dict()
+		gdata['fields'] = []
+		field = {'name': "Winner!", 'value': f"<@{winner.id}>", 'inline': False}
+		gdata['fields'].append(field)
+		gdata['color'] = 15158332
+		await message.edit(embed=embed.from_dict(gdata))
+		await message.reply(f"{winner.mention} you have successfully Won the {gdata['title']}")
+		await self.bot.give.delete_by_id(message.id)			
+		try:
+			return self.bot.giveaway.pop((message.id))
+		except KeyError:
+			return
+
+
 
 def setup(bot):
     bot.add_cog(giveaway(bot))
