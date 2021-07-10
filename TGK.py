@@ -55,7 +55,7 @@ bot = commands.Bot(
     command_prefix=get_prefix,
     case_insensitive=True,
     owner_ids=[391913988461559809 , 488614633670967307, 301657045248114690],
-    help_command=Help(ending_note=f"Made By Jay and Utik",show_cooldown=False,show_brief=True,timeout=60,timeout_delete=True),
+    help_command=Help(ending_note=f"Made By Jay and Utki",show_cooldown=False,show_brief=True,timeout=60,timeout_delete=True),
     intents=intents,
     )
 
