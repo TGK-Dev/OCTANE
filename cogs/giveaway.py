@@ -173,7 +173,6 @@ class giveaway(commands.Cog):
 			]
 		)
 	@commands.check_any(commands.is_owner(), commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 787259553225637889, 803230347575820289))
-	@commands.check_any(commands.has_any_role(785842380565774368, 799037944735727636, 785845265118265376))
 	async def gstart(self, ctx, time, price, winners,r_req=None, b_role=None):
 		time = await TimeConverter().convert(ctx, time)
 		r_req = r_req if r_req else None
