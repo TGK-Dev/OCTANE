@@ -182,11 +182,10 @@ class giveaway(commands.Cog):
 			descript = f'React this message to Enter!\nEnds: **{format_timespan(time)}**\nHosted by: {ctx.author.mention}'
 		else:
 			if b_role == None:
-				pass
-			else:
 				descript = f'React this message to Enter!\nEnds: **{format_timespan(time)}**\nRequired Role: {r_req.mention}\nHosted by: {ctx.author.mention}'
-			if r_req and b_role != None:
+			else:
 				descript = f'React this message to Enter!\nEnds: **{format_timespan(time)}**\nRequired Role: {r_req.mention}\nBypass Role: {b_role.mention}\nHosted by: {ctx.author.mention}'
+	
 		embed = discord.Embed(title=price, color=0x3498DB, description=descript)
 		embed.timestamp = (datetime.datetime.utcnow() + datetime.timedelta(seconds=time))
 		embed.set_footer(text=f"Winners: {winners} | Ends At")
