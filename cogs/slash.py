@@ -37,7 +37,7 @@ class slash(commands.Cog):
 
 	@commands.Cog.listener()
 	async def on_ready(self):
-		print(f"{self.__class__.__name__} has been loaded")
+		print(f"{self.__class__.__name__} has been loaded \n------")
 
 	@cog_ext.cog_slash(name="stest",description="An test commands",guild_ids=guild_ids,
 		options=[
