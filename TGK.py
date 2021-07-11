@@ -80,7 +80,7 @@ bot.perm = {}
 bot.free_users = {}
 bot.giveaway = {}
 bot.mod_role = [797923152617275433, 848585998769455104]
-bot.version = "3.0"
+bot.version = "4.0"
 bot.uptime = datetime.datetime.utcnow()
 
 bot.colors = {
