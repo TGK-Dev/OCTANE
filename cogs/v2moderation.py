@@ -3,6 +3,7 @@ import datetime
 import discord
 import re
 
+
 from humanfriendly import format_timespan
 from copy import deepcopy
 from dateutil.relativedelta import relativedelta
@@ -150,7 +151,7 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
     async def on_ready(self):
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
 
-
+    """
     @commands.command(
         name='mute',
         description="Mutes a given user for x time!",
@@ -434,7 +435,7 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
 
         case["case"] += 1
         await self.bot.config.upsert(case)
-
+    """
     @commands.command(name="purge", description="A command which purges the channel it is called in", usage="[amount]", invoke_without_command = True)
     @commands.check_any(perm_check(), is_me())
     async def purge(self, ctx, amount=10):
