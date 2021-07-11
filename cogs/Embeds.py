@@ -220,8 +220,5 @@ class Embeds(commands.Cog, description=description):
 
         await ctx.send(embed=embed.from_dict(data))
 
-
-
-
 def setup(bot):
     bot.add_cog(Embeds(bot))
