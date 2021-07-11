@@ -79,13 +79,18 @@ class slash(commands.Cog):
 	@commands.check_any(commands.has_any_role(785842380565774368,803635405638991902,799037944735727636,785845265118265376,787259553225637889), commands.is_owner())
 	async def ban(self , ctx: SlashContext, user, reason:str, time: TimeConverter=None):
 		time = time if time else None
-		try:
+		if type(user) == discord.Member:
 			if user.top_role >= ctx.author.top_role:
 				return await ctx.send("You cannot do this action on this user due to role hierarchy.")
-		except:
-			user = int(user)
-			user = await self.bot.fetch_user(int(user))
 
+		if type(user) == int:        	
+			try:
+				use = await self.bot.fetch_user(int(user))
+				entry = await ctx.guild.fetch_ban(use)
+				return await ctx.send("That User is already Banned")
+			except discord.NotFound:
+				pass
+		return 
 		if time ==None:
 			try:
 				await user.send(f"You have been Banned from {ctx.guild.name} for {reason}")
@@ -152,27 +157,26 @@ class slash(commands.Cog):
 		)
 	@commands.check_any(commands.is_owner(), commands.has_any_role(785842380565774368, 799037944735727636, 785845265118265376))
 	async def uban(self , user, reason=None):
-		user = int(user)
-		reason = reason if reason else "No Reason provided"
-		user = self.bot.fetch_user(user)
+		reason = reason if reason else "No Reason Provided"
+		member = await self.bot.fetch_user(int(user))
+		await ctx.guild.unban(member, reason=reason)
 
-		await ctx.guild.uban(user, reason)
-		embed = discord.Embed(color=0x2f3136,
-            description=f"<:allow:819194696874197004>|**{member.name}** Has Been Unbanned"
-        )
+		embed = discord.Embed(
+			description=f"<:allow:819194696874197004>|**{member.name}** Has Been Unbanned"
+		)
 		await ctx.send(embed=embed)
 
 		await self.bot.bans.delete(member.id)
 		try:
 			self.bot.bot.ban_users.pop(member.id)
-		except KeyError:
+		except :
 			pass
 
 		case = await self.bot.config.find(ctx.guild.id)
 		log_channel = self.bot.get_channel(855784930494775296)
 
 		log_embed = discord.Embed(title=f"🔓 UnBan | Case ID: {case['case']}",
-		description=f" **Offender**: {member.name} | {member.mention}\n **Moderator**: {ctx.author.display_name} {ctx.author.mention}", color=0x2ECC71)
+			description=f" **Offender**: {member.name} | {member.mention}\n **Moderator**: {ctx.author.display_name} {ctx.author.mention}", color=0x2ECC71)
 		log_embed.set_thumbnail(url=member.avatar_url)
 		log_embed.set_footer(text=f"ID: {member.id}")
 		log_embed.timestamp = datetime.datetime.utcnow()
@@ -222,6 +226,7 @@ class slash(commands.Cog):
 
 		data["case"] += 1
 		await self.bot.config.upsert(data)
+		
 	@cog_ext.cog_slash(name="mute", description="Mute someone for x time", guild_ids=guild_ids,
 		options=[
 			create_option(name="user", description="Select which User You want to Mute" , option_type=6, required=True),
@@ -350,4 +355,3 @@ class slash(commands.Cog):
 
 def setup(bot):
 	bot.add_cog(slash(bot))
-
