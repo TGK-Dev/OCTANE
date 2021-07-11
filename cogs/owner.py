@@ -454,11 +454,7 @@ class Owner(commands.Cog, description=description):
                             inline=False
                         )
                 await ctx.send(embed=embed)
-
-
-
-
-
+                
 def setup(bot):
     bot.add_cog(Owner(bot))
 
