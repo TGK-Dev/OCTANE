@@ -102,8 +102,11 @@ class giveaway(commands.Cog):
 				winner_list = []
 				while True:
 					member = random.choice(users)
-					users.pop(users.index(member))
-					winner_list.append(member.mention)
+					if type(member) == discord.Member:
+						users.pop(users.index(member))
+						winner_list.append(member.mention)
+					else:
+						pass
 					if len(winner_list) == value['winners']:
 						break
 
@@ -138,18 +141,21 @@ class giveaway(commands.Cog):
 		channel = self.bot.get_channel(payload.channel_id)
 		message = await channel.fetch_message(payload.message_id)
 		users = await guild.fetch_member(payload.user_id)
-		if users.id == self.bot.user.id:
+		if users.id == self.bot.user.id or users == None:
 			return
+
 		if message.id in giveaway:
 			data = await self.bot.give.find(message.id)
 			config = await self.bot.config.find(guild.id)
 
 			if data['r_req'] == None:
 				return
+
 			blacklist = []
 			for role in config['g_blacklist']:
 				role = discord.utils.get(guild.roles, id=role)
 				blacklist.append(role)
+
 			for role in blacklist:
 				if role in users.roles:
 					try:
@@ -185,8 +191,6 @@ class giveaway(commands.Cog):
 				except discord.HTTPException:
 					pass
 					
-
-
 	@cog_ext.cog_slash(name="gstart",description="an giveaway commands", guild_ids=guild_ids,
 		options=[
 				create_option(name="time", description="how long giveaway should last", option_type=3, required=True),
@@ -428,4 +432,3 @@ class giveaway(commands.Cog):
 
 def setup(bot):
     bot.add_cog(giveaway(bot))
-
