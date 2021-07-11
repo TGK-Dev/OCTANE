@@ -142,8 +142,22 @@ class giveaway(commands.Cog):
 			return
 		if message.id in giveaway:
 			data = await self.bot.give.find(message.id)
+			config = await self.bot.config.find(guild.id)
+
 			if data['r_req'] == None:
 				return
+			blacklist = []
+			for role in config['g_blacklist']:
+				role = discord.utils.get(guild.roles, id=role)
+				blacklist.append(role)
+			for role in blacklist:
+				if role in users.roles:
+					try:
+						await message.remove_reaction(payload.emoji, users)
+						embed= discord.Embed(title="Entry Decline",description=f"You have one the blacklist role `{role.name}` there for you cannot enter", color=0xE74C3C)
+						return await users.send(embed=embed)
+					except discord.HTTPException:
+						return
 			else:
 				r_role = discord.utils.get(guild.roles, id=data['r_req'])
 				b_role = discord.utils.get(guild.roles, id=data['b_role'])
@@ -154,10 +168,20 @@ class giveaway(commands.Cog):
 			elif r_role in users.roles:
 				return
 			else:
-				await message.remove_reaction(payload.emoji, users)
+
+				bypass = []
+				for role in config['g_bypass']:
+					role = discord.utils.get(guild.roles, id=role)
+					bypass.append(role)
+
+				for role in bypass:
+					if role in users.roles:
+						return
+
 				try:
+					await message.remove_reaction(payload.emoji, users)
 					embed= discord.Embed(title="Entry Decline",description=f"You need `{r_role.name}` to Enter this [giveaway]({message.jump_url})", color=0xE74C3C)
-					await users	.send(embed=embed)
+					await users.send(embed=embed)
 				except discord.HTTPException:
 					pass
 					
@@ -185,7 +209,6 @@ class giveaway(commands.Cog):
 				descript = f'React this message to Enter!\nEnds: **{format_timespan(time)}**\nRequired Role: {r_req.mention}\nHosted by: {ctx.author.mention}'
 			else:
 				descript = f'React this message to Enter!\nEnds: **{format_timespan(time)}**\nRequired Role: {r_req.mention}\nBypass Role: {b_role.mention}\nHosted by: {ctx.author.mention}'
-	
 		embed = discord.Embed(title=price, color=0x3498DB, description=descript)
 		embed.timestamp = (datetime.datetime.utcnow() + datetime.timedelta(seconds=time))
 		embed.set_footer(text=f"Winners: {winners} | Ends At")
@@ -347,6 +370,61 @@ class giveaway(commands.Cog):
 		except KeyError:
 			pass
 
+	@cog_ext.cog_slash(name="gblacklist", description="Blacklit an role from giveaway it's an global blacklist",guild_ids=guild_ids,
+		options=[
+				create_option(name="role", description="Select role to blacklist it", required=True, option_type=8)
+			]
+		)
+	@commands.check_any(commands.is_owner(), commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 787259553225637889))
+	async def gblacklist(self, ctx, role):
+		data = await self.bot.config.find(ctx.guild.id)
+		if data is None: return await ctx.send("Your Server config was not found please run config First")
+		if role.id in data['g_blacklist']:
+			data['g_blacklist'].remove(role.id)
+			return await ctx.send(f"{role.mention} Has been Removed from blacklist ", hidden=True)
+		else:	
+			data['g_blacklist'].append(role.id)
+		await self.bot.config.upsert(data)
+		await ctx.send(f"{role.mention} Has added to Blacklist", hidden=True)
+
+	@cog_ext.cog_slash(name="gbypass", description="make and role to bpyass all global giveaway",guild_ids=guild_ids,
+		options=[
+				create_option(name="role", description="Select role make it bypass", required=True, option_type=8)
+			]
+		)
+	@commands.check_any(commands.is_owner(), commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 787259553225637889))
+	async def gbypass(self, ctx, role):
+		data = await self.bot.config.find(ctx.guild.id)
+		if data is None: return await ctx.send("Your Server config was not found please run config First")
+		if role.id in data['g_bypass']:
+			data['g_bypass'].remove(role.id)
+			return await ctx.send(f"{role.mention} Has been Removed from the Bypass list", hidden=True)
+		data['g_bypass'].append(role.id)
+		await self.bot.config.upsert(data)
+		await ctx.send(f"{role.mention} is added to bypass list", hidden=True)
+
+	@cog_ext.cog_slash(name="bypasslist", description="Send the Bypass role list", guild_ids=guild_ids)
+	async def bypasslist(self, ctx):
+		data = await self.bot.config.find(ctx.guild.id)
+		lists = []
+		for role in data['g_bypass']:
+			role = discord.utils.get(ctx.guild.roles, id=role)
+			lists.append(role.mention)
+
+		embed = discord.Embed(title="Bypass Role list", description=", ".join(lists), color=0x2f3136)
+
+		await ctx.send(embed=embed)
+
+	@cog_ext.cog_slash(name="blacklist", description="Send the blacklist role list", guild_ids=guild_ids)
+	async def blacklistl(self, ctx):
+		data = await self.bot.config.find(ctx.guild.id)
+		lists = []
+		for role in data['g_blacklist']:
+			role = discord.utils.get(ctx.guild.roles, id=role)
+			lists.append(role.mention)
+
+		embed = discord.Embed(title="blacklist Role list", description=", ".join(lists), color=0x2f3136)
+		await ctx.send(embed=embed)
 
 def setup(bot):
     bot.add_cog(giveaway(bot))
