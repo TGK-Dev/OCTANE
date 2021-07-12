@@ -140,7 +140,10 @@ class giveaway(commands.Cog):
 		guild = self.bot.get_guild(payload.guild_id)
 		channel = self.bot.get_channel(payload.channel_id)
 		message = await channel.fetch_message(payload.message_id)
-		users = await guild.fetch_member(payload.user_id)
+		try:
+			users = await guild.fetch_member(payload.user_id)
+		except discord.NotFound:
+			return
 		if users.id == self.bot.user.id or users == None:
 			return
 
