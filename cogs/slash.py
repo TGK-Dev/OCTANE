@@ -90,7 +90,7 @@ class slash(commands.Cog):
 				return await ctx.send("That User is already Banned")
 			except discord.NotFound:
 				pass
-		return 
+				
 		if time ==None:
 			try:
 				await user.send(f"You have been Banned from {ctx.guild.name} for {reason}")
