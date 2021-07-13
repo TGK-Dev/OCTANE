@@ -403,7 +403,7 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
 
             case["case"] += 1
             await self.bot.config.upsert(case)
-
+    """
     @commands.command(name="unban", description="Unban user From guild", usage="<user> [reason]")
     @commands.check_any(perm_check(), is_me())
     async def unban(self, ctx, member, *, reason=None):
@@ -435,7 +435,7 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
 
         case["case"] += 1
         await self.bot.config.upsert(case)
-    """
+    
     @commands.command(name="purge", description="A command which purges the channel it is called in", usage="[amount]", invoke_without_command = True)
     @commands.check_any(perm_check(), is_me())
     async def purge(self, ctx, amount=10):

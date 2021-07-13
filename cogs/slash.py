@@ -149,42 +149,7 @@ class slash(commands.Cog):
 
 		case["case"] += 1
 		await self.bot.config.upsert(case)
-	@cog_ext.cog_slash(name="unban", description="unban an User from his Id", guild_ids=guild_ids,
-		options=[	
-				create_option(name="user",description="The User Id you want to unban", option_type=3, required=True),
-				create_option(name="reason",description="provide reason for unban", option_type=3, required=False)
-			]
-		)
-	@commands.check_any(commands.is_owner(), commands.has_any_role(785842380565774368, 799037944735727636, 785845265118265376))
-	async def uban(self , user, reason=None):
-		reason = reason if reason else "No Reason Provided"
-		member = await self.bot.fetch_user(int(user))
-		await ctx.guild.unban(member, reason=reason)
-
-		embed = discord.Embed(
-			description=f"<:allow:819194696874197004>|**{member.name}** Has Been Unbanned"
-		)
-		await ctx.send(embed=embed)
-
-		await self.bot.bans.delete(member.id)
-		try:
-			self.bot.bot.ban_users.pop(member.id)
-		except :
-			pass
-
-		case = await self.bot.config.find(ctx.guild.id)
-		log_channel = self.bot.get_channel(855784930494775296)
-
-		log_embed = discord.Embed(title=f"🔓 UnBan | Case ID: {case['case']}",
-			description=f" **Offender**: {member.name} | {member.mention}\n **Moderator**: {ctx.author.display_name} {ctx.author.mention}", color=0x2ECC71)
-		log_embed.set_thumbnail(url=member.avatar_url)
-		log_embed.set_footer(text=f"ID: {member.id}")
-		log_embed.timestamp = datetime.datetime.utcnow()
-		await log_channel.send(embed=log_embed)
-
-		case["case"] += 1
-		await self.bot.config.upsert(case)
-
+		
 	@cog_ext.cog_slash(name="kick", description="Kick someone from the guild",
 		guild_ids=guild_ids,
 		options=[
