@@ -2,6 +2,7 @@ import discord
 from copy import deepcopy
 from discord.ext import commands, tasks
 import datetime
+from utils.util import Pag
 import asyncio
 from humanfriendly import format_timespan
 import time
@@ -161,6 +162,35 @@ class freeloader(commands.Cog):
 		await self.bot.free.delete(user.id)
 
 		await ctx.reply(embed=embed, mention_author=False)
+
+	@commands.command(name="flist", description="List of the freeloaders in the database")
+	@commands.check_any(is_me(), perm_check())
+	async def flist(self, ctx):
+		freeloader = await self.bot.free.get_all()
+		if freeloader is None: return await ctx.send("Looks like database is Empty for Now")
+
+		page = []
+		i = 1
+		for data in freeloader:
+			member = await self.bot.fetch_user(data['_id'])
+			than = data['time']
+			now = datetime.datetime.utcnow()
+			newtime = (now - than)
+			total_s = newtime.total_seconds()
+
+			description = f"""
+			{i}.User Name: {member}\n User Id: {member.id}\n Freeloading at {data['time'].strftime("%I:%M %p %B %d, %Y")}\nTime left in 14 Day: {format_timespan(total_s)}
+			"""
+			i += 1
+			page.append(description)
+
+		await Pag(
+            title=f"freeloaders DataBase",
+            colour=0x9e3bff,
+            entries=page,
+            embed=True,
+            length=5
+        ).start(ctx)
 
 def setup(bot):
     bot.add_cog(freeloader(bot))
