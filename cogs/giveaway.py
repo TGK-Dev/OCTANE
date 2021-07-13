@@ -90,6 +90,8 @@ class giveaway(commands.Cog):
 						gdata = embed.to_dict()
 
 					gdata['fields'] = []
+					gdata['title'] = f"{gdata['title']} • Giveaway Has Endded"
+					gdata['color'] = 15158332
 					field = {'name': "No valid entrants!", 'value': "so a winner could not be determined!", 'inline': False}
 					gdata['fields'].append(field)
 					await message.edit(embed=embed.from_dict(gdata))
@@ -116,9 +118,10 @@ class giveaway(commands.Cog):
 				for embed in embeds:
 					gdata = embed.to_dict()
 				gdata['fields'] = []
+				gdata['title'] = f"{gdata['title']} • Giveaway Has Endded"
+				gdata['color'] = 15158332
 				field = {'name': "Winner!", 'value': ", ".join(winner_list), 'inline': False}
 				gdata['fields'].append(field)
-				gdata['color'] = 15158332
 				await message.edit(embed=embed.from_dict(gdata))
 				reply = ",".join(winner_list)
 				await message.reply(f"{reply} have successfully Won the {gdata['title']}")
