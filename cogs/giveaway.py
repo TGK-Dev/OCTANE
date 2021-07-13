@@ -71,6 +71,8 @@ class giveaway(commands.Cog):
 						gdata = embed.to_dict()
 
 					gdata['fields'] = []
+					gdata['title'] = f"{gdata['title']} • Giveaway Has Endded"
+					gdata['color'] = 15158332
 					field = {'name': "No valid entrants!", 'value': "so a winner could not be determined!", 'inline': False}
 					gdata['fields'].append(field)
 					await message.edit(embed=embed.from_dict(gdata))
@@ -144,6 +146,7 @@ class giveaway(commands.Cog):
 			users = await guild.fetch_member(payload.user_id)
 		except discord.NotFound:
 			return
+			
 		if users.id == self.bot.user.id or users == None:
 			return
 
@@ -206,6 +209,8 @@ class giveaway(commands.Cog):
 	@commands.check_any(commands.is_owner(), commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 787259553225637889, 803230347575820289))
 	async def gstart(self, ctx, time, price, winners,r_req=None, b_role=None):
 		time = await TimeConverter().convert(ctx, time)
+		if time < 15:
+			return await ctx.send("Giveaway time needed to be longer than 15 seconds")
 		r_req = r_req if r_req else None
 		b_role = b_role if b_role else None
 		descript = ""
@@ -216,7 +221,7 @@ class giveaway(commands.Cog):
 				descript = f'React this message to Enter!\nEnds: **{format_timespan(time)}**\nRequired Role: {r_req.mention}\nHosted by: {ctx.author.mention}'
 			else:
 				descript = f'React this message to Enter!\nEnds: **{format_timespan(time)}**\nRequired Role: {r_req.mention}\nBypass Role: {b_role.mention}\nHosted by: {ctx.author.mention}'
-		embed = discord.Embed(title=price, color=0x3498DB, description=descript)
+		embed = discord.Embed(title=price, color=0x9e3bff, description=descript)
 		embed.timestamp = (datetime.datetime.utcnow() + datetime.timedelta(seconds=time))
 		embed.set_footer(text=f"Winners: {winners} | Ends At")
 		#await ctx.message.delete()
