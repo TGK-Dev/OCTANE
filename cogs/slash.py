@@ -77,21 +77,22 @@ class slash(commands.Cog):
 			]
 		)
 	@commands.check_any(commands.has_any_role(785842380565774368,803635405638991902,799037944735727636,785845265118265376,787259553225637889), commands.is_owner())
-	async def ban(self , ctx: SlashContext, user, reason:str, time: TimeConverter=None):
+	async def ban(self , ctx: SlashContext, user, reason:str, time=None):
 		time = time if time else None
-		if type(user) == discord.Member:
+		try:
 			if user.top_role >= ctx.author.top_role:
 				return await ctx.send("You cannot do this action on this user due to role hierarchy.")
-
-		if type(user) == int:        	
-			try:
-				use = await self.bot.fetch_user(int(user))
-				entry = await ctx.guild.fetch_ban(use)
-				return await ctx.send("That User is already Banned")
-			except discord.NotFound:
-				pass
+		except:
+			pass
+      	
+		try:
+			use = await self.bot.fetch_user(int(user))
+			entry = await ctx.guild.fetch_ban(use)
+			return await ctx.send("That User is already Banned")
+		except discord.NotFound:
+			pass
 				
-		if time ==None:
+		if time == None:
 			try:
 				await user.send(f"You have been Banned from {ctx.guild.name} for {reason}")
 			except discord.HTTPException:
