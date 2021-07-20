@@ -34,75 +34,79 @@ class TimeConverter(commands.Converter):
 class giveaway(commands.Cog):
 	def __init__(self, bot):
 		self.bot = bot
-		self.giveaway_task = self.check_givaway.start()
+		#self.giveaway_task = self.check_givaway.start()
 
 	def is_me():
 		def predicate(ctx):
 			return ctx.message.author.id in [488614633670967307 , 301657045248114690]
 		return commands.check(predicate)
 
-
-	@tasks.loop(seconds=5)
+	
+	@tasks.loop(seconds=10)
 	async def check_givaway(self):
-		currentTime = datetime.datetime.now()
-		gives = deepcopy(self.bot.giveaway)
-		for key, value in gives.items():
-
-			ftime = value['start_time'] + relativedelta(seconds=value['end_time'])
+		currentTime = datetime.datetime.now() 
+		for data in await self.bot.give.get_all():
+			ftime = data['start_time'] + relativedelta(seconds=data['end_time'])
 
 			if currentTime >= ftime:
-				channel = self.bot.get_channel(value['channel'])
-				guild = self.bot.get_guild(value['guild'])
-				message = await channel.fetch_message(value['_id'])
+				guild = self.bot.get_guild(data['guild'])
+				channel = self.bot.get_channel(data['channel'])
+				message = await channel.fetch_message(data['_id'])
+				host = await guild.fetch_member(data['host'])
 				if message == None:
-					await self.bot.give.delete(value['_id'])
+					date = await self.bot.give.delete(data['_id'])
 					try:
-					    return self.bot.giveaway.pop((value['_id']))
-					except KeyError:
-					    return
-
-				host = await guild.fetch_member(value['host'])
-				users = await message.reactions[0].users().flatten()
-				users.pop(users.index(guild.me))
-				#users.pop(users.index(host))
-				if len(users) == 0:
-					embeds = message.embeds
-					for embed in embeds:
-						gdata = embed.to_dict()
-
-					gdata['fields'] = []
-					gdata['title'] = f"{gdata['title']} • Giveaway Has Endded"
-					gdata['color'] = 15158332
-					field = {'name': "No valid entrants!", 'value': "so a winner could not be determined!", 'inline': False}
-					gdata['fields'].append(field)
-					await message.edit(embed=embed.from_dict(gdata))
-					await message.reply("No valid entrants, so a winner not be determined!")
-
-					await self.bot.give.delete((value['_id']))
-					try:
-					    return self.bot.giveaway.pop((value['_id']))
-					except KeyError:
-					    return
-
-				if len(users) < value['winners']:
-					embeds = message.embeds
-					for embed in embeds:
-						gdata = embed.to_dict()
-
-					gdata['fields'] = []
-					gdata['title'] = f"{gdata['title']} • Giveaway Has Endded"
-					gdata['color'] = 15158332
-					field = {'name': "No valid entrants!", 'value': "so a winner could not be determined!", 'inline': False}
-					gdata['fields'].append(field)
-					await message.edit(embed=embed.from_dict(gdata))
-					await message.reply("No valid entrants, so a winner not be determined!")
-
-					await self.bot.give.delete((value['_id']))
-					try:
-						return self.bot.giveaway.pop((value['_id']))
+						return self.bot.giveaway.remove(data['_id'])
 					except KeyError:
 						return
 
+				users = await message.reactions[0].users().flatten()
+				users.pop(users.index(guild.me))
+				entries = await message.reactions[0].users().flatten()
+				entries.pop(users.index(guild.me))
+				#users.pop(users.index(host))
+
+				#if no users have Taken part in giveaways
+				if len(users) == 0:
+					embeds = message.embeds
+					for embed in embeds:
+						edict = embed.to_dict()
+
+					edict['fields'] = []
+					edict['title'] = f"{edict['title']} • Giveaway Has Endded"
+					edict['color'] = 15158332
+					field = {'name': "No valid entrants!", 'value': "so a winner could not be determined!", 'inline': False}
+					edict['fields'].append(field)
+					await message.edit(embed=embed.from_dict(edict))
+					await message.reply("No valid entrants, so a winner not be determined!")
+
+					await self.bot.give.delete((data['_id']))
+					try:
+						return self.bot.giveaway.remove((data['_id']))
+					except KeyError:
+						return
+
+				#if there is entrys are less then winners
+				if len(users) < data['winners']:
+					embeds = message.embeds
+					for embed in embeds:
+						edict = embed.to_dict()
+
+					edict['fields'] = []
+					edict['title'] = f"{edict['title']} • Giveaway Has Endded"
+					edict['color'] = 15158332
+					field = {'name': "No valid entrants!", 'value': "so a winner could not be determined!", 'inline': False}
+					edict['fields'].append(field)
+					await message.edit(embed=embed.from_dict(edict))
+					await message.reply("No valid entrants, so a winner not be determined!")
+
+					await self.bot.give.delete((data['_id']))
+					try:
+						return self.bot.giveaway.remove((data['_id']))
+					except KeyError:
+						return
+
+				#if all req meets so we can get winners
 				winner_list = []
 				while True:
 					member = random.choice(users)
@@ -111,30 +115,33 @@ class giveaway(commands.Cog):
 						winner_list.append(member.mention)
 					else:
 						pass
-					if len(winner_list) == value['winners']:
+					if len(winner_list) == data['winners']:
 						break
 
 				embeds = message.embeds
 				for embed in embeds:
 					gdata = embed.to_dict()
+				reply = ",".join(winner_list)
+				reply = "".join(winner_list)
+				await message.reply(f"**Price**: {gdata['title']}\n**Winners**: {reply}\n**Total Entries**: {len(users)}")
+
 				gdata['fields'] = []
 				gdata['title'] = f"{gdata['title']} • Giveaway Has Endded"
 				gdata['color'] = 15158332
 				field = {'name': "Winner!", 'value': ", ".join(winner_list), 'inline': False}
 				gdata['fields'].append(field)
+                
 				await message.edit(embed=embed.from_dict(gdata))
-				reply = ",".join(winner_list)
-				await message.reply(f"{reply} have successfully Won the {gdata['title']}")
-				await self.bot.give.delete_by_id(message.id)			
+				await self.bot.give.delete_by_id(message.id)            
 				try:
-				    return self.bot.giveaway.pop((value['_id']))
+					return self.bot.giveaway.remove(message.id)
 				except KeyError:
-				    return
+					return
 
 	@check_givaway.before_loop
 	async def before_check_givaway(self):
 		await self.bot.wait_until_ready()
-
+	
 	@commands.Cog.listener()
 	async def on_ready(self):
 		print(f"{self.__class__.__name__} has been loaded \n------")
@@ -248,7 +255,7 @@ class giveaway(commands.Cog):
 			data['b_role'] = None
 
 		await self.bot.give.upsert(data)
-		self.bot.giveaway[mesg.id] = data
+		self.bot.giveaway.append(data['_id'])
 		await mesg.add_reaction("🎉")
 		
 
@@ -274,10 +281,13 @@ class giveaway(commands.Cog):
 				gdata = embed.to_dict()
 
 			gdata['fields'] = []
+			gdata['title'] = f"{gdata['title']} • Giveaway Has Endded"
+			gdata['color'] = 15158332
 			field = {'name': "No valid entrants!", 'value': "so a winner could not be determined!", 'inline': False}
 			gdata['fields'].append(field)
+			await ctx.send("Giveaway has Endded")
 			await message.edit(embed=embed.from_dict(gdata))
-			await ctx.send("No valid entrants, so a winner not be determined!")
+			await message.reply("No valid entrants, so a winner not be determined!")
 
 			await self.bot.give.delete_by_id(message.id)
 			try:
@@ -307,7 +317,7 @@ class giveaway(commands.Cog):
 			member = random.choice(users)
 			users.pop(users.index(member))
 			winner_list.append(member.mention)
-			if len(winner_list) == value['winners']:
+			if len(winner_list) == data['winners']:
 				break
 
 		embeds = message.embeds
@@ -318,8 +328,11 @@ class giveaway(commands.Cog):
 		gdata['fields'].append(field)
 		gdata['color'] = 15158332
 		reply = ",".join(winner_list)
+		
+		await message.reply(f"{reply} you have successfully Won the {gdata['title']}")
+		gdata['title'] = f"{data['title']} • Giveaway Has Endded"
 		await message.edit(embed=embed.from_dict(gdata))
-		await ctx.send(f"{reply} you have successfully Won the {gdata['title']}")
+		await ctx.send("Giveaway has Endded")
 		await self.bot.give.delete_by_id(message.id)			
 		try:
 			return self.bot.giveaway.pop((message.id))
