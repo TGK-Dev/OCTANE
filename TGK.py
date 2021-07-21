@@ -78,9 +78,9 @@ bot.cwd = cwd
 bot.event_channel = {}
 bot.perm = {}
 bot.free_users = {}
-bot.giveaway = {}
+bot.giveaway = []
 bot.mod_role = [797923152617275433, 848585998769455104]
-bot.version = "4.0"
+bot.version = "4.1"
 bot.uptime = datetime.datetime.utcnow()
 
 bot.colors = {
@@ -112,7 +112,7 @@ async def on_ready():
     print(
         f"-----\nLogged in as: {bot.user.name} : {bot.user.id}\n-----\nMy current prefix is: {bot.DEFAULTPREFIX}\n-----"
     )
-    await bot.change_presence(activity=discord.Game(name="Getting Ready for DPY.V2"), status=discord.Status.dnd)
+    await bot.change_presence(status=discord.Status.dnd)
     
 
     bot.load_extension('jishaku')
@@ -136,7 +136,7 @@ async def on_ready():
 
     currentGive = await bot.give.get_all()
     for give in currentGive:
-        bot.giveaway[give["_id"]] = give
+        bot.giveaway.append(give['_id'])
 
     datas = await bot.ticket_setup.get_all()
     for data in datas:
