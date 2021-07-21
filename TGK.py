@@ -114,8 +114,6 @@ async def on_ready():
     )
     await bot.change_presence(status=discord.Status.dnd)
     
-
-    bot.load_extension('jishaku')
     print("jishaku has been loaded\n-----")
 
     current_blacklist_user = await bot.blacklist.get_all()
