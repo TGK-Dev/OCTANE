@@ -41,6 +41,8 @@ class giveaway(commands.Cog):
 			return ctx.message.author.id in [488614633670967307 , 301657045248114690]
 		return commands.check(predicate)
 
+	def cog_unload(self):
+		self.giveaway_task.cancel()
 	
 	@tasks.loop(seconds=10)
 	async def check_givaway(self):
@@ -51,7 +53,13 @@ class giveaway(commands.Cog):
 			if currentTime >= ftime:
 				guild = self.bot.get_guild(data['guild'])
 				channel = self.bot.get_channel(data['channel'])
-				message = await channel.fetch_message(data['_id'])
+
+				try:
+					message = await channel.fetch_message(data['_id'])
+				except discord.NotFound:
+					await self.bot.give.delete(data['_id'])
+					return await self.bot.giveaway.remove(data['_id'])
+
 				host = await guild.fetch_member(data['host'])
 				if message == None:
 					date = await self.bot.give.delete(data['_id'])
@@ -75,11 +83,9 @@ class giveaway(commands.Cog):
 					edict['fields'] = []
 					edict['title'] = f"{edict['title']} • Giveaway Has Endded"
 					edict['color'] = 15158332
-					field = {'name': "No valid entrants!", 'value': "so a winner could not be determined!", 'inline': False}
-					edict['fields'].append(field)
 					await message.edit(embed=embed.from_dict(edict))
-					await message.reply("No valid entrants, so a winner not be determined!")
-
+					small_embed = discord.Embed(description=f"No valid [entrants]({message.jump_url}), so winner not be determined!", color=0x2f3136)
+					await message.reply(embed=small_embed)
 					await self.bot.give.delete((data['_id']))
 					try:
 						return self.bot.giveaway.remove((data['_id']))
@@ -95,10 +101,9 @@ class giveaway(commands.Cog):
 					edict['fields'] = []
 					edict['title'] = f"{edict['title']} • Giveaway Has Endded"
 					edict['color'] = 15158332
-					field = {'name': "No valid entrants!", 'value': "so a winner could not be determined!", 'inline': False}
-					edict['fields'].append(field)
 					await message.edit(embed=embed.from_dict(edict))
-					await message.reply("No valid entrants, so a winner not be determined!")
+					small_embed = discord.Embed(description=f"No valid [entrants]({message.jump_url}), so winner not be determined!", color=0x2f3136)
+					await message.reply(embed=small_embed)
 
 					await self.bot.give.delete((data['_id']))
 					try:
@@ -122,8 +127,9 @@ class giveaway(commands.Cog):
 				for embed in embeds:
 					gdata = embed.to_dict()
 				reply = ",".join(winner_list)
-				reply = "".join(winner_list)
-				await message.reply(f"**Price**: {gdata['title']}\n**Winners**: {reply}\n**Total Entries**: {len(entries)}")
+				small_embed = discord.Embed(description=f"Total Entries: [{len(entries)}]({message.jump_url})")
+				await message.reply(
+					f"**Giveaway Has Endded**\n<a:winners_emoji:867972307103141959>  **Prize**      <a:yellowrightarrow:801446308778344468> {gdata['title']}\n─────────────────────\n<a:pandaswag:801013818896941066>   **Host**      <a:yellowrightarrow:801446308778344468> {host.display_name}\n─────────────────────\n<a:winner:805380293757370369>  **Winner** <a:yellowrightarrow:801446308778344468> {reply}\n─────────────────────\n", embed=small_embed)
 
 				gdata['fields'] = []
 				gdata['title'] = f"{gdata['title']} • Giveaway Has Endded"
@@ -289,11 +295,12 @@ class giveaway(commands.Cog):
 			edict['fields'] = []
 			edict['title'] = f"{edict['title']} • Giveaway Has Endded"
 			edict['color'] = 15158332
-			field = {'name': "No valid entrants!", 'value': "so a winner could not be determined!", 'inline': False}
+			field = {'name': "No valid entrants!", 'value': "so winner could not be determined!", 'inline': False}
 			edict['fields'].append(field)
-			await ctx.send("No valid entrants, so a winner not be determined!", hidden=True)
+			await ctx.send("No valid entrants, so winner not be determined!", hidden=True)
 			await message.edit(embed=embed.from_dict(edict))
-			await message.reply("No valid entrants, so a winner not be determined!")
+			small_embed = discord.Embed(description=f"No valid [entrants]({message.jump_url}), so winner not be determined!", color=0x2f3136)
+			await message.reply(embed=small_embed, hidden=False)
 
 			await self.bot.give.delete((data['_id']))
 			try:
@@ -309,11 +316,12 @@ class giveaway(commands.Cog):
 			edict['fields'] = []
 			edict['title'] = f"{edict['title']} • Giveaway Has Endded"
 			edict['color'] = 15158332
-			field = {'name': "No valid entrants!", 'value': "so a winner could not be determined!", 'inline': False}
+			field = {'name': "No valid entrants!", 'value': "so winner could not be determined!", 'inline': False}
 			edict['fields'].append(field)
-			await ctx.send("No valid entrants, so a winner not be determined!", hidden=True)
+			await ctx.send("No valid entrants, so winner not be determined!", hidden=True)
 			await message.edit(embed=embed.from_dict(edict))
-			await message.reply("No valid entrants, so a winner not be determined!")
+			small_embed = discord.Embed(description=f"No valid [entrants]({message.jump_url}), so winner not be determined!", color=0x2f3136)
+			await message.reply(embed=small_embed, hidden=False)
 
 			await self.bot.give.delete((data['_id']))
 			try:
@@ -336,8 +344,9 @@ class giveaway(commands.Cog):
 		for embed in embeds:
 			gdata = embed.to_dict()
 		reply = ",".join(winner_list)
-
-		await message.reply(f"**Price**: {gdata['title']}\n**Winners**: {reply}\n**Total Entries**: {len(entries)}")
+		small_embed = discord.Embed(description=f"Total Entries: [{len(entries)}]({message.jump_url})")
+		await message.reply(
+			f"**Giveaway Has Endded**\n<a:winners_emoji:867972307103141959>  **Prize**      <a:yellowrightarrow:801446308778344468> {gdata['title']}\n─────────────────────\n<a:pandaswag:801013818896941066>   **Host**      <a:yellowrightarrow:801446308778344468> {host.display_name}\n─────────────────────\n<a:winner:805380293757370369>  **Winner** <a:yellowrightarrow:801446308778344468> {reply}\n─────────────────────\n", embed=small_embed)
 
 		gdata['fields'] = []
 		gdata['title'] = f"{gdata['title']} • Giveaway Has Endded"
@@ -347,6 +356,7 @@ class giveaway(commands.Cog):
 
 		await ctx.send(f"The winners are {reply}", hidden=True)
 		await message.edit(embed=embed.from_dict(gdata))
+
 		await self.bot.give.delete_by_id(message.id)            
 		try:
 			return self.bot.giveaway.remove(message.id)
