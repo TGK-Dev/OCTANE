@@ -222,7 +222,7 @@ class giveaway(commands.Cog):
 				create_option(name="b_role", description="bypass role to bypass the required role",option_type=8, required=False)
 			]
 		)
-	@commands.check_any(commands.is_owner(), commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 787259553225637889, 803230347575820289))
+	@commands.check_any(commands.is_owner(), commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376,787259553225637889, 803230347575820289))
 	async def gstart(self, ctx, time, price, winners,r_req=None, b_role=None):
 		time = await TimeConverter().convert(ctx, time)
 		if time < 15:
@@ -270,7 +270,7 @@ class giveaway(commands.Cog):
 				create_option(name="message_id", description="message id of the giveaway", required=True, option_type=3)
 			]
 		)
-	@commands.check_any(commands.is_owner(), commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 787259553225637889, 803230347575820289))
+	@commands.check_any(commands.is_owner(), commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376,787259553225637889, 803230347575820289))
 	async def gend(self, ctx, message_id):
 		message_id = int(message_id)
 		data = await self.bot.give.find(message_id)
@@ -370,7 +370,7 @@ class giveaway(commands.Cog):
 			create_option(name="channel", description="channel of giveaway message", required=False, option_type=7),
 			]
 		)
-	@commands.check_any(commands.is_owner(), commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 787259553225637889, 803230347575820289))
+	@commands.check_any(commands.is_owner(), commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376,787259553225637889, 803230347575820289))
 	async def greroll(self, ctx, message_id, winners: int, channel=None,):
 		message_id = int(message_id)
 		channel = channel if channel else ctx.channel
@@ -418,7 +418,7 @@ class giveaway(commands.Cog):
 				create_option(name="message_id", description="message id of the giveaway message", required=True, option_type=3)
 			]
 		)
-	@commands.check_any(commands.is_owner(), commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 787259553225637889, 803230347575820289))
+	@commands.check_any(commands.is_owner(), commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376,787259553225637889, 803230347575820289))
 	async def gdelete(self, ctx, message_id):
 		message_id = int(message_id)
 		data = await self.bot.give.find(message_id)
@@ -438,7 +438,7 @@ class giveaway(commands.Cog):
 				create_option(name="role", description="Select role to blacklist it", required=True, option_type=8)
 			]
 		)
-	@commands.check_any(commands.is_owner(), commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 787259553225637889))
+	@commands.check_any(commands.is_owner(), commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376,787259553225637889))
 	async def gblacklist(self, ctx, role):
 		data = await self.bot.config.find(ctx.guild.id)
 		if data is None: return await ctx.send("Your Server config was not found please run config First")
@@ -455,7 +455,7 @@ class giveaway(commands.Cog):
 				create_option(name="role", description="Select role make it bypass", required=True, option_type=8)
 			]
 		)
-	@commands.check_any(commands.is_owner(), commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 787259553225637889))
+	@commands.check_any(commands.is_owner(), commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376,787259553225637889))
 	async def gbypass(self, ctx, role):
 		data = await self.bot.config.find(ctx.guild.id)
 		if data is None: return await ctx.send("Your Server config was not found please run config First")
