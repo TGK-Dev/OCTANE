@@ -77,21 +77,97 @@ class slash(commands.Cog):
 			]
 		)
 	@commands.check_any(commands.has_any_role(785842380565774368,803635405638991902,799037944735727636,785845265118265376,787259553225637889), commands.is_owner())
-	async def ban(self , ctx: SlashContext, user, reason:str, time=None):
+	async def ban(self , ctx: SlashContext, user: discord.Member, reason:str, time=None):
 		time = time if time else None
+		if user.top_role >= ctx.author.top_role:
+			return await ctx.send("You cannot do this action on this user due to role hierarchy.")
+
+		if time == None:
+			try:
+				await user.send(f"You have been Banned from {ctx.guild.name} for {reason}")
+			except discord.HTTPException:
+				pass
+
+			await ctx.guild.ban(user, reason=reason, delete_message_days=0)
+
+			em = discord.Embed(color=0x06f79e, description=f"**{user.name}** Has been Banned for {reason}")
+			await ctx.send(embed=em)
+
+			log_channel = self.bot.get_channel(855784930494775296)
+			data = await self.bot.config.find(ctx.guild.id)
+			log_embed = discord.Embed(title=f"🔨 Ban | Case ID: {data['case']}",
+			    description=f" **Offender**: {user} | {user.mention} \n**Reason**: {reason}\n **Moderator**: {ctx.author} {ctx.author.mention}", color=0xE74C3C)
+			log_embed.set_thumbnail(url=user.avatar_url)
+			log_embed.timestamp = datetime.datetime.utcnow()
+			log_embed.set_footer(text=f"ID: {user.id}")
+
+			await log_channel.send(embed=log_embed)
+			data["case"] += 1
+			
+			return await self.bot.config.upsert(data)
+
+		time = await TimeConverter().convert(ctx, time)
+		data = {
+		    '_id': user.id,
+		    'BannedAt': datetime.datetime.now(),
+		    'BanDuration': time or None,
+		    'BanedBy': ctx.author.id,
+		    'guildId': ctx.guild.id,
+		}
+		await self.bot.bans.upsert(data)
+		self.bot.ban_users[user.id] = data
+		time = format_timespan(time)
+
 		try:
-			if user.top_role >= ctx.author.top_role:
-				return await ctx.send("You cannot do this action on this user due to role hierarchy.")
+			await user.send(f"You Have Been Banned from {ctx.guild}\nTime: {time}\nReason: {reason}")
 		except:
 			pass
-      	
-		try:
-			use = await self.bot.fetch_user(int(user))
-			entry = await ctx.guild.fetch_ban(use)
-			return await ctx.send("That User is already Banned")
-		except discord.NotFound:
-			pass
-				
+
+		await ctx.guild.ban(user, reason=reason, delete_message_days=0)
+
+		em = discord.Embed(color=0x06f79e, description=f"**{user.mention}** Has been Banned for {reason}")
+		await ctx.send(embed=em)
+
+		case = await self.bot.config.find(ctx.guild.id)
+		log_channel = self.bot.get_channel(855784930494775296)
+
+		log_embed = discord.Embed(title=f"🔨 Ban | Case ID: {case['case']}",
+		    description=f" **Offender**: {user} | {user.mention} \n**Reason**: {reason}\n **Duration**: {time}\n **Moderator**: {ctx.author} {ctx.author.mention}", color=0xE74C3C)
+		log_embed.set_thumbnail(url=user.avatar_url)
+		log_embed.set_footer(text=f"ID: {user.id}")
+		log_embed.timestamp = datetime.datetime.utcnow()
+		await log_channel.send(embed=log_embed)
+
+		case["case"] += 1
+		await self.bot.config.upsert(case)
+
+	@cog_ext.cog_slash(name="force_ban", description="Ban user only works with Ids", guild_ids=guild_ids,
+		options=[
+				create_option(
+					name="user",
+					description="Select You that need to be ban",
+					option_type=3,
+					required=True
+				),
+				create_option(
+					name="reason",
+					description="Tell why you want to ban that user",
+					option_type=3,
+					required=True,
+				),
+				create_option(
+					name="time",
+					description="How much time they need to ban exp: 1h | 4d etc",
+					option_type=3,
+					required=False
+				)
+			]
+		)
+	@commands.check_any(commands.has_any_role(785842380565774368,803635405638991902,799037944735727636,785845265118265376,787259553225637889), commands.is_owner())
+	async def force_ban(self , ctx: SlashContext, user: int, reason:str, time=None):
+		time = time if time else None
+		user = await self.bot.fetch_user(user)
+
 		if time == None:
 			try:
 				await user.send(f"You have been Banned from {ctx.guild.name} for {reason}")
@@ -196,12 +272,13 @@ class slash(commands.Cog):
 	@cog_ext.cog_slash(name="mute", description="Mute someone for x time", guild_ids=guild_ids,
 		options=[
 			create_option(name="user", description="Select which User You want to Mute" , option_type=6, required=True),
-			create_option(name="reason", description="Enter reason for the mute" , option_type=3, required=True),
+			create_option(name="reason", description="Enter reason for the mute" , option_type=3, required=False),
 			create_option(name="time", description="The time you want to mute user", option_type=3, required=False)
 		]
 	)
 	@commands.check_any(commands.has_any_role(785842380565774368,803635405638991902,799037944735727636,785845265118265376,787259553225637889,843775369470672916), commands.is_owner())
-	async def mute(self, ctx: SlashContext, user, reason, time=None):
+	async def mute(self, ctx: SlashContext, user, reason=None, time=None):
+		reason = reason if reason else "N/A"
 		role = discord.utils.get(ctx.guild.roles, name="Muted")
 		if not role:
 		    await ctx.send("No muted role was found! Please create one called `Muted`")
@@ -318,6 +395,7 @@ class slash(commands.Cog):
 
 		data["case"] += 1
 		await self.bot.config.upsert(data)
+
 
 def setup(bot):
 	bot.add_cog(slash(bot))
