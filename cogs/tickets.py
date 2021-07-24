@@ -484,6 +484,11 @@ class tickets(commands.Cog, description=description):
             print("TimeoutError")
             await m.edit(embed=cancel_embed, components = [])
 
+    @commands.command(hidden=True)
+    @commands.check_any(is_me())
+    async def invite(self, ctx, invite: discord.Invite):
+        await ctx.send(f"invite: {invite}\nInvite Server ID: {invite.guild.id}")
+
 
 def setup(bot):
     bot.add_cog(tickets(bot))
