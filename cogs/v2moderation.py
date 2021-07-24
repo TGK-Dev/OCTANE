@@ -76,9 +76,18 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
                 guild = self.bot.get_guild(value['guildId'])
                 member = guild.get_member(value['_id'])
 
+                if member is None:
+                    await self.bot.mutes.delete(value['_id'])    
+                    try:
+                        self.bot.muted_users.pop(value['_id'])
+                    except KeyError:
+                        return
+
                 role = discord.utils.get(guild.roles, name="Muted")
+                print(member)
                 if role in member.roles:
                     await member.remove_roles(role)
+
 
                     log_channel = self.bot.get_channel(855784930494775296)
                     data = await self.bot.config.find(guild.id)
