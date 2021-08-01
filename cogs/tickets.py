@@ -7,7 +7,6 @@ import json
 import random
 #----------------------
 from discord_components import DiscordComponents, Button, ButtonStyle, InteractionType
-from bson.objectid import ObjectId
 from copy import deepcopy
 from discord import message
 from discord import channel
@@ -276,15 +275,14 @@ class tickets(commands.Cog, description=description):
             return await ctx.send("Ticket already Opned")
         else:
 
-            ticket_filter = {"ticket_id": ctx.channel.id}
-            tickets = await self.bot.ticket.find_many_by_custom(ticket_filter)
+            ticket_filter = {"channel": ctx.channel.id, 'guild': ctx.guild.id}
+            ticket = await self.bot.ticket.find_by_custom(ticket_filter)
             #prole = discord.utils.get(guild.roles, id=831405039830564875)
 
-            if not bool(tickets):
+            if not bool(ticket):
                 return await ctx.send(f"Couldn't find any Close Tickets")
 
-            for ticket in tickets:
-                member = ctx.guild.get_member(ticket['user_id'])
+            member = ctx.guild.get_member(ticket['user_id'])
 
             if not member:
                 return await ctx.send("user Not Found maybe he has Left server you may delete ticket by >delete")
@@ -359,7 +357,7 @@ class tickets(commands.Cog, description=description):
                     res = await self.bot.wait_for("button_click", check=lambda res:res.user.id == ctx.author.id and res.channel.id == ctx.channel.id and str(res.message.id) == str(m.id), timeout=10)
                     await m.edit(embed=cancel_embed, components = [])
                 except asyncio.TimeoutError:
-                    ticket_filter = {"ticket_id": channel.id}
+                    ticket_filter = {"channel": channel.id, 'guild': ctx.guild.id}
                     await self.bot.ticket.delete_by_custom(ticket_filter)
                     await m.edit(components = [])
                     await asyncio.sleep(0.5)
