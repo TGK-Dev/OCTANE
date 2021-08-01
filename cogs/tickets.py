@@ -282,7 +282,7 @@ class tickets(commands.Cog, description=description):
             if not bool(ticket):
                 return await ctx.send(f"Couldn't find any Close Tickets")
 
-            member = ctx.guild.get_member(ticket['user_id'])
+            member = ctx.guild.get_member(ticket['_id'])
 
             if not member:
                 return await ctx.send("user Not Found maybe he has Left server you may delete ticket by >delete")
