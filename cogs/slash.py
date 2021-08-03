@@ -363,7 +363,8 @@ class slash(commands.Cog):
 			]
 		)
 	@commands.check_any(commands.has_any_role(785842380565774368,803635405638991902,799037944735727636,785845265118265376,787259553225637889,843775369470672916), commands.is_owner())
-	async def unmute(self, ctx:SlashContext, user, reason):
+	async def unmute(self, ctx:SlashContext, user, reason=None):
+		reason = reason if reason else "N/A"
 		role = discord.utils.get(ctx.guild.roles, name="Muted")
 		if not role:
 		    await ctx.send("No muted role was found! Please create one called `Muted`")
