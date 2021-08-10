@@ -5,6 +5,7 @@ import random
 import discord
 from discord.ext import commands, tasks
 from copy import deepcopy
+import datetime
 from dateutil.relativedelta import relativedelta
 from humanfriendly import format_timespan
 from discord_slash import cog_ext, SlashContext, cog_ext, SlashContext
@@ -227,16 +228,18 @@ class giveaway(commands.Cog):
 		time = await TimeConverter().convert(ctx, time)
 		if time < 15:
 			return await ctx.send("Giveaway time needed to be longer than 15 seconds")
+		end_time = datetime.datetime.now() + datetime.timedelta(seconds=time)
+		end_time = round(end_time.timestamp())
 		r_req = r_req if r_req else None
 		b_role = b_role if b_role else None
 		descript = ""
 		if r_req == None:
-			descript = f'React this message to Enter!\nEnds: **{format_timespan(time)}**\nHosted by: {ctx.author.mention}'
+			descript = f'React this message to Enter!\nEnds: **<t:{end_time}:R> (<t:{end_time}:F>)**\nHosted by: {ctx.author.mention}'
 		else:
 			if b_role == None:
-				descript = f'React this message to Enter!\nEnds: **{format_timespan(time)}**\nRequired Role: {r_req.mention}\nHosted by: {ctx.author.mention}'
+				descript = f'React this message to Enter!\nEnds: **<t:{end_time}:R> (<t:{end_time}:F>)**\nRequired Role: {r_req.mention}\nHosted by: {ctx.author.mention}'
 			else:
-				descript = f'React this message to Enter!\nEnds: **{format_timespan(time)}**\nRequired Role: {r_req.mention}\nBypass Role: {b_role.mention}\nHosted by: {ctx.author.mention}'
+				descript = f'React this message to Enter!\nEnds: **<t:{end_time}:R> (<t:{end_time}:F>)**\nRequired Role: {r_req.mention}\nBypass Role: {b_role.mention}\nHosted by: {ctx.author.mention}'
 		embed = discord.Embed(title=price, color=0x9e3bff, description=descript)
 		embed.timestamp = (datetime.datetime.utcnow() + datetime.timedelta(seconds=time))
 		embed.set_footer(text=f"Winners: {winners} | Ends At")
