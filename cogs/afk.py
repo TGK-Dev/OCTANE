@@ -89,7 +89,7 @@ class Afk(commands.Cog, description="An Afk commands"):
 		data['message'] = "⠀"
 		await self.bot.afk.upsert(data)
 		try:
-			self.bot.afk_user.pop(message.author.id)
+			self.bot.afk_user.pop(user.id)
 		except KeyError:
 			pass#
 		self.bot.afk_user[user.id] = data
