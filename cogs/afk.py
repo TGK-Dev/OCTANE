@@ -76,6 +76,22 @@ class Afk(commands.Cog, description="An Afk commands"):
 		await self.bot.afk.upsert(data)
 		self.bot.afk_user[ctx.author.id] = data
 
+	@commands.command(name="afkreset", description="Remove any user afk message")
+	@commands.is_owner()
+	async def afkreset(self, ctx, user: discord.Member):
+		data = await self.bot.afk.find(user.id)
+		if data is None:
+			return await ctx.send("No data Found, check your id")
+		data['message'] = "⠀"
+		await self.bot.afk.upsert(data)
+		try:
+	    	self.bot.afk_user.pop(message.author.id)
+		except KeyError:
+		    pass#
+	    self.bot.afk_user[ctx.author.id] = data
+
+
+
 def setup(bot):
 	bot.add_cog(Afk(bot))
     
