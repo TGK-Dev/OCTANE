@@ -92,7 +92,7 @@ class Afk(commands.Cog, description="An Afk commands"):
 			self.bot.afk_user.pop(message.author.id)
 		except KeyError:
 			pass#
-		self.bot.afk_user[user.id] = dataa
+		self.bot.afk_user[user.id] = data
 		await ctx.send("User Afk message has been reset")
 
 
