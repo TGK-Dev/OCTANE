@@ -77,6 +77,7 @@ bot.ticket_setups = {}
 bot.cwd = cwd
 bot.event_channel = {}
 bot.perm = {}
+bot.afk_user = {}
 bot.free_users = {}
 bot.giveaway = []
 bot.mod_role = [797923152617275433, 848585998769455104]
@@ -128,6 +129,10 @@ async def on_ready():
     for ban in currentBans:
         bot.ban_users[ban["_id"]] = ban
 
+    current_afk_user = await bot.afk.get_all()
+    for afk in current_afk_user:
+        bot.afk_user[afk["_id"]] = afk
+
     currentFree = await bot.free.get_all()
     for free in currentFree:
         bot.free_users[free["_id"]] = free
@@ -164,6 +169,7 @@ async def on_ready():
     print(f"Current Bans:{len(bot.ban_users)}")
     print("\n-----")
     print(f"Current Free users:{len(bot.free_users)}")
+    print(f"Current Afk users:{len(bot.afk_user)}")
     print("\n-----")
     print("Database Connected\n-----")
 
@@ -200,6 +206,7 @@ if __name__ == "__main__":
     bot.mongo = motor.motor_asyncio.AsyncIOMotorClient(str(bot.connection_url))
     bot.db = bot.mongo["tgk_database"]
     bot.config = Document(bot.db, "config")
+    bot.afk = Document(bot.db, "afk")
     bot.mutes = Document(bot.db, "mutes")
     bot.bans = Document(bot.db, "bans")
     bot.warns = Document(bot.db, "warns")
