@@ -4,7 +4,8 @@ from copy import deepcopy
 from discord.ext import commands
 import re
 
-mention_regex = re.compile("(@)(!|&)(\d\d\d)")
+pc_mention_regex = re.compile("(@)(!|&)(\d\d\d)")
+mo_mention_regex = re.compile("<(@)")
 
 class Afk(commands.Cog, description="An Afk commands"):
 	def __init__ (self, bot):
@@ -61,7 +62,10 @@ class Afk(commands.Cog, description="An Afk commands"):
 	@commands.cooldown(1, 300, commands.BucketType.user)
 	async def afk(self, ctx, *,message=None):
 		message = message if message else "⠀"
-		match = re.findall(mention_regex, message)
+		match = re.findall(pc_mention_regex, message)
+		if match:
+			return await ctx.reply("You can't have the any Role/User Mentions in your afk message")
+		match = re.findall(mo_mention_regex, message)
 		if match:
 			return await ctx.reply("You can't have the any Role/User Mentions in your afk message")
 		data = {'_id': ctx.author.id,
