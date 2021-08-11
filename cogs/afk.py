@@ -57,7 +57,7 @@ class Afk(commands.Cog, description="An Afk commands"):
 					await message.reply(f"{user.display_name} is afk {value['message']} -<t:{time}:R> <t:{time}:f>", mention_author=False)
 		
 	@commands.command(name="afk", description="set your status afk with this command")
-	@commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916, 818129661325869058, 806804472700600400, 835866393458901033, 786477872029892639, 830013421239140403, 836551065733431348, 810129351692648479))
+	@commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916, 818129661325869058, 806804472700600400, 835866393458901033, 786477872029892639, 830013421239140403, 836551065733431348, 810129351692648479, 866739202069757963))
 	@commands.cooldown(1, 300, commands.BucketType.user)
 	async def afk(self, ctx, *,message=None):
 		message = message if message else "⠀"
@@ -88,7 +88,7 @@ class Afk(commands.Cog, description="An Afk commands"):
 			self.bot.afk_user.pop(message.author.id)
 		except KeyError:
 			pass#
-		self.bot.afk_user[user.id] = data
+		self.bot.afk_user[user.id] = dataa
 		await ctx.send("User Afk message has been reset")
 
 
