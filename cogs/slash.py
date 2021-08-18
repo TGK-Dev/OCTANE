@@ -13,6 +13,30 @@ from discord_slash.model import SlashCommandPermissionType
 time_regex = re.compile("(?:(\d{1,5})(h|s|m|d))+?")
 time_dict = {"h": 3600, "s": 1, "m": 60, "d": 86400}
 
+
+admin_perms = {
+	785839283847954433: [
+	create_permission(488614633670967307, SlashCommandPermissionType.USER, True),
+	create_permission(785842380565774368, SlashCommandPermissionType.ROLE, True),
+	create_permission(803635405638991902, SlashCommandPermissionType.ROLE, True),
+	create_permission(799037944735727636, SlashCommandPermissionType.ROLE, True),
+	create_permission(785845265118265376, SlashCommandPermissionType.ROLE, True),
+	]
+}
+
+mod_perms = {
+	785839283847954433:[
+	create_permission(488614633670967307, SlashCommandPermissionType.USER, True),
+	create_permission(785842380565774368, SlashCommandPermissionType.ROLE, True),
+	create_permission(803635405638991902, SlashCommandPermissionType.ROLE, True),
+	create_permission(799037944735727636, SlashCommandPermissionType.ROLE, True),
+	create_permission(785845265118265376, SlashCommandPermissionType.ROLE, True),
+	create_permission(787259553225637889, SlashCommandPermissionType.ROLE, True),
+	create_permission(843775369470672916, SlashCommandPermissionType.ROLE, True)
+	]
+}
+
+
 class TimeConverter(commands.Converter):
     async def convert(self, ctx, argument):
         args = argument.lower()
@@ -39,22 +63,14 @@ class slash(commands.Cog):
 	async def on_ready(self):
 		print(f"{self.__class__.__name__} has been loaded \n------")
 
-	@cog_ext.cog_slash(name="stest",description="An test commands",guild_ids=guild_ids,
-		options=[
-				create_option(
-					name="user",
-					description="Select You that need to be ban",
-					option_type=6,
-					required=True
-				)
-			]
-		)
-	@commands.check_any(commands.has_any_role(785842380565774368,803635405638991902,799037944735727636,785845265118265376,787259553225637889,843775369470672916), commands.is_owner())
-	async def ttest(self , ctx: SlashContext, user):
+	@cog_ext.cog_slash(name="stest",description="An test commands",guild_ids=guild_ids,default_permission=False,
+		permissions=admin_perms)
+	async def test(self , ctx: SlashContext, user):
 		await ctx.send("Hello", hidden=True)
 		
 
-	@cog_ext.cog_slash(name="ban", description="Ban user From the Server", guild_ids=guild_ids,
+	@cog_ext.cog_slash(name="ban", description="Ban user From the Server", guild_ids=guild_ids,default_permission=False,
+		permissions=mod_perms,
 		options=[
 				create_option(
 					name="user",
@@ -76,7 +92,6 @@ class slash(commands.Cog):
 				)
 			]
 		)
-	@commands.check_any(commands.has_any_role(785842380565774368,803635405638991902,799037944735727636,785845265118265376,787259553225637889), commands.is_owner())
 	async def ban(self , ctx: SlashContext, user: discord.Member, reason:str, time=None):
 		time = time if time else None
 		if user.top_role >= ctx.author.top_role:
@@ -141,7 +156,8 @@ class slash(commands.Cog):
 		case["case"] += 1
 		await self.bot.config.upsert(case)
 
-	@cog_ext.cog_slash(name="force_ban", description="Ban user only works with Ids", guild_ids=guild_ids,
+	@cog_ext.cog_slash(name="force_ban", description="Ban user only works with Ids", guild_ids=guild_ids,default_permission=False,
+		permissions=admin_perms,
 		options=[
 				create_option(
 					name="user",
@@ -163,7 +179,6 @@ class slash(commands.Cog):
 				)
 			]
 		)
-	@commands.check_any(commands.has_any_role(785842380565774368,803635405638991902,799037944735727636,785845265118265376,787259553225637889), commands.is_owner())
 	async def force_ban(self , ctx: SlashContext, user: int, reason:str, time=None):
 		time = time if time else None
 		user = await self.bot.fetch_user(user)
@@ -227,7 +242,7 @@ class slash(commands.Cog):
 		case["case"] += 1
 		await self.bot.config.upsert(case)
 		
-	@cog_ext.cog_slash(name="kick", description="Kick someone from the guild",
+	@cog_ext.cog_slash(name="kick", description="Kick someone from the guild",default_permission=False,permissions=mod_perms,
 		guild_ids=guild_ids,
 		options=[
 				create_option(
@@ -244,7 +259,6 @@ class slash(commands.Cog):
 					)
 			]
 		)
-	@commands.check_any(commands.has_any_role(785842380565774368,803635405638991902,799037944735727636,785845265118265376,787259553225637889,843775369470672916), commands.is_owner())
 	async def kick(self, ctx: SlashContext, user, reason):
 		if user.top_role >= ctx.author.top_role: return await ctx.send("You can't You cannot do this action on this user due to role hierarchy.")
 
@@ -269,14 +283,13 @@ class slash(commands.Cog):
 		data["case"] += 1
 		await self.bot.config.upsert(data)
 		
-	@cog_ext.cog_slash(name="mute", description="Mute someone for x time", guild_ids=guild_ids,
+	@cog_ext.cog_slash(name="mute", description="Mute someone for x time", guild_ids=guild_ids,default_permission=False,permissions=mod_perms,
 		options=[
 			create_option(name="user", description="Select which User You want to Mute" , option_type=6, required=True),
 			create_option(name="reason", description="Enter reason for the mute" , option_type=3, required=False),
 			create_option(name="time", description="The time you want to mute user", option_type=3, required=False)
 		]
 	)
-	@commands.check_any(commands.has_any_role(785842380565774368,803635405638991902,799037944735727636,785845265118265376,787259553225637889,843775369470672916), commands.is_owner())
 	async def mute(self, ctx: SlashContext, user, reason=None, time=None):
 		reason = reason if reason else "N/A"
 		role = discord.utils.get(ctx.guild.roles, name="Muted")
@@ -356,15 +369,13 @@ class slash(commands.Cog):
 		case["case"] += 1
 		await self.bot.config.upsert(case)
 
-	@cog_ext.cog_slash(name="Unmute", description="Unmute an User", guild_ids=guild_ids,
+	@cog_ext.cog_slash(name="Unmute", description="Unmute an User", guild_ids=guild_ids,default_permission=False, permissions=mod_perms,
 		options=[
 				create_option(name="user", description="Select which User need be Unmuted", option_type=6, required=True),
 				create_option(name="reason", description="reason why your unmuting user early", option_type=3, required=False)
 			]
 		)
-	@commands.check_any(commands.has_any_role(785842380565774368,803635405638991902,799037944735727636,785845265118265376,787259553225637889,843775369470672916), commands.is_owner())
-	async def unmute(self, ctx:SlashContext, user, reason=None):
-		reason = reason if reason else "N/A"
+	async def unmute(self, ctx:SlashContext, user, reason):
 		role = discord.utils.get(ctx.guild.roles, name="Muted")
 		if not role:
 		    await ctx.send("No muted role was found! Please create one called `Muted`")
