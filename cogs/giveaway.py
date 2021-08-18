@@ -16,6 +16,39 @@ from discord_slash.model import SlashCommandPermissionType
 time_regex = re.compile("(?:(\d{1,5})(h|s|m|d))+?")
 time_dict = {"h": 3600, "s": 1, "m": 60, "d": 86400}
 guild_ids=[785839283847954433]
+
+
+owner_perms = {
+	785839283847954433:[
+	create_permission(488614633670967307, SlashCommandPermissionType.USER, True),
+	create_permission(785842380565774368, SlashCommandPermissionType.ROLE, True),
+	]
+}
+
+mod_perms = {
+	785839283847954433:[
+	create_permission(488614633670967307, SlashCommandPermissionType.USER, True),
+	create_permission(785842380565774368, SlashCommandPermissionType.ROLE, True),
+	create_permission(803635405638991902, SlashCommandPermissionType.ROLE, True),
+	create_permission(799037944735727636, SlashCommandPermissionType.ROLE, True),
+	create_permission(785845265118265376, SlashCommandPermissionType.ROLE, True),
+	create_permission(787259553225637889, SlashCommandPermissionType.ROLE, True),
+	create_permission(843775369470672916, SlashCommandPermissionType.ROLE, True),
+	create_permission(803230347575820289, SlashCommandPermissionType.ROLE, True)
+	]
+}
+
+
+admin_perms = {
+	785839283847954433: [
+	create_permission(488614633670967307, SlashCommandPermissionType.USER, True),
+	create_permission(785842380565774368, SlashCommandPermissionType.ROLE, True),
+	create_permission(803635405638991902, SlashCommandPermissionType.ROLE, True),
+	create_permission(799037944735727636, SlashCommandPermissionType.ROLE, True),
+	create_permission(785845265118265376, SlashCommandPermissionType.ROLE, True),
+	]
+}
+
 class TimeConverter(commands.Converter):
     async def convert(self, ctx, argument):
         args = argument.lower()
@@ -37,11 +70,6 @@ class giveaway(commands.Cog):
 		self.bot = bot
 		self.giveaway_task = self.check_givaway.start()
 
-	def is_me():
-		def predicate(ctx):
-			return ctx.message.author.id in [488614633670967307 , 301657045248114690]
-		return commands.check(predicate)
-
 	def cog_unload(self):
 		self.giveaway_task.cancel()
 	
@@ -62,21 +90,9 @@ class giveaway(commands.Cog):
 					return await self.bot.giveaway.remove(data['_id'])
 
 				host = await guild.fetch_member(data['host'])
-				if message == None:
-					date = await self.bot.give.delete(data['_id'])
-					try:
-						return self.bot.giveaway.remove(data['_id'])
-					except KeyError:
-						return
-
-				users = await message.reactions[0].users().flatten()
-				users.pop(users.index(guild.me))
-				entries = await message.reactions[0].users().flatten()
-				entries.pop(entries.index(guild.me))
-				#users.pop(users.index(host))
 
 				#if no users have Taken part in giveaways
-				if len(users) == 0:
+				if len(data['entries']) == 0:
 					embeds = message.embeds
 					for embed in embeds:
 						edict = embed.to_dict()
@@ -94,7 +110,7 @@ class giveaway(commands.Cog):
 						return
 
 				#if there is entrys are less then winners
-				if len(users) < data['winners']:
+				if len(data['entries']) < data['winners']:
 					embeds = message.embeds
 					for embed in embeds:
 						edict = embed.to_dict()
@@ -114,16 +130,13 @@ class giveaway(commands.Cog):
 
 				#if all req meets so we can get winners
 				winner_list = []
+				entries = data['entries']
 				while True:
-					member = random.choice(users)
-					if type(member) == discord.Member:
-						users.pop(users.index(member))
-						winner_list.append(member.mention)
-					else:
-						pass
+					member = random.choice(data['entries'])
+					data['entries'].remove(member)
+					winner_list.append(member)
 					if len(winner_list) == data['winners']:
 						break
-
 				embeds = message.embeds
 				for embed in embeds:
 					gdata = embed.to_dict()
@@ -164,7 +177,7 @@ class giveaway(commands.Cog):
 		except discord.NotFound:
 			return
 			
-		if users.id == self.bot.user.id or users == None:
+		if users.id == self.bot.user.id:
 			return
 
 		if message.id in giveaway:
@@ -172,49 +185,66 @@ class giveaway(commands.Cog):
 			config = await self.bot.config.find(guild.id)
 
 			if data['r_req'] == None:
-				return
+				for role_multi in config['role_multi']:
+					role = discord.utils.get(guild.roles,id=role_multi['role_id'])
+					if role in users.roles:
+						i = 1
+						while i <= role_multi['multi']:
+							data['entries'].append(users.mention)
+							i += 1
+						return await self.bot.give.upsert(data)
 
-			blacklist = []
 			for role in config['g_blacklist']:
 				role = discord.utils.get(guild.roles, id=role)
-				blacklist.append(role)
-
-			for role in blacklist:
 				if role in users.roles:
 					try:
 						await message.remove_reaction(payload.emoji, users)
-						embed= discord.Embed(title="Entry Decline",description=f"You have one the blacklist role `{role.name}` there for you cannot enter", color=0xE74C3C)
+						embed = discord.Embed(title="Entry Decline",description=f"You have one the blacklist role `{role.name}` there for you cannot enter", color=0xE74C3C)
 						return await users.send(embed=embed)
 					except discord.HTTPException:
 						return
-			else:
-				r_role = discord.utils.get(guild.roles, id=data['r_req'])
-				b_role = discord.utils.get(guild.roles, id=data['b_role'])
-				if b_role == None:
-					pass
-			if b_role in users.roles:
-				return
-			elif r_role in users.roles:
-				return
-			else:
 
-				bypass = []
-				for role in config['g_bypass']:
-					role = discord.utils.get(guild.roles, id=role)
-					bypass.append(role)
+			for role in config['g_bypass']:
+				role = discord.utils.get(guild.roles, id=role)
+				if role in users.roles:
+					for role_multi in config['role_multi']:
+						role = discord.utils.get(guild.roles,id=role_multi['role_id'])
+						if role in users.roles:
+							i = 1
+							while i <= role_multi['multi']:
+								data['entries'].append(users.mention)
+								i += 1
+							return await self.bot.give.upsert(data)
 
-				for role in bypass:
+			r_role = discord.utils.get(guild.roles, id=data['r_req'])
+
+			if r_role in users.roles:
+				for role_multi in config['role_multi']:
+					role = discord.utils.get(guild.roles,id=role_multi['role_id'])
 					if role in users.roles:
-						return
-
+						i = 1
+						while i <= role_multi['multi']:
+							data['entries'].append(users.mention)
+							i += 1
+						return await self.bot.give.upsert(data)
+			b_role = discord.utils.get(guild.roles, id=data['b_role'])
+			if b_role == None:
 				try:
 					await message.remove_reaction(payload.emoji, users)
-					embed= discord.Embed(title="Entry Decline",description=f"You need `{r_role.name}` to Enter this [giveaway]({message.jump_url})", color=0xE74C3C)
+					embed = discord.Embed(title="Entry Decline",description=f"You need `{r_role.name}` to Enter this [giveaway]({message.jump_url})", color=0xE74C3C)
 					await users.send(embed=embed)
 				except discord.HTTPException:
-					pass
-					
-	@cog_ext.cog_slash(name="gstart",description="an giveaway commands", guild_ids=guild_ids,
+					return
+			if type(b_role) == discord.Role:
+				if role in users.roles:
+					i = 1
+					while i <= role_multi['multi']:
+						data['entries'].append(users.mention)
+						i += 1
+					return await self.bot.give.upsert(data)
+
+
+	@cog_ext.cog_slash(name="gstart",description="an giveaway commands", guild_ids=guild_ids, default_permission=False, permissions=mod_perms,
 		options=[
 				create_option(name="time", description="how long giveaway should last", option_type=3, required=True),
 				create_option(name="price", description="price of the giveaway", option_type=3, required=True),
@@ -223,7 +253,6 @@ class giveaway(commands.Cog):
 				create_option(name="b_role", description="bypass role to bypass the required role",option_type=8, required=False)
 			]
 		)
-	@commands.check_any(commands.is_owner(), commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376,787259553225637889, 803230347575820289))
 	async def gstart(self, ctx, time, price, winners,r_req=None, b_role=None):
 		time = await TimeConverter().convert(ctx, time)
 		if time < 15:
@@ -250,6 +279,7 @@ class giveaway(commands.Cog):
 				"channel": ctx.channel.id,
 				"host": ctx.author.id,
 				"winners": winners,
+				"entries": [],
 				"end_time": time,
 				"start_time": datetime.datetime.now()
 				}
@@ -268,12 +298,11 @@ class giveaway(commands.Cog):
 		await mesg.add_reaction("🎉")
 		
 
-	@cog_ext.cog_slash(name="gend", description="Focre end an giveaway", guild_ids=guild_ids,
+	@cog_ext.cog_slash(name="gend", description="Focre end an giveaway", guild_ids=guild_ids,default_permission=False, permissions=mod_perms,
 		options=[
 				create_option(name="message_id", description="message id of the giveaway", required=True, option_type=3)
 			]
 		)
-	@commands.check_any(commands.is_owner(), commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376,787259553225637889, 803230347575820289))
 	async def gend(self, ctx, message_id):
 		message_id = int(message_id)
 		data = await self.bot.give.find(message_id)
@@ -326,7 +355,7 @@ class giveaway(commands.Cog):
 			small_embed = discord.Embed(description=f"No valid [entrants]({message.jump_url}), so winner not be determined!", color=0x2f3136)
 			await message.reply(embed=small_embed, hidden=False)
 
-			await self.bot.give.delete((data['_id']))
+			await self.bot.give.delete(data['_id'])
 			try:
 				return self.bot.giveaway.remove((data['_id']))
 			except KeyError:
@@ -366,14 +395,13 @@ class giveaway(commands.Cog):
 		except KeyError:
 			return
 
-	@cog_ext.cog_slash(name="greroll", description="Reroll and giveaway for new winners",guild_ids=guild_ids,
+	@cog_ext.cog_slash(name="greroll", description="Reroll and giveaway for new winners",guild_ids=guild_ids,default_permission=False, permissions=mod_perms,
 		options=[
 			create_option(name="message_id", description="message id of the giveaway", required=True, option_type=3),
 			create_option(name="winners", description="numbers of winners", required=True, option_type=4),
 			create_option(name="channel", description="channel of giveaway message", required=False, option_type=7),
 			]
 		)
-	@commands.check_any(commands.is_owner(), commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376,787259553225637889, 803230347575820289))
 	async def greroll(self, ctx, message_id, winners: int, channel=None,):
 		message_id = int(message_id)
 		channel = channel if channel else ctx.channel
@@ -416,7 +444,7 @@ class giveaway(commands.Cog):
 		await ctx.send(f"**Price**: {gdata['title']}\n**Winners**: {reply}\n**Total Entries**: {len(entries)}", hidden=False)
 		await message.edit(embed=embed.from_dict(gdata))
 
-	@cog_ext.cog_slash(name="gdelete", description="Delete an giveaway", guild_ids=guild_ids,
+	@cog_ext.cog_slash(name="gdelete", description="Delete an giveaway", guild_ids=guild_ids,default_permission=False, permissions=mod_perms,
 		options=[
 				create_option(name="message_id", description="message id of the giveaway message", required=True, option_type=3)
 			]
@@ -436,12 +464,11 @@ class giveaway(commands.Cog):
 		except KeyError:
 			pass
 
-	@cog_ext.cog_slash(name="gblacklist", description="Blacklit an role from giveaway it's an global blacklist",guild_ids=guild_ids,
+	@cog_ext.cog_slash(name="gblacklist", description="Blacklit an role from giveaway it's an global blacklist",guild_ids=guild_ids,default_permission=False, permissions=admin_perms,
 		options=[
 				create_option(name="role", description="Select role to blacklist it", required=True, option_type=8)
 			]
 		)
-	@commands.check_any(commands.is_owner(), commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376,787259553225637889))
 	async def gblacklist(self, ctx, role):
 		data = await self.bot.config.find(ctx.guild.id)
 		if data is None: return await ctx.send("Your Server config was not found please run config First")
@@ -453,23 +480,23 @@ class giveaway(commands.Cog):
 		await self.bot.config.upsert(data)
 		await ctx.send(f"{role.mention} Has added to Blacklist", hidden=True)
 
-	@cog_ext.cog_slash(name="gbypass", description="make and role to bpyass all global giveaway",guild_ids=guild_ids,
+	@cog_ext.cog_slash(name="gbypass", description="make and role to bpyass all global giveaway",guild_ids=guild_ids, default_permission=False, permissions=admin_perms,
 		options=[
 				create_option(name="role", description="Select role make it bypass", required=True, option_type=8)
 			]
 		)
-	@commands.check_any(commands.is_owner(), commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376,787259553225637889))
-	async def gbypass(self, ctx, role):
+	async def gbypass(self, ctx, role: discord.role):
 		data = await self.bot.config.find(ctx.guild.id)
+		print(type(role))
 		if data is None: return await ctx.send("Your Server config was not found please run config First")
 		if role.id in data['g_bypass']:
 			data['g_bypass'].remove(role.id)
-			return await ctx.send(f"{role.mention} Has been Removed from the Bypass list", hidden=True)
-		data['g_bypass'].append(role.id)
+			await ctx.send(f"{role.mention} Has been Removed from the Bypass list", hidden=True)
+			return await self.bot.config.upsert(data)
 		await self.bot.config.upsert(data)
 		await ctx.send(f"{role.mention} is added to bypass list", hidden=True)
 
-	@cog_ext.cog_slash(name="bypasslist", description="Send the Bypass role list", guild_ids=guild_ids)
+	@cog_ext.cog_slash(name="bypasslist", description="Send the Bypass role list", guild_ids=guild_ids,default_permission=False, permissions=mod_perms)
 	async def bypasslist(self, ctx):
 		data = await self.bot.config.find(ctx.guild.id)
 		lists = []
@@ -479,9 +506,9 @@ class giveaway(commands.Cog):
 
 		embed = discord.Embed(title="Bypass Role list", description=", ".join(lists), color=0x2f3136)
 
-		await ctx.send(embed=embed)
+		await ctx.send(embed=embed, hidden=False)
 
-	@cog_ext.cog_slash(name="blacklist", description="Send the blacklist role list", guild_ids=guild_ids)
+	@cog_ext.cog_slash(name="blacklist", description="Send the blacklist role list", guild_ids=guild_ids, default_permission=False, permissions=mod_perms)
 	async def blacklistl(self, ctx):
 		data = await self.bot.config.find(ctx.guild.id)
 		lists = []
@@ -490,6 +517,41 @@ class giveaway(commands.Cog):
 			lists.append(role.mention)
 
 		embed = discord.Embed(title="blacklist Role list", description=", ".join(lists), color=0x2f3136)
+		await ctx.send(embed=embed)
+
+	@cog_ext.cog_slash(name="setmulti", description="Set role multi for giveaways", guild_ids=guild_ids,default_permission=False, permissions=admin_perms,
+		options=[
+			create_option(name="role", description="Select Role for multi",option_type=8, required=True),
+			create_option(name="multi", description="Enter multi for the rolem", option_type=4, required=True)
+		])
+	async def role_multi(self, ctx: SlashContext, role:discord.Role, multi: int):
+		data = await self.bot.config.find(ctx.guild.id)
+		for roles in data['role_multi']:
+			if role.id == roles['role_id']:
+				data['role_multi'].remove(roles)
+
+		multis = {'role_id': role.id, 'multi': multi}
+		data['role_multi'].append(multis)
+		data['role_multi'] = sorted(data['role_multi'],key=lambda x: x['multi'], reverse=True)
+		await self.bot.config.upsert(data)
+		embed = discord.Embed(title="Role Multi Update",color=0x2f3136,
+			description=f"Role :{role.mention}\nRole Multiplier: {multi}")
+		embed.timestamp = datetime.datetime.utcnow()
+		embed.set_footer(text=ctx.guild.name, icon_url=ctx.guild.icon_url)
+		await ctx.send(embed=embed)
+
+	@cog_ext.cog_slash(name="multis", description="Show server role multiplier", guild_ids=guild_ids)
+	async def multis(self, ctx):
+		data = await self.bot.config.find(ctx.guild.id)
+		if data is None or len(data['role_multi']) == 0: return await ctx.send("No multis Founds", hidden=True)
+		embed = discord.Embed(title="Server Role Multiplier", color=0x2f3136, description="")
+		embed.timestamp = datetime.datetime.utcnow()
+		embed.set_footer(text=ctx.guild.name, icon_url=ctx.guild.icon_url)
+		i = 1
+		for roles in data['role_multi']:
+			role = discord.utils.get(ctx.guild.roles, id=roles['role_id'])
+			embed.description += f"{i}.Role: {role.mention}\n Multiplier: {roles['multi']}\n\n"
+			i += 1
 		await ctx.send(embed=embed)
 
 def setup(bot):
