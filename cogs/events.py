@@ -13,7 +13,7 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
         self.bot = bot
         self.update_task = self.check_update_task.start()
 
-    @tasks.loop(seconds=3600)
+    @tasks.loop(seconds=900)
     async def check_update_task(self):
 
         self.bot.blacklist_user = {}
@@ -35,6 +35,11 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
         currentFree = await self.bot.free.get_all()
         for free in currentFree:
             self.bot.free_users[ban["_id"]] = free
+
+        self.bot.afk_user = {}
+        current_afk_user = await self.bot.afk.get_all()
+        for afk in current_afk_user:
+            self.bot.afk_user[afk["_id"]] = afk
 
     @check_update_task.before_loop
     async def before_check_current_free(self):
