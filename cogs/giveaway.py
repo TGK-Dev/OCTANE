@@ -193,6 +193,9 @@ class giveaway(commands.Cog):
 							data['entries'].append(users.mention)
 							i += 1
 						return await self.bot.give.upsert(data)
+				data['entries'].append(users.mention)
+				return await self.bot.give.upsert(data)
+
 
 			for role in config['g_blacklist']:
 				role = discord.utils.get(guild.roles, id=role)
@@ -215,6 +218,8 @@ class giveaway(commands.Cog):
 								data['entries'].append(users.mention)
 								i += 1
 							return await self.bot.give.upsert(data)
+					data['entries'].append(users.mention)
+					return await self.bot.give.upsert(data)
 
 			r_role = discord.utils.get(guild.roles, id=data['r_req'])
 
@@ -227,6 +232,10 @@ class giveaway(commands.Cog):
 							data['entries'].append(users.mention)
 							i += 1
 						return await self.bot.give.upsert(data)
+
+				data['entries'].append(users.mention)
+				return await self.bot.give.upsert(data)
+
 			b_role = discord.utils.get(guild.roles, id=data['b_role'])
 			if b_role == None:
 				try:
@@ -242,6 +251,8 @@ class giveaway(commands.Cog):
 						data['entries'].append(users.mention)
 						i += 1
 					return await self.bot.give.upsert(data)
+				data['entries'].append(users.mention)
+				return await self.bot.give.upsert(data)
 
 
 	@cog_ext.cog_slash(name="gstart",description="an giveaway commands", guild_ids=guild_ids, default_permission=False, permissions=mod_perms,
