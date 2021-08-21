@@ -81,7 +81,6 @@ class giveaway(commands.Cog):
 			ftime = value['start_time'] + relativedelta(seconds=value['end_time'])
 
 			if currentTime >= ftime and self.start == False:
-				print(value)
 				start = True
 				guild = self.bot.get_guild(value['guild'])
 				channel = guild.get_channel(value['channel'])
@@ -169,30 +168,6 @@ class giveaway(commands.Cog):
 		except:
 			return
 
-<<<<<<< Updated upstream
-		if message.id in giveaway:
-			data = await self.bot.give.find(message.id)
-			config = await self.bot.config.find(guild.id)
-
-			if data['r_req'] == None:
-				for role_multi in config['role_multi']:
-					role = discord.utils.get(guild.roles,id=role_multi['role_id'])
-					if role in users.roles:
-						i = 1
-						while i <= role_multi['multi']:
-							data['entries'].append(users.mention)
-							i += 1
-						return await self.bot.give.upsert(data)
-				data['entries'].append(users.mention)
-				return await self.bot.give.upsert(data)
-
-=======
-		if user.id == self.bot.user.id:
-			return
-		required = await self.bot.give.find(message.id)
-		config = await self.bot.config.find(message.guild.id)
->>>>>>> Stashed changes
-
 		if config['g_blacklist']:
 			for role in config['g_blacklist']:
 				role = discord.utils.get(guild.roles, id=role)
@@ -208,7 +183,6 @@ class giveaway(commands.Cog):
 		if config['g_bypass']:
 		
 			for role in config['g_bypass']:
-<<<<<<< Updated upstream
 				role = discord.utils.get(guild.roles, id=role)
 				if role in users.roles:
 					for role_multi in config['role_multi']:
@@ -254,11 +228,9 @@ class giveaway(commands.Cog):
 					return await self.bot.give.upsert(data)
 				data['entries'].append(users.mention)
 				return await self.bot.give.upsert(data)
-=======
 				bypass_role = discord.utils.get(guild.roles, id=role)
 				if bypass_role in user.roles:
 					bypass = True
->>>>>>> Stashed changes
 
 		if required['r_req'] and bypass == False:
 			rrole = discord.utils.get(guild.roles, id=required['r_req'])
