@@ -79,7 +79,7 @@ bot.event_channel = {}
 bot.perm = {}
 bot.afk_user = {}
 bot.free_users = {}
-bot.giveaway = []
+bot.giveaway = {}
 bot.mod_role = [797923152617275433, 848585998769455104]
 bot.version = "4.1"
 bot.uptime = datetime.datetime.utcnow()
@@ -139,7 +139,7 @@ async def on_ready():
 
     currentGive = await bot.give.get_all()
     for give in currentGive:
-        bot.giveaway.append(give['_id'])
+        bot.giveaway[give["_id"]] = give
 
     datas = await bot.ticket_setup.get_all()
     for data in datas:
@@ -169,7 +169,7 @@ async def on_ready():
     print(f"Current Bans:{len(bot.ban_users)}")
     print("\n-----")
     print(f"Current Free users:{len(bot.free_users)}")
-    print(f"Current Afk users:{len(bot.afk_user)}")
+    print(f"Current giveaway:{len(bot.giveaway)}")
     print("\n-----")
     print("Database Connected\n-----")
 

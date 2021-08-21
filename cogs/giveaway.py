@@ -11,13 +11,14 @@ from humanfriendly import format_timespan
 from discord_slash import cog_ext, SlashContext, cog_ext, SlashContext
 from discord_slash.utils.manage_commands import create_option, create_choice, create_permission
 from discord_slash.model import SlashCommandPermissionType
+from utils.util import Amari
 
 
 time_regex = re.compile("(?:(\d{1,5})(h|s|m|d))+?")
 time_dict = {"h": 3600, "s": 1, "m": 60, "d": 86400}
 guild_ids=[785839283847954433]
 
-
+amari_api = Amari()
 owner_perms = {
 	785839283847954433:[
 	create_permission(488614633670967307, SlashCommandPermissionType.USER, True),
@@ -48,7 +49,6 @@ admin_perms = {
 	create_permission(785845265118265376, SlashCommandPermissionType.ROLE, True),
 	]
 }
-
 class TimeConverter(commands.Converter):
     async def convert(self, ctx, argument):
         args = argument.lower()
@@ -69,94 +69,83 @@ class giveaway(commands.Cog):
 	def __init__(self, bot):
 		self.bot = bot
 		self.giveaway_task = self.check_givaway.start()
-
+		self.start = False
 	def cog_unload(self):
 		self.giveaway_task.cancel()
 	
 	@tasks.loop(seconds=10)
 	async def check_givaway(self):
-		currentTime = datetime.datetime.now() 
-		for data in await self.bot.give.get_all():
-			ftime = data['start_time'] + relativedelta(seconds=data['end_time'])
+		currentTime = datetime.datetime.now()
+		giveaway = deepcopy(self.bot.giveaway)
+		for key, value in giveaway.items():
+			ftime = value['start_time'] + relativedelta(seconds=value['end_time'])
 
-			if currentTime >= ftime:
-				guild = self.bot.get_guild(data['guild'])
-				channel = self.bot.get_channel(data['channel'])
+			if currentTime >= ftime and self.start == False:
+				print(value)
+				start = True
+				guild = self.bot.get_guild(value['guild'])
+				channel = guild.get_channel(value['channel'])
+				message = await channel.fetch_message(value['_id'])
+				data = await self.bot.give.find(message.id)
+				host = guild.get_member(value['host'])
 
-				try:
-					message = await channel.fetch_message(data['_id'])
-				except discord.NotFound:
-					await self.bot.give.delete(data['_id'])
-					return await self.bot.giveaway.remove(data['_id'])
-
-				host = await guild.fetch_member(data['host'])
-
-				#if no users have Taken part in giveaways
-				if len(data['entries']) == 0:
-					embeds = message.embeds
-					for embed in embeds:
-						edict = embed.to_dict()
-
-					edict['fields'] = []
-					edict['title'] = f"{edict['title']} • Giveaway Has Endded"
-					edict['color'] = 15158332
-					await message.edit(embed=embed.from_dict(edict))
-					small_embed = discord.Embed(description=f"No valid [entrants]({message.jump_url}), so winner not be determined!", color=0x2f3136)
-					await message.reply(embed=small_embed)
-					await self.bot.give.delete((data['_id']))
-					try:
-						return self.bot.giveaway.remove((data['_id']))
-					except KeyError:
-						return
-
-				#if there is entrys are less then winners
-				if len(data['entries']) < data['winners']:
-					embeds = message.embeds
-					for embed in embeds:
-						edict = embed.to_dict()
-
-					edict['fields'] = []
-					edict['title'] = f"{edict['title']} • Giveaway Has Endded"
-					edict['color'] = 15158332
-					await message.edit(embed=embed.from_dict(edict))
-					small_embed = discord.Embed(description=f"No valid [entrants]({message.jump_url}), so winner not be determined!", color=0x2f3136)
-					await message.reply(embed=small_embed)
-
-					await self.bot.give.delete((data['_id']))
-					try:
-						return self.bot.giveaway.remove((data['_id']))
-					except KeyError:
-						return
-
-				#if all req meets so we can get winners
 				winner_list = []
 				entries = data['entries']
+				users = await message.reactions[0].users().flatten()
+				users.pop(users.index(guild.me))
 				while True:
+					if len(data['entries']) == 0: break
 					member = random.choice(data['entries'])
 					data['entries'].remove(member)
-					winner_list.append(member)
+					member = guild.get_member(member)
+					if member in users:
+						winner_list.append(member.mention)
 					if len(winner_list) == data['winners']:
-						break
-				embeds = message.embeds
-				for embed in embeds:
-					gdata = embed.to_dict()
-				reply = ",".join(winner_list)
-				small_embed = discord.Embed(description=f"Total Entries: [{len(entries)}]({message.jump_url})")
-				await message.reply(
+							break
+
+				if len(winner_list) < value['winners']:
+					embeds = message.embeds
+					for embed in embeds:
+						edict = embed.to_dict()
+
+					edict['title'] = f"{edict['title']} • Giveaway Has Endded"
+					edict['color'] = 15158332
+					await message.edit(embed=embed.from_dict(edict))
+					small_embed = discord.Embed(description=f"No valid [entrants]({message.jump_url}), so winner not be determined!", color=0x2f3136)
+					await message.reply(embed=small_embed)
+					await self.bot.give.delete(message.id)
+					try:
+						self.start = False
+						return self.bot.giveaway.pop((data['_id']))
+					except KeyError:
+						self.start = False
+						return 
+
+				if len(winner_list) >= value['winners']:
+					embeds = message.embeds
+					for embed in embeds:
+						gdata = embed.to_dict()
+					reply = ",".join(winner_list)
+					small_embed = discord.Embed(description=f"Total Entries: [{len(entries)}]({message.jump_url})")
+					await message.reply(
 					f"**Giveaway Has Endded**\n<a:winners_emoji:867972307103141959>  **Prize**      <a:yellowrightarrow:801446308778344468> {gdata['title']}\n─────────────────────\n<a:pandaswag:801013818896941066>   **Host**      <a:yellowrightarrow:801446308778344468> {host.display_name}\n─────────────────────\n<a:winner:805380293757370369>  **Winner** <a:yellowrightarrow:801446308778344468> {reply}\n─────────────────────\n", embed=small_embed)
 
-				gdata['fields'] = []
-				gdata['title'] = f"{gdata['title']} • Giveaway Has Endded"
-				gdata['color'] = 15158332
-				field = {'name': "Winner!", 'value': ", ".join(winner_list), 'inline': False}
-				gdata['fields'].append(field)
-                
-				await message.edit(embed=embed.from_dict(gdata))
-				await self.bot.give.delete_by_id(message.id)            
-				try:
-					return self.bot.giveaway.remove(message.id)
-				except KeyError:
-					return
+					gdata['title'] = f"{gdata['title']} • Giveaway Has Endded"
+					gdata['color'] = 15158332
+					field = {'name': "Winner!", 'value': ", ".join(winner_list), 'inline': False}
+					try:
+						gdata['fields'].append(field)
+					except KeyError:
+						gdata['fields'] = []
+						gdata['fields'].append(field)
+					await message.edit(embed=embed.from_dict(gdata))
+					await self.bot.give.delete(message.id)
+					try:
+						self.start = False
+						self.bot.giveaway.pop(message.id)
+					except KeyError:
+						self.start = False
+						pass
 
 	@check_givaway.before_loop
 	async def before_check_givaway(self):
@@ -168,18 +157,19 @@ class giveaway(commands.Cog):
 
 	@commands.Cog.listener()
 	async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
-		giveaway = deepcopy(self.bot.giveaway)
-		guild = self.bot.get_guild(payload.guild_id)
+		if payload.emoji == "🎉": return 
 		channel = self.bot.get_channel(payload.channel_id)
+		guild = self.bot.get_guild(payload.guild_id)
 		message = await channel.fetch_message(payload.message_id)
-		try:
-			users = await guild.fetch_member(payload.user_id)
-		except discord.NotFound:
+		bypass = False
+		if message.author != self.bot.user:
 			return
-			
-		if users.id == self.bot.user.id:
+		try:
+			user = await guild.fetch_member(payload.user_id)
+		except:
 			return
 
+<<<<<<< Updated upstream
 		if message.id in giveaway:
 			data = await self.bot.give.find(message.id)
 			config = await self.bot.config.find(guild.id)
@@ -196,18 +186,29 @@ class giveaway(commands.Cog):
 				data['entries'].append(users.mention)
 				return await self.bot.give.upsert(data)
 
+=======
+		if user.id == self.bot.user.id:
+			return
+		required = await self.bot.give.find(message.id)
+		config = await self.bot.config.find(message.guild.id)
+>>>>>>> Stashed changes
 
+		if config['g_blacklist']:
 			for role in config['g_blacklist']:
 				role = discord.utils.get(guild.roles, id=role)
-				if role in users.roles:
+				if role in user.roles:
 					try:
-						await message.remove_reaction(payload.emoji, users)
 						embed = discord.Embed(title="Entry Decline",description=f"You have one the blacklist role `{role.name}` there for you cannot enter", color=0xE74C3C)
-						return await users.send(embed=embed)
+						await user.send(embed=embed)
+						return await message.remove_reaction(payload.emoji, user)
 					except discord.HTTPException:
-						return
-
+						pass
+					return await message.remove_reaction(payload.emoji, user)
+		
+		if config['g_bypass']:
+		
 			for role in config['g_bypass']:
+<<<<<<< Updated upstream
 				role = discord.utils.get(guild.roles, id=role)
 				if role in users.roles:
 					for role_multi in config['role_multi']:
@@ -253,7 +254,114 @@ class giveaway(commands.Cog):
 					return await self.bot.give.upsert(data)
 				data['entries'].append(users.mention)
 				return await self.bot.give.upsert(data)
+=======
+				bypass_role = discord.utils.get(guild.roles, id=role)
+				if bypass_role in user.roles:
+					bypass = True
+>>>>>>> Stashed changes
 
+		if required['r_req'] and bypass == False:
+			rrole = discord.utils.get(guild.roles, id=required['r_req'])
+			if rrole in user.roles:
+				pass
+			else:
+				if required['b_role']:
+					role = discord.utils.get(guild.roles, id=required['b_role'])
+					if role in user.roles:
+						pass
+					else:
+						embed = discord.Embed(title="Entery Decline:",
+							description=f"your entriy for this [Giveaway]({message.jump_url}) has been decline\nReason: You don't have Required Role `{rrole.name}`",color=0xE74C3C)
+						embed.timestamp = datetime.datetime.utcnow()
+						embed.set_footer(text=guild.name,icon_url=guild.icon_url)
+						try:
+							await user.send(embed=embed)
+						except discord.HTTPException:
+							pass
+						await message.remove_reaction(payload.emoji, user)
+				else:
+					embed = discord.Embed(title="Entery Decline:",
+						description=f"your entriy for this [Giveaway]({message.jump_url}) has been decline\nReason: You don't have Required Role `{rrole.name}`",color=0xE74C3C)
+					embed.timestamp = datetime.datetime.utcnow()
+					embed.set_footer(text=guild.name,icon_url=guild.icon_url)
+					try:
+						await user.send(embed=embed)
+					except discord.HTTPException:
+						pass
+					return await message.remove_reaction(payload.emoji, user)
+
+		if required['amari_level'] and bypass == False:
+			user_level = await amari_api.get_amari_rank(user.guild.id, user)
+			if user_level < required['amari_level']:
+				if required['b_role']:
+					role = discord.utils.get(guild.roles, id=required['b_role'])
+					if role in user.roles:
+						pass
+					else:
+						embed = discord.Embed(title="Entery Decline:",
+							description=f"Your Entery for this [Giveaway]({message.jump_url}) has been decline\nReason:You don't have enough amari level your short {required['amari_level'] - user_level}  Level enter", color=0xE74C3C)
+						embed.timestamp = datetime.datetime.utcnow()
+						embed.set_footer(text=guild.name,icon_url=guild.icon_url)
+						try:
+							await user.send(embed=embed)
+						except discord.HTTPException:
+							pass
+						return await message.remove_reaction(payload.emoji, user)
+				else:
+					embed = discord.Embed(title="Entery Decline:",
+						description=f"Your Entery for this [Giveaway]({message.jump_url}) has been decline\nReason:You don't have enough amari level your short {required['amari_level'] - user_level}  Level enter", color=0xE74C3C)
+					embed.timestamp = datetime.datetime.utcnow()
+					embed.set_footer(text=guild.name,icon_url=guild.icon_url)
+					try:
+						await user.send(embed=embed)
+					except discord.HTTPException:
+						pass
+					return await message.remove_reaction(payload.emoji, user)
+
+		if required['weekly_amari'] and bypass == False:
+			user_level = await amari_api.get_weekly_rank(user.guild.id, user)
+			if user_level < required['weekly_amari']:
+				if required['b_role']:
+					role = discord.utils.get(guild.roles, id=required['b_role'])
+					if role in user.roles:
+						pass
+					else:
+						embed = discord.Embed(title="Entery Decline:",
+							description=f"Your Entery for this [Giveaway]({message.jump_url}) has been decline\nReason:You don't have enough weekly amari you still need {required['weekly_amari'] - user_level} To enter", color=0xE74C3C)
+						embed.timestamp = datetime.datetime.utcnow()
+						embed.set_footer(text=guild.name,icon_url=guild.icon_url)
+						try:
+							await user.send(embed=embed)
+						except discord.HTTPException:
+							pass
+						return await message.remove_reaction(payload.emoji, user)
+				else:
+					embed = discord.Embed(title="Entery Decline:",
+						description=f"Your Entery for this [Giveaway]({message.jump_url}) has been decline\nReason:You don't have enough weekly amari you still need {required['weekly_amari'] - user_level} To enter", color=0xE74C3C)
+					embed.timestamp = datetime.datetime.utcnow()
+					embed.set_footer(text=guild.name,icon_url=guild.icon_url)
+					try:
+						await user.send(embed=embed)
+					except discord.HTTPException:
+						pass
+					return await message.remove_reaction(payload.emoji, user)
+
+		for role_multi in config['role_multi']:
+			role = discord.utils.get(guild.roles, id=role_multi['role_id'])
+			if role in user.roles:
+				i = 0
+				while True:
+					required['entries'].append(user.id)
+					i += 1
+					
+					if i == role_multi['multi']:
+						await self.bot.give.upsert(required)
+						self.bot.giveaway[message.id] = required
+
+		required['entries'].append(user.id)
+		await self.bot.give.upsert(required)
+		self.bot.giveaway[message.id] = required
+	
 
 	@cog_ext.cog_slash(name="gstart",description="an giveaway commands", guild_ids=guild_ids, default_permission=False, permissions=mod_perms,
 		options=[
@@ -261,10 +369,13 @@ class giveaway(commands.Cog):
 				create_option(name="price", description="price of the giveaway", option_type=3, required=True),
 				create_option(name="winners", description="numbers of the winners", option_type=4, required=True),
 				create_option(name="r_req", description="required role to Event the giveaway",option_type=8, required=False),
-				create_option(name="b_role", description="bypass role to bypass the required role",option_type=8, required=False)
+				create_option(name="b_role", description="bypass role to bypass the required role",option_type=8, required=False),
+				create_option(name="amari_level", description="set required amari level",option_type=4, required=False),
+				create_option(name="weekly_amari", description="set giveaway weekly amari",option_type=4, required=False),
+				create_option(name="ping", description="Ping an role", option_type=8, required=False)
 			]
 		)
-	async def gstart(self, ctx, time, price, winners,r_req=None, b_role=None):
+	async def gstart(self, ctx, time, price, winners,r_req=None, b_role=None, amari_level: int=None, weekly_amari: int=None, ping:discord.Role=None):
 		time = await TimeConverter().convert(ctx, time)
 		if time < 15:
 			return await ctx.send("Giveaway time needed to be longer than 15 seconds")
@@ -272,27 +383,53 @@ class giveaway(commands.Cog):
 		end_time = round(end_time.timestamp())
 		r_req = r_req if r_req else None
 		b_role = b_role if b_role else None
-		descript = ""
+		amari_level = amari_level if amari_level else None
+		weekly_amari = weekly_amari if weekly_amari else None
+
+		embed_dict = {'type': 'rich', 'title': price, 'color': 10370047,
+		'description': f"React this message to Enter!\nEnds: <t:{end_time}:R> (<t:{end_time}:F>)\nHosted By: {ctx.author.mention}", 'fields': []}
 		if r_req == None:
-			descript = f'React this message to Enter!\nEnds: **<t:{end_time}:R> (<t:{end_time}:F>)**\nHosted by: {ctx.author.mention}'
-		else:
+			feild = {'name': "Role Requirements", 'inline':False}
 			if b_role == None:
-				descript = f'React this message to Enter!\nEnds: **<t:{end_time}:R> (<t:{end_time}:F>)**\nRequired Role: {r_req.mention}\nHosted by: {ctx.author.mention}'
+				pass
 			else:
-				descript = f'React this message to Enter!\nEnds: **<t:{end_time}:R> (<t:{end_time}:F>)**\nRequired Role: {r_req.mention}\nBypass Role: {b_role.mention}\nHosted by: {ctx.author.mention}'
-		embed = discord.Embed(title=price, color=0x9e3bff, description=descript)
-		embed.timestamp = (datetime.datetime.utcnow() + datetime.timedelta(seconds=time))
-		embed.set_footer(text=f"Winners: {winners} | Ends At")
-		#await ctx.message.delete()
-		mesg = await ctx.send(embed=embed)
-		data = {"_id": mesg.id,
+				feild['value'] = f"Bypass Role: {b_role.mention}"
+				embed_dict['fields'].append(feild)
+		else:
+			feild = {'name': "Role Requirements:", 'inline':False}
+			if b_role == None:
+				feild['value'] = f"Required Role: {r_req.mention}"
+				embed_dict['fields'].append(feild)
+			else:
+				feild['value'] = f"Required Role: {r_req.mention}\nBypass Role: {b_role.mention}"
+				embed_dict['fields'].append(feild)
+
+		feild = {'name': "Amari Requirements", 'inline': False}
+		if amari_level != None and weekly_amari == None:
+			feild['value'] = f"Required Amari Level: {amari_level}"
+		if amari_level == None and weekly_amari != None:
+			feild['value'] = f"Weekly Amari: {weekly_amari}"
+
+		if amari_level != None and weekly_amari != None:
+			feild['value'] = f"Amari Level: {amari_level}\nWeekly Amari: {weekly_amari}"
+		if amari_level == None and weekly_amari == None:
+			pass
+		else:
+			embed_dict['fields'].append(feild)
+
+		embed = discord.Embed()
+		msg = await ctx.send(embed=embed.from_dict(embed_dict))
+
+		data = {"_id": msg.id,
 				"guild": ctx.guild.id,
 				"channel": ctx.channel.id,
 				"host": ctx.author.id,
 				"winners": winners,
 				"entries": [],
 				"end_time": time,
-				"start_time": datetime.datetime.now()
+				"start_time": datetime.datetime.now(),
+				"weekly_amari": weekly_amari,
+				"amari_level": amari_level
 				}
 		try:
 			data['r_req'] = r_req.id
@@ -305,9 +442,12 @@ class giveaway(commands.Cog):
 			data['b_role'] = None
 
 		await self.bot.give.upsert(data)
-		self.bot.giveaway.append(data['_id'])
-		await mesg.add_reaction("🎉")
-		
+		self.bot.giveaway[msg.id] = data
+		await msg.add_reaction("🎉")
+		if ping == None:
+			pass
+		else:
+			await ctx.channel.send(ping.mention)
 
 	@cog_ext.cog_slash(name="gend", description="Focre end an giveaway", guild_ids=guild_ids,default_permission=False, permissions=mod_perms,
 		options=[
@@ -372,26 +512,28 @@ class giveaway(commands.Cog):
 			except KeyError:
 				return
 
-		winner_list = []
-		while True:
-			member = random.choice(users)
-			if type(member) == discord.Member:
-				users.pop(users.index(member))
-				winner_list.append(member.mention)
-			else:
-				pass
-			if len(winner_list) == data['winners']:
-				break
+			winner_list = []
+			entries = data['entries']
+			users = await message.reactions[0].users().flatten()
+			users.pop(users.index(ctx.guild.me))
+			while True:
+				member = random.choice(data['entries'])
+				data['entries'].remove(member)
+				member = await guild.get_member(member)
+				if member in users:
+					winner_list.append(member)
+				if len(winner_list) == data['winners']:
+						break
 
 		embeds = message.embeds
 		for embed in embeds:
 			gdata = embed.to_dict()
 		reply = ",".join(winner_list)
 		small_embed = discord.Embed(description=f"Total Entries: [{len(entries)}]({message.jump_url})")
+		host = await message.guild.fetch_member(data['host'])
 		await message.reply(
 			f"**Giveaway Has Endded**\n<a:winners_emoji:867972307103141959>  **Prize**      <a:yellowrightarrow:801446308778344468> {gdata['title']}\n─────────────────────\n<a:pandaswag:801013818896941066>   **Host**      <a:yellowrightarrow:801446308778344468> {host.display_name}\n─────────────────────\n<a:winner:805380293757370369>  **Winner** <a:yellowrightarrow:801446308778344468> {reply}\n─────────────────────\n", embed=small_embed)
 
-		gdata['fields'] = []
 		gdata['title'] = f"{gdata['title']} • Giveaway Has Endded"
 		gdata['color'] = 15158332
 		field = {'name': "Winner!", 'value': ", ".join(winner_list), 'inline': False}
@@ -402,7 +544,7 @@ class giveaway(commands.Cog):
 
 		await self.bot.give.delete_by_id(message.id)            
 		try:
-			return self.bot.giveaway.remove(message.id)
+			return self.bot.giveaway.pop(message.id)
 		except KeyError:
 			return
 
@@ -498,7 +640,6 @@ class giveaway(commands.Cog):
 		)
 	async def gbypass(self, ctx, role: discord.role):
 		data = await self.bot.config.find(ctx.guild.id)
-		print(type(role))
 		if data is None: return await ctx.send("Your Server config was not found please run config First")
 		if role.id in data['g_bypass']:
 			data['g_bypass'].remove(role.id)
