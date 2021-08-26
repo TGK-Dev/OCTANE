@@ -156,11 +156,13 @@ class giveaway(commands.Cog):
 
 	@commands.Cog.listener()
 	async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
-		if payload.emoji == "🎉": return 
 		channel = self.bot.get_channel(payload.channel_id)
 		guild = self.bot.get_guild(payload.guild_id)
 		message = await channel.fetch_message(payload.message_id)
-		bypass = False
+		config = await self.bot.config.find(guild.id)
+		required = await self.bot.give.find(message.id)
+		if required is None:
+			return
 		if message.author != self.bot.user:
 			return
 		try:
