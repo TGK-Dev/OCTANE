@@ -1,10 +1,9 @@
 asyncio==3.4.3
 buttons==0.1.9
 chat-exporter==1.3.0.6.5
-discord.py==1.7.3
+discord.py @ git+https://github.com/Rapptz/discord.py@fc51736b34df3c37c06781ae948b18efb71616fa
 DiscordUtils==1.2.8
 discord-better-help==1.3.0
-discord-py-slash-command==3.0.1
 dnspython==1.16.0
 humanfriendly==9.2
 emojis==0.6.0

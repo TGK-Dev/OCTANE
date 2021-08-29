@@ -106,7 +106,7 @@ class freeloader(commands.Cog):
 			#await guild.ban(member, reason=reason, delete_message_days=0)
 
 			log_channel = self.bot.get_channel(855784930494775296)
-			data = await self.bot.config.find(ctx.guild.id)
+			data = await self.bot.config.find(member.guild.id)
 			log_embed = discord.Embed(title=f"🔨 Ban | Case ID: {data['case']}",
 			    description=f" **Offender**: {member.name} | {member.mention} \n**Reason**: {reason}\n **Moderator**: <@{data['BanedBy']}> {data['BanedBy']}", color=0xE74C3C)
 			log_embed.set_thumbnail(url=member.avatar_url)

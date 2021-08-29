@@ -1,12 +1,7 @@
 import datetime
 import discord
 
-from discord_slash import cog_ext, SlashContext, cog_ext, SlashContext
-from discord_slash.utils.manage_commands import create_option, create_choice, create_permission
-from discord_slash.model import SlashCommandPermissionType
-
 from discord.ext import commands, tasks
-from discord_components import DiscordComponents, Button, ButtonStyle, InteractionType
 
 class Events(commands.Cog, command_attrs=dict(hidden=True)):
     def __init__(self, bot):
@@ -49,18 +44,6 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
     @commands.Cog.listener()
     async def on_ready(self):
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
-
-    @commands.Cog.listener()
-    async def on_slash_command_error(self, ctx, ex):
-        if isinstance(ex, commands.MissingPermissions):
-            await ctx.send("Hey! You lack permission to use this command.")
-        elif isinstance(ex, commands.MissingAnyRole):
-            await ctx.send("Hey! You lack permission to use this command.")
-        else:
-            embed = discord.Embed(color=0xE74C3C, 
-                description=f"Error: `{ex}`")
-            await ctx.send(embed=embed)
-
     
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
@@ -81,7 +64,7 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
                 )
         elif isinstance(error, commands.CheckFailure):
             # If the command has failed a check, trip this
-            await ctx.send("Hey! You lack permission to use this command.")
+            return
         elif isinstance(error, commands.DisabledCommand):
             await ctx.send('The command is disabed by Owner')
         elif isinstance(error, commands.MaxConcurrencyReached):

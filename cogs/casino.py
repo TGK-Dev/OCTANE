@@ -60,8 +60,8 @@ class casino(commands.Cog, description=description):
 		if trinnger1 > trinnger2:
 			fail_embed = discord.Embed(description=f"You were caught during the heist and you lost {lost}$", color=0xE74C3C)
 			fail_embed.timestamp = datetime.datetime.utcnow()
-			fail_embed.set_author(name=f"{ctx.author.name}", icon_url=ctx.author.avatar_url)
-			fail_embed.set_footer(text=f"{ctx.author.name}", icon_url=ctx.author.avatar_url)
+			fail_embed.set_author(name=f"{ctx.author.name}", icon_url=ctx.author.avatar.url)
+			fail_embed.set_footer(text=f"{ctx.author.name}", icon_url=ctx.author.avatar.url)
 			await ctx.reply(embed=fail_embed, mention_author=False)
 
 			data['cash'] -= lost
@@ -71,8 +71,8 @@ class casino(commands.Cog, description=description):
 
 		embed = discord.Embed(color=0x2ECC71, description=f"You successfully Stole the {earn} from your last heist")
 		embed.timestamp = datetime.datetime.utcnow()
-		embed.set_author(name=f"{ctx.author.name}", icon_url=ctx.author.avatar_url)
-		embed.set_footer(text=f"{ctx.author.name}", icon_url=ctx.author.avatar_url)
+		embed.set_author(name=f"{ctx.author.name}", icon_url=ctx.author.avatar.url)
+		embed.set_footer(text=f"{ctx.author.name}", icon_url=ctx.author.avatar.url)
 		await ctx.reply(embed=embed, mention_author=False)
 		data['cash'] += earn
 
@@ -88,7 +88,7 @@ class casino(commands.Cog, description=description):
 			return await ctx.send("Your balance is None `use >work` to get started")
 		embed = discord.Embed(title=f"{user.name}'s balance",color=user.color)
 		embed.timestamp = datetime.datetime.utcnow()
-		embed.set_author(name=f"{ctx.author.name}", icon_url=ctx.author.avatar_url)
+		embed.set_author(name=f"{ctx.author.name}", icon_url=ctx.author.avatar.url)
 		embed.add_field(name="Cash:", value=f"{data['cash']}")
 		embed.add_field(name="vault:", value=f"{data['vault']}")
 		embed.add_field(name="Total:", value=f"{data['cash'] + data['vault']}")
@@ -109,14 +109,14 @@ class casino(commands.Cog, description=description):
 		if amount > data['vault']:
 			fail_embed = discord.Embed(color=0xE74C3C, description=f"<:deny:811570766818050100> | You can withdraw more than you total vault you currentry have {data['vault']}$")
 			fail_embed.timestamp = datetime.datetime.utcnow()
-			fail_embed.set_author(name=f"{ctx.author.name}", icon_url=ctx.author.avatar_url)
+			fail_embed.set_author(name=f"{ctx.author.name}", icon_url=ctx.author.avatar.url)
 			return await ctx.reply(embed=fail_embed, mention_author=False)
 		data['vault'] -= amount
 		data['cash'] += amount
 
 		embed = discord.Embed(color=0x2ECC71, description=f"{ctx.author.mention} you have successfully withdraw {amount}$ from you vault now you left with {data['vault']}$ in vault")		
 		embed.timestamp = datetime.datetime.utcnow()
-		embed.set_author(name=f"{ctx.author.name}", icon_url=ctx.author.avatar_url)
+		embed.set_author(name=f"{ctx.author.name}", icon_url=ctx.author.avatar.url)
 		await ctx.reply(embed=embed, mention_author=False)
 		await self.bot.casino.upsert(data)
 
@@ -133,7 +133,7 @@ class casino(commands.Cog, description=description):
 		if data['cash'] < amount:
 			fail_embed = discord.Embed(color=0xE74C3C, description=f"<:deny:811570766818050100> | You can Deposit more than you total cash you currentry have {data['cash']}$ in your hand")
 			fail_embed.timestamp = datetime.datetime.utcnow()
-			fail_embed.set_author(name=f"{ctx.author.name}", icon_url=ctx.author.avatar_url)
+			fail_embed.set_author(name=f"{ctx.author.name}", icon_url=ctx.author.avatar.url)
 			return await ctx.reply(embed=fail_embed, mention_author=False)
 
 		data['vault'] += amount
@@ -141,7 +141,7 @@ class casino(commands.Cog, description=description):
 
 		embed = discord.Embed(color=0x2ECC71, description=f"{ctx.author.mention} you have successfully Deposit {amount}$ from you cash now you have {data['vault']}$ in vault")		
 		embed.timestamp = datetime.datetime.utcnow()
-		embed.set_author(name=f"{ctx.author.name}", icon_url=ctx.author.avatar_url)
+		embed.set_author(name=f"{ctx.author.name}", icon_url=ctx.author.avatar.url)
 		await ctx.reply(embed=embed, mention_author=False)
 		await self.bot.casino.upsert(data)
 
@@ -153,7 +153,7 @@ class casino(commands.Cog, description=description):
 			return await ctx.reply("You have never played this game how you can reset you balance without playing")
 		embed = discord.Embed(color=0xE74C3C, description=f"{ctx.author.mention} Are you Sure You want to re set your balance?")
 		embed.timestamp = datetime.datetime.utcnow()
-		embed.set_author(name=f"{ctx.author.name}", icon_url=ctx.author.avatar_url)
+		embed.set_author(name=f"{ctx.author.name}", icon_url=ctx.author.avatar.url)
 		buttons = [
 			[	
 				Button(style=ButtonStyle.red, label="No"),
@@ -170,17 +170,17 @@ class casino(commands.Cog, description=description):
 				await self.bot.casino.upsert(data)
 				done_embed = discord.Embed(color=0x2ECC71, description=f"{ctx.author.mention} Your balance has been reseted")
 				done_embed.timestamp = datetime.datetime.utcnow()
-				done_embed.set_author(name=f"{ctx.author.name}", icon_url=ctx.author.avatar_url)
+				done_embed.set_author(name=f"{ctx.author.name}", icon_url=ctx.author.avatar.url)
 				await m.edit(embed=done_embed, components=[])
 			if str(res.component.label.lower()) == "no":
 				done_embed = discord.Embed(color=0x2ECC71, description=f"{ctx.author.mention} Canceling the command\n**Reason**: Canceled by User")
 				done_embed.timestamp = datetime.datetime.utcnow()
-				done_embed.set_author(name=f"{ctx.author.name}", icon_url=ctx.author.avatar_url)
+				done_embed.set_author(name=f"{ctx.author.name}", icon_url=ctx.author.avatar.url)
 				await m.edit(embed=done_embed, components=[])
 		except asyncio.TimeoutError:
 				done_embed = discord.Embed(color=0x2ECC71, description=f"{ctx.author.mention} Canceling the command\n**Reason**: TimeoutError")
 				done_embed.timestamp = datetime.datetime.utcnow()
-				done_embed.set_author(name=f"{ctx.author.name}", icon_url=ctx.author.avatar_url)
+				done_embed.set_author(name=f"{ctx.author.name}", icon_url=ctx.author.avatar.url)
 				await m.edit(embed=done_embed, components=[])
 
 	@commands.command(name="add-money", description="add money to Member Account")
@@ -193,7 +193,7 @@ class casino(commands.Cog, description=description):
 			data = {'_id': user.id, 'cash': 0, 'vault': 0}
 		embed = discord.Embed(description=f"{ctx.author.mention} Where you want to add {user.mention} money", color=user.color)
 		embed.timestamp = datetime.datetime.utcnow()
-		embed.set_footer(text=ctx.author.name, icon_url=ctx.author.avatar_url)
+		embed.set_footer(text=ctx.author.name, icon_url=ctx.author.avatar.url)
 		buttons = [
 			[
 				Button(style=ButtonStyle.green, label="Vault"),
@@ -212,7 +212,7 @@ class casino(commands.Cog, description=description):
 
 				embed = discord.Embed(description=f"{ctx.author.mention} You have successfully Add {amount} to {user.mention}'s {res.component.label.lower()}")
 				embed.timestamp = datetime.datetime.utcnow()
-				embed.set_author(name=f"{ctx.author.name}", icon_url=ctx.author.avatar_url)
+				embed.set_author(name=f"{ctx.author.name}", icon_url=ctx.author.avatar.url)
 
 				return await m.edit(components=[], embed=embed)
 
@@ -222,7 +222,7 @@ class casino(commands.Cog, description=description):
 
 				embed = discord.Embed(description=f"{ctx.author.mention} You have successfully Add {amount} to {user.mention}'s {res.component.label.lower()}")
 				embed.timestamp = datetime.datetime.utcnow()
-				embed.set_author(name=f"{ctx.author.name}", icon_url=ctx.author.avatar_url)
+				embed.set_author(name=f"{ctx.author.name}", icon_url=ctx.author.avatar.url)
 
 				return await m.edit(components=[], embed=embed)
 
@@ -230,7 +230,7 @@ class casino(commands.Cog, description=description):
 
 				embed = discord.Embed(description=f"Canceling the command\n**Reason**: Canceled by Staff")
 				embed.timestamp = datetime.datetime.utcnow()
-				embed.set_author(name=f"{ctx.author.name}", icon_url=ctx.author.avatar_url)
+				embed.set_author(name=f"{ctx.author.name}", icon_url=ctx.author.avatar.url)
 				return await m.edit(embed=embed, components=[])
 
 		except asyncio.TimeoutError:
@@ -254,7 +254,7 @@ class casino(commands.Cog, description=description):
 				description=f"You bet was **{amount}**\nYour price is **{amount*2}**\nNow you have **{data['cash']}**")
 
 			embed.timestamp = datetime.datetime.utcnow()
-			embed.set_author(name=f"{ctx.author.name}", icon_url=ctx.author.avatar_url)
+			embed.set_author(name=f"{ctx.author.name}", icon_url=ctx.author.avatar.url)
 
 			embed.add_field(name="Your Number", value=player)
 			embed.add_field(name=f"{self.bot.user.name}", value=compter)
@@ -268,7 +268,7 @@ class casino(commands.Cog, description=description):
 				description=f"You bet was **{amount}**\nNow you have **{data['cash']}**")
 
 			embed.timestamp = datetime.datetime.utcnow()
-			embed.set_author(name=f"{ctx.author.name}", icon_url=ctx.author.avatar_url)
+			embed.set_author(name=f"{ctx.author.name}", icon_url=ctx.author.avatar.url)
 
 			embed.add_field(name="Your Number", value=player)
 			embed.add_field(name=f"{self.bot.user.name}", value=compter)
@@ -282,7 +282,7 @@ class casino(commands.Cog, description=description):
 				description=f"You bet was **{amount}**\nYou Cash is has't been charge")
 
 			embed.timestamp = datetime.datetime.utcnow()
-			embed.set_author(name=f"{ctx.author.name}", icon_url=ctx.author.avatar_url)
+			embed.set_author(name=f"{ctx.author.name}", icon_url=ctx.author.avatar.url)
 
 			embed.add_field(name="Your Number", value=player)
 			embed.add_field(name=f"{self.bot.user.name}", value=compter)

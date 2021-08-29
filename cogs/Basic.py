@@ -1,6 +1,7 @@
 import asyncio
 import discord
 import os
+from discord.ext.commands import converter
 import psutil
 import time
 import platform
@@ -44,8 +45,7 @@ class Basic(commands.Cog, description=description):
         embed = discord.Embed(title="Pingss", color=ctx.author.colour,
             description=f"**Response TIme** {round(self.bot.latency * 1000)}ms\n**API**: {round((end_time - start_time) * 1000)}ms\n**Database Ping**: {round(dping * 1000)}Ms\n**My Age**: {format_timespan(total_s)}")
 
-        await message.delete()
-        await ctx.send(embed=embed)
+        await message.edit(content=None, embed=embed)
         
   
     @commands.command(
@@ -76,7 +76,7 @@ class Basic(commands.Cog, description=description):
         embed.add_field(name="Embed Format:" , value="<@413651113485533194>\n<@651711446081601545>")
 
         embed.set_footer(text=f"Developed by Jay & Utik007 | {self.bot.user.name}")
-        embed.set_author(name=self.bot.user.name, icon_url=self.bot.user.avatar_url)
+        embed.set_author(name=self.bot.user.name, icon_url=self.bot.user.avatar.url)
 
         await ctx.send(embed=embed)
         

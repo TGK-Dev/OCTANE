@@ -33,7 +33,9 @@ class Afk(commands.Cog, description="An Afk commands"):
 			try:
 				await message.author.edit(nick=f"{data['last_name']}")
 			except:
-				await self.bot.afk.delete(message.author.id)
+				pass
+			
+			await self.bot.afk.delete(message.author.id)
 
 			try:
 			    self.bot.afk_user.pop(message.author.id)
