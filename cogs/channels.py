@@ -15,19 +15,25 @@ description="Channel Management Commands"
 
 
 class Confirm(discord.ui.View):
-    def __init__(self):
+    def __init__(self, ctx):
         super().__init__()
         self.value = False
+        self.ctx = ctx
     
-    @discord.ui.Button(label="Confirm", style=discord.Button.green)
-    async def confirm(self, button:discord.ui.Botttn, interaction: discord.Interaction):
-        self.value = True
+    @discord.ui.button(label='Confirm', style=discord.ButtonStyle.green)
+    async def confirm(self, button: discord.ui.Button, interaction: discord.Interaction):
+        self.value =True
         self.stop()
     
-    @discord.ui.Button(label="Cancel", style=discord.Button.red)
-    async def cancel(self, button:discord.ui.Botttn, interaction: discord.Interaction):
+    @discord.ui.button(label='Cancel', style=discord.ButtonStyle.red)
+    async def cancel(self, button: discord.ui.Button, interaction: discord.Interaction):
         self.stop()
-
+    
+    async def interaction_check(self, interaction):
+        if interaction.user != self.ctx.author:
+            await interaction.response.send_message("it's not your Buttons", ephemeral=True)
+        else:
+            return True
 
 class TimeConverter(commands.Converter):
     async def convert(self, ctx, argument):
@@ -189,7 +195,7 @@ class channel(commands.Cog, description=description):
         data["lockdown_channels"].append(channel.id)
         await self.bot.config.upsert(data)
         config = discord.Embed(description="list updated")
-        await m.edit(embed=config)
+        await ctx.send(embed=config)
 
     @lockdown.command(name="remove", description="remove channel form lockdown list")
     @commands.check_any(perm_check(), is_me())
@@ -237,7 +243,7 @@ class channel(commands.Cog, description=description):
                 await channel.set_permissions(role, overwrite=overwrite)
                 embed = discord.Embed(title="Server UnLockdown", description="The Server Is Unlocked\nIf any channel is still lock ping any Mod/Admin", color=0x2ECC71)
                 await channel.send(embed=embed)
-            await m.edit(content="Server Now Unlocked", embed=None, view=None)
+            await msg.edit(content="Server Now Unlocked", embed=None, view=None)
 
 def setup(bot):
     bot.add_cog(channel(bot))
