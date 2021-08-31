@@ -182,9 +182,10 @@ class Help(HelpCommand):
             return ctx.channel
 
     def get_command_signature(self, command):
+        ctx = self.context
         parent = command.full_parent_name
 
-        return '%s%s %s' % (self.clean_prefix, command.name if not parent else f"{parent} {command.name}", command.signature)
+        return '%s%s %s' % (ctx.clean_prefix, command.name if not parent else f"{parent} {command.name}", command.signature)
 
     async def send_bot_help(self, mapping: dict):
         bot = self.context.bot

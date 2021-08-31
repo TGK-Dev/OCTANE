@@ -5,7 +5,6 @@ import re
 import datetime
 
 from discord.ext import commands
-from discord.ui import view
 
 from humanfriendly import format_timespan
 
@@ -253,14 +252,14 @@ class channel(commands.Cog, description=description):
                 await channel.send(embed=embed)
             await msg.edit(content="Server Now Unlocked", embed=None, view=None)
     
-    @commands.command(name="Elock", description="lock an event channel")
+    @commands.command(name="Elock", description="lock an event channel", aliases=['el'])
     @commands.check_any(perm_check(), is_me(), commands.has_any_role(801798369281703936, 868070416722296902,864452953951305758, 882283892722262036))
     async def elock(self, ctx):
         if ctx.channel.category.id != 787366209464565770: return await ctx.send("this comamnd will only works in <#787366209464565770>")
         role = ctx.guild.default_role
-        overwrite = channel.overwrites_for(role)
+        overwrite = ctx.channel.overwrites_for(role)
         overwrite.send_messages = False
-        await channel.set_premissions(role, overwrite=overwrite)
+        await ctx.channel.set_permissions(role, overwrite=overwrite)
         embed = discord.Embed(
             description="Event channel is now Locked"
         )
@@ -268,14 +267,14 @@ class channel(commands.Cog, description=description):
         embed.set_footer(text=ctx.author.name, icon_url=ctx.author.avatar.url)
         await ctx.send(embed=embed)
     
-    @commands.command(name="Eunlock", description="lock an event channel")
+    @commands.command(name="Eunlock", description="unlock an event channel", aliases=['eu'])
     @commands.check_any(perm_check(), is_me(), commands.has_any_role(801798369281703936, 868070416722296902,864452953951305758, 882283892722262036))
     async def eunlock(self, ctx):
         if ctx.channel.category.id != 787366209464565770: return await ctx.send("this comamnd will only works in <#787366209464565770>")
         role = ctx.guild.default_role
-        overwrite = channel.overwrites_for(role)
+        overwrite = ctx.channel.overwrites_for(role)
         overwrite.send_messages = None
-        await channel.set_premissions(role, overwrite=overwrite)
+        await ctx.channel.set_permissions(role, overwrite=overwrite)
         embed = discord.Embed(
             description="Event channel is now unlocked"
         )
