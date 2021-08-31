@@ -8,10 +8,13 @@ from utils.util import Pag
 guild_ids = [797920317871357972, 785839283847954433]
 # Requires: pip install DiscordUtils
 
+
 def fomat_time(time):
     return time.strftime('%d-%B-%Y %I:%m %p')
 
+
 description = "Invites Systems"
+
 
 class Invites(commands.Cog, description=description):
     def __init__(self, bot):
@@ -20,12 +23,13 @@ class Invites(commands.Cog, description=description):
 
     def is_me():
         def predicate(ctx):
-            return ctx.message.author.id in [488614633670967307 , 301657045248114690]
+            return ctx.message.author.id in [488614633670967307, 301657045248114690]
         return commands.check(predicate)
 
     def perm_check():
         async def predicate(ctx):
-            mod_role = [785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916]
+            mod_role = [785842380565774368, 803635405638991902, 799037944735727636,
+                        785845265118265376, 787259553225637889, 843775369470672916]
             for mod in mod_role:
                 role = discord.utils.get(ctx.guild.roles, id=mod)
                 if role in ctx.author.roles:
@@ -60,7 +64,7 @@ class Invites(commands.Cog, description=description):
         if inviter is None:
             return
         data = await self.bot.invites.find(inviter.id)
-        
+
         if data is None:
             data = {"_id": inviter.id, "count": 0, "userInvited": []}
 
@@ -68,16 +72,19 @@ class Invites(commands.Cog, description=description):
         data["userInvited"].append(member.id)
         await self.bot.invites.upsert(data)
 
-        channel =  self.bot.get_channel(829008100555489301)
+        channel = self.bot.get_channel(829008100555489301)
         embed = discord.Embed(timestamp=member.joined_at)
-        embed.add_field(name=f"Member Information:", value=f"Name: {member.name}\n Member ID:\n {member.id}\nCreated at:\n{fomat_time(member.created_at)}")
-        embed.add_field(name=f"Invited Information", value=f"Name: {inviter.name}\nInviter ID:{inviter.id}\nInviter account created at\n{fomat_time(inviter.created_at)}\nInvites: {data['count']}", inline=False)
+        embed.add_field(name=f"Member Information:",
+                        value=f"Name: {member.name}\n Member ID:\n {member.id}\nCreated at:\n{fomat_time(member.created_at)}")
+        embed.add_field(name=f"Invited Information",
+                        value=f"Name: {inviter.name}\nInviter ID:{inviter.id}\nInviter account created at\n{fomat_time(inviter.created_at)}\nInvites: {data['count']}", inline=False)
         embed.set_thumbnail(url=member.avatar_url)
-        embed.set_footer(text=member.guild.name, icon_url=member.guild.icon_url)
+        embed.set_footer(text=member.guild.name,
+                         icon_url=member.guild.icon_url)
         await channel.send(embed=embed)
 
     @commands.command(name="invites", description="Show user total Invites", usage="[Member]")
-    async def invites(self, ctx ,member: discord.Member=None):
+    async def invites(self, ctx, member: discord.Member = None):
         member = member if member else ctx.author
 
         invites_filter = {"_id": member.id}
@@ -90,13 +97,14 @@ class Invites(commands.Cog, description=description):
         for invite in invites:
             count = (invite['count'])
             mcolor = member.color
-            embed = discord.Embed(description=f"The User {member.name} Has `{count}` Invites", color=mcolor, timestamp=datetime.datetime.now())
+            embed = discord.Embed(
+                description=f"The User {member.name} Has `{count}` Invites", color=mcolor, timestamp=datetime.datetime.now())
 
             await ctx.send(embed=embed)
-            
+
     @commands.command(name="inviter", description="Find out who invited who")
     @commands.check_any(perm_check(), is_me())
-    async def inviter(self, ctx, member:discord.Member):
+    async def inviter(self, ctx, member: discord.Member):
 
         invites_filter = {"userInvited": member.id}
 
@@ -105,13 +113,14 @@ class Invites(commands.Cog, description=description):
         if not bool(data):
             return await ctx.send("I failed to find vaild Entry in DataBase")
 
-        embed = discord.Embed(color=0x2f3136, description=f"{member.mention} Was invited by <@{data['_id']}>")
+        embed = discord.Embed(
+            color=0x2f3136, description=f"{member.mention} Was invited by <@{data['_id']}>")
         await ctx.send(embed=embed)
 
     @commands.command(name='ilb', description="invites leaderboard")
     async def ilb(self, ctx):
         invites = await self.bot.invites.get_all()
-        
+
         invites = sorted(invites, key=lambda x: x["count"], reverse=True)
         i = 1
         pages = []
@@ -129,5 +138,7 @@ class Invites(commands.Cog, description=description):
             entries=pages,
             length=5
         ).start(ctx)
+
+
 def setup(bot):
     bot.add_cog(Invites(bot))

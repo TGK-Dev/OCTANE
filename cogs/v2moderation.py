@@ -16,6 +16,7 @@ time_dict = {"h": 3600, "s": 1, "m": 60, "d": 86400}
 
 description = "Moderation commands"
 
+
 class TimeConverter(commands.Converter):
     async def convert(self, ctx, argument):
         args = argument.lower()
@@ -47,12 +48,13 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
 
     def is_me():
         def predicate(ctx):
-            return ctx.message.author.id in [488614633670967307 , 301657045248114690]
+            return ctx.message.author.id in [488614633670967307, 301657045248114690]
         return commands.check(predicate)
 
     def perm_check():
         async def predicate(ctx):
-            mod_role = [785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916]
+            mod_role = [785842380565774368, 803635405638991902, 799037944735727636,
+                        785845265118265376, 787259553225637889, 843775369470672916]
             for mod in mod_role:
                 role = discord.utils.get(ctx.guild.roles, id=mod)
                 if role in ctx.author.roles:
@@ -60,7 +62,6 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
                     check = permissions['perm']
                     return (ctx.command.name in check)
         return commands.check(predicate)
-
 
     @tasks.loop(seconds=10)
     async def check_current_mutes(self):
@@ -70,14 +71,15 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
             if value['muteDuration'] is None:
                 continue
 
-            unmuteTime = value['mutedAt'] + relativedelta(seconds=value['muteDuration'])
+            unmuteTime = value['mutedAt'] + \
+                relativedelta(seconds=value['muteDuration'])
 
             if currentTime >= unmuteTime:
                 guild = self.bot.get_guild(value['guildId'])
                 member = guild.get_member(value['_id'])
 
                 if member is None:
-                    await self.bot.mutes.delete(value['_id'])    
+                    await self.bot.mutes.delete(value['_id'])
                     try:
                         self.bot.muted_users.pop(value['_id'])
                     except KeyError:
@@ -88,11 +90,10 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
                 if role in member.roles:
                     await member.remove_roles(role)
 
-
                     log_channel = self.bot.get_channel(855784930494775296)
                     data = await self.bot.config.find(guild.id)
                     log_embed = discord.Embed(title=f"🔊 UnMute | Case ID: {data['case']}",
-                    	description=f"**Offender**: {member.name} | {member.mention} \n**Moderator**: {self.bot.user.name} | {self.bot.user.mention} \n**Reason**: Temporary Mute expired", color=0x2ECC71)
+                                              description=f"**Offender**: {member.name} | {member.mention} \n**Moderator**: {self.bot.user.name} | {self.bot.user.mention} \n**Reason**: Temporary Mute expired", color=0x2ECC71)
                     log_embed.set_thumbnail(url=member.avatar_url)
                     log_embed.timestamp = datetime.datetime.utcnow()
                     log_embed.set_footer(text=f"ID: {member.id}")
@@ -106,7 +107,7 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
                 try:
                     self.bot.muted_users.pop(member.id)
                 except KeyError:
-                    pass#🔓
+                    pass  # 🔓
 
     @tasks.loop(seconds=10)
     async def check_current_bans(self):
@@ -116,7 +117,8 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
             if value['BanDuration'] is None:
                 continue
 
-            unbanTime = value['BannedAt'] + relativedelta(seconds=value['BanDuration'])
+            unbanTime = value['BannedAt'] + \
+                relativedelta(seconds=value['BanDuration'])
 
             if currentTime >= unbanTime:
                 guild = self.bot.get_guild(value['guildId'])
@@ -131,7 +133,7 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
                 log_channel = self.bot.get_channel(855784930494775296)
 
                 log_embed = discord.Embed(title=f"🔓 UnBan | Case ID: {case['case']}",
-                    description=f" **Offender**: {member.name} | {member.mention}\n**Reason** {reason}:\n**Moderator**: {self.bot.user.name} {self.bot.user.mention}", color=0x2ECC71)
+                                          description=f" **Offender**: {member.name} | {member.mention}\n**Reason** {reason}:\n**Moderator**: {self.bot.user.name} {self.bot.user.mention}", color=0x2ECC71)
                 log_embed.set_thumbnail(url=member.avatar_url)
                 log_embed.set_footer(text=f"ID: {member.id}")
                 log_embed.timestamp = datetime.datetime.utcnow()
@@ -150,12 +152,10 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
     async def before_check_current_bans(self):
         await self.bot.wait_until_ready()
 
-
-
     @check_current_mutes.before_loop
     async def before_check_current_mutes(self):
         await self.bot.wait_until_ready()
-    
+
     @commands.Cog.listener()
     async def on_ready(self):
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
@@ -429,14 +429,14 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
         await self.bot.bans.delete(member.id)
         try:
             self.bot.bot.ban_users.pop(member.id)
-        except :
+        except:
             pass
 
         case = await self.bot.config.find(ctx.guild.id)
         log_channel = self.bot.get_channel(855784930494775296)
 
         log_embed = discord.Embed(title=f"🔓 UnBan | Case ID: {case['case']}",
-            description=f" **Offender**: {member.name} | {member.mention}\n **Moderator**: {ctx.author.display_name} {ctx.author.mention}", color=0x2ECC71)
+                                  description=f" **Offender**: {member.name} | {member.mention}\n **Moderator**: {ctx.author.display_name} {ctx.author.mention}", color=0x2ECC71)
         log_embed.set_thumbnail(url=member.avatar_url)
         log_embed.set_footer(text=f"ID: {member.id}")
         log_embed.timestamp = datetime.datetime.utcnow()
@@ -444,8 +444,8 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
 
         case["case"] += 1
         await self.bot.config.upsert(case)
-    
-    @commands.command(name="purge", description="A command which purges the channel it is called in", usage="[amount]", invoke_without_command = True)
+
+    @commands.command(name="purge", description="A command which purges the channel it is called in", usage="[amount]", invoke_without_command=True)
     @commands.check_any(perm_check(), is_me())
     async def purge(self, ctx, amount=10):
         await ctx.message.delete()
@@ -460,33 +460,41 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
     @commands.check_any(perm_check(), is_me())
     async def uerinfo(self, ctx, member: discord.Member = None):
         await ctx.message.delete()
+
         def fomat_time(time):
-          return time.strftime('%d-%B-%Y %I:%m %p')
+            return time.strftime('%d-%B-%Y %I:%m %p')
 
         member = member if member else ctx.author
         usercolor = member.color
 
-        today = (datetime.datetime.utcnow() - member.created_at).total_seconds()
+        today = (datetime.datetime.utcnow() -
+                 member.created_at).total_seconds()
 
         embed = discord.Embed(title=f'{member.name}', color=usercolor)
         embed.set_thumbnail(url=member.avatar_url)
-        embed.add_field(name='Account Name:', value=f'{member.name}', inline=False)
-        embed.add_field(name='Created at:', value=f"{fomat_time(member.created_at)}\n{format_timespan(today)}")
+        embed.add_field(name='Account Name:',
+                        value=f'{member.name}', inline=False)
+        embed.add_field(
+            name='Created at:', value=f"{fomat_time(member.created_at)}\n{format_timespan(today)}")
         embed.add_field(name='Joined at', value=fomat_time(member.joined_at))
-        embed.add_field(name='Account Status', value=str(member.status).title())
-        embed.add_field(name='Account Activity', value=f"{str(member.activity.type).title().split('.')[1]} {member.activity.name}" if member.activity is not None else "None")
+        embed.add_field(name='Account Status',
+                        value=str(member.status).title())
+        embed.add_field(name='Account Activity',
+                        value=f"{str(member.activity.type).title().split('.')[1]} {member.activity.name}" if member.activity is not None else "None")
 
-        hsorted_roles = sorted([role for role in member.roles[-2:]], key=lambda x: x.position, reverse=True)
-        
+        hsorted_roles = sorted(
+            [role for role in member.roles[-2:]], key=lambda x: x.position, reverse=True)
 
-        embed.add_field(name='Top Role:', value=', '.join(role.mention for role in hsorted_roles), inline=False)
-        embed.add_field(name='Number of Roles', value=f"{len(member.roles) -1 }")
+        embed.add_field(name='Top Role:', value=', '.join(
+            role.mention for role in hsorted_roles), inline=False)
+        embed.add_field(name='Number of Roles',
+                        value=f"{len(member.roles) -1 }")
         embed.set_footer(text=f'ID {member.id}', icon_url=member.avatar_url)
         await ctx.send(embed=embed)
 
     @commands.command(name="flags")
     @commands.check_any(is_me())
-    async def flags(self, ctx, user: discord.Member, *,args: TypedFlags):
+    async def flags(self, ctx, user: discord.Member, *, args: TypedFlags):
         data = args.lower()
         await ctx.send(f'{user.name}|{args}')
 

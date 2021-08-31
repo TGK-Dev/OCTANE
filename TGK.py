@@ -16,7 +16,6 @@ from traceback import format_exception
 
 from discord.ext import commands
 from pathlib import Path
-from discord_slash import SlashCommand
 from better_help import Help
 
 # Local code
@@ -54,13 +53,11 @@ bot = commands.Bot(
     description="commands List of Me",
     command_prefix=get_prefix,
     case_insensitive=True,
-    owner_ids=[391913988461559809 , 488614633670967307, 301657045248114690],
-    help_command=Help(ending_note=f"Made By Jay and Utki",show_cooldown=False,show_brief=True,timeout=60,timeout_delete=True),
+    owner_ids=[391913988461559809, 488614633670967307, 301657045248114690],
+    help_command=Help(ending_note=f"Made By Jay and Utki", show_cooldown=False,
+                      show_brief=True, timeout=60, timeout_delete=True),
     intents=intents,
-    )
-
-slash = SlashCommand(bot, sync_commands=True, sync_on_cog_reload=True)
-
+)
 # change command_prefix='-' to command_prefix=get_prefix for custom prefixes
 bot.config_token = os.getenv('TOKEN')
 bot.connection_url = str(os.getenv('MONGO'))
@@ -107,6 +104,7 @@ bot.colors = {
 }
 bot.color_list = [c for c in bot.colors.values()]
 
+
 @bot.event
 async def on_ready():
     # On ready, print some details to standard out
@@ -114,7 +112,7 @@ async def on_ready():
         f"-----\nLogged in as: {bot.user.name} : {bot.user.id}\n-----\nMy current prefix is: {bot.DEFAULTPREFIX}\n-----"
     )
     await bot.change_presence(status=discord.Status.dnd)
-    
+
     print("jishaku has been loaded\n-----")
 
     current_blacklist_user = await bot.blacklist.get_all()
@@ -143,8 +141,8 @@ async def on_ready():
 
     datas = await bot.ticket_setup.get_all()
     for data in datas:
-    	setup = json.dumps(data)
-    	bot.ticket_setups = json.loads(setup)
+        setup = json.dumps(data)
+        bot.ticket_setups = json.loads(setup)
 
     try:
         permissions = await bot.perms.get_all()
@@ -160,7 +158,6 @@ async def on_ready():
     except:
         pass
 
-
     print("\n-----")
     print(f"Current blacklist:{len(bot.blacklist_user)}")
     print("\n-----")
@@ -173,7 +170,7 @@ async def on_ready():
     print("\n-----")
     print("Database Connected\n-----")
 
-    
+
 @bot.event
 async def on_message(message):
     # Ignore messages sent by yourself
@@ -189,15 +186,14 @@ async def on_message(message):
     if message.content.startswith(f"<@!{bot.user.id}>") and len(message.content) == len(
         f"<@!{bot.user.id}>"
     ):
-        data = await bot.config.find_by_id  (message.guild.id)
+        data = await bot.config.find_by_id(message.guild.id)
         if not data or "prefix" not in data:
             prefix = bot.DEFAULTPREFIX
         else:
             prefix = data["prefix"]
-        await message.channel.send(f"My prefix here is `{prefix}`", delete_after=15)    
+        await message.channel.send(f"My prefix here is `{prefix}`", delete_after=15)
 
     await bot.process_commands(message)
-
 
 
 if __name__ == "__main__":
@@ -224,7 +220,7 @@ if __name__ == "__main__":
     bot.give = Document(bot.db, "give")
 
     for file in os.listdir(cwd + "/cogs"):
-        if file.endswith(".py") and not file.startswith("_") and not file.startswith("afk"):
+        if file.endswith(".py") and not file.startswith("_") and not file.startswith("test") and not file.startswith("events"):
             bot.load_extension(f"cogs.{file[:-3]}")
 
     bot.run(bot.config_token)

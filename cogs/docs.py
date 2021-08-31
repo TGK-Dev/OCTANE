@@ -40,7 +40,7 @@ class SphinxObjectFileReader:
             pos = buf.find(b"\n")
             while pos != -1:
                 yield buf[:pos].decode("utf-8")
-                buf = buf[pos + 1 :]
+                buf = buf[pos + 1:]
                 pos = buf.find(b"\n")
 
 
@@ -56,12 +56,13 @@ class Docs(commands.Cog, name="Documentation"):
 
     def is_me():
         def predicate(ctx):
-            return ctx.message.author.id in [488614633670967307 , 301657045248114690]
+            return ctx.message.author.id in [488614633670967307, 301657045248114690]
         return commands.check(predicate)
 
     def perm_check():
         async def predicate(ctx):
-            mod_role = [785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916]
+            mod_role = [785842380565774368, 803635405638991902, 799037944735727636,
+                        785845265118265376, 787259553225637889, 843775369470672916]
             for mod in mod_role:
                 role = discord.utils.get(ctx.guild.roles, id=mod)
                 if role in ctx.author.roles:
@@ -69,7 +70,6 @@ class Docs(commands.Cog, name="Documentation"):
                     check = permissions['perm']
                     return (ctx.command.name in check)
         return commands.check(predicate)
-
 
     def finder(self, text, collection, *, key=None, lazy=True):
         suggestions = []
@@ -110,10 +110,12 @@ class Docs(commands.Cog, name="Documentation"):
         # next line says if it's a zlib header
         line = stream.readline()
         if "zlib" not in line:
-            raise RuntimeError("Invalid objects.inv file, not z-lib compatible.")
+            raise RuntimeError(
+                "Invalid objects.inv file, not z-lib compatible.")
 
         # This code mostly comes from the Sphinx repository.
-        entry_regex = re.compile(r"(?x)(.+?)\s+(\S*:\S*)\s+(-?\d+)\s+(\S+)\s+(.*)")
+        entry_regex = re.compile(
+            r"(?x)(.+?)\s+(\S*:\S*)\s+(-?\d+)\s+(\S+)\s+(.*)")
         for line in stream.read_compressed_lines():
             match = entry_regex.match(line.rstrip())
             if not match:
@@ -171,13 +173,15 @@ class Docs(commands.Cog, name="Documentation"):
 
         cache = list(self._rtfm_cache[key].items())
 
-        self.matches = self.finder(obj, cache, key=lambda t: t[0], lazy=False)[:8]
+        self.matches = self.finder(
+            obj, cache, key=lambda t: t[0], lazy=False)[:8]
 
         e = discord.Embed(colour=0xCE2029)
         if len(self.matches) == 0:
             return await ctx.send("Could not find anything. Sorry.")
 
-        e.description = "\n".join(f"[`{key}`]({url})" for key, url in self.matches)
+        e.description = "\n".join(
+            f"[`{key}`]({url})" for key, url in self.matches)
         await ctx.send(embed=e)
 
     @commands.Cog.listener()
@@ -216,9 +220,9 @@ class Docs(commands.Cog, name="Documentation"):
                     embed=discord.Embed.from_dict(
                         {
                             "title": "Hmmm",
-                            
+
                         },
-                        
+
                     )
                 )
 

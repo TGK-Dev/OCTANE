@@ -43,11 +43,10 @@ class Basic(commands.Cog, description=description):
         dping = dping.total_seconds()
 
         embed = discord.Embed(title="Pingss", color=ctx.author.colour,
-            description=f"**Response TIme** {round(self.bot.latency * 1000)}ms\n**API**: {round((end_time - start_time) * 1000)}ms\n**Database Ping**: {round(dping * 1000)}Ms\n**My Age**: {format_timespan(total_s)}")
+                              description=f"**Response TIme** {round(self.bot.latency * 1000)}ms\n**API**: {round((end_time - start_time) * 1000)}ms\n**Database Ping**: {round(dping * 1000)}Ms\n**My Age**: {format_timespan(total_s)}")
 
         await message.edit(content=None, embed=embed)
-        
-  
+
     @commands.command(
         name="stats", description="A useful command that displays bot statistics.", usage="stats"
     )
@@ -56,7 +55,7 @@ class Basic(commands.Cog, description=description):
         dpyVersion = discord.__version__
         serverCount = len(self.bot.guilds)
         memberCount = len(set(self.bot.get_all_members()))
-        cpu = round(psutil.cpu_percent(),1)
+        cpu = round(psutil.cpu_percent(), 1)
 
         embed = discord.Embed(
             title=f"{self.bot.user.name} Stats",
@@ -71,14 +70,20 @@ class Basic(commands.Cog, description=description):
         embed.add_field(name="Total Guilds:", value=serverCount)
         embed.add_field(name="Total Users:", value=memberCount)
         embed.add_field(name="CPU Useage:", value=f"{str(cpu)}%")
-        embed.add_field(name="RAM Useage:", value=f"{round(psutil.virtual_memory().percent,1)}%")
-        embed.add_field(name="Bot Developers:", value="<@488614633670967307>\n<@301657045248114690>")
-        embed.add_field(name="Embed Format:" , value="<@413651113485533194>\n<@651711446081601545>")
+        embed.add_field(name="RAM Useage:",
+                        value=f"{round(psutil.virtual_memory().percent,1)}%")
+        embed.add_field(name="Bot Developers:",
+                        value="<@488614633670967307>\n<@301657045248114690>")
+        embed.add_field(name="Embed Format:",
+                        value="<@413651113485533194>\n<@651711446081601545>")
 
-        embed.set_footer(text=f"Developed by Jay & Utik007 | {self.bot.user.name}")
-        embed.set_author(name=self.bot.user.name, icon_url=self.bot.user.avatar.url)
+        embed.set_footer(
+            text=f"Developed by Jay & Utik007 | {self.bot.user.name}")
+        embed.set_author(name=self.bot.user.name,
+                         icon_url=self.bot.user.avatar.url)
 
         await ctx.send(embed=embed)
-        
+
+
 def setup(bot):
     bot.add_cog(Basic(bot))
