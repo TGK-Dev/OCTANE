@@ -220,7 +220,7 @@ if __name__ == "__main__":
     bot.give = Document(bot.db, "give")
 
     for file in os.listdir(cwd + "/cogs"):
-        if file.endswith(".py") and not file.startswith("_") and not file.startswith("test") and not file.startswith("events"):
+        if file.endswith(".py") and not file.startswith("_") and not file.startswith("test"):
             bot.load_extension(f"cogs.{file[:-3]}")
 
     bot.run(bot.config_token)
