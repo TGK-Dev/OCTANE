@@ -153,7 +153,6 @@ async def on_ready():
     print("\n-----")
     print(f"Current Bans:{len(bot.ban_users)}")
     print("\n-----")
-    print(f"Current Free users:{len(bot.free_users)}")
     print(f"Current giveaway:{len(bot.giveaway)}")
     print("\n-----")
     print("Database Connected\n-----")
