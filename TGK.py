@@ -119,21 +119,9 @@ async def on_ready():
     for blacklisted_user in current_blacklist_user:
         bot.blacklist_user[blacklisted_user["_id"]] = blacklisted_user
 
-    currentMutes = await bot.mutes.get_all()
-    for mute in currentMutes:
-        bot.muted_users[mute["_id"]] = mute
-
-    currentBans = await bot.bans.get_all()
-    for ban in currentBans:
-        bot.ban_users[ban["_id"]] = ban
-
     current_afk_user = await bot.afk.get_all()
     for afk in current_afk_user:
         bot.afk_user[afk["_id"]] = afk
-
-    currentFree = await bot.free.get_all()
-    for free in currentFree:
-        bot.free_users[free["_id"]] = free
 
     currentGive = await bot.give.get_all()
     for give in currentGive:
@@ -214,9 +202,6 @@ if __name__ == "__main__":
     bot.lockdown = Document(bot.db, "lockdown")
     bot.event = Document(bot.db, "event")
     bot.score = Document(bot.db, "score")
-    bot.embed = Document(bot.db, "embed")
-    bot.casino = Document(bot.db, "casino")
-    bot.free = Document(bot.db, "free")
     bot.give = Document(bot.db, "give")
 
     for file in os.listdir(cwd + "/cogs"):

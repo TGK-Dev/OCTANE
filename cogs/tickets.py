@@ -264,6 +264,7 @@ class tickets(commands.Cog, description=description):
             await msg.edit(content="Ok cancelling the command")
         except asyncio.TimeoutError:
             await ctx.channel.delete()
+            await self.bot.ticket.delete(data['_id'])
 
     @commands.command(name="add", description="add User to the channel", usage="[member]")
     @commands.check_any(commands.has_any_role(831405039830564875), perm_check(), is_me())
