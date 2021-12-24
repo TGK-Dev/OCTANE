@@ -66,19 +66,14 @@ bot.joke_api_key = os.getenv('DAD')
 logging.basicConfig(level=logging.INFO)
 
 bot.DEFAULTPREFIX = DEFAULTPREFIX
-bot.muted_users = {}
-bot.ban_users = {}
 bot.blacklist_user = {}
 bot.guild_id = [797920317871357972]
 bot.ticket_setups = {}
 bot.cwd = cwd
-bot.event_channel = {}
 bot.perm = {}
 bot.afk_user = {}
-bot.free_users = {}
-bot.giveaway = {}
 bot.mod_role = [797923152617275433, 848585998769455104]
-bot.version = "4.1"
+bot.version = "1.0"
 bot.uptime = datetime.datetime.utcnow()
 
 bot.colors = {
@@ -123,10 +118,6 @@ async def on_ready():
     for afk in current_afk_user:
         bot.afk_user[afk["_id"]] = afk
 
-    currentGive = await bot.give.get_all()
-    for give in currentGive:
-        bot.giveaway[give["_id"]] = give
-
     datas = await bot.ticket_setup.get_all()
     for data in datas:
         setup = json.dumps(data)
@@ -136,13 +127,6 @@ async def on_ready():
         permissions = await bot.perms.get_all()
         permission = json.dumps(permissions)
         bot.perm = json.loads(permission)
-    except:
-        pass
-
-    try:
-        channels = await bot.event.get_all()
-        channel = json.dumps(channels[0]["event_channels"])
-        bot.event_channel = json.loads(channel)
     except:
         pass
 
@@ -190,18 +174,10 @@ if __name__ == "__main__":
     bot.db = bot.mongo["tgk_database"]
     bot.config = Document(bot.db, "config")
     bot.afk = Document(bot.db, "afk")
-    bot.mutes = Document(bot.db, "mutes")
-    bot.bans = Document(bot.db, "bans")
-    bot.warns = Document(bot.db, "warns")
     bot.ticket = Document(bot.db, "ticket")
     bot.ticket_setup = Document(bot.db, "ticket_setup")
     bot.blacklist = Document(bot.db, "blacklist")
     bot.invites = Document(bot.db, "invites")
-    bot.tasks = Document(bot.db, "tasks")
-    bot.lockdown = Document(bot.db, "lockdown")
-    bot.event = Document(bot.db, "event")
-    bot.score = Document(bot.db, "score")
-    bot.give = Document(bot.db, "give")
 
     for file in os.listdir(cwd + "/cogs"):
         if file.endswith(".py") and not file.startswith("_") and not file.startswith("test"):

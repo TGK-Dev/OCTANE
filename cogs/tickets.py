@@ -18,7 +18,6 @@ from discord.ext.commands.core import command
 
 description = "Ticket System For the Server Support"
 
-
 class PersistentView(discord.ui.View):
     def __init__(self, bot):
         self.bot = bot
@@ -98,7 +97,6 @@ class PersistentView(discord.ui.View):
         else:
             channel = self.bot.get_channel(data['channel'])
             return await interaction.response.send_message(f"{user.mention}You alredy have an ticket {channel.mention}", ephemeral=True)
-
 
 class tickets(commands.Cog, description=description):
     def __init__(self, bot):

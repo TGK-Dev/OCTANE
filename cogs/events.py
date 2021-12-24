@@ -25,21 +25,6 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
         for blacklisted_user in current_blacklist_user:
             self.bot.blacklist_user[blacklisted_user["_id"]] = blacklisted_user
 
-        self.bot.muted_users = {}
-        currentMutes = await self.bot.mutes.get_all()
-        for mute in currentMutes:
-            self.bot.muted_users[mute["_id"]] = mute
-
-        self.bot.ban_users = {}
-        currentBans = await self.bot.bans.get_all()
-        for ban in currentBans:
-            self.bot.ban_users[ban["_id"]] = ban
-
-        self.bot.free_users = {}
-        currentFree = await self.bot.free.get_all()
-        for free in currentFree:
-            self.bot.free_users[ban["_id"]] = free
-
         self.bot.afk_user = {}
         current_afk_user = await self.bot.afk.get_all()
         for afk in current_afk_user:
@@ -107,62 +92,6 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
                     return await message.reply('We have daily heist in <#804708111301738576>, and heists for special requirements and occasions in <#812992825801179136>', delete_after=30)
 
     @commands.Cog.listener()
-    async def on_member_ban(self, guild, member):
-        # if guild.id != 785839283847954433:
-        # return
-        logs = await guild.audit_logs(limit=1, action=discord.AuditLogAction.ban).flatten()
-        channel = self.bot.get_channel(806107399005667349)
-        logs = logs[0]
-        if logs.user.id == 816699167824281621:
-            return
-        if logs.target == member:
-            data = await self.bot.config.find(guild.id)
-            if data is None:
-                return
-            if logs.reason is None:
-                logs.reason = "None"
-            log_channel = self.bot.get_channel(855784930494775296)
-            log_embed = discord.Embed(title=f"🔨 Ban | Case ID: {data['case']}",
-                                      description=f" **Offender**: {logs.target.name} | {logs.target.mention} \n**Reason**: {logs.reason}\n **Moderator**: {logs.user.name} {logs.user.mention}", color=0xE74C3C)
-            log_embed.set_thumbnail(url=member.avatar_url)
-            log_embed.timestamp = datetime.datetime.utcnow()
-            log_embed.set_footer(text=f"ID: {member.id}")
-
-            await log_channel.send(embed=log_embed)
-
-            data["case"] += 1
-            await self.bot.config.upsert(data)
-
-    @commands.Cog.listener()
-    async def on_member_unban(self, guild, member):
-        # if guild.id != 785839283847954433:
-        # return
-        log = await guild.audit_logs(limit=1, action=discord.AuditLogAction.unban).flatten()
-        channel = self.bot.get_channel(806107399005667349)
-        logs = log[0]
-        data = await self.bot.config.find(guild.id)
-
-        if logs.user.id == 816699167824281621:
-            return
-        if logs.target == member:
-            data = await self.bot.config.find(guild.id)
-            if data is None:
-                return
-            if logs.reason is None:
-                logs.reason = "None"
-            log_channel = self.bot.get_channel(855784930494775296)
-            log_embed = discord.Embed(title=f"🔓 UnBan | Case ID: {data['case']}",
-                                      description=f" **Offender**: {logs.target.name} | {logs.target.mention} \n**Reason**: {logs.reason}\n **Moderator**: {logs.user.name} {logs.user.mention}", color=0x2ECC71)
-            log_embed.set_thumbnail(url=member.avatar_url)
-            log_embed.timestamp = datetime.datetime.utcnow()
-            log_embed.set_footer(text=f"ID: {member.id}")
-
-            await log_channel.send(embed=log_embed)
-
-            data["case"] += 1
-            await self.bot.config.upsert(data)
-
-    @commands.Cog.listener()
     async def on_member_join(self, member):
         guild = member.guild
 
@@ -184,7 +113,7 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
         embed = discord.Embed(title=f'**WELCOME TO TGK, {member.display_name}!**',
                               description=f"\n\nGet your favorite roles from [self-roles](https://discord.gg/58bc5QWE4q),\nand say _Hello_ to everyone in [chat](https://discord.gg/yEPYYDZ3dD)!\n\nAlso check out other fun game bots on the server:\n✦ [Casino](https://discord.gg/DJycdCqnqt) ✦ [Mudae](https://discord.gg/ujCHVRctHY) ✦ [Akinator](https://discord.gg/fzDTdGZFh6) ✦ [Pokemon](https://discord.gg/DpJ4mAUC9m)\n\nMake sure you follow the [rules](https://discord.gg/NmD4JGCaNc) of the house for a good time here. Also, check out rules and instructions of game bots in respective channels.\n\n:love_letter: To get in touch with staff, simply raise a ticket from [support](https://discord.gg/T8VWyvDfeB).\n\nHave fun!\n\n__Server Member Count:__ {guild.member_count - len([m for m in guild.members if m.bot])}",
                               color=0x000000)
-        embed.set_thumbnail(url=member.avatar_url)
+        embed.set_thumbnail(url=member.avatar.url)
         await channel.send(f"{member.mention}", embed=embed)
         await member.add_roles(ping)
         await member.add_roles(level)
