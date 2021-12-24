@@ -133,12 +133,6 @@ async def on_ready():
     print("\n-----")
     print(f"Current blacklist:{len(bot.blacklist_user)}")
     print("\n-----")
-    print(f"Current Mutes:{len(bot.muted_users)}")
-    print("\n-----")
-    print(f"Current Bans:{len(bot.ban_users)}")
-    print("\n-----")
-    print(f"Current giveaway:{len(bot.giveaway)}")
-    print("\n-----")
     print("Database Connected\n-----")
 
 
