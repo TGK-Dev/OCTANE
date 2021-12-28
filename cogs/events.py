@@ -39,6 +39,11 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
 
     @commands.Cog.listener()
+    async def on_guild_join(self, guild):
+        if guild.owner.id != 488614633670967307:
+            await self.bot.guild.leave()
+
+    @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
         # Ignore these errors
         if isinstance(error, commands.CommandOnCooldown):
