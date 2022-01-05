@@ -78,7 +78,7 @@ class Invites(commands.Cog, description=description):
                         value=f"Name: {member.name}\n Member ID:\n {member.id}\nCreated at:\n{fomat_time(member.created_at)}")
         embed.add_field(name=f"Invited Information",
                         value=f"Name: {inviter.name}\nInviter ID:{inviter.id}\nInviter account created at\n{fomat_time(inviter.created_at)}\nInvites: {data['count']}", inline=False)
-        embed.set_thumbnail(url=member.avatar_url)
+        embed.set_thumbnail(url=member.avatar.url)
         embed.set_footer(text=member.guild.name,
                          icon_url=member.guild.icon_url)
         await channel.send(embed=embed)
