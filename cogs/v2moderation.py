@@ -1,9 +1,10 @@
 import asyncio
 import datetime
+from typing import MutableSet
 import discord
 import re
 from discord import user
-import requests
+from aiohttp import ClientSession
 import json
 
 from humanfriendly import format_timespan
@@ -110,6 +111,7 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
         if int(time) > 2419200:return await ctx.send("You can't set timeout for more than 28days")
         time = datetime.datetime.utcnow() + datetime.timedelta(seconds=time)
         time = time.isoformat()
+        url = f"https://discord.com/api/v9/guilds/{ctx.guild.id}/members/{user.id}"
         payload = {
             "communication_disabled_until": time
             }
@@ -118,7 +120,11 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
             "Content-Type": "application/json",
             }
 
-        r = requests.patch(f'https://discord.com/api/v9/guilds/{ctx.guild.id}/members/{user.id}', data=json.dumps(payload),headers=headers)
+        async with ClientSession() as session:
+            async with session.patch(url, data=json.dumps(payload),headers=headers) as response:
+                r = await response.json()
+                await session.close()
+
         embed = discord.Embed(description=f"<:dynosuccess:898244185814081557> ***{user} Was Timeout***",color=0x11eca4)
         await ctx.channel.send(embed=embed)
         log_embed = discord.Embed(title=f"Mute | {user}")
@@ -126,6 +132,27 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
         log_embed.add_field(name="Moderator", value=ctx.author.mention)
         channel = self.bot.get_channel(803687264110247987)
         await channel.send(embed=log_embed)
+    
+    @commands.command(name="selfmute", description="put user in timeout", usage="[member] [time]", aliases=["timeout"])
+    async def mute(self, ctx, time: TimeConverter):
+        if int(time) > 2419200:return await ctx.send("You can't set timeout for more than 28days")
+        mutet = time
+        time = datetime.datetime.utcnow()+ datetime.timedelta(seconds=time)
+        time = time.isoformat()
+        url = f"https://discord.com/api/v9/guilds/{ctx.guild.id}/members/{ctx.author.id}"
+        payload = {
+            "communication_disabled_until": time
+            }
+        headers = {
+            "Authorization": f"Bot {self.bot.config_token}",
+            "Content-Type": "application/json",
+            }
 
+        async with ClientSession() as session:
+            async with session.patch(url, data=json.dumps(payload),headers=headers) as response:
+                r = await response.json()
+                await session.close()
+        
+        await ctx.reply(f"You Have SelfMuted your self for {format_timespan(mutet)}\nPlease don't ask staff for unmute")
 def setup(bot):
     bot.add_cog(v2Moderation(bot))
