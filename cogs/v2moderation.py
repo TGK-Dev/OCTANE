@@ -133,8 +133,8 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
         channel = self.bot.get_channel(803687264110247987)
         await channel.send(embed=log_embed)
     
-    @commands.command(name="selfmute", description="put user in timeout", usage="[member] [time]", aliases=["timeout"])
-    async def mute(self, ctx, time: TimeConverter):
+    @commands.command(name="selfmute", description="put Your self in timeout", usage="[member] [time]", aliases=["smt"])
+    async def selfmute(self, ctx, time: TimeConverter):
         if int(time) > 2419200:return await ctx.send("You can't set timeout for more than 28days")
         mutet = time
         time = datetime.datetime.utcnow()+ datetime.timedelta(seconds=time)
