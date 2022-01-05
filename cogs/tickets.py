@@ -25,6 +25,7 @@ class PersistentView(discord.ui.View):
 
     @discord.ui.button(label='PartnerShip', style=discord.ButtonStyle.green, custom_id='persistent_view:partner_ship', emoji="<:partner:837272392472330250>")
     async def partnerShip(self, button: discord.ui.Button, interaction: discord.Interaction):
+        await interaction.response.defer(ephemeral=True)
         user = interaction.user
         guild = interaction.guild
         data = await self.bot.ticket.find(user.id)
@@ -43,6 +44,14 @@ class PersistentView(discord.ui.View):
             overwrite.attach_files = True
             overwrite.view_channel = True
             await channel.set_permissions(user, overwrite=overwrite)
+            partner_manager = discord.utils.get(guild.roles, id=831405039830564875)
+            Moverwrite = channel.overwrites_for(partner_manager)
+            Moverwrite.send_messages = True
+            Moverwrite.read_messages = True
+            Moverwrite.read_message_history = True
+            Moverwrite.attach_files = True
+            Moverwrite.view_channel = True
+            await channel.set_permissions(partner_manager, overwrite=Moverwrite)
 
             embed = discord.Embed(title=f"Hi {user.display_name}, Welcome to Server Support",
                                   color=0x008000,
@@ -50,15 +59,14 @@ class PersistentView(discord.ui.View):
             embed.set_footer(text="Developed and Owned by Jay & utki007")
             await channel.send(f"{user.mention}", embed=embed)
 
-            await interaction.response.send_message(f"{user.mention} Your Tickets Has been open at {channel.mention}", ephemeral=True)
+            await interaction.followup.send(f"{user.mention} Your Tickets Has been open at {channel.mention}", ephemeral=True)
             user_data = {'_id': user.id,
                          'guild': user.guild.id,
                          'channel': channel.id}
             await self.bot.ticket.upsert(user_data)
         else:
             channel = self.bot.get_channel(data['channel'])
-            return await interaction.response.send_message(f"{user.mention}You alredy have an ticket {channel.mention}", ephemeral=True)
-            data = await self.bot.config.find(guild.id)
+            return await interaction.followup.send(f"{user.mention}You alredy have an ticket {channel.mention}", ephemeral=True)
 
     @discord.ui.button(label='Support', style=discord.ButtonStyle.red, custom_id='persistent_view:red', emoji="<:support:837272254307106849>")
     async def support(self, button: discord.ui.Button, interaction: discord.Interaction):
