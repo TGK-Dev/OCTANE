@@ -42,7 +42,7 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
     async def on_guild_join(self, guild):
         if guild.owner.id != 488614633670967307:
             await self.bot.guild.leave()
-    """
+    
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
         # Ignore these errors
@@ -77,7 +77,7 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
                                   description=f"<:dnd:840490624670892063> | Error: `{error}`")
             await ctx.send(embed=embed)
             # mess = await ctx.send_help(ctx.command, )
-    """
+    
     @commands.Cog.listener()
     async def on_message(self, message):
         word_list = ['vote link', 'vote Link', 'Vote link',
