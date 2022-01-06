@@ -61,6 +61,7 @@ class start(discord.ui.View):
         await self.message.edit(view=self)
         thread = await self.message.create_thread(name="Guess Number Here", auto_archive_duration=60)
         self.bot.dispatch('game_start', self.message, thread, right_num)
+        await self.message.channel.send(f"Start guessing the number in thread above, {thread.mention}")
 
     async def interaction_check(self ,interaction):
         if interaction.user.id == self.ctx.author.id:
@@ -81,13 +82,13 @@ class Cog_name(commands.Cog):
         try:
             win_msg = await self.bot.wait_for("message", check=lambda m: m.channel.id == channel.id and m.content == str(right), timeout=3600)
             await win_msg.reply(f"{win_msg.author.mention} You Guessed The Right Number")         
-
+            await channel.edit(name="Game Has Ended",archived=True, locked=True)
             data = message.embeds[0].to_dict()
             (data['fields'][len(data['fields'])-1]) = {'name': 'Winner', 'value': f'{win_msg.author.mention} | {win_msg.author.name}', 'inline': False}
-
-            await message.edit(content=f"{win_msg.author.mention} Has Won the Game",embed=discord.Embed().from_dict(data))
-            await channel.edit(name="Game Has Ended",archived=True, locked=True)
-
+            await message.edit(embed=discord.Embed().from_dict(data))
+            win_embed = discord.Embed(description=f"{win_msg.author.mention} Has Won the [Game]({win_msg.jump_url})")
+            await message.reply(embed=win_embed)
+            
         except asyncio.TimeoutError:
 
             await channel.send(f"No one won")
@@ -97,7 +98,7 @@ class Cog_name(commands.Cog):
     @commands.check_any(commands.has_any_role(785842380565774368,803635405638991902,799037944735727636,785845265118265376,787259553225637889,852125566802198528))
     async def guess_number(self, ctx, max: int):
         embed = discord.Embed(title=f"{ctx.author} is Starting An Guess The Number Game",color=ctx.author.color,
-        description=f"You have to Guess The Number When Games Starts")
+        description=f"Start guessing the number in thread below after the event starts")
         embed.add_field(name="Range", value=f"0-{max}")
         embed.add_field(name="Channel", value=ctx.channel.mention)
         embed.add_field(name="Note:", value="Confirm The Range and Channel and use buttons below", inline=False)
