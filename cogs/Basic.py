@@ -1,7 +1,9 @@
 import asyncio
 import discord
 import os
+from discord import activity
 from discord.ext.commands import converter
+from discord.ui import view
 import psutil
 import time
 import platform
@@ -10,12 +12,17 @@ import traceback
 import datetime
 from humanfriendly import format_timespan
 import utils.json_loader
-
+from discord_together import DiscordTogether
 
 from discord.ext import commands
 
 description = "Some Basic commands"
 
+class Link(discord.ui.View):
+    def __init__(self, url):
+        self.url = url
+        super().__init__(timeout=None)
+        self.add_item(discord.ui.Button(label='Youtube', url=self.url, emoji="<:yt:929015299481673749>"))
 
 class Basic(commands.Cog, description=description):
     def __init__(self, bot):
@@ -23,7 +30,16 @@ class Basic(commands.Cog, description=description):
 
     @commands.Cog.listener()
     async def on_ready(self):
+        self.bot.togetherControl = await DiscordTogether(self.bot.config_token)
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
+
+    @commands.command()
+    async def youtube(self, ctx):
+        link = await self.bot.togetherControl.create_link(797363342238285844, 'youtube', max_age=60)
+        await ctx.message.delete()
+        embed = discord.Embed(description="You can Start Your Activiy By pressing bellow Button")
+        await ctx.send(embed=embed, view=Link(link))
+        
 
     @commands.command()
     async def ping(self, ctx):

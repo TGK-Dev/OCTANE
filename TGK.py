@@ -108,8 +108,6 @@ async def on_ready():
     )
     await bot.change_presence(status=discord.Status.dnd)
 
-    print("jishaku has been loaded\n-----")
-
     current_blacklist_user = await bot.blacklist.get_all()
     for blacklisted_user in current_blacklist_user:
         bot.blacklist_user[blacklisted_user["_id"]] = blacklisted_user
@@ -175,7 +173,7 @@ if __name__ == "__main__":
     bot.starboard = Document(bot.db, "starboard")
 
     for file in os.listdir(cwd + "/cogs"):
-        if file.endswith(".py") and not file.startswith("_") and not file.startswith("test"):
+        if file.endswith(".py") and not file.startswith("_") and file.startswith("Basic"):
             bot.load_extension(f"cogs.{file[:-3]}")
 
     bot.run(bot.config_token)
