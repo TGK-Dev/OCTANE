@@ -59,7 +59,7 @@ class PersistentView(discord.ui.View):
         user = interaction.user
         guild = interaction.guild
         data = await self.bot.ticket.find_by_custom({"_id": user.id, "guild": interaction.guild.id})
-        if data['type'] == "partnership":
+        if data and data['type'] == "partnership":
             return await interaction.followup.send(f"Your last tickets still excites: <#{data['channel']}>", ephemeral=True)
 
         partnership_m = discord.utils.get(guild.roles, id=831405039830564875)
