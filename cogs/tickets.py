@@ -6,7 +6,6 @@ import io
 import json
 import random
 
-
 from copy import deepcopy
 from discord import message
 from discord import channel
@@ -23,6 +22,8 @@ class PersistentView(discord.ui.View):
     def __init__(self, bot):
         self.bot = bot
         super().__init__(timeout=None)
+        url = 'https://dyno.gg/form/99ad4f31'
+        self.add_item(discord.ui.Button(label='Ban Appeal', url=url))
 
     @discord.ui.button(label='Server Support', style=discord.ButtonStyle.red, custom_id='persistent_view:red', emoji="<:support:837272254307106849>")
     async def support(self, button: discord.ui.Button, interaction: discord.Interaction):
