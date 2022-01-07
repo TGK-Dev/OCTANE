@@ -9,6 +9,7 @@ import textwrap
 from discord.ext import commands
 from discord.ext.buttons import Paginator
 from traceback import format_exception
+import traceback
 from utils.util import Pag
 from utils.util import clean_code
 
