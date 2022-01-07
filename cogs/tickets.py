@@ -30,9 +30,9 @@ class PersistentView(discord.ui.View):
         await interaction.response.defer(ephemeral=True)
         user = interaction.user
         guild = interaction.guild
-        data = await self.bot.ticket.find(user.id)
+        data = await self.bot.ticket.find_by_custom({"_id": user.id, "guild": interaction.guild.id})
         if data and data['type'] == "support": 
-            return await interaction.response.send_message(f"Your last tickets still excites: {data['channel']}", ephemeral=True)
+            return await interaction.followup.send(f"Your last tickets still excites: <#{data['channel']}>", ephemeral=True)
 
         overwrites = {
             guild.default_role: discord.PermissionOverwrite(read_messages=False),
@@ -40,13 +40,13 @@ class PersistentView(discord.ui.View):
             interaction.user: discord.PermissionOverwrite(read_messages=True, send_messages=True, attach_files=True,read_message_history=True),            
         }
         channel = await guild.create_text_channel(category=self.bot.get_channel(829230513516445736), name=f"{user.name} Support Ticket", topic=f"User Id: {user.id}", overwrites=overwrites)
-        await interaction.followup.send(f"You new Ticekt has Been Open in {channel.mention})", ephemeral=True)
+        await interaction.followup.send(f"You new Ticekt has Been Open in {channel.mention}", ephemeral=True)
         
         Tembed = discord.Embed(title=f"Hi {user.display_name}, Welcome to Server Support",
                                   color=0x008000,
                                   description="Kindly wait patiently. A staff member will assist you shortly.\nIf you're looking to approach a specific staff member, ping the member once. Do not spam ping any member or role.\n\nThank you.")
         Tembed.set_footer(text="Developed and Owned by Jay & utki007")
-        await channel.send(f"{user.mention} | `@here`", embed=Tembed)
+        await channel.send(f"{user.mention} | @here", embed=Tembed)
         user_data = {'_id': user.id,
                          'guild': user.guild.id,
                          'channel': channel.id,
@@ -58,9 +58,9 @@ class PersistentView(discord.ui.View):
         await interaction.response.defer(ephemeral=True)
         user = interaction.user
         guild = interaction.guild
-        data = await self.bot.ticket.find(user.id)
+        data = await self.bot.ticket.find_by_custom({"_id": user.id, "guild": interaction.guild.id})
         if data['type'] == "partnership":
-            return await interaction.response.send_message(f"Your last tickets still excites: {data['channel']}", ephemeral=True)
+            return await interaction.followup.send(f"Your last tickets still excites: <#{data['channel']}>", ephemeral=True)
 
         partnership_m = discord.utils.get(guild.roles, id=831405039830564875)
         overwrites = {
@@ -75,12 +75,12 @@ class PersistentView(discord.ui.View):
                                   color=0x008000,
                                   description="Kindly wait patiently. A staff member will assist you shortly.\nIf you're looking to approach a specific staff member, ping the member once. Do not spam ping any member or role.\n\nThank you.")
         Tembed.set_footer(text="Developed and Owned by Jay & utki007")
-        m = await channel.send(f"{user.mention} | `{partnership_m.mention}`", embed=Tembed)
-        await interaction.followup.send(f"You new Ticekt has Been Open in {channel.mention})", ephemeral=True)
+        m = await channel.send(f"{user.mention} | {partnership_m.mention}", embed=Tembed)
+        await interaction.followup.send(f"You new Ticekt has Been Open in {channel.mention}", ephemeral=True)
         user_data = {'_id': user.id,
-                         'guild': user.guild.id,
-                         'channel': channel.id,
-                         'type': 'partnership'}
+                    'guild': user.guild.id,
+                    'channel': channel.id,
+                    'type': 'partnership'}
         await self.bot.ticket.upsert(user_data)
 
 class Confirm(discord.ui.View):
