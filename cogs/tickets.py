@@ -47,10 +47,11 @@ class PersistentView(discord.ui.View):
                                   description="Kindly wait patiently. A staff member will assist you shortly.\nIf you're looking to approach a specific staff member, ping the member once. Do not spam ping any member or role.\n\nThank you.")
         Tembed.set_footer(text="Developed and Owned by Jay & utki007")
         await channel.send(f"{user.mention} | @here", embed=Tembed)
+
         user_data = {'_id': user.id,
-                         'guild': user.guild.id,
-                         'channel': channel.id,
-                         'type': 'support'}
+                    'guild': user.guild.id,
+                    'channel': channel.id,
+                    'type': 'support'}
         await self.bot.ticket.upsert(user_data)
 
     @discord.ui.button(label='Partership', style=discord.ButtonStyle.green, custom_id='persistent_view:partner_ship', emoji="<:partner:837272392472330250>")
@@ -77,6 +78,7 @@ class PersistentView(discord.ui.View):
         Tembed.set_footer(text="Developed and Owned by Jay & utki007")
         m = await channel.send(f"{user.mention} | {partnership_m.mention}", embed=Tembed)
         await interaction.followup.send(f"You new Ticekt has Been Open in {channel.mention}", ephemeral=True)
+        
         user_data = {'_id': user.id,
                     'guild': user.guild.id,
                     'channel': channel.id,
@@ -176,9 +178,9 @@ class Tickets(commands.Cog):
         tz_info = "Asia/Kolkata"
 
         data = await self.bot.ticket.find_by_custom({'channel': ctx.channel.id, 'guild': ctx.guild.id})
-        view = Confirm(data['_id'])
-        embed = discord.Embed(description=f"<@{data['_id']}> Press Below Button to allow us to save this conversation of this ticket, This conversation will not be share anywhere")
-        m = await ctx.send(f"<@{data['_id']}>", embed=embed, view=view)
+        view = Confirm(ctx.author.id)
+        embed = discord.Embed(description=f"<@{ctx.author.mention}> by Pressing bellow button your allowing as to save messages of this channel")
+        m = await ctx.send(f"{ctx.author.mention}", embed=embed, view=view)
         await view.wait()
         if view.value is None:
             await m.edit('Timed out...')
