@@ -80,8 +80,7 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
     
     @commands.Cog.listener()
     async def on_message(self, message):
-        word_list = ['vote link', 'vote Link', 'Vote link',
-                     'pls vote', 'pls Vote', 'Pls vote']
+        word_list = ['vote link', 'vote Link', 'Vote link','how to get vote role', 'how to vote', 'pls vote', 'pls Vote', 'Pls vote']
         if message.author.bot:
             return
 
@@ -130,16 +129,6 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
             await member.send(embed=embed)
         except discord.HTTPException:
             pass
-
-    @commands.command(name="joint", hidden=True)
-    @commands.has_any_role(785842380565774368, 799037944735727636)
-    async def joint(self, ctx):
-        guild = ctx.guild
-        embed = discord.Embed(title=f'**WELCOME TO TGK, {ctx.author.display_name}!**',
-                              description=f"\n\nGet your favorite roles from [self-roles](https://discord.gg/58bc5QWE4q),\nand say _Hello_ to everyone in [chat](https://discord.gg/yEPYYDZ3dD)!\n\nAlso check out other fun game bots on the server:\n✦ [Casino](https://discord.gg/DJycdCqnqt) ✦ [Mudae](https://discord.gg/ujCHVRctHY) ✦ [Akinator](https://discord.gg/fzDTdGZFh6) ✦ [Pokemon](https://discord.gg/DpJ4mAUC9m)\n\nMake sure you follow the [rules](https://discord.gg/NmD4JGCaNc) of the house for a good time here. Also, check out rules and instructions of game bots in respective channels.\n\n:love_letter: To get in touch with staff, simply raise a ticket from [support](https://discord.gg/T8VWyvDfeB).\n\nHave fun!\n\n__Server Member Count:__ {guild.member_count - len([m for m in guild.members if m.bot])}",
-                              color=0x2ECC71)
-        embed.set_thumbnail(url=ctx.author.avatar_url)
-        await ctx.send(embed=embed)
 
     @commands.Cog.listener()
     async def on_member_ban(self, guild, member):
