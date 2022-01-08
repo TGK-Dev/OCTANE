@@ -78,7 +78,7 @@ class PersistentView(discord.ui.View):
         Tembed.set_footer(text="Developed and Owned by Jay & utki007")
         m = await channel.send(f"{user.mention} | {partnership_m.mention}", embed=Tembed)
         await interaction.followup.send(f"You new Ticekt has Been Open in {channel.mention}", ephemeral=True)
-        
+
         user_data = {'_id': user.id,
                     'guild': user.guild.id,
                     'channel': channel.id,
@@ -179,7 +179,7 @@ class Tickets(commands.Cog):
 
         data = await self.bot.ticket.find_by_custom({'channel': ctx.channel.id, 'guild': ctx.guild.id})
         view = Confirm(ctx.author.id)
-        embed = discord.Embed(description=f"<@{ctx.author.mention}> by Pressing bellow button your allowing as to save messages of this channel")
+        embed = discord.Embed(description=f"{ctx.author.mention} by Pressing bellow button your allowing as to save messages of this channel")
         m = await ctx.send(f"{ctx.author.mention}", embed=embed, view=view)
         await view.wait()
         if view.value is None:
