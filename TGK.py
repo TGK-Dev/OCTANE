@@ -102,7 +102,6 @@ bot.color_list = [c for c in bot.colors.values()]
 
 @bot.event
 async def on_ready():
-    # On ready, print some details to standard out
     print(
         f"-----\nLogged in as: {bot.user.name} : {bot.user.id}\n-----\nMy current prefix is: {bot.DEFAULTPREFIX}\n-----"
     )
@@ -177,12 +176,3 @@ if __name__ == "__main__":
             bot.load_extension(f"cogs.{file[:-3]}")
 
     bot.run(bot.config_token)
-
-"""
-
-{
-    "token": "ODMxNTYzNzgwNTI5MzI0MDMy.YHXEHg.7cm20TLRjhmXFmxl4KwUbwQIGWc",
-    "mongo": "mongodb+srv://test121:test121@cluster0.l4ljr.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
-    "x-rapidapi-key": "61081de6d7msh9b9cc262fb7993dp1ed8f8jsn4d6720e23330"
-}
-"""
