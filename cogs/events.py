@@ -89,7 +89,7 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
             for word in word_list:
                 if word in messageContent:
                     guild = message.guild.id
-                    return await message.reply('__**Voting Perks**__\n❥ Special "Voted" Role.\n❥ 2,500 Casino Cash. Collect using ,collectincome in #:game_die:。casino.\n❥ Access to Dank Memer Premium with 2x Amaari.\n❥ Guild wide 1x Amaari.\n\n', mention_author=False, view=vote_button(guild))
+                    return await message.reply('__**Voting Perks**__\n❥ Special "Voted" Role.\n❥ 2,500 Casino Cash. Collect using ,collectincome in <#786117471840895016>.\n❥ Access to <#929613393097293874> with 2x Amaari.\n❥ Guild wide 1x Amaari.\n\n', mention_author=False, view=vote_button(guild))
 
             for word in ['when heist', 'where heist', 'heist when', 'where is the heist']:
                 if word in messageContent:
