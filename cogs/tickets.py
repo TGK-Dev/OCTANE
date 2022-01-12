@@ -47,7 +47,7 @@ class PersistentView(discord.ui.View):
                                   color=0x008000,
                                   description="Kindly wait patiently. A staff member will assist you shortly.\nIf you're looking to approach a specific staff member, ping the member once. Do not spam ping any member or role.\n\nThank you.")
         Tembed.set_footer(text="Developed and Owned by Jay & utki007")
-        await channel.send(f"{user.mention} | `@here`", embed=Tembed)
+        await channel.send(f"{user.mention} | @here", embed=Tembed)
 
         user_data = {'_id': user.id,
                     'guild': user.guild.id,
