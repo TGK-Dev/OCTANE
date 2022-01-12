@@ -1,4 +1,5 @@
 import asyncio
+import re
 import chat_exporter
 import datetime
 import discord
@@ -46,7 +47,7 @@ class PersistentView(discord.ui.View):
                                   color=0x008000,
                                   description="Kindly wait patiently. A staff member will assist you shortly.\nIf you're looking to approach a specific staff member, ping the member once. Do not spam ping any member or role.\n\nThank you.")
         Tembed.set_footer(text="Developed and Owned by Jay & utki007")
-        await channel.send(f"{user.mention} | @here", embed=Tembed)
+        await channel.send(f"{user.mention} | `@here`", embed=Tembed)
 
         user_data = {'_id': user.id,
                     'guild': user.guild.id,
@@ -85,6 +86,31 @@ class PersistentView(discord.ui.View):
                     'type': 'partnership'}
         await self.bot.ticket.upsert(user_data)
 
+    async def interaction_check(self ,interaction):
+        data = self.bot.blacklist_users
+        print(f"User: {interaction.user.id}\nlist: {data}")
+        if interaction.user.id in data:
+            await interaction.response.send_message("Your Blacklisted from bot", ephemeral=True)
+        else:
+            return True
+
+class delete(discord.ui.View):
+    def __init__(self, bot, ctx):
+        super().__init__()
+        self.bot = bot
+        self.ctx = ctx
+    
+    @discord.ui.button(label="Yes", style=discord.ButtonStyle.red)
+    async def yes(self, button: discord.ui.Button, interaction: discord.Interaction):
+        await interaction.response.send_message(f"Invoking delete command on your behalf.", ephemeral=True)
+        await self.ctx.invoke(self.bot.get_command('delete'))
+
+    async def interaction_check(self ,interaction):
+        if interaction.user.id == self.ctx.author.id:
+            return True
+        else:
+            await interaction.response.send_message("You didn't invoked save command", ephemeral=True)
+
 class Confirm(discord.ui.View):
     def __init__(self, user=None):
         super().__init__()
@@ -102,6 +128,7 @@ class Confirm(discord.ui.View):
         await interaction.response.send_message('Cancelling', ephemeral=True)
         self.value = False
         self.stop()
+
     async def interaction_check(self ,interaction):
         if interaction.user.id == self.user:
             return True
@@ -162,7 +189,8 @@ class Tickets(commands.Cog):
 
         msg = await ctx.send("Deleting this Ticekt in 10s `type fs` to cancel this command")
         try:
-            await self.bot.wait_for('message', check=lambda m: m.author.id == ctx.author.id and m.channel.id == ctx.channel.id and m.content.lower() == "fs", timeout=10)
+            stop_m = await self.bot.wait_for('message', check=lambda m: m.author.id == ctx.author.id and m.channel.id == ctx.channel.id and m.content.lower() == "fs", timeout=10)
+            await stop_m.add_reaction("✅")
             return await msg.edit(content="Ok cancelling the command")
         except asyncio.TimeoutError:
             await ctx.channel.delete()
@@ -200,6 +228,8 @@ class Tickets(commands.Cog):
             channel_file = discord.File(io.BytesIO(transcript.encode()),
                                         filename=f"transcript-{ctx.channel.name}.html")
             await ctx.send(f"{ctx.channel.name} | {ticket}", file=channel_file)
+
+            await ctx.send("Do want to delete this ticket?", view=delete(self.bot,ctx))
         else: 
             pass
     
