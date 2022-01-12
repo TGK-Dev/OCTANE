@@ -69,7 +69,7 @@ class start(discord.ui.View):
         else:
             await interaction.response.send_message("You nor the Staff or Host of the event", ephemeral=True)
 
-class Cog_name(commands.Cog):
+class Guess_number(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
     
@@ -86,7 +86,7 @@ class Cog_name(commands.Cog):
             data = message.embeds[0].to_dict()
             (data['fields'][len(data['fields'])-1]) = {'name': 'Winner', 'value': f'{win_msg.author.mention} | {win_msg.author.name}', 'inline': False}
             await message.edit(embed=discord.Embed().from_dict(data))
-            win_embed = discord.Embed(description=f"{win_msg.author.mention} Has Won the [Game]({win_msg.jump_url})")
+            win_embed = discord.Embed(description=f"🏆 {win_msg.author.mention} Guessed The Correct Number", color=win_msg.author.color)
             await message.reply(embed=win_embed)
             
         except asyncio.TimeoutError:
@@ -117,7 +117,7 @@ class Cog_name(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(Cog_name(bot))
+    bot.add_cog(Guess_number(bot))
 
 #None Thread Version
 # from asyncio.tasks import wait, wait_for
