@@ -122,17 +122,15 @@ class Owner(commands.Cog, description=description):
 
             current_blacklist_user = await self.bot.blacklist.get_all()
             for blacklisted_user in current_blacklist_user:
-                self.bot.blacklist_user[blacklisted_user["_id"]
-                                        ] = blacklisted_user
+                self.bot.blacklist_user[blacklisted_user["_id"]] = blacklisted_user
 
             embed = discord.Embed(
                 description=f"The User {user.mention} is now blacklisted")
             await ctx.send(embed=embed)
-            # await user.send("you Have been blacklist from using me")
-            # await user.send("<a:bye:842697189159206932>")
             await ctx.message.delete()
         else:
-            await ctx.send("already blacklisted")
+            embed = discord.Embed(description=f"The User {user.mention} is already Blacklisted")
+            await ctx.send(embed=embed)
 
     @commands.command(
         name="unblacklist",
