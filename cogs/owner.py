@@ -107,22 +107,23 @@ class Owner(commands.Cog, description=description):
         description="blacklist user from the bot",
         usage="<user>",
     )
-    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376), is_me())
-    @commands.check_any(perm_check(), is_me())
+    @commands.check_any(commands.has_any_role(799037944735727636, 785845265118265376, 803635405638991902), is_me())
     async def blacklist(self, ctx, user: discord.Member):
-        user = user if user else ctx.author
         if user.id in [self.bot.user.id, ctx.author.id, 488614633670967307, 488614633670967307]:
             return await ctx.send("Hey, you cannot blacklist yourself / bot/ Owner")
 
-        data = await self.bot.blacklist.find(user.id)
-        if data is None:
-            data = {"_id": user.id}
+        data = await self.bot.config.find(ctx.guild.id)
+        if data:
+            if user.id in data['blacklist']:
+                return await ctx.send("User is allready blacklisted")
+            else:
+                data['blacklist'].append(user.id)
 
-            await self.bot.blacklist.upsert(data)
+            await self.bot.config.upsert(data)
 
-            current_blacklist_user = await self.bot.blacklist.get_all()
-            for blacklisted_user in current_blacklist_user:
-                self.bot.blacklist_user[blacklisted_user["_id"]] = blacklisted_user
+            current_blacklist_user = await self.bot.config.find(785839283847954433)
+            for blacklisted_user in current_blacklist_user['blacklist']:
+                self.blacklist_users.append(blacklisted_user)
 
             embed = discord.Embed(
                 description=f"The User {user.mention} is now blacklisted")
@@ -137,31 +138,31 @@ class Owner(commands.Cog, description=description):
         description="Unblacklist a user from the bot",
         usage="<user>"
     )
-    @commands.check_any(perm_check(), is_me())
+    @commands.check_any(commands.has_any_role(799037944735727636, 785845265118265376), is_me())
     async def unblacklist(self, ctx, user: discord.Member):
         """
         Unblacklist someone from the bot
         """
-        data = await self.bot.blacklist.find(user.id)
-        if data is None:
-            return await ctx.send(f"Couldn't find Any User by {user.name}")
-        blacklist = {'_id': user.id}
+        data = await self.bot.config.find(ctx.guild.id)
+        if data:
+            if user.id in data['blacklist']:
+                data['blacklist'].remove(user.id)
+            else:
+                return await ctx.send("User is not blacklisted")
+                
+            await self.bot.config.upsert(data)
 
-        await self.bot.blacklist.delete_by_custom(blacklist)
+            current_blacklist_user = await self.bot.config.find(785839283847954433)
+            for blacklisted_user in current_blacklist_user['blacklist']:
+                self.blacklist_users.append(blacklisted_user)
 
-        current_blacklist_user = await self.bot.blacklist.get_all()
-        for blacklisted_user in current_blacklist_user:
-            self.bot.blacklist_user[blacklisted_user["_id"]] = blacklisted_user
-
-        try:
-            self.bot.blacklist_user.pop(user.id)
-        except KeyError:
-            pass
-
-        embed = discord.Embed(
-            description=f"The User {user.mention} is now unblacklisted")
-        await ctx.send(embed=embed)
-        await ctx.message.delete()
+            embed = discord.Embed(
+                description=f"The User {user.mention} is now blacklisted")
+            await ctx.send(embed=embed)
+            await ctx.message.delete()
+        else:
+            embed = discord.Embed(description=f"The User {user.mention} is already Blacklisted")
+            await ctx.send(embed=embed)
 
     @commands.command(name="activity", description="Change Bot activity", usage="[activity]")
     @commands.check_any(perm_check(), is_me())

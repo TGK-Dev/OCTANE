@@ -20,10 +20,10 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
     @tasks.loop(seconds=900)
     async def check_update_task(self):
 
-        self.bot.blacklist_user = {}
-        current_blacklist_user = await self.bot.blacklist.get_all()
-        for blacklisted_user in current_blacklist_user:
-            self.bot.blacklist_user[blacklisted_user["_id"]] = blacklisted_user
+        self.bot.blacklist_users = []
+        current_blacklist_user = await self.bot.config.find(785839283847954433)
+        for blacklisted_user in current_blacklist_user['blacklist']:
+            self.bot.blacklist_users.append(blacklisted_user)
 
         self.bot.afk_user = {}
         current_afk_user = await self.bot.afk.get_all()

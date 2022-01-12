@@ -66,9 +66,8 @@ bot.joke_api_key = os.getenv('DAD')
 logging.basicConfig(level=logging.INFO)
 
 bot.DEFAULTPREFIX = DEFAULTPREFIX
-bot.blacklist_user = {}
+bot.blacklist_users = []
 bot.guild_id = [797920317871357972]
-bot.ticket_setups = {}
 bot.cwd = cwd
 bot.perm = {}
 bot.afk_user = {}
@@ -107,9 +106,10 @@ async def on_ready():
     )
     await bot.change_presence(status=discord.Status.dnd)
 
-    current_blacklist_user = await bot.blacklist.get_all()
-    for blacklisted_user in current_blacklist_user:
-        bot.blacklist_user[blacklisted_user["_id"]] = blacklisted_user
+    current_blacklist_user = await bot.config.find(785839283847954433)
+    for blacklisted_user in current_blacklist_user['blacklist']:
+        bot.blacklist_users.append(blacklisted_user)
+        
 
     current_afk_user = await bot.afk.get_all()
     for afk in current_afk_user:
@@ -128,7 +128,7 @@ async def on_ready():
         pass
 
     print("\n-----")
-    print(f"Current blacklist:{len(bot.blacklist_user)}")
+    print(f"Current blacklist:{len(bot.blacklist_users)}")
     print("\n-----")
     print("Database Connected\n-----")
 
@@ -141,7 +141,7 @@ async def on_message(message):
 
     # A way to blacklist users from the bot by not processing commands
     # if the author is in the blacklisted list
-    if message.author.id in bot.blacklist_user:
+    if message.author.id in bot.blacklist_users:
         return
 
     # Whenever the bot is tagged, respond with its prefix
@@ -163,7 +163,6 @@ if __name__ == "__main__":
     # I.E its not being imported from another python file run this
     bot.mongo = motor.motor_asyncio.AsyncIOMotorClient(str(bot.connection_url))
     bot.db = bot.mongo["tgk_database"]
-    bot.blacklist = Document(bot.db,"BlackListed")
     bot.config = Document(bot.db, "config")
     bot.afk = Document(bot.db, "afk")
     bot.ticket = Document(bot.db, "ticket")

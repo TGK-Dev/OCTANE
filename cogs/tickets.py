@@ -88,7 +88,6 @@ class PersistentView(discord.ui.View):
 
     async def interaction_check(self ,interaction):
         data = self.bot.blacklist_users
-        print(f"User: {interaction.user.id}\nlist: {data}")
         if interaction.user.id in data:
             await interaction.response.send_message("Your Blacklisted from bot", ephemeral=True)
         else:
