@@ -11,9 +11,15 @@ class starboard(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
     
+    def is_me():
+        def predicate(ctx):
+            return ctx.message.author.id in [488614633670967307, 301657045248114690]
+        return commands.check(predicate)
+
     @commands.Cog.listener()
     async def on_read(self):
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
+    
     
 
     @commands.Cog.listener()
@@ -139,6 +145,7 @@ class starboard(commands.Cog):
                         return await existing_message.edit(content=f":dizzy: {len(react)} | {channel.mention}",embed=existing_message.embeds[0])
 
     @commands.group(invoke_without_command=True,description="Config command for startbord module")
+    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902,799037944735727636), is_me())
     async def starboard(self, ctx):
         data = await self.bot.config.find(ctx.guild.id)
         embed = discord.Embed(title=f"{ctx.guild.name}'s Startbord Config",color=0x9e3bff,
@@ -148,6 +155,7 @@ class starboard(commands.Cog):
         await ctx.send(embed=embed)
     
     @starboard.group(invoke_without_command=True, name="threshold")
+    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902,799037944735727636), is_me())
     async def threshold(self, ctx, threshold: int=None):
         data = await self.bot.config.find(ctx.guild.id)
         if not data: return await ctx.send("No config found")
@@ -159,6 +167,7 @@ class starboard(commands.Cog):
             await ctx.send(f"Current Threshhold is {data['emoji_threshold']}")
 
     @starboard.group(invoke_without_command=True, name="toggle")
+    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902,799037944735727636), is_me())
     async def toggle(self, ctx, toggle: bool=False):
         data = await self.bot.config.find(ctx.guild.id)
         if not data: return await ctx.send("No config found")
@@ -170,6 +179,7 @@ class starboard(commands.Cog):
             await ctx.send(f"Current status is {data['starboard_toggle']}")
 
     @starboard.group(invoke_without_command=True, name="channel")
+    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902,799037944735727636), is_me())
     async def channel(self, ctx, channel: discord.TextChannel=None):
         data = await self.bot.config.find(ctx.guild.id)
         if not data: return await ctx.send("No config found")

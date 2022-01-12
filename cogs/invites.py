@@ -103,7 +103,7 @@ class Invites(commands.Cog, description=description):
             await ctx.send(embed=embed)
 
     @commands.command(name="inviter", description="Find out who invited who")
-    @commands.check_any(perm_check(), is_me())
+    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902,799037944735727636,785845265118265376,787259553225637889,843775369470672916), is_me())
     async def inviter(self, ctx, member: discord.Member):
 
         invites_filter = {"userInvited": member.id}

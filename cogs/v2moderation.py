@@ -105,7 +105,7 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
         await ctx.send(f'{user.name}|{args}')
 
     @commands.command(name="mute", description="put user in timeout", usage="[member] [time]", aliases=["timeout"])
-    @commands.has_any_role(785842380565774368, 803635405638991902, 799037944735727636, 785845265118265376, 787259553225637889, 843775369470672916)
+    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902,799037944735727636,785845265118265376,787259553225637889,843775369470672916), is_me())
     async def mute(self, ctx, user: discord.Member, time: TimeConverter):
         await ctx.message.delete()
         if int(time) > 2419200:return await ctx.send("You can't set timeout for more than 28days")

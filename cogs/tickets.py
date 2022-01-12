@@ -156,7 +156,7 @@ class Tickets(commands.Cog):
         await ctx.send(embed=embed, view=PersistentView(self.bot))
 
     @commands.command()
-    @commands.check_any(commands.has_any_role(831405039830564875, 810134909372203039), is_me())
+    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902,799037944735727636,785845265118265376,787259553225637889,843775369470672916), is_me())
     async def close(self, ctx):
         data = await self.bot.ticket.find_by_custom({'channel': ctx.channel.id, 'guild': ctx.guild.id})
         if not data: return await ctx.send("Please use this command only in tickets")
@@ -168,7 +168,7 @@ class Tickets(commands.Cog):
         await ctx.send(embed=embed)
     
     @commands.command()
-    @commands.check_any(commands.has_any_role(831405039830564875, 810134909372203039,831405039830564875), is_me())
+    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902,799037944735727636,785845265118265376,787259553225637889,843775369470672916), is_me())
     async def open(self, ctx):
         data = await self.bot.ticket.find_by_custom({'channel': ctx.channel.id, 'guild': ctx.guild.id})
         if not data: return await ctx.send("Please use this command only in tickets")
@@ -180,7 +180,7 @@ class Tickets(commands.Cog):
         await ctx.send(content=f"<@{data['_id']}>",embed=embed)
 
     @commands.command(name="delete", description="delete the ticekt")
-    @commands.check_any(commands.has_any_role(831405039830564875, 810134909372203039,831405039830564875), is_me())
+    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902,799037944735727636,785845265118265376,787259553225637889), is_me())
     async def delete(self, ctx):
         data = await self.bot.ticket.find_by_custom({'channel': ctx.channel.id, 'guild': ctx.guild.id})
 
@@ -196,7 +196,7 @@ class Tickets(commands.Cog):
             await self.bot.ticket.delete(data['_id'])
 
     @commands.command(name="transcript", description="Save current ticket's transcript", usage="[limit] [time Zone]", aliases=["save"])
-    @commands.check_any(commands.has_any_role(831405039830564875, 810134909372203039,831405039830564875), is_me())
+    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902,799037944735727636,785845265118265376,787259553225637889,843775369470672916), is_me())
     async def transcript(self, ctx, limit: int = None, *, ticket=None):
 
         ticket = ticket if ticket else "Topic Not Given"

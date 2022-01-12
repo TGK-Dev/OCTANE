@@ -66,7 +66,7 @@ class Owner(commands.Cog, description=description):
         description="Change your guilds prefix!",
         usage="prefix [New_prefix]",
     )
-    @commands.check_any(perm_check(), is_me())
+    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902,799037944735727636), is_me())
     async def prefix(self, ctx, *, prefix):
         data = await self.bot.config.find(ctx.guild.id)
         if data is None:
@@ -172,7 +172,7 @@ class Owner(commands.Cog, description=description):
         await ctx.send('Bot activity is Updated')
 
     @commands.command(name="Say", description="And classic say command", usage="[anything]")
-    @commands.check_any(perm_check(), is_me())
+    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902,799037944735727636,785845265118265376,787259553225637889,843775369470672916), is_me())
     async def say(self, ctx, *, say):
         await ctx.message.delete()
         await ctx.send(f'{say}')
@@ -206,7 +206,7 @@ class Owner(commands.Cog, description=description):
             await ctx.send(f"I have {ternary} {command.qualified_name} for you!")
 
     @commands.command(name="nuke", description="Nuke The Channel", hidden=True)
-    @commands.check_any(perm_check(), is_me())
+    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902,799037944735727636,), is_me())
     @commands.max_concurrency(1, commands.BucketType.channel)
     async def nuke(self, ctx, channel: discord.TextChannel = None):
         channel = channel if channel else ctx.channel
