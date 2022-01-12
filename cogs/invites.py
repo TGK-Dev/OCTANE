@@ -80,7 +80,7 @@ class Invites(commands.Cog, description=description):
                         value=f"Name: {inviter.name}\nInviter ID:{inviter.id}\nInviter account created at\n{fomat_time(inviter.created_at)}\nInvites: {data['count']}", inline=False)
         embed.set_thumbnail(url=member.avatar.url)
         embed.set_footer(text=member.guild.name,
-                         icon_url=member.guild.icon_url)
+                         icon_url=member.guild.icon.url)
         await channel.send(embed=embed)
 
     @commands.command(name="invites", description="Show user total Invites", usage="[Member]")
