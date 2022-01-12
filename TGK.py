@@ -163,6 +163,7 @@ if __name__ == "__main__":
     # I.E its not being imported from another python file run this
     bot.mongo = motor.motor_asyncio.AsyncIOMotorClient(str(bot.connection_url))
     bot.db = bot.mongo["tgk_database"]
+    bot.blacklist = Document(bot.db,"BlackListed")
     bot.config = Document(bot.db, "config")
     bot.afk = Document(bot.db, "afk")
     bot.ticket = Document(bot.db, "ticket")
