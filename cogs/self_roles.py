@@ -28,16 +28,14 @@ class self_role(discord.ui.View):
     async def self_main(self, select: discord.ui.select, interaction: discord.Interaction):
         guild = interaction.guild
         added = []
-        remove = []
         for roles in select.values:
             role = discord.utils.get(guild.roles, id=int(roles))
             if role in interaction.user.roles:
-                remove.append(role.mention)
-                await interaction.user.remove_roles(role)
+                continue
             else:
                 added.append(role.mention)
                 await interaction.user.add_roles(role)
-        await interaction.response.send_message("Added Role: "+", ".join(added)+"\n"+"Removed Roles: "+", ".join(remove), ephemeral=True)
+        await interaction.response.send_message("Added Role: "+", ".join(added), ephemeral=True)
 
 class self_cmd(commands.Cog):
     def __init__(self, bot):
