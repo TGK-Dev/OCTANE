@@ -1,5 +1,8 @@
 import asyncio
+from code import interact
 import datetime
+from dis import dis
+from email import message
 from typing import MutableSet
 import discord
 import re
@@ -19,6 +22,37 @@ time_dict = {"h": 3600, "s": 1, "m": 60, "d": 86400}
 
 description = "Moderation commands"
 
+class roles(discord.ui.View):
+    def __init__(self, bot, ctx, user: discord.Member, message: discord.Message):
+        super().__init__(timeout=60)
+        self.bot = bot
+        self.ctx = ctx
+        self.user = user
+        self.message = message
+    
+    @discord.ui.button(label="Show Roles", style=discord.ButtonStyle.blurple)
+    async def roles(self, button: discord.ui.Button, interaction: discord.Interaction):
+        hsorted_roles = sorted([role for role in self.user.roles[1:]], key=lambda x: x.position)
+        embed = discord.Embed(description=", ".join(role.mention for role in hsorted_roles),color=self.user.color)
+        embed.add_field(name="Total Roles", value=len(self.user.roles))
+        await interaction.response.send_message(embed=embed, ephemeral=True)
+
+    @discord.ui.button(label="Permissions", style=discord.ButtonStyle.blurple)
+    async def perms(self, button: discord.ui.Button, interaction: discord.Interaction):
+        perm = ", ".join([str(p[0]).replace("_", " ").title() for p in self.user.guild_permissions if p[1]])
+        embed = discord.Embed(description=f"`{perm}`", color=self.user.color)
+        await interaction.response.send_message(embed=embed, ephemeral=True)
+
+    async def interaction_check(self, interaction):
+        if interaction.user.guild_permissions.manage_messages:
+            return True
+        else:
+            return False
+
+    async def on_timeout(self):
+        for b in self.children:
+            b.disabled = True
+        await self.message.edit(view=self)
 
 class TimeConverter(commands.Converter):
     async def convert(self, ctx, argument):
@@ -73,36 +107,22 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
         member = member if member else ctx.author
         usercolor = member.color
 
-        today = (datetime.datetime.utcnow() -
-                 member.created_at).total_seconds()
-
         embed = discord.Embed(title=f'{member.name}', color=usercolor)
-        embed.set_thumbnail(url=member.avatar_url)
+        embed.set_thumbnail(url=member.avatar.url)
         embed.add_field(name='Account Name:',
                         value=f'{member.name}', inline=False)
         embed.add_field(
-            name='Created at:', value=f"{fomat_time(member.created_at)}\n{format_timespan(today)}")
+            name='Created at:', value=f"{fomat_time(member.created_at)}")
         embed.add_field(name='Joined at', value=fomat_time(member.joined_at))
         embed.add_field(name='Account Status',
                         value=str(member.status).title())
         embed.add_field(name='Account Activity',
                         value=f"{str(member.activity.type).title().split('.')[1]} {member.activity.name}" if member.activity is not None else "None")
 
-        hsorted_roles = sorted(
-            [role for role in member.roles[-2:]], key=lambda x: x.position, reverse=True)
+        embed.set_footer(text=f'ID {member.id}', icon_url=member.avatar.url)
+        m = await ctx.send(embed=embed)
+        await m.edit(view=roles(self.bot, ctx, member, m))
 
-        embed.add_field(name='Top Role:', value=', '.join(
-            role.mention for role in hsorted_roles), inline=False)
-        embed.add_field(name='Number of Roles',
-                        value=f"{len(member.roles) -1 }")
-        embed.set_footer(text=f'ID {member.id}', icon_url=member.avatar_url)
-        await ctx.send(embed=embed)
-
-    @commands.command(name="flags")
-    @commands.check_any(is_me())
-    async def flags(self, ctx, user: discord.Member, *, args: TypedFlags):
-        data = args.lower()
-        await ctx.send(f'{user.name}|{args}')
 
     @commands.command(name="mute", description="put user in timeout", usage="[member] [time]", aliases=["timeout"])
     @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902,799037944735727636,785845265118265376,787259553225637889,843775369470672916), is_me())
@@ -154,5 +174,6 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
                 await session.close()
         
         await ctx.reply(f"You Have SelfMuted your self for {format_timespan(mutet)}\nPlease don't ask staff for unmute")
+
 def setup(bot):
     bot.add_cog(v2Moderation(bot))
