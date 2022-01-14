@@ -32,10 +32,16 @@ class PersistentView(discord.ui.View):
         user = interaction.user
         guild = interaction.guild
         data = await self.bot.ticket.find_by_custom({"_id": user.id, "guild": interaction.guild.id})
-        if data and data['type'] == "support": 
-            return await interaction.followup.send(f"Your last tickets still excites: <#{data['channel']}>", ephemeral=True)
+        if interaction.user.guild_permissions.manage_messages:
+            pass
+        else: 
+            if data and data['type'] == "partnership":
+                return await interaction.followup.send(f"Your last tickets still excites: <#{data['channel']}>", ephemeral=True)
+        
+        staff_role = discord.utils.get(guild.roles, id=810134909372203039)
 
         overwrites = {
+            staff_role: discord.PermissionOverwrite(read_messages=True, send_messages=True, attach_files=True,read_message_history=True),
             guild.default_role: discord.PermissionOverwrite(read_messages=False),
             guild.me: discord.PermissionOverwrite(read_messages=True),
             interaction.user: discord.PermissionOverwrite(read_messages=True, send_messages=True, attach_files=True,read_message_history=True),            
@@ -47,7 +53,7 @@ class PersistentView(discord.ui.View):
                                   color=0x008000,
                                   description="Kindly wait patiently. A staff member will assist you shortly.\nIf you're looking to approach a specific staff member, ping the member once. Do not spam ping any member or role.\n\nThank you.")
         Tembed.set_footer(text="Developed and Owned by Jay & utki007")
-        await channel.send(f"{user.mention} | @here", embed=Tembed)
+        await channel.send(f"{user.mention} | <@&787259553225637889>", embed=Tembed)
 
         user_data = {'_id': user.id,
                     'guild': user.guild.id,
@@ -61,8 +67,11 @@ class PersistentView(discord.ui.View):
         user = interaction.user
         guild = interaction.guild
         data = await self.bot.ticket.find_by_custom({"_id": user.id, "guild": interaction.guild.id})
-        if data and data['type'] == "partnership":
-            return await interaction.followup.send(f"Your last tickets still excites: <#{data['channel']}>", ephemeral=True)
+        if interaction.user.guild_permissions.manage_messages:
+            pass
+        else: 
+            if data and data['type'] == "partnership":
+                return await interaction.followup.send(f"Your last tickets still excites: <#{data['channel']}>", ephemeral=True)
 
         partnership_m = discord.utils.get(guild.roles, id=831405039830564875)
         overwrites = {
