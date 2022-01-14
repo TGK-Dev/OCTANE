@@ -55,42 +55,8 @@ class channel(commands.Cog, description=description):
     async def on_ready(self):
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
 
-    @commands.command(name="lock", description="Lock the given channel For mentioned Role", usage="[Role]", aliases=['l'])
-    @commands.check_any(perm_check(), is_me())
-    async def lock(self, ctx, *, role: discord.Role = None):
-
-        channel = ctx.channel
-        role = role if role else ctx.guild.default_role
-
-        overwrite = channel.overwrites_for(role)
-        overwrite.send_messages = False
-
-        await ctx.message.delete()
-        await channel.set_permissions(role, overwrite=overwrite)
-
-        embed = discord.Embed(
-            color=0x2f3136, description=f'<:allow:819194696874197004> | Locked {channel.mention} for {role.mention}')
-        await channel.send(embed=embed)
-
-    @commands.command(name="unlock", description="Unlock the given channel For mentioned Role", usage="[Role]", aliases=['ul'])
-    @commands.check_any(perm_check(), is_me())
-    async def unlock(self, ctx, *, role: discord.Role = None):
-
-        channel = ctx.channel
-        role = role if role else ctx.guild.default_role
-
-        overwrite = channel.overwrites_for(role)
-        overwrite.send_messages = None
-
-        await ctx.message.delete()
-        await channel.set_permissions(role, overwrite=overwrite)
-
-        embed = discord.Embed(
-            color=0x2f3136, description=f'<:allow:819194696874197004> | Unlocked {channel.mention} for {role.mention}')
-        await channel.send(embed=embed)
-
     @commands.command(name="slowmode", description="Set Slowmode In Current Channel", usage="[slowmode time 1m, 1s 1h max 6h]", aliases=['sm'])
-    @commands.check_any(perm_check(), is_me())
+    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902,799037944735727636,785845265118265376,787259553225637889,843775369470672916), is_me())
     async def slowmode(self, ctx, time: TimeConverter = None):
         await ctx.message.delete()
         channel = ctx.channel
