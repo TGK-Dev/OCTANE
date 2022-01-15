@@ -72,6 +72,7 @@ class start(discord.ui.View):
 class Guess_number(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.guess = 0
     
     @commands.Cog.listener()
     async def on_ready(self):
@@ -79,12 +80,20 @@ class Guess_number(commands.Cog):
 
     @commands.Cog.listener()
     async def on_game_start(self, message:discord.Message, channel: discord.channel, right:int):
+        #
+        def check(m, total_guess=self.guess):
+            if m.channel.id == channel.id and m.content == str(right):
+                return True
+            elif m.channel.id == channel.id and m.content != str(right):
+                self.guess = self.guess +1
+                print(self.guess)
         try:
-            win_msg = await self.bot.wait_for("message", check=lambda m: m.channel.id == channel.id and m.content == str(right), timeout=3600)
+            win_msg = await self.bot.wait_for("message", check=check, timeout=3600)
             await win_msg.reply(f"{win_msg.author.mention} You Guessed The Right Number")         
             await channel.edit(name="Game Has Ended",archived=True, locked=True)
             data = message.embeds[0].to_dict()
-            (data['fields'][len(data['fields'])-1]) = {'name': 'Winner', 'value': f'{win_msg.author.mention} | {win_msg.author.name}', 'inline': False}
+            (data['fields'][len(data['fields'])-1]) = {'name': 'Winner', 'value': f'{win_msg.author.mention} | {win_msg.author.name}', 'inline': None}
+            data['fields'].append({'name': 'Total Guesse', 'value': f'{self.guess}', 'inline': False})
             await message.edit(embed=discord.Embed().from_dict(data))
             win_embed = discord.Embed(description=f"🏆 {win_msg.author.mention} Guessed The Correct Number", color=win_msg.author.color)
             await message.reply(embed=win_embed)
@@ -97,6 +106,7 @@ class Guess_number(commands.Cog):
     @commands.command(name="Guess Number", description="starting Guess The Number Game!", aliases=['gn'])
     @commands.check_any(commands.has_any_role(785842380565774368,803635405638991902,799037944735727636,785845265118265376,787259553225637889,852125566802198528))
     async def guess_number(self, ctx, max: int):
+        self.guess = 0
         embed = discord.Embed(title=f"{ctx.author} is Starting An Guess The Number Game",color=ctx.author.color,
         description=f"Start guessing the number in thread below after the event starts")
         embed.add_field(name="Range", value=f"0-{max}")
