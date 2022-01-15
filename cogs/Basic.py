@@ -74,15 +74,13 @@ class Basic(commands.Cog, description=description):
         cpu = round(psutil.cpu_percent(), 1)
 
         embed = discord.Embed(
-            title=f"{self.bot.user.name} Stats",
-            description="\uFEFF",
             colour=ctx.author.colour,
             timestamp=ctx.message.created_at,
         )
 
         embed.add_field(name="Bot Version:", value=self.bot.version)
         embed.add_field(name="Python Version:", value=pythonVersion)
-        embed.add_field(name="Discord.Py Version", value=dpyVersion)
+        embed.add_field(name="Nextcord Version", value=dpyVersion)
         embed.add_field(name="Total Guilds:", value=serverCount)
         embed.add_field(name="Total Users:", value=memberCount)
         embed.add_field(name="CPU Useage:", value=f"{str(cpu)}%")
@@ -98,7 +96,10 @@ class Basic(commands.Cog, description=description):
         embed.set_author(name=self.bot.user.name,
                          icon_url=self.bot.user.avatar.url)
 
-        await ctx.send(embed=embed)
+        view = discord.ui.View()
+
+        view.add_item(discord.ui.Button(label='GitHub', url="https://github.com/Jay24004/TGK.bot", emoji="<:github1:931838892787785759>"))
+        await ctx.send(embed=embed, view=view)
 
 
 def setup(bot):
