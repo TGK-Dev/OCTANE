@@ -107,7 +107,7 @@ async def on_ready():
     )
     await bot.change_presence(status=discord.Status.dnd)
 
-    os.system("pip uninstall discord.py==1.7.3")
+    os.system("pip uninstall -y discord.py==1.7.3")
 
     current_blacklist_user = await bot.config.find(785839283847954433)
     for blacklisted_user in current_blacklist_user['blacklist']:
