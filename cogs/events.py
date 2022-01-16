@@ -43,40 +43,40 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
         if guild.owner.id != 488614633670967307:
             await self.bot.guild.leave()
     
-    @commands.Cog.listener()
-    async def on_command_error(self, ctx, error):
-        # Ignore these errors
-        if isinstance(error, commands.CommandOnCooldown):
-            # If the command is currently on cooldown trip this
-            m, s = divmod(error.retry_after, 60)
-            h, m = divmod(m, 60)
-            if int(h) == 0 and int(m) == 0:
-                await ctx.send(f" You must wait {int(s)} seconds to use this command!")
-            elif int(h) == 0 and int(m) != 0:
-                await ctx.send(
-                    f" You must wait {int(m)} minutes and {int(s)} seconds to use this command!"
-                )
-            else:
-                await ctx.send(
-                    f" You must wait {int(h)} hours, {int(m)} minutes and {int(s)} seconds to use this command!"
-                )
-        elif isinstance(error, commands.CheckFailure):
-            # If the command has failed a check, trip this
-            return
-        elif isinstance(error, commands.DisabledCommand):
-            await ctx.send('The command is disabed by Owner')
-        elif isinstance(error, commands.MaxConcurrencyReached):
-            await ctx.send('Please Wait for last Game to End')
-        elif isinstance(error, commands.CommandInvokeError):
-            return
-        elif isinstance(error, commands.CommandNotFound):
-            return
-        else:
-            #raise error
-            embed = discord.Embed(color=0xE74C3C,
-                                  description=f"<:dnd:840490624670892063> | Error: `{error}`")
-            await ctx.send(embed=embed)
-            # mess = await ctx.send_help(ctx.command, )
+    # @commands.Cog.listener()
+    # async def on_command_error(self, ctx, error):
+    #     # Ignore these errors
+    #     if isinstance(error, commands.CommandOnCooldown):
+    #         # If the command is currently on cooldown trip this
+    #         m, s = divmod(error.retry_after, 60)
+    #         h, m = divmod(m, 60)
+    #         if int(h) == 0 and int(m) == 0:
+    #             await ctx.send(f" You must wait {int(s)} seconds to use this command!")
+    #         elif int(h) == 0 and int(m) != 0:
+    #             await ctx.send(
+    #                 f" You must wait {int(m)} minutes and {int(s)} seconds to use this command!"
+    #             )
+    #         else:
+    #             await ctx.send(
+    #                 f" You must wait {int(h)} hours, {int(m)} minutes and {int(s)} seconds to use this command!"
+    #             )
+    #     elif isinstance(error, commands.CheckFailure):
+    #         # If the command has failed a check, trip this
+    #         return
+    #     elif isinstance(error, commands.DisabledCommand):
+    #         await ctx.send('The command is disabed by Owner')
+    #     elif isinstance(error, commands.MaxConcurrencyReached):
+    #         await ctx.send('Please Wait for last Game to End')
+    #     elif isinstance(error, commands.CommandInvokeError):
+    #         return
+    #     elif isinstance(error, commands.CommandNotFound):
+    #         return
+    #     else:
+    #         #raise error
+    #         embed = discord.Embed(color=0xE74C3C,
+    #                               description=f"<:dnd:840490624670892063> | Error: `{error}`")
+    #         await ctx.send(embed=embed)
+    #         # mess = await ctx.send_help(ctx.command, )
     
     @commands.Cog.listener()
     async def on_message(self, message):

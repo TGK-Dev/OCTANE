@@ -1,17 +1,9 @@
-import asyncio
 import discord
-import os
-from discord import activity
-from discord.ext.commands import converter
-from discord.ui import view
 import psutil
 import time
 import platform
-import random
-import traceback
 import datetime
 from humanfriendly import format_timespan
-import utils.json_loader
 from discord_together import DiscordTogether
 
 from discord.ext import commands

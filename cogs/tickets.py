@@ -9,13 +9,10 @@ import random
 
 from copy import deepcopy
 from discord import message
-from discord import channel
+import discord
 from discord.ext import commands
-from typing import Union, overload
-
-from discord.ext.commands.converter import CategoryChannelConverter
-from discord.ext.commands.core import command
-from discord.ui import view
+from typing import Union
+from utils.checks import checks
 
 description = "Ticket System For the Server Support"
 
@@ -146,11 +143,6 @@ class Confirm(discord.ui.View):
 class Tickets(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-    
-    def is_me():
-        def predicate(ctx):
-            return ctx.message.author.id in [488614633670967307, 301657045248114690]
-        return commands.check(predicate)
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -158,14 +150,14 @@ class Tickets(commands.Cog):
         print(f'{self.__class__.__name__} Cog has been loaded\n-----')
 
     @commands.command()
-    @commands.check_any(commands.has_any_role(831405039830564875, 799037944735727636), is_me())
+    @commands.check_any(checks.is_me(), checks.can_use())
     async def setup(self, ctx):
         embed = discord.Embed(title="Support Centre",description="This channel is for in-server support purpose only, talking anything here which is not related to the channel usage will result in warn or mute, mini-modding is also not allowed, we have enough staff members to handle it. Thank you for your cooperation.",color=0xff0000)
         embed.set_footer(text=ctx.guild.name, icon_url=ctx.guild.icon.url)
         await ctx.send(embed=embed, view=PersistentView(self.bot))
 
-    @commands.command()
-    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902,799037944735727636,785845265118265376,787259553225637889,843775369470672916), is_me())
+    @commands.command(name="close", description="Close Current Ticket")
+    @commands.check_any(checks.is_me(), checks.can_use())
     async def close(self, ctx):
         data = await self.bot.ticket.find_by_custom({'channel': ctx.channel.id, 'guild': ctx.guild.id})
         if not data: return await ctx.send("Please use this command only in tickets")
@@ -176,8 +168,8 @@ class Tickets(commands.Cog):
         embed = discord.Embed(color=0x2f3136, description=f"Ticket Closed By {ctx.author.mention}")
         await ctx.send(embed=embed)
     
-    @commands.command()
-    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902,799037944735727636,785845265118265376,787259553225637889,843775369470672916), is_me())
+    @commands.command(name="open", description="Open Current Ticket")
+    @commands.check_any(checks.is_me(), checks.can_use())
     async def open(self, ctx):
         data = await self.bot.ticket.find_by_custom({'channel': ctx.channel.id, 'guild': ctx.guild.id})
         if not data: return await ctx.send("Please use this command only in tickets")
@@ -189,7 +181,7 @@ class Tickets(commands.Cog):
         await ctx.send(content=f"<@{data['_id']}>",embed=embed)
 
     @commands.command(name="delete", description="delete the ticekt")
-    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902,799037944735727636,785845265118265376,787259553225637889), is_me())
+    @commands.check_any(checks.is_me(), checks.can_use())
     async def delete(self, ctx):
         data = await self.bot.ticket.find_by_custom({'channel': ctx.channel.id, 'guild': ctx.guild.id})
 
@@ -205,7 +197,7 @@ class Tickets(commands.Cog):
             await self.bot.ticket.delete(data['_id'])
 
     @commands.command(name="transcript", description="Save current ticket's transcript", usage="[limit] [time Zone]", aliases=["save"])
-    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902,799037944735727636,785845265118265376,787259553225637889,843775369470672916), is_me())
+    @commands.check_any(checks.is_me(), checks.can_use())
     async def transcript(self, ctx, limit: int = None, *, ticket=None):
 
         ticket = ticket if ticket else "Topic Not Given"
@@ -242,7 +234,7 @@ class Tickets(commands.Cog):
             pass
     
     @commands.command(name="add", description="add User to the channel", usage="[member]")
-    @commands.check_any(commands.has_any_role(831405039830564875, 810134909372203039,831405039830564875), is_me())
+    @commands.check_any(checks.is_me(), checks.can_use())
     async def add(self, ctx, *, target: Union[discord.Member, discord.Role]):
         channel = ctx.channel
         if ctx.channel.category.id == 829230513516445736:
@@ -258,7 +250,7 @@ class Tickets(commands.Cog):
             await ctx.send(embed=embed)
 
     @commands.command(name="remove", description="Remove User to the channel", usage="[member]")
-    @commands.check_any(commands.has_any_role(831405039830564875, 810134909372203039,831405039830564875), is_me())
+    @commands.check_any(checks.is_me(), checks.can_use())
     async def remove(self, ctx, *, target: Union[discord.Member, discord.Role]):
         channel = ctx.channel
         if ctx.channel.category.id == 829230513516445736:
@@ -275,3 +267,63 @@ class Tickets(commands.Cog):
 
 def setup(bot):
     bot.add_cog(Tickets(bot))
+
+## NEw System Draft
+# class ticket_class(discord.ui.View):
+#     def __init__(self):
+#         super().__init__(timeout=None)
+    
+#     @discord.ui.button(label='Server Support', style=discord.ButtonStyle.red, custom_id='ticket:red', emoji="<:support:837272254307106849>")
+#     async def support(self, button: discord.ui.Button, interaction: discord.Interaction):
+#         await interaction.response.send_message("This Should Create New ticket", ephemeral=True)
+    
+#     @discord.ui.button(label='Partership', style=discord.ButtonStyle.green, custom_id='ticket:partner_ship', emoji="<:partner:837272392472330250>")
+#     async def partnership(self, button: discord.ui.Button, interaction: discord.Interaction):
+#         await interaction.response.send_message("This Should Create New ticket", ephemeral=True)
+
+# class PersistentView(discord.ui.View):
+#     def __init__(self):
+#         super().__init__(timeout=None)
+
+#     @discord.ui.select(placeholder="Select Your Qestion from Below", max_values=1, min_values=1,custom_id="ticket:select",
+#         options=[discord.SelectOption(label="Weekly Amari Rewards?", value="0"),
+#                 discord.SelectOption(label="Perks for Voting", value="1"),
+#                 discord.SelectOption(label="become a Staff Member?", value="2"),
+#                 discord.SelectOption(label="I have Other Qestions", value="ticket")])
+#     async def select(self, select: discord.ui.select, interaction: discord.Interaction):
+#         print(select.values)
+#         if select.values[0] == str(0):
+#             amari_embed = discord.Embed(title="What are Weekly Amari Rewards?", description="Members gain Amaari XP by engaging on the server through text, audio and bot channels. Top 3 Members, with the highest XP, are rewarded every week with:\n✦ Special <@&787566907833581590> role\n✦ Access Dank Memer Premium with 3x Amari\n✦ Guild wide 2x Amari\n✦ Free DMC as per rank:",color=0xffd700)
+#             amari_embed.add_field(name="Winner", value="🥇 ⏣ 1,500,000")
+#             amari_embed.add_field(name="Runner-up", value="🥈 ⏣ 1,000,000")
+#             amari_embed.add_field(name="Second Runner-up", value="🥉 ⏣ 500,000")
+#             amari_embed.set_footer(text="The Gambler's Kingdom", icon_url="https://cdn.discordapp.com/icons/785839283847954433/a_23007c59f65faade4c973506d9e66224.gif?size=1024")
+#             await interaction.response.send_message(embed=amari_embed, ephemeral=True)
+#         elif select.values[0] == str(1):
+#             vote_embed = discord.Embed(title="What perks will I gain by voting for the server?", description="You can vote for The Gambler's Kingdom here every 12 Hours, and for every 12 Hours you get the following perks:\n✦ Special temporary <@&786884615192313866> role\n✦ 2,500 Casino Cash. Collect using ,collect-income in <#786117471840895016>\n✦ Access to Dank Memer Premium with 2x Amari\n✦ Guild wide 2x Amaari\n\nTo access the vote link anywhere on the server, simply use Vote Link.",color=0xffd700)
+#             vote_embed.set_footer(text="The Gambler's Kingdom", icon_url="https://cdn.discordapp.com/icons/785839283847954433/a_23007c59f65faade4c973506d9e66224.gif?size=1024")
+#             view = discord.ui.View()
+#             view.add_item(discord.ui.Button(label='Click Here', url="https://top.gg/servers/785839283847954433/vote"))
+#             await interaction.response.send_message(embed=vote_embed, ephemeral=True, view=view)
+#         elif select.values[0] == str(2):
+#             staff_embed = discord.Embed(description='Check <#839388341627912242> for staff applications',color=0xffd700)
+#             staff_embed.set_footer(text="The Gambler's Kingdom", icon_url="https://cdn.discordapp.com/icons/785839283847954433/a_23007c59f65faade4c973506d9e66224.gif?size=1024")
+#             await interaction.response.send_message(embed=staff_embed, ephemeral=True)
+#         elif select.values[0].lower() =="ticket":
+#             await interaction.response.send_message("Press Below Button to Make Ticket", view=ticket_class(), ephemeral=True)
+
+# class test(commands.Cog):
+#     def __init__(self, bot):
+#         self.bot = bot
+    
+#     @commands.Cog.listener()
+#     async def on_ready(self):
+#         self.bot.add_view(PersistentView())
+#         self.bot.add_view(ticket_class())
+#         print(f'{self.__class__.__name__} Cog has been loaded\n-----')
+    
+#     @commands.command()
+#     async def faq(self, ctx):
+#         embed = discord.Embed(title="Support Centre",description="This channel is for in-server support purpose only, talking anything here which is not related to the channel usage will result in warn or mute, mini-modding is also not allowed, we have enough staff members to handle it. Thank you for your cooperation.",color=0xff0000)
+#         embed.set_footer(text=ctx.guild.name, icon_url=ctx.guild.icon.url)
+#         await ctx.send(embed=embed, view=PersistentView())

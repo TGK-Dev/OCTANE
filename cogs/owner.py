@@ -1,5 +1,9 @@
 import asyncio
 import contextlib
+from dis import dis
+from distutils import command
+from telnetlib import AYT
+from unicodedata import name
 import discord
 import io
 import os
@@ -12,6 +16,7 @@ from traceback import format_exception
 import traceback
 from utils.util import Pag
 from utils.util import clean_code
+from utils.checks import checks
 
 description = "Owners Commands"
 
@@ -20,34 +25,12 @@ class Owner(commands.Cog, description=description):
     def __init__(self, bot):
         self.bot = bot
 
-    def is_me():
-        def predicate(ctx):
-            return ctx.message.author.id in [488614633670967307, 301657045248114690]
-        return commands.check(predicate)
-
-    def perm_check():
-        async def predicate(ctx):
-            mod_role = [785842380565774368, 803635405638991902, 799037944735727636,
-                        785845265118265376, 787259553225637889, 843775369470672916]
-            for mod in mod_role:
-                role = discord.utils.get(ctx.guild.roles, id=mod)
-                if role in ctx.author.roles:
-                    permissions = await ctx.bot.config.find(role.id)
-                    check = permissions['perm']
-                    return (ctx.command.name in check)
-        return commands.check(predicate)
-
     @commands.Cog.listener()
     async def on_ready(self):
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
 
-    @commands.command(name="test")
-    @commands.check_any(perm_check(), is_me())
-    async def test(self, ctx):
-        await ctx.send(f"Ping `{round(self.bot.latency * 1000)}`ms")
-
     @commands.group(name="config", description="set Server config", invoke_without_command=True)
-    @commands.check_any(perm_check(), is_me())
+    @commands.check_any(checks.is_me())
     async def config(self, ctx):
         data = await self.bot.config.find(ctx.guild.id)
 
@@ -66,7 +49,7 @@ class Owner(commands.Cog, description=description):
         description="Change your guilds prefix!",
         usage="prefix [New_prefix]",
     )
-    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902,799037944735727636), is_me())
+    @commands.check_any(checks.is_me())
     async def prefix(self, ctx, *, prefix):
         data = await self.bot.config.find(ctx.guild.id)
         if data is None:
@@ -78,14 +61,14 @@ class Owner(commands.Cog, description=description):
 
     @config.command(
         name="deleteprefix", aliases=["dp"], description="Delete your guilds prefix!", usage="")
-    @commands.check_any(perm_check(), is_me())
+    @commands.check_any(checks.is_me())
     async def deleteprefix(self, ctx):
         await self.bot.config.unset({"_id": ctx.guild.id, "prefix": 1})
         await ctx.send("This guilds prefix has been set back to the default")
 
     @config.command(
         name="welcome", description="Set welcome channel for server",)
-    @commands.check_any(perm_check(), is_me())
+    @commands.check_any(checks.is_me())
     async def welcome(self, ctx, channel: discord.TextChannel):
         data = await self.bot.config.find(ctx.guild.id)
         if data is None:
@@ -94,7 +77,7 @@ class Owner(commands.Cog, description=description):
         await ctx.send("welcome channel Updated")
 
     @config.command(name="event", description="set event channel")
-    @commands.check_any(perm_check(), is_me())
+    @commands.check_any(checks.is_me())
     async def event(self, ctx, channel: discord.TextChannel):
         data = self.bot.config.find(ctx.guil.id)
         if data is None:
@@ -107,7 +90,7 @@ class Owner(commands.Cog, description=description):
         description="blacklist user from the bot",
         usage="<user>",
     )
-    @commands.check_any(commands.has_any_role(799037944735727636, 785845265118265376, 803635405638991902), is_me())
+    @commands.check_any(checks.is_me())
     async def blacklist(self, ctx, user: discord.Member):
         if user.id in [self.bot.user.id, ctx.author.id, 488614633670967307, 488614633670967307]:
             return await ctx.send("Hey, you cannot blacklist yourself / bot/ Owner")
@@ -138,7 +121,7 @@ class Owner(commands.Cog, description=description):
         description="Unblacklist a user from the bot",
         usage="<user>"
     )
-    @commands.check_any(commands.has_any_role(799037944735727636, 785845265118265376), is_me())
+    @commands.check_any(checks.is_me())
     async def unblacklist(self, ctx, user: discord.Member):
         """
         Unblacklist someone from the bot
@@ -165,14 +148,14 @@ class Owner(commands.Cog, description=description):
             await ctx.send(embed=embed)
 
     @commands.command(name="activity", description="Change Bot activity", usage="[activity]")
-    @commands.check_any(perm_check(), is_me())
+    @commands.check_any(checks.is_me())
     async def activity(self, ctx, *, activity):
         # This changes the bots 'activity'
         await self.bot.change_presence(activity=discord.Game(name=f"{activity}"), status=discord.Status.dnd)
         await ctx.send('Bot activity is Updated')
 
     @commands.command(name="Say", description="And classic say command", usage="[anything]")
-    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902,799037944735727636,785845265118265376,787259553225637889,843775369470672916), is_me())
+    @commands.check_any(checks.is_me())
     async def say(self, ctx, *, say):
         await ctx.message.delete()
         await ctx.send(f'{say}')
@@ -184,13 +167,13 @@ class Owner(commands.Cog, description=description):
         usage="",
         hidden=True
     )
-    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902), is_me())
+    @commands.check_any(checks.is_me())
     async def logout(self, ctx):
         await ctx.send(f"Hey {ctx.author.mention}, I am now logging out :wave:")
         await self.bot.logout()
 
     @commands.command(name="toggle", description="Enable or disable a command!")
-    @commands.check_any(perm_check(), is_me())
+    @commands.check_any(checks.is_me())
     async def toggle(self, ctx, *, command):
         command = self.bot.get_command(command)
 
@@ -206,7 +189,7 @@ class Owner(commands.Cog, description=description):
             await ctx.send(f"I have {ternary} {command.qualified_name} for you!")
 
     @commands.command(name="nuke", description="Nuke The Channel", hidden=True)
-    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902,799037944735727636,), is_me())
+    @commands.check_any(checks.is_me())
     @commands.max_concurrency(1, commands.BucketType.channel)
     async def nuke(self, ctx, channel: discord.TextChannel = None):
         channel = channel if channel else ctx.channel
@@ -233,7 +216,7 @@ class Owner(commands.Cog, description=description):
             await ctx.send(embed=embed)
 
     @commands.command(name="eval", description="Let Owner Run Code within bot", aliases=["exec"])
-    @is_me()
+    @commands.check_any(checks.is_me())
     async def _eval(self, ctx, *, code):
         code = clean_code(code)
 
@@ -272,7 +255,7 @@ class Owner(commands.Cog, description=description):
         await pager.start(ctx)
 
     @commands.command(name="vsetup", hidden=True)
-    @commands.check_any(perm_check(), is_me())
+    @commands.check_any(checks.is_me())
     async def vsetup(self, ctx):
         embed = discord.Embed(title="SERVER VERIFICATAON",
                               description="To unlock the Server find the Emoji Below and add your reaction if, if you still can't unlock the server please dm any online <@&799037944735727636>, <@&785845265118265376> to unlock server.",
@@ -284,7 +267,7 @@ class Owner(commands.Cog, description=description):
     @commands.command(
         name='reload', description="Reload all/one of the bots cogs!", usage="", hidden=True
     )
-    @is_me()
+    @commands.check_any(checks.is_me())
     async def reload(self, ctx, cog=None):
         if not cog:
             # No cog, means we reload all cogs
@@ -347,6 +330,64 @@ class Owner(commands.Cog, description=description):
                         )
                 await ctx.send(embed=embed)
 
+    @commands.group(name="permission", description="Edit permmsion for any command", aliases=['perm'], invoke_without_command=True)
+    @commands.check_any(checks.can_use(),commands.has_any_role(785842380565774368, 803635405638991902,799037944735727636))
+    async def permission(self, ctx):
+        await ctx.send("Looks like you forgot to add sub-command")
+
+    @permission.command()
+    @commands.check_any(checks.can_use(),commands.has_any_role(785842380565774368, 803635405638991902,799037944735727636))
+    async def check(self, ctx, command):
+        command = self.bot.get_command(command)
+        if command is None: return await ctx.send("I can't find a command with that name!")
+
+        cmd_data = await self.bot.active_cmd.find_by_custom({'command_name': command.name})
+        if not cmd_data:return await ctx.send("NO data found")
+
+        embed = discord.Embed(title=f"permission {command.name}",color=ctx.author.color)
+        role = []
+        for roles in cmd_data['allowed_roles']:
+            role.append(f"<@&{int(roles)}>")
+        embed.add_field(name="allowed roles", value=", ".join(role))
+        await ctx.send(embed=embed)
+        
+    @permission.command(name="add")
+    @commands.check_any(checks.can_use(),commands.has_any_role(785842380565774368, 803635405638991902,799037944735727636))
+    async def add(self, ctx, command, role: discord.Role):
+        command = self.bot.get_command(command)
+
+        if command is None:
+            return await ctx.send("I can't find a command with that name!")
+
+        elif ctx.command == command:
+            return await ctx.send("You cannot edit perm for this command")
+        
+        data = await self.bot.active_cmd.find_by_custom({'command_name': command.name})
+        if not data:
+            return await ctx.send("NO data found")
+        if role.id not in data['allowed_roles']: data['allowed_roles'].append(role.id)
+        await self.bot.active_cmd.upsert(data)
+
+        await ctx.send(f"{command.name} now can be used by {role.mention}", allowed_mentions=discord.AllowedMentions(everyone=False, roles=False))
+    
+    @permission.command(name="remove")
+    @commands.check_any(checks.can_use(),commands.has_any_role(785842380565774368, 803635405638991902,799037944735727636))
+    async def remove(self, ctx, command, role: discord.Role):
+        command = self.bot.get_command(command)
+
+        if command is None:
+            return await ctx.send("I can't find a command with that name!")
+
+        elif ctx.command == command:
+            return await ctx.send("You cannot edit perm for this command")
+        
+        data = await self.bot.active_cmd.find_by_custom({'command_name': command.name})
+        if not data:
+            return await ctx.send("NO data found")
+        if role.id in data['allowed_roles']: data['allowed_roles'].remove(role.id)
+        await self.bot.active_cmd.upsert(data)
+
+        await ctx.send(f"{command.name} now can be can't be used by {role.mention}", allowed_mentions=discord.AllowedMentions(everyone=False, roles=False))
 
 def setup(bot):
     bot.add_cog(Owner(bot))

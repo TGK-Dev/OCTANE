@@ -4,6 +4,7 @@ import discord
 
 from discord.ext import commands
 from utils.util import Pag
+from utils.checks import checks
 
 guild_ids = [797920317871357972, 785839283847954433]
 # Requires: pip install DiscordUtils
@@ -20,23 +21,6 @@ class Invites(commands.Cog, description=description):
     def __init__(self, bot):
         self.bot = bot
         self.tracker = DiscordUtils.InviteTracker(bot)
-
-    def is_me():
-        def predicate(ctx):
-            return ctx.message.author.id in [488614633670967307, 301657045248114690]
-        return commands.check(predicate)
-
-    def perm_check():
-        async def predicate(ctx):
-            mod_role = [785842380565774368, 803635405638991902, 799037944735727636,
-                        785845265118265376, 787259553225637889, 843775369470672916]
-            for mod in mod_role:
-                role = discord.utils.get(ctx.guild.roles, id=mod)
-                if role in ctx.author.roles:
-                    permissions = await ctx.bot.config.find(role.id)
-                    check = permissions['perm']
-                    return (ctx.command.name in check)
-        return commands.check(predicate)
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -103,7 +87,7 @@ class Invites(commands.Cog, description=description):
             await ctx.send(embed=embed)
 
     @commands.command(name="inviter", description="Find out who invited who")
-    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902,799037944735727636,785845265118265376,787259553225637889,843775369470672916), is_me())
+    @commands.check_any(checks.is_me(), checks.can_use())
     async def inviter(self, ctx, member: discord.Member):
 
         invites_filter = {"userInvited": member.id}

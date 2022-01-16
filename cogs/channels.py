@@ -3,10 +3,9 @@ import discord
 import random
 import re
 import datetime
-
 from discord.ext import commands
-
 from humanfriendly import format_timespan
+from utils.checks import checks
 
 time_regex = re.compile("(?:(\d{1,5})(h|s|m|d))+?")
 time_dict = {"h": 3600, "s": 1, "m": 60, "d": 86400}
@@ -34,29 +33,12 @@ class channel(commands.Cog, description=description):
     def __init__(self, bot):
         self.bot = bot
 
-    def is_me():
-        def predicate(ctx):
-            return ctx.message.author.id in [488614633670967307, 301657045248114690]
-        return commands.check(predicate)
-
-    def perm_check():
-        async def predicate(ctx):
-            mod_role = [785842380565774368, 803635405638991902, 799037944735727636,
-                        785845265118265376, 787259553225637889, 843775369470672916]
-            for mod in mod_role:
-                role = discord.utils.get(ctx.guild.roles, id=mod)
-                if role in ctx.author.roles:
-                    permissions = await ctx.bot.config.find(role.id)
-                    check = permissions['perm']
-                    return (ctx.command.name in check)
-        return commands.check(predicate)
-
     @commands.Cog.listener()
     async def on_ready(self):
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
 
     @commands.command(name="slowmode", description="Set Slowmode In Current Channel", usage="[slowmode time 1m, 1s 1h max 6h]", aliases=['sm'])
-    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902,799037944735727636,785845265118265376,787259553225637889,843775369470672916), is_me())
+    @commands.check_any(checks.is_me(), checks.can_use())
     async def slowmode(self, ctx, time: TimeConverter = None):
         await ctx.message.delete()
         channel = ctx.channel
@@ -78,7 +60,7 @@ class channel(commands.Cog, description=description):
         await ctx.send(embed=embed)
 
     @commands.command(name="Hide", description="Hide Channels For mentioned Role", usage="[role]")
-    @commands.check_any(perm_check(), is_me())
+    @commands.check_any(checks.is_me(), checks.can_use())
     async def hide(self, ctx, role: discord.Role = None):
         channel = ctx.channel
         role = role if role else discord.utils.get(
@@ -93,7 +75,7 @@ class channel(commands.Cog, description=description):
         await ctx.send(embed=embed, delete_after=10)
 
     @commands.command(name="Unhide", description="Unhide Channels For mentioned Role", usage="[role]")
-    @commands.check_any(perm_check(), is_me())
+    @commands.check_any(checks.is_me(), checks.can_use())
     async def unhide(self, ctx, role: discord.Role = None):
         channel = ctx.channel
         role = role if role else discord.utils.get(
@@ -108,7 +90,7 @@ class channel(commands.Cog, description=description):
         await ctx.send(embed=embed, delete_after=10)
 
     @commands.command(name="Sync", description="Sync Channels permissions to it's Category", usage="[channel]")
-    @commands.check_any(perm_check(), is_me())
+    @commands.check_any(checks.is_me(), checks.can_use())
     async def sync(self, ctx, channel: discord.TextChannel = None):
         channel = channel if channel else ctx.channel
 

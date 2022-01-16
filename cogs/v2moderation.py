@@ -15,7 +15,7 @@ from copy import deepcopy
 from dateutil.relativedelta import relativedelta
 from discord.ext import commands
 from discord.ext import tasks
-from typed_flags import TypedFlags
+from utils.checks import checks
 
 time_regex = re.compile("(?:(\d{1,5})(h|s|m|d))+?")
 time_dict = {"h": 3600, "s": 1, "m": 60, "d": 86400}
@@ -75,29 +75,12 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
     def __init__(self, bot):
         self.bot = bot
 
-    def is_me():
-        def predicate(ctx):
-            return ctx.message.author.id in [488614633670967307, 301657045248114690]
-        return commands.check(predicate)
-
-    def perm_check():
-        async def predicate(ctx):
-            mod_role = [785842380565774368, 803635405638991902, 799037944735727636,
-                        785845265118265376, 787259553225637889, 843775369470672916]
-            for mod in mod_role:
-                role = discord.utils.get(ctx.guild.roles, id=mod)
-                if role in ctx.author.roles:
-                    permissions = await ctx.bot.config.find(role.id)
-                    check = permissions['perm']
-                    return (ctx.command.name in check)
-        return commands.check(predicate)
-
     @commands.Cog.listener()
     async def on_ready(self):
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
 
     @commands.command(name="uerinfo", description="Give all Infomation about user", usage="[member]", aliases=['whois'])
-    @commands.check_any(perm_check(), is_me())
+    @commands.check_any(checks.is_me(), checks.can_use())
     async def uerinfo(self, ctx, member: discord.Member = None):
         await ctx.message.delete()
 
@@ -125,7 +108,7 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
 
 
     @commands.command(name="mute", description="put user in timeout", usage="[member] [time]", aliases=["timeout"])
-    @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902,799037944735727636,785845265118265376,787259553225637889,843775369470672916), is_me())
+    @commands.check_any(checks.is_me(), checks.can_use())
     async def mute(self, ctx, user: discord.Member, time: TimeConverter):
         await ctx.message.delete()
         if int(time) > 2419200:return await ctx.send("You can't set timeout for more than 28days")

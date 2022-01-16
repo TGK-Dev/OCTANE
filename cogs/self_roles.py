@@ -1,8 +1,6 @@
 import discord
-import datetime
-from discord import guild
 from discord.ext import commands
-from discord.ui import view
+from utils.checks import checks
 
 game_role = [795711140108697630, 795711130378829835]
 bot_role = [801392998465404958, 791713762041266226, 842809745802526730]
@@ -64,6 +62,7 @@ class self_cmd(commands.Cog):
         print(f"{self.__class__.__name__} Is Ready")
     
     @commands.command()
+    @commands.check_any(checks.is_me(), checks.can_use())
     async def rr(self, ctx):
         await ctx.message.delete()
         embed = discord.Embed(title="Some important self roles",color=ctx.guild.me.color,

@@ -9,6 +9,7 @@ from discord import message
 from discord.ext import commands
 from discord.ext.commands.core import command
 from discord.ui import view
+from utils.checks import checks
 
 class Confirm(discord.ui.View):
     def __init__(self, message: discord.Message, ctx, range:int, bot):
@@ -73,7 +74,9 @@ class Guess_number(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.guess = 0
-    
+
+
+
     @commands.Cog.listener()
     async def on_ready(self):
         print(f'{self.__class__.__name__} Cog has been loaded-----')
@@ -104,7 +107,7 @@ class Guess_number(commands.Cog):
             await channel.edit(archived=True, locked=True)
 
     @commands.command(name="Guess Number", description="starting Guess The Number Game!", aliases=['gn'])
-    @commands.check_any(commands.has_any_role(785842380565774368,803635405638991902,799037944735727636,785845265118265376,787259553225637889,852125566802198528))
+    @commands.check_any(checks.is_me(), checks.can_use())
     async def guess_number(self, ctx, max: int):
         self.guess = 0
         embed = discord.Embed(title=f"{ctx.author} is Starting An Guess The Number Game",color=ctx.author.color,
