@@ -3,6 +3,7 @@ import contextlib
 import io
 import logging
 import os
+from pydoc import Doc
 from dotenv import load_dotenv
 
 # Third party libraries
@@ -106,11 +107,12 @@ async def on_ready():
     )
     await bot.change_presence(status=discord.Status.dnd)
 
+    os.system("pip uninstall discord.py==1.7.3")
+
     current_blacklist_user = await bot.config.find(785839283847954433)
     for blacklisted_user in current_blacklist_user['blacklist']:
         bot.blacklist_users.append(blacklisted_user)
         
-
     current_afk_user = await bot.afk.get_all()
     for afk in current_afk_user:
         bot.afk_user[afk["_id"]] = afk
@@ -170,9 +172,11 @@ if __name__ == "__main__":
     bot.blacklist = Document(bot.db, "blacklist")
     bot.invites = Document(bot.db, "invites")
     bot.starboard = Document(bot.db, "starboard")
+    bot.active_cmd = Document(bot.db, "Active_commands")
+    bot.inactive_cmd = Document(bot.db, "inactive_commands")
 
     for file in os.listdir(cwd + "/cogs"):
-        if file.endswith(".py") and not file.startswith("_") and not file.startswith("test"):
+        if file.endswith(".py") and not file.startswith("_"):
             bot.load_extension(f"cogs.{file[:-3]}")
 
     bot.run(bot.config_token)
