@@ -98,7 +98,7 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
     @commands.Cog.listener()
     async def on_member_join(self, member):
         guild = member.guild
-
+ 
         if member.guild.id != 785839283847954433: return
         if member.bot: return
         data = await self.bot.config.find(guild.id)
