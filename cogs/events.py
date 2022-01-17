@@ -93,7 +93,7 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
 
             for word in ['when heist', 'where heist', 'heist when', 'where is the heist']:
                 if word in messageContent:
-                    return await message.reply('We have daily heist in <#804708111301738576>, and heists for special requirements and occasions in <#812992825801179136>', delete_after=30)
+                    return await message.reply('Keep an 👁️ on <#927241961038045236> for heist related requirements/updates.', delete_after=30)
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
