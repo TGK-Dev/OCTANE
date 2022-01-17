@@ -91,7 +91,7 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
                     guild = message.guild.id
                     return await message.reply('__**Voting Perks**__\n❥ Special "Voted" Role.\n❥ 2,500 Casino Cash. Collect using ,collectincome in <#786117471840895016>.\n❥ Access to <#929613393097293874> with 2x Amaari.\n❥ Guild wide 1x Amaari.\n\n', mention_author=False, view=vote_button(guild))
 
-            for word in ['when heist', 'where heist', 'heist when', 'where is the heist']:
+            for word in ['when heist', 'where heist', 'heist when', 'where is the heist', 'heist?']:
                 if word in messageContent:
                     return await message.reply('Keep an 👁️ on <#927241961038045236> for heist related requirements/updates.', delete_after=30)
 
