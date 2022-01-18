@@ -102,8 +102,7 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
         if member.guild.id != 785839283847954433: return
         if member.bot: return
         data = await self.bot.config.find(guild.id)
-        if data is None:
-            return
+        if data is None: return
 
         channel = self.bot.get_channel(data["welcome"])
         robot = discord.utils.get(guild.roles, id=810153515610537994)
@@ -113,17 +112,19 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
         game = discord.utils.get(guild.roles, id=810135369177759774)
         dono = discord.utils.get(guild.roles, id=810134737829888050)
         special = discord.utils.get(guild.roles, id=810134311163920404)
-
-        embed = discord.Embed(title=f'**WELCOME TO TGK, {member.display_name}!**',
-                              description=f"\n\nGet your favorite roles from [self-roles](https://discord.gg/58bc5QWE4q),\nand say _Hello_ to everyone in [chat](https://discord.gg/yEPYYDZ3dD)!\n\nAlso check out other fun game bots on the server:\n✦ [Casino](https://discord.gg/DJycdCqnqt) ✦ [Mudae](https://discord.gg/ujCHVRctHY) ✦ [Akinator](https://discord.gg/fzDTdGZFh6) ✦ [Pokemon](https://discord.gg/DpJ4mAUC9m)\n\nMake sure you follow the [rules](https://discord.gg/NmD4JGCaNc) of the house for a good time here. Also, check out rules and instructions of game bots in respective channels.\n\n:love_letter: To get in touch with staff, simply raise a ticket from [support](https://discord.gg/T8VWyvDfeB).\n\nHave fun!\n\n__Server Member Count:__ {guild.member_count - len([m for m in guild.members if m.bot])}",
-                              color=0x000000)
-        embed.set_thumbnail(url=member.avatar.url)
-        await channel.send(f"{member.mention}", embed=embed)
+        
         await member.add_roles(ping)
         await member.add_roles(level)
         await member.add_roles(game)
         await member.add_roles(dono)
         await member.add_roles(special)
+
+        embed = discord.Embed(title=f'**WELCOME TO TGK, {member.display_name}!**',
+                              description=f"\n\nGet your favorite roles from [self-roles](https://discord.gg/58bc5QWE4q),\nand say _Hello_ to everyone in [chat](https://discord.gg/yEPYYDZ3dD)!\n\nAlso check out other fun game bots on the server:\n✦ [Casino](https://discord.gg/DJycdCqnqt) ✦ [Mudae](https://discord.gg/ujCHVRctHY) ✦ [Akinator](https://discord.gg/fzDTdGZFh6) ✦ [Pokemon](https://discord.gg/DpJ4mAUC9m)\n\nMake sure you follow the [rules](https://discord.gg/NmD4JGCaNc) of the house for a good time here. Also, check out rules and instructions of game bots in respective channels.\n\n:love_letter: To get in touch with staff, simply raise a ticket from [support](https://discord.gg/T8VWyvDfeB).\n\nHave fun!\n\n__Server Member Count:__ {guild.member_count - len([m for m in guild.members if m.bot])}",
+                              color=0x000000)
+        embed.set_thumbnail(url=member.avatar.url or None)
+        await channel.send(f"{member.mention}", embed=embed)
+
 
         try:
             await member.send(embed=embed)
