@@ -3,6 +3,7 @@ from code import interact
 import datetime
 from dis import dis
 from email import message
+from socket import timeout
 from typing import MutableSet
 import discord
 import re
@@ -101,8 +102,11 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
                         value=str(member.status).title())
         embed.add_field(name='Account Activity',
                         value=f"{str(member.activity.type).title().split('.')[1]} {member.activity.name}" if member.activity is not None else "None")
-
         embed.set_footer(text=f'ID {member.id}', icon_url=member.avatar.url)
+
+        Member = await self.bot.fetch_user(member.id)
+        if Member.banner:
+            embed.set_image(url=Member.banner)
         m = await ctx.send(embed=embed)
         await m.edit(view=roles(self.bot, ctx, member, m))
 
@@ -113,24 +117,29 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
         await ctx.message.delete()
         if int(time) > 2419200:return await ctx.send("You can't set timeout for more than 28days")
         time = datetime.datetime.utcnow() + datetime.timedelta(seconds=time)
-        time = time.isoformat()
-        url = f"https://discord.com/api/v9/guilds/{ctx.guild.id}/members/{user.id}"
-        payload = {
-            "communication_disabled_until": time
-            }
-        headers = {
-            "Authorization": f"Bot {self.bot.config_token}",
-            "Content-Type": "application/json",
-            }
-
-        async with ClientSession() as session:
-            async with session.patch(url, data=json.dumps(payload),headers=headers) as response:
-                r = await response.json()
-                await session.close()
+        
+        await user.edit(timeout=time)
 
         embed = discord.Embed(description=f"<:dynosuccess:898244185814081557> ***{user} Was Timeout***",color=0x11eca4)
         await ctx.channel.send(embed=embed)
+
         log_embed = discord.Embed(title=f"Mute | {user}")
+        log_embed.add_field(name="User", value=user.mention)
+        log_embed.add_field(name="Moderator", value=ctx.author.mention)
+        channel = self.bot.get_channel(803687264110247987)
+        await channel.send(embed=log_embed)
+    
+    @commands.command(name="unmute", description="Remove timeout from user", usage="[member] [time]")
+    @commands.check_any(checks.is_me(), checks.can_use())
+    async def unmute(self, ctx, user: discord.Member):
+        await ctx.message.delete()
+        
+        await user.edit(timeout=None)
+
+        embed = discord.Embed(description=f"<:dynosuccess:898244185814081557> ***{user} Was Timeout***",color=0x11eca4)
+        await ctx.channel.send(embed=embed)
+
+        log_embed = discord.Embed(title=f"UnMute | {user}")
         log_embed.add_field(name="User", value=user.mention)
         log_embed.add_field(name="Moderator", value=ctx.author.mention)
         channel = self.bot.get_channel(803687264110247987)
@@ -141,21 +150,7 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
         if int(time) > 2419200:return await ctx.send("You can't set timeout for more than 28days")
         mutet = time
         time = datetime.datetime.utcnow()+ datetime.timedelta(seconds=time)
-        time = time.isoformat()
-        url = f"https://discord.com/api/v9/guilds/{ctx.guild.id}/members/{ctx.author.id}"
-        payload = {
-            "communication_disabled_until": time
-            }
-        headers = {
-            "Authorization": f"Bot {self.bot.config_token}",
-            "Content-Type": "application/json",
-            }
-
-        async with ClientSession() as session:
-            async with session.patch(url, data=json.dumps(payload),headers=headers) as response:
-                r = await response.json()
-                await session.close()
-        
+        await ctx.author.edit(timeout=time)        
         await ctx.reply(f"You Have SelfMuted your self for {format_timespan(mutet)}\nPlease don't ask staff for unmute")
 
 def setup(bot):
