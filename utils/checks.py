@@ -13,6 +13,7 @@ class checks():
             command = await ctx.bot.active_cmd.find_by_custom({'command_name': ctx.command.name})
             if not command: return await ctx.send("Error Happend Report to Jay")
             user_roles = [role.id for role in ctx.author.roles]
+            if ctx.author.id in command['allowed_users']: return True
             if (set(user_roles) & set(command['allowed_roles'])):
                 return True
             else:
