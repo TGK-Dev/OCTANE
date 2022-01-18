@@ -1,13 +1,9 @@
 import asyncio
 import contextlib
-from dis import dis
-from distutils import command
-from telnetlib import AYT
-from unicodedata import name
+from dis import disco
 import discord
 import io
 import os
-import random
 import textwrap
 
 from discord.ext import commands
@@ -17,7 +13,7 @@ import traceback
 from utils.util import Pag
 from utils.util import clean_code
 from utils.checks import checks
-
+from typing import Union
 description = "Owners Commands"
 
 
@@ -345,49 +341,75 @@ class Owner(commands.Cog, description=description):
         if not cmd_data:return await ctx.send("NO data found")
 
         embed = discord.Embed(title=f"permission {command.name}",color=ctx.author.color)
-        role = []
-        for roles in cmd_data['allowed_roles']:
-            role.append(f"<@&{int(roles)}>")
-        embed.add_field(name="allowed roles", value=", ".join(role))
+        roles,users = [], []
+
+        for role in cmd_data['allowed_roles']: 
+            roles.append(f"<@&{role}>")
+        if len(roles) == 0: 
+            embed.add_field(name="Allowed roles", value="None")
+        else: 
+            embed.add_field(name="Allowed roles", value=", ".join(roles))
+
+        for user in cmd_data['allowed_users']: 
+            
+            users.append(f"<@{user}>")
+        if len(users) == 0: 
+            embed.add_field(name="Allowed Users", value="None")
+        else: 
+            embed.add_field(name="Allowed Users", value=", ".join(users))
         await ctx.send(embed=embed)
         
     @permission.command(name="add")
     @commands.check_any(checks.can_use(),commands.has_any_role(785842380565774368, 803635405638991902,799037944735727636))
-    async def add(self, ctx, command, role: discord.Role):
+    async def add(self, ctx, command, target: Union[discord.Member, discord.Role]):
+
         command = self.bot.get_command(command)
-
-        if command is None:
-            return await ctx.send("I can't find a command with that name!")
-
-        elif ctx.command == command:
-            return await ctx.send("You cannot edit perm for this command")
+        if command is None: return await ctx.send("I can't find a command with that name!")
+        elif ctx.command == command: return await ctx.send("You cannot edit perm for this command")
         
         data = await self.bot.active_cmd.find_by_custom({'command_name': command.name})
-        if not data:
-            return await ctx.send("NO data found")
-        if role.id not in data['allowed_roles']: data['allowed_roles'].append(role.id)
-        await self.bot.active_cmd.upsert(data)
+        if not data:return await ctx.send("NO data found")
 
-        await ctx.send(f"{command.name} now can be used by {role.mention}", allowed_mentions=discord.AllowedMentions(everyone=False, roles=False))
+        if type(target) == discord.Role:
+            if target.id in data['allowed_roles']:
+                return await ctx.send(f"{target.mention} Has Already permission to use {command.name}", allowed_mentions=discord.AllowedMentions(everyone=False, roles=False))
+            else:
+                data['allowed_roles'].append(target.id)
+
+        elif type(target) == discord.Member:
+            if target.id in data['allowed_users']:
+                return await ctx.send(f"{target.mention} Has Already permission to use {command.name}", allowed_mentions=discord.AllowedMentions(everyone=False, roles=False))
+            else:
+                data['allowed_users'].append(target.id)
+
+        await self.bot.active_cmd.upsert(data)
+        await ctx.send(f"{command.name} now can be used by {target.mention}", allowed_mentions=discord.AllowedMentions(everyone=False, roles=False))
     
     @permission.command(name="remove")
     @commands.check_any(checks.can_use(),commands.has_any_role(785842380565774368, 803635405638991902,799037944735727636))
-    async def remove(self, ctx, command, role: discord.Role):
+    async def remove(self, ctx, command, target: Union[discord.Member, discord.Role]):
+
         command = self.bot.get_command(command)
-
-        if command is None:
-            return await ctx.send("I can't find a command with that name!")
-
-        elif ctx.command == command:
-            return await ctx.send("You cannot edit perm for this command")
+        if command is None: return await ctx.send("I can't find a command with that name!")
+        elif ctx.command == command: return await ctx.send("You cannot edit perm for this command")
         
         data = await self.bot.active_cmd.find_by_custom({'command_name': command.name})
-        if not data:
-            return await ctx.send("NO data found")
-        if role.id in data['allowed_roles']: data['allowed_roles'].remove(role.id)
-        await self.bot.active_cmd.upsert(data)
+        if not data:return await ctx.send("NO data found")
 
-        await ctx.send(f"{command.name} now can be can't be used by {role.mention}", allowed_mentions=discord.AllowedMentions(everyone=False, roles=False))
+        if type(target) == discord.Role:
+            if target.id in data['allowed_roles']:
+                return await ctx.send(f"{target.mention} had no permission to use this command {command.name}", allowed_mentions=discord.AllowedMentions(everyone=False, roles=False))
+            else:
+                data['allowed_roles'].remove(target.id)
+
+        elif type(target) == discord.Member:
+            if target.id in data['allowed_users']:
+                return await ctx.send(f"{target.mention} had no permission to use this command {command.name}", allowed_mentions=discord.AllowedMentions(everyone=False, roles=False))
+            else:
+                data['allowed_users'].remove(target.id)
+
+        await self.bot.active_cmd.upsert(data)
+        await ctx.send(f"permission of {command.name} is removed from {target.mention} is Removed", allowed_mentions=discord.AllowedMentions(everyone=False, roles=False))
 
 def setup(bot):
     bot.add_cog(Owner(bot))
