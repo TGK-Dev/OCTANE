@@ -45,6 +45,8 @@ class AutoMod(commands.Cog):
                 await channel.send(embed=embed, content="<@&787259553225637889> If link is phishing ban user Fast")
                 try:
                     await message.author.send("phishing has been detected in your message and you have been put on timeout if you think it's mistake Dm any Admin")
+                except:
+                    pass
 
 def setup(bot):
     bot.add_cog(AutoMod(bot))
