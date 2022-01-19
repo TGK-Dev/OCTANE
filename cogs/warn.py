@@ -33,58 +33,6 @@ class Warns(commands.Cog, description=description):
                     return (ctx.command.name in check)
         return commands.check(predicate)
 
-    @commands.command(name="Warn", description="Gives an Warnings to user", usage="[member] [warn]")
-    @commands.check_any(perm_check(), is_me())
-    async def warn(self, ctx, member: discord.Member, *, reason):
-        await ctx.message.delete()
-        if member.id in [self.bot.user.id, 488614633670967307, 301657045248114690]:
-            return await ctx.send("You cannot warn bot or it's Creater because they are way too cool to be warned")
-
-        if member.id == ctx.author.id:
-            return await ctx.send("You cannot warn your self")
-
-        current_warn_count = len(
-            await self.bot.warns.find_many_by_custom(
-                {
-                    "user_id": member.id,
-                    "guild_id": member.guild.id
-                }
-            )
-        ) + 1
-
-        warn_filter = {"user_id": member.id,
-                       "guild_id": member.guild.id, "number": current_warn_count}
-        warn_data = {"reason": reason,
-                     "timestamp": ctx.message.created_at, "warned_by": ctx.author.id}
-
-        await self.bot.warns.upsert_custom(warn_filter, warn_data)
-
-        try:
-            await member.send(f"You Have Been Warned | {reason} | Warnings Count {current_warn_count}")
-            em = discord.Embed(
-                color=0x06f79e, description=f"<:allow:819194696874197004> **{member.name} Has been Warned | {reason} |Warnings Count {current_warn_count}**")
-            await ctx.send(embed=em)
-        except discord.HTTPException:
-            emb = discord.Embed(
-                color=0x06f79e, description=f"<:allow:819194696874197004> **The User {member.name} Has Been Warned I couldn't DM them.| Warnings Count {current_warn_count}**")
-            await ctx.send(embed=emb)
-
-        data = await self.bot.config.find(ctx.guild.id)
-        log_channel = self.bot.get_channel(855784930494775296)
-
-        log_embed = discord.Embed(title=f"⚠️ Warn | Case ID: {data['case']}",
-                                  description=f" **Offender**: {member.name} | {member.mention}\n **Reason**: {reason}\n**Moderator**: {ctx.author.display_name} | {ctx.author.mention}",
-                                  color=0xE74C3C)
-        log_embed.set_thumbnail(url=member.avatar.url)
-        log_embed.timestamp = datetime.datetime.utcnow()
-        log_embed.set_footer(
-            text=f"ID: {member.id} Warns Count {current_warn_count}")
-
-        await log_channel.send(embed=log_embed)
-
-        data["case"] += 1
-        await self.bot.config.upsert(data)
-
     @commands.command(name="Warnings", description="Show All Warnings for User", usage="[member]")
     @commands.check_any(perm_check(), is_me())
     async def Warnings(self, ctx, member: discord.Member):
