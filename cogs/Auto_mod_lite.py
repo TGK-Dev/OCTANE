@@ -16,7 +16,7 @@ def is_link_bad(link: str):
     r = requests.post(url, data=json.dumps(payload)).json()
     return r
 
-class Cog_name(commands.Cog):
+class AutoMod(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
     
@@ -47,4 +47,4 @@ class Cog_name(commands.Cog):
                     await message.author.send("phishing has been detected in your message and you have been put on timeout if you think it's mistake Dm any Admin")
 
 def setup(bot):
-    bot.add_cog(Cog_name(bot))
+    bot.add_cog(AutoMod(bot))

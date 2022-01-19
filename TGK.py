@@ -176,7 +176,7 @@ if __name__ == "__main__":
     bot.inactive_cmd = Document(bot.db, "inactive_commands")
 
     for file in os.listdir(cwd + "/cogs"):
-        if file.endswith(".py") and not file.startswith("_") and file.startswith("Auto_mod_lite"):
+        if file.endswith(".py") and not file.startswith("_") and not file.startswith("test"):
             bot.load_extension(f"cogs.{file[:-3]}")
 
     bot.run(bot.config_token)
