@@ -1,4 +1,5 @@
 import asyncio
+from os import link
 import re
 import chat_exporter
 import datetime
@@ -115,6 +116,7 @@ class delete(discord.ui.View):
             return True
         else:
             await interaction.response.send_message("You didn't invoked save command", ephemeral=True)
+            await interaction.message.delete()
 
 class Confirm(discord.ui.View):
     def __init__(self, user=None):
@@ -220,14 +222,20 @@ class Tickets(commands.Cog):
             if transcript is None:
                 return
 
-            transcript_file = discord.File(io.BytesIO(transcript.encode()),
-                                        filename=f"transcript-{ctx.channel.name}.html")
+            transcript_file = discord.File(io.BytesIO(transcript.encode()),filename=f"transcript-{ctx.channel.name}.html")
 
-            await channel.send(f"{ctx.channel.name} | {ticket}", file=transcript_file)
+            link_msg = await channel.send(f"{ctx.channel.name} | {ticket}", file=transcript_file)
+
+            link_button = discord.ui.View()
+            url = f"https://codebeautify.org/htmlviewer?url={link_msg.attachments[0].url}"
+            link_button.add_item(discord.ui.Button(label='View Transcript', url=url))
+
+            await link_msg.edit(view=link_button)
             await m.edit(content=f"{ctx.author.mention} transcript Saved",)
+
             channel_file = discord.File(io.BytesIO(transcript.encode()),
                                         filename=f"transcript-{ctx.channel.name}.html")
-            await ctx.send(f"{ctx.channel.name} | {ticket}", file=channel_file)
+            await ctx.send(f"{ctx.channel.name} | {ticket}", file=channel_file, view=link_button)
 
             await ctx.send("Do want to delete this ticket?", view=delete(self.bot,ctx))
         else: 
