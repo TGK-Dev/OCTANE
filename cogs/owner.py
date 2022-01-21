@@ -180,9 +180,13 @@ class Owner(commands.Cog, description=description):
             await ctx.send("You cannot disable this command.")
 
         else:
-            command.enabled = not command.enabled
-            ternary = "enabled" if command.enabled else "disabled"
-            await ctx.send(f"I have {ternary} {command.qualified_name} for you!")
+            cmd_data = await self.bot.active_cmd.find_by_custom({'command_name': command.name})
+            if cmd_data['disable'] == True:
+                cmd_data['disable'] == False
+                return await ctx.send("Command is now Enable")
+            else:
+                cmd_data['disable'] == True
+                return await ctx.send("Command is now Disabled")
 
     @commands.command(name="nuke", description="Nuke The Channel", hidden=True)
     @commands.check_any(checks.is_me())
@@ -249,16 +253,6 @@ class Owner(commands.Cog, description=description):
         )
 
         await pager.start(ctx)
-
-    @commands.command(name="vsetup", hidden=True)
-    @commands.check_any(checks.is_me())
-    async def vsetup(self, ctx):
-        embed = discord.Embed(title="SERVER VERIFICATAON",
-                              description="To unlock the Server find the Emoji Below and add your reaction if, if you still can't unlock the server please dm any online <@&799037944735727636>, <@&785845265118265376> to unlock server.",
-                              color=0x2ECC71)
-        message = await ctx.send(embed=embed)
-        emoji = self.bot.get_emoji(843395086284357632)
-        await message.add_reaction(emoji)
 
     @commands.command(
         name='reload', description="Reload all/one of the bots cogs!", usage="", hidden=True
@@ -357,6 +351,7 @@ class Owner(commands.Cog, description=description):
             embed.add_field(name="Allowed Users", value="None")
         else: 
             embed.add_field(name="Allowed Users", value=", ".join(users))
+        embed.add_field(name="Avtive:", value=cmd_data['disable'], inline=False)
         await ctx.send(embed=embed)
         
     @permission.command(name="add")
