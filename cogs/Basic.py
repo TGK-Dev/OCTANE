@@ -11,10 +11,12 @@ from discord.ext import commands
 description = "Some Basic commands"
 
 class Link(discord.ui.View):
-    def __init__(self, url):
+    def __init__(self, url, url_poker):
         self.url = url
+        self.url_poker = url_poker
         super().__init__(timeout=None)
         self.add_item(discord.ui.Button(label='Youtube', url=self.url, emoji="<:yt:929015299481673749>"))
+        self.add_item(discord.ui.Button(label='Poker Night', url=self.url_poker, emoji="<:yt:929015299481673749>"))
 
 class Basic(commands.Cog, description=description):
     def __init__(self, bot):
@@ -25,12 +27,15 @@ class Basic(commands.Cog, description=description):
         self.bot.togetherControl = await DiscordTogether(self.bot.config_token)
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
 
-    @commands.command()
-    async def youtube(self, ctx):
-        link = await self.bot.togetherControl.create_link(797363342238285844, 'youtube', max_age=60)
+    @commands.command(name="vcgame")
+    async def activity(self, ctx):
+        if ctx.author.voice.channel == None: return await ctx.send("Join vc fist")
+        link = await self.bot.togetherControl.create_link(ctx.author.voice.channel.id, 'youtube', max_age=60)
+        plink = await self.bot.togetherControl.create_link(ctx.author.voice.channel.id, 'poker', max_age=60)
         await ctx.message.delete()
-        embed = discord.Embed(description="You can Start Your Activiy By pressing bellow Button")
-        await ctx.send(embed=embed, view=Link(link))
+        embed = discord.Embed(description="You can Start Your Activiy By pressing bellow Button\n Avtivity is still in beta can break discord")
+        embed.set_footer(text="Only Works wth Pc version")
+        await ctx.send(embed=embed, view=Link(link, plink))
         
 
     @commands.command()
