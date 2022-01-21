@@ -16,7 +16,7 @@ class Link(discord.ui.View):
         self.url_poker = url_poker
         super().__init__(timeout=None)
         self.add_item(discord.ui.Button(label='Youtube', url=self.url, emoji="<:yt:929015299481673749>"))
-        self.add_item(discord.ui.Button(label='Poker Night', url=self.url_poker, emoji="<:yt:929015299481673749>"))
+        self.add_item(discord.ui.Button(label='Poker Night', url=self.url_poker, emoji="🪙"))
 
 class Basic(commands.Cog, description=description):
     def __init__(self, bot):
@@ -29,13 +29,12 @@ class Basic(commands.Cog, description=description):
 
     @commands.command(name="vcgame")
     async def activity(self, ctx):
-        if ctx.author.voice.channel == None: return await ctx.send("Join vc fist")
+        if ctx.author.voice == None: return await ctx.send("Join vc fist")
         link = await self.bot.togetherControl.create_link(ctx.author.voice.channel.id, 'youtube', max_age=60)
         plink = await self.bot.togetherControl.create_link(ctx.author.voice.channel.id, 'poker', max_age=60)
-        await ctx.message.delete()
         embed = discord.Embed(description="You can Start Your Activiy By pressing bellow Button\n Avtivity is still in beta can break discord")
         embed.set_footer(text="Only Works wth Pc version")
-        await ctx.send(embed=embed, view=Link(link, plink))
+        await ctx.message.reply(embed=embed, view=Link(link, plink), mention_author=False)
         
 
     @commands.command()
