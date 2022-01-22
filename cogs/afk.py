@@ -70,8 +70,7 @@ class Afk(commands.Cog, description="An Afk commands"):
     @commands.check_any(checks.is_me(), checks.can_use())
     @commands.cooldown(1, 300, commands.BucketType.user)
     async def afk(self, ctx, *, message=None):
-        message = message if message else "⠀"
-        match = re.findall(pc_mention_regex, message)
+        message = message if message else ""
 
         data = {'_id': ctx.author.id,
                 'message': message,
@@ -86,7 +85,7 @@ class Afk(commands.Cog, description="An Afk commands"):
         self.bot.afk_user[ctx.author.id] = data
 
     @commands.command(name="afkreset", description="Remove any user afk message")
-    @commands.check_any(checks.is_me(), checks.can_use())
+    @commands.check_any(checks.can_use())
     async def afkreset(self, ctx, user: discord.Member):
         data = await self.bot.afk.find(user.id)
         if data is None:
