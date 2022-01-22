@@ -9,9 +9,7 @@ class checks():
 
     def can_use():
         async def predicate(ctx):
-            command = await ctx.bot.active_cmd.find_by_custom({'command_name': ctx.command.name})
-            if type(command) != dict: return await ctx.send("Error Happend Report to Jay")
-
+            command = await ctx.bot.active_cmd.find(ctx.command.name)
             if command['disable'] == True:
                 await ctx.send("Command is disabled by Jay/Utki")
                 return False
