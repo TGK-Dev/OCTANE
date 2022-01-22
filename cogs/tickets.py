@@ -1,15 +1,8 @@
 import asyncio
-from os import link
-import re
 import chat_exporter
-import datetime
 import discord
 import io
-import json
-import random
 
-from copy import deepcopy
-from discord import message
 import discord
 from discord.ext import commands
 from typing import Union
@@ -33,25 +26,27 @@ class PersistentView(discord.ui.View):
         if interaction.user.guild_permissions.manage_messages:
             pass
         else: 
-            if data and data['type'] == "partnership":
+            if data and data['type'] == "support":
                 return await interaction.followup.send(f"Your last tickets still excites: <#{data['channel']}>", ephemeral=True)
-        
-        staff_role = discord.utils.get(guild.roles, id=810134909372203039)
+
+        mod_role = discord.utils.get(guild.roles, id=787259553225637889)
+        trmod_role = discord.utils.get(guild.roles, id=843775369470672916)
 
         overwrites = {
-            staff_role: discord.PermissionOverwrite(read_messages=True, send_messages=True, attach_files=True,read_message_history=True),
             guild.default_role: discord.PermissionOverwrite(read_messages=False),
             guild.me: discord.PermissionOverwrite(read_messages=True),
-            interaction.user: discord.PermissionOverwrite(read_messages=True, send_messages=True, attach_files=True,read_message_history=True),            
+            interaction.user: discord.PermissionOverwrite(read_messages=True, send_messages=True, attach_files=True,read_message_history=True),
+            mod_role: discord.PermissionOverwrite(read_messages=True, send_messages=True, attach_files=True,read_message_history=True),
+            trmod_role: discord.PermissionOverwrite(read_messages=True, send_messages=True, attach_files=True,read_message_history=True),
         }
-        channel = await guild.create_text_channel(category=self.bot.get_channel(829230513516445736), name=f"{user.name} Support Ticket", topic=f"User Id: {user.id}", overwrites=overwrites)
-        await interaction.followup.send(f"You new Ticekt has Been Open in {channel.mention}", ephemeral=True)
-        
+        channel = await guild.create_text_channel(category=self.bot.get_channel(829230513516445736), name=f"{user.name} Stupport Ticket", topic=f"User Id: {user.id}", overwrites=overwrites)
+                
         Tembed = discord.Embed(title=f"Hi {user.display_name}, Welcome to Server Support",
                                   color=0x008000,
                                   description="Kindly wait patiently. A staff member will assist you shortly.\nIf you're looking to approach a specific staff member, ping the member once. Do not spam ping any member or role.\n\nThank you.")
         Tembed.set_footer(text="Developed and Owned by Jay & utki007")
-        await channel.send(f"{user.mention} | <@&787259553225637889>", embed=Tembed)
+        m = await channel.send(f"{user.mention} | <@&787259553225637889>", embed=Tembed)
+        await interaction.followup.send(f"You new Ticekt has Been Open in {channel.mention}", ephemeral=True)
 
         user_data = {'_id': user.id,
                     'guild': user.guild.id,
@@ -72,11 +67,15 @@ class PersistentView(discord.ui.View):
                 return await interaction.followup.send(f"Your last tickets still excites: <#{data['channel']}>", ephemeral=True)
 
         partnership_m = discord.utils.get(guild.roles, id=831405039830564875)
+        mod_role = discord.utils.get(guild.roles, id=787259553225637889)
+        trmod_role = discord.utils.get(guild.roles, id=843775369470672916)
+
         overwrites = {
             guild.default_role: discord.PermissionOverwrite(read_messages=False),
             guild.me: discord.PermissionOverwrite(read_messages=True),
             interaction.user: discord.PermissionOverwrite(read_messages=True, send_messages=True, attach_files=True,read_message_history=True),
-            partnership_m: discord.PermissionOverwrite(read_messages=True, send_messages=True, attach_files=True,read_message_history=True)
+            mod_role: discord.PermissionOverwrite(read_messages=True, send_messages=True, attach_files=True,read_message_history=True),
+            trmod_role: discord.PermissionOverwrite(read_messages=True, send_messages=True, attach_files=True,read_message_history=True),
         }
         channel = await guild.create_text_channel(category=self.bot.get_channel(829230513516445736), name=f"{user.name} Partnership Ticket", topic=f"User Id: {user.id}", overwrites=overwrites)
                 
@@ -84,7 +83,7 @@ class PersistentView(discord.ui.View):
                                   color=0x008000,
                                   description="Kindly wait patiently. A staff member will assist you shortly.\nIf you're looking to approach a specific staff member, ping the member once. Do not spam ping any member or role.\n\nThank you.")
         Tembed.set_footer(text="Developed and Owned by Jay & utki007")
-        m = await channel.send(f"{user.mention} | {partnership_m.mention}", embed=Tembed)
+        m = await channel.send(f"{user.mention} | `{partnership_m.mention}`", embed=Tembed)
         await interaction.followup.send(f"You new Ticekt has Been Open in {channel.mention}", ephemeral=True)
 
         user_data = {'_id': user.id,
@@ -92,6 +91,11 @@ class PersistentView(discord.ui.View):
                     'channel': channel.id,
                     'type': 'partnership'}
         await self.bot.ticket.upsert(user_data)
+
+    @discord.ui.button(label='Want bot like me ?', style=discord.ButtonStyle.blurple, custom_id='persistent_view:custom_bot', emoji="🤖")
+    async def custom_bot(self, button: discord.ui.Button, interaction: discord.Interaction):
+        embed = discord.Embed(description="Yes you can get a Bot like me With very cheap price with hosting\nJust Dm <@488614633670967307> or <@301657045248114690> and We don't take any bot currency as payment")
+        await interaction.response.send_message(embed=embed, ephemeral=True)
 
     async def interaction_check(self ,interaction):
         data = self.bot.blacklist_users
