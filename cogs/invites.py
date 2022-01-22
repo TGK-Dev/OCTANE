@@ -1,18 +1,14 @@
 import DiscordUtils
 import datetime
 import discord
-
+import os
 from discord.ext import commands
 from utils.util import Pag
 from utils.checks import checks
 
-guild_ids = [797920317871357972, 785839283847954433]
-# Requires: pip install DiscordUtils
-
 
 def fomat_time(time):
     return time.strftime('%d-%B-%Y %I:%m %p')
-
 
 description = "Invites Systems"
 
@@ -122,7 +118,38 @@ class Invites(commands.Cog, description=description):
             entries=pages,
             length=5
         ).start(ctx)
+    
+    @commands.command()
+    @commands.check_any(checks.is_me())
+    async def invited(self, ctx, user: discord.Member):
+        data = await self.bot.invites.find_by_custom({'_id': user.id})
+        if not data: return await ctx.send("No data Found")
 
+        invited_users = list(set(data['userInvited']))
+
+        if len(invited_users) <= 10:
+            
+            embed = discord.Embed(description="")
+            for i in invited_users:
+                embed.description += f"{int(i)}\n"
+            return await ctx.send(f"here is list of all user invited by {user.mention}", embed=embed)
+        
+        with open("ids_list.txt", "w") as file:
+            for i in invited_users: 
+                file.write(f"{int(i)}\n")
+        
+        with open("ids_list.txt", "rb") as file:
+            await ctx.send(f"Here is list of all user invited by {user.mention}", file=discord.File(file, f"Users Invited by {user.name}| {user.id}.txt"))
+        os.remove("ids_list.txt")
+
+
+    
+    
+    
+    
+    
+        
+        
 
 def setup(bot):
     bot.add_cog(Invites(bot))
