@@ -1,14 +1,7 @@
-from asyncio.tasks import wait, wait_for
-from datetime import time
-from logging import FATAL
-import re
 import discord
 import random
 import asyncio
-from discord import message
 from discord.ext import commands
-from discord.ext.commands.core import command
-from discord.ui import view
 from utils.checks import checks
 
 class Confirm(discord.ui.View):
