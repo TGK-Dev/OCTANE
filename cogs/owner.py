@@ -166,7 +166,7 @@ class Owner(commands.Cog, description=description):
     @commands.check_any(checks.is_me())
     async def logout(self, ctx):
         await ctx.send(f"Hey {ctx.author.mention}, I am now logging out :wave:")
-        await self.bot.logout()
+        await self.bot.close()
 
     @commands.command(name="toggle", description="Enable or disable a command!")
     @commands.check_any(checks.is_me())
