@@ -170,7 +170,7 @@ class Owner(commands.Cog, description=description):
         await self.bot.close()
 
     @commands.command(name="toggle", description="Enable or disable a command!")
-    @commands.check_any(checks.can_use(), commands.has_any_roles(799037944735727636, 803635405638991902))
+    @commands.check_any(checks.can_use(), commands.has_any_role(799037944735727636, 803635405638991902))
     async def toggle(self, ctx, *, command):
         command = self.bot.get_command(command)
 
