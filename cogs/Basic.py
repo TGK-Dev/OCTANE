@@ -79,6 +79,7 @@ class Basic(commands.Cog, description=description):
         embed.add_field(name="Nextcord Version", value=dpyVersion)
         embed.add_field(name="Total Guilds:", value=serverCount)
         embed.add_field(name="Total Users:", value=memberCount)
+        embed.add_field(name="Total Commands:", value=len(list(self.bot.commands)))
         embed.add_field(name="CPU Useage:", value=f"{str(cpu)}%")
         embed.add_field(name="RAM Useage:",
                         value=f"{round(psutil.virtual_memory().percent,1)}%")
@@ -92,10 +93,7 @@ class Basic(commands.Cog, description=description):
         embed.set_author(name=self.bot.user.name,
                          icon_url=self.bot.user.avatar.url)
 
-        view = discord.ui.View()
-
-        view.add_item(discord.ui.Button(label='GitHub', url="https://github.com/Jay24004/TGK.bot", emoji="<:github1:931838892787785759>"))
-        await ctx.send(embed=embed, view=view)
+        await ctx.send(embed=embed)
 
 
 def setup(bot):
