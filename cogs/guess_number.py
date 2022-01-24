@@ -100,7 +100,7 @@ class Guess_number(commands.Cog):
             await channel.edit(archived=True, locked=True)
 
     @commands.command(name="Guess Number", description="starting Guess The Number Game!", aliases=['gn'])
-    @commands.check_any(checks.is_me(), checks.can_use())
+    @commands.check_any(checks.can_use())
     async def guess_number(self, ctx, max: int):
         self.guess = 0
         embed = discord.Embed(title=f"{ctx.author} is Starting An Guess The Number Game",color=ctx.author.color,

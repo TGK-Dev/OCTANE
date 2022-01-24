@@ -139,7 +139,7 @@ class starboard(commands.Cog):
                         return await existing_message.edit(content=f":dizzy: {len(react)} | {channel.mention}",embed=existing_message.embeds[0])
 
     @commands.group(invoke_without_command=True,description="Config command for startbord module")
-    @commands.check_any(checks.is_me(), checks.can_use())
+    @commands.check_any(checks.can_use())
     async def starboard(self, ctx):
         data = await self.bot.config.find(ctx.guild.id)
         embed = discord.Embed(title=f"{ctx.guild.name}'s Startbord Config",color=0x9e3bff,
@@ -149,7 +149,7 @@ class starboard(commands.Cog):
         await ctx.send(embed=embed)
     
     @starboard.group(invoke_without_command=True, name="threshold")
-    @commands.check_any(checks.is_me(), checks.can_use())
+    @commands.check_any(checks.can_use())
     async def threshold(self, ctx, threshold: int=None):
         data = await self.bot.config.find(ctx.guild.id)
         if not data: return await ctx.send("No config found")
@@ -161,7 +161,7 @@ class starboard(commands.Cog):
             await ctx.send(f"Current Threshhold is {data['emoji_threshold']}")
 
     @starboard.group(invoke_without_command=True, name="toggle")
-    @commands.check_any(checks.is_me(), checks.can_use())
+    @commands.check_any(checks.can_use())
     async def toggle(self, ctx, toggle: bool=False):
         data = await self.bot.config.find(ctx.guild.id)
         if not data: return await ctx.send("No config found")
@@ -173,7 +173,7 @@ class starboard(commands.Cog):
             await ctx.send(f"Current status is {data['starboard_toggle']}")
 
     @starboard.group(invoke_without_command=True, name="channel")
-    @commands.check_any(checks.is_me(), checks.can_use())
+    @commands.check_any(checks.can_use())
     async def channel(self, ctx, channel: discord.TextChannel=None):
         data = await self.bot.config.find(ctx.guild.id)
         if not data: return await ctx.send("No config found")

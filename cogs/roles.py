@@ -31,7 +31,7 @@ class roles(commands.Cog,  description=description):
 
     # geting All Info mantions
     @commands.command(name="roleinfo", description="Give Infomation Abouth Role", usage="[Role]")
-    @commands.check_any(checks.is_me(), checks.can_use())
+    @commands.check_any(checks.can_use())
     async def roleinfo(self, ctx, *, role: discord.Role = None):
         if role == None:
             return await ctx.send("Looks like you forget to add role")
@@ -51,7 +51,7 @@ class roles(commands.Cog,  description=description):
 
     # Added Roel/Remove to any User
     @commands.command(name="role", description="add/Remove role from user", usage="[member][role]")
-    @commands.check_any(checks.is_me(), checks.can_use())
+    @commands.check_any(checks.can_use())
     async def role(self, ctx, member: discord.Member, *, role: discord.Role):
         if role == None:
             return await ctx.send("Looks like you forget to add role")
@@ -81,7 +81,7 @@ class roles(commands.Cog,  description=description):
     # some Important roles members count
 
     @commands.command(name="Pings", description="Members count of some Roles", usage="")
-    @commands.check_any(checks.is_me(), checks.can_use())
+    @commands.check_any(checks.can_use())
     async def pings(self, ctx):
         await ctx.message.delete()
 
@@ -100,7 +100,7 @@ class roles(commands.Cog,  description=description):
 
     # getting Mutual Pings
     @commands.command(name="mping", description="Mutual Pings for tow role", usage="[role 1] [role 2]",)
-    @commands.check_any(checks.is_me(), checks.can_use())
+    @commands.check_any(checks.can_use())
     async def mping(self, ctx, role1: discord.Role, role2: discord.Role):
         pings1 = role1.members
         pings2 = role2.members

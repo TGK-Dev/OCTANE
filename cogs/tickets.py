@@ -163,7 +163,7 @@ class Tickets(commands.Cog):
         await ctx.send(embed=embed, view=PersistentView(self.bot))
 
     @commands.command(name="close", description="Close Current Ticket")
-    @commands.check_any(checks.is_me(), checks.can_use())
+    @commands.check_any(checks.can_use())
     async def close(self, ctx):
         data = await self.bot.ticket.find_by_custom({'channel': ctx.channel.id, 'guild': ctx.guild.id})
         if not data: return await ctx.send("Please use this command only in tickets")
@@ -175,7 +175,7 @@ class Tickets(commands.Cog):
         await ctx.send(embed=embed)
     
     @commands.command(name="open", description="Open Current Ticket")
-    @commands.check_any(checks.is_me(), checks.can_use())
+    @commands.check_any(checks.can_use())
     async def open(self, ctx):
         data = await self.bot.ticket.find_by_custom({'channel': ctx.channel.id, 'guild': ctx.guild.id})
         if not data: return await ctx.send("Please use this command only in tickets")
@@ -187,7 +187,7 @@ class Tickets(commands.Cog):
         await ctx.send(content=f"<@{data['_id']}>",embed=embed)
 
     @commands.command(name="delete", description="delete the ticekt")
-    @commands.check_any(checks.is_me(), checks.can_use())
+    @commands.check_any(checks.can_use())
     async def delete(self, ctx):
         data = await self.bot.ticket.find_by_custom({'channel': ctx.channel.id, 'guild': ctx.guild.id})
 
@@ -203,7 +203,7 @@ class Tickets(commands.Cog):
             await self.bot.ticket.delete(data['_id'])
 
     @commands.command(name="transcript", description="Save current ticket's transcript", usage="[limit] [time Zone]", aliases=["save"])
-    @commands.check_any(checks.is_me(), checks.can_use())
+    @commands.check_any(checks.can_use())
     async def transcript(self, ctx, limit: int = None, *, ticket=None):
 
         ticket = ticket if ticket else "Topic Not Given"
@@ -246,7 +246,7 @@ class Tickets(commands.Cog):
             pass
     
     @commands.command(name="add", description="add User to the channel", usage="[member]")
-    @commands.check_any(checks.is_me(), checks.can_use())
+    @commands.check_any(checks.can_use())
     async def add(self, ctx, *, target: Union[discord.Member, discord.Role]):
         channel = ctx.channel
         if ctx.channel.category.id == 829230513516445736:
@@ -262,7 +262,7 @@ class Tickets(commands.Cog):
             await ctx.send(embed=embed)
 
     @commands.command(name="remove", description="Remove User to the channel", usage="[member]")
-    @commands.check_any(checks.is_me(), checks.can_use())
+    @commands.check_any(checks.can_use())
     async def remove(self, ctx, *, target: Union[discord.Member, discord.Role]):
         channel = ctx.channel
         if ctx.channel.category.id == 829230513516445736:

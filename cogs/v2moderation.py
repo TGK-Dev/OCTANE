@@ -81,7 +81,7 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
 
     @commands.command(name="uerinfo", description="Give all Infomation about user", usage="[member]", aliases=['whois'])
-    @commands.check_any(checks.is_me(), checks.can_use())
+    @commands.check_any(checks.can_use())
     async def uerinfo(self, ctx, member: discord.Member = None):
         await ctx.message.delete()
 
@@ -112,7 +112,7 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
 
 
     @commands.command(name="mute", description="put user in timeout", usage="[member] [time]", aliases=["timeout"])
-    @commands.check_any(checks.is_me(), checks.can_use())
+    @commands.check_any(checks.can_use())
     async def mute(self, ctx, user: discord.Member, time: TimeConverter):
         await ctx.message.delete()
         if int(time) > 2419200:return await ctx.send("You can't set timeout for more than 28days")
@@ -130,7 +130,7 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
         await channel.send(embed=log_embed)
     
     @commands.command(name="unmute", description="Remove timeout from user", usage="[member] [time]")
-    @commands.check_any(checks.is_me(), checks.can_use())
+    @commands.check_any(checks.can_use())
     async def unmute(self, ctx, user: discord.Member):
         await ctx.message.delete()
         

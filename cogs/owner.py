@@ -1,6 +1,7 @@
 import asyncio
 import contextlib
 from dis import disco
+import re
 import discord
 import io
 import os
@@ -26,7 +27,7 @@ class Owner(commands.Cog, description=description):
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
 
     @commands.group(name="config", description="set Server config", invoke_without_command=True)
-    @commands.check_any(checks.is_me())
+    @commands.check_any(checks.can_use())
     async def config(self, ctx):
         data = await self.bot.config.find(ctx.guild.id)
 
@@ -45,7 +46,7 @@ class Owner(commands.Cog, description=description):
         description="Change your guilds prefix!",
         usage="prefix [New_prefix]",
     )
-    @commands.check_any(checks.is_me())
+    @commands.check_any(checks.can_use())
     async def prefix(self, ctx, *, prefix):
         data = await self.bot.config.find(ctx.guild.id)
         if data is None:
@@ -57,14 +58,14 @@ class Owner(commands.Cog, description=description):
 
     @config.command(
         name="deleteprefix", aliases=["dp"], description="Delete your guilds prefix!", usage="")
-    @commands.check_any(checks.is_me())
+    @commands.check_any(checks.can_use())
     async def deleteprefix(self, ctx):
         await self.bot.config.unset({"_id": ctx.guild.id, "prefix": 1})
         await ctx.send("This guilds prefix has been set back to the default")
 
     @config.command(
         name="welcome", description="Set welcome channel for server",)
-    @commands.check_any(checks.is_me())
+    @commands.check_any(checks.can_use())
     async def welcome(self, ctx, channel: discord.TextChannel):
         data = await self.bot.config.find(ctx.guild.id)
         if data is None:
@@ -73,7 +74,7 @@ class Owner(commands.Cog, description=description):
         await ctx.send("welcome channel Updated")
 
     @config.command(name="event", description="set event channel")
-    @commands.check_any(checks.is_me())
+    @commands.check_any(checks.can_use())
     async def event(self, ctx, channel: discord.TextChannel):
         data = self.bot.config.find(ctx.guil.id)
         if data is None:
@@ -151,7 +152,7 @@ class Owner(commands.Cog, description=description):
         await ctx.send('Bot activity is Updated')
 
     @commands.command(name="Say", description="And classic say command", usage="[anything]")
-    @commands.check_any(checks.is_me())
+    @commands.check_any(checks.can_use())
     async def say(self, ctx, *, say):
         await ctx.message.delete()
         await ctx.send(f'{say}')
@@ -169,21 +170,28 @@ class Owner(commands.Cog, description=description):
         await self.bot.close()
 
     @commands.command(name="toggle", description="Enable or disable a command!")
-    @commands.check_any(checks.is_me())
+    @commands.check_any(checks.can_use())
     async def toggle(self, ctx, *, command):
         command = self.bot.get_command(command)
 
         if command is None or command == ctx.command:
             return await ctx.send("Invalid Command")
         
-        cmd_data = await self.bot.active_cmd({'command_name': command.name})
+        cmd_data = await self.bot.active_cmd.find(command.name)
         if not cmd_data: return await ctx.send("no data found ping Jay Fast")
         
-        await ctx.send(f"```json\n{cmd_data}\n```")
+        if cmd_data['disable'] == True:
+            cmd_data['disable'] = False
+            await ctx.send(f"{command.name} Is Now Enable")
+            return await self.bot.active_cmd.upsert(cmd_data)
 
+        if cmd_data['disable'] == False:
+            cmd_data['disable'] = True
+            await ctx.send(f"{command.name} Is Now disabled")
+            return await self.bot.active_cmd.upsert(cmd_data)
 
     @commands.command(name="nuke", description="Nuke The Channel", hidden=True)
-    @commands.check_any(checks.is_me())
+    @commands.check_any(checks.can_use())
     @commands.max_concurrency(1, commands.BucketType.channel)
     async def nuke(self, ctx, channel: discord.TextChannel = None):
         channel = channel if channel else ctx.channel

@@ -6,6 +6,7 @@ import asyncio
 from bson.objectid import ObjectId
 from discord.ext import commands
 from utils.util import Pag
+from utils.checks import checks
 
 time_regex = re.compile("(?:(\d{1,5})(h|s|m|d))+?")
 time_dict = {"h": 3600, "s": 1, "m": 60, "d": 86400}
@@ -34,7 +35,7 @@ class Warns(commands.Cog, description=description):
         return commands.check(predicate)
 
     @commands.command(name="Warnings", description="Show All Warnings for User", usage="[member]")
-    @commands.check_any(perm_check(), is_me())
+    @commands.check_any(checks.can_use())
     async def Warnings(self, ctx, member: discord.Member):
         warn_filter = {"user_id": member.id, "guild_id": member.guild.id}
         warns = await self.bot.warns.find_many_by_custom(warn_filter)
@@ -63,7 +64,7 @@ class Warns(commands.Cog, description=description):
         ).start(ctx)
 
     @commands.command(name="delwarn", description="Delete Warning For user", usage="[Warn_id]")
-    @commands.check_any(perm_check(), is_me())
+    @commands.check_any(checks.can_use())
     async def delwarn(self, ctx, *, _id):
 
         warns_filter = {"_id": ObjectId(_id)}
@@ -76,7 +77,7 @@ class Warns(commands.Cog, description=description):
         await ctx.send(embed=embed)
 
     @commands.command(name="clearwarn", description="Clear all warnings form user", usage="[member]")
-    @commands.check_any(perm_check(), is_me())
+    @commands.check_any(checks.can_use())
     async def clearwarn(self, ctx, member: discord.Member = None):
         member = member if member else ctx.author
 

@@ -83,7 +83,7 @@ class Invites(commands.Cog, description=description):
             await ctx.send(embed=embed)
 
     @commands.command(name="inviter", description="Find out who invited who")
-    @commands.check_any(checks.is_me(), checks.can_use())
+    @commands.check_any(checks.can_use())
     async def inviter(self, ctx, member: discord.Member):
 
         invites_filter = {"userInvited": member.id}
@@ -120,7 +120,7 @@ class Invites(commands.Cog, description=description):
         ).start(ctx)
     
     @commands.command()
-    @commands.check_any(checks.is_me())
+    @commands.check_any(checks.can_use())
     async def invited(self, ctx, user: discord.Member):
         data = await self.bot.invites.find_by_custom({'_id': user.id})
         if not data: return await ctx.send("No data Found")
@@ -141,15 +141,6 @@ class Invites(commands.Cog, description=description):
         with open("ids_list.txt", "rb") as file:
             await ctx.send(f"Here is list of all user invited by {user.mention}", file=discord.File(file, f"Users Invited by {user.name}| {user.id}.txt"))
         os.remove("ids_list.txt")
-
-
-    
-    
-    
-    
-    
-        
-        
 
 def setup(bot):
     bot.add_cog(Invites(bot))

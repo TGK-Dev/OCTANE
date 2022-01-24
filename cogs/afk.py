@@ -67,7 +67,7 @@ class Afk(commands.Cog, description="An Afk commands"):
                     await message.reply(f"{user.display_name} is afk {value['message']} -<t:{time}:R> <t:{time}:f>", mention_author=False, delete_after=30, allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
 
     @commands.command(name="afk", description="set your status afk with this command")
-    @commands.check_any(checks.is_me(), checks.can_use())
+    @commands.check_any(checks.can_use())
     @commands.cooldown(1, 300, commands.BucketType.user)
     async def afk(self, ctx, *, message=None):
         message = message if message else ""

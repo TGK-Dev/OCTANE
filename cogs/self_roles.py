@@ -62,7 +62,7 @@ class self_cmd(commands.Cog):
         print(f"{self.__class__.__name__} Is Ready")
     
     @commands.command()
-    @commands.check_any(checks.is_me(), checks.can_use())
+    @commands.check_any(checks.can_use())
     async def rr(self, ctx):
         await ctx.message.delete()
         embed = discord.Embed(title="Some important self roles",color=ctx.guild.me.color,
