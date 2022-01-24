@@ -1,4 +1,10 @@
 from discord.ext import commands
+import nextcord
+
+class CommandDisableByDev(commands.CommandError):
+    def __init__(self, user, *args, **kwargs):
+        self.user = user
+        super().__init__(*args, **kwargs)
 
 class checks():
     
@@ -10,10 +16,10 @@ class checks():
     def can_use():
         async def predicate(ctx):
             command = await ctx.bot.active_cmd.find(ctx.command.name)
+            
             if command['disable'] == True:
-                await ctx.send("Command is disabled by Jay/Utki")
-                return False
-
+                raise CommandDisableByDev(ctx.message)
+                
             if ctx.author.id in [488614633670967307, 301657045248114690]: return True
 
             user_roles = [role.id for role in ctx.author.roles]

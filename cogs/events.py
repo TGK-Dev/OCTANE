@@ -1,7 +1,7 @@
 import datetime
 import discord
 from discord import guild
-
+from utils.checks import CommandDisableByDev
 from discord.ext import commands, tasks
 
 
@@ -64,9 +64,11 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
             # If the command has failed a check, trip this
             return
         elif isinstance(error, commands.DisabledCommand):
-            await ctx.send('The command is disabed by Owner')
+            await ctx.send('The command is disabed by Jay/Utki')
         elif isinstance(error, commands.MaxConcurrencyReached):
             await ctx.send('Please Wait for last Game to End')
+        elif isinstance(error, CommandDisableByDev):
+            await ctx.send('The command is disabed by Jay/Utki')
         elif isinstance(error, commands.CommandInvokeError):
             return
         elif isinstance(error, commands.CommandNotFound):
