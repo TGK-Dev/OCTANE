@@ -17,7 +17,7 @@ class checks():
             if ctx.author.id in [488614633670967307, 301657045248114690]: return True
 
             user_roles = [role.id for role in ctx.author.roles]
-            if ctx.author.id in command['allowed_users']: return True
+            #if ctx.author.id in command['allowed_users']: return True
 
             if (set(user_roles) & set(command['allowed_roles'])):
                 return True
