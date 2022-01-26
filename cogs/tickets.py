@@ -54,7 +54,7 @@ class PersistentView(discord.ui.View):
                     'type': 'support'}
         await self.bot.ticket.upsert(user_data)
 
-    @discord.ui.button(label='Partership', style=discord.ButtonStyle.green, custom_id='persistent_view:partner_ship', emoji="<:partner:837272392472330250>")
+    @discord.ui.button(label='Partnership ', style=discord.ButtonStyle.green, custom_id='persistent_view:partner_ship', emoji="<:partner:837272392472330250>")
     async def partnership(self, button: discord.ui.Button, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
         user = interaction.user
@@ -77,7 +77,7 @@ class PersistentView(discord.ui.View):
             mod_role: discord.PermissionOverwrite(read_messages=True, send_messages=True, attach_files=True,read_message_history=True),
             trmod_role: discord.PermissionOverwrite(read_messages=True, send_messages=True, attach_files=True,read_message_history=True),
         }
-        channel = await guild.create_text_channel(category=self.bot.get_channel(829230513516445736), name=f"{user.name} Partnership Ticket", topic=f"User Id: {user.id}", overwrites=overwrites)
+        channel = await guild.create_text_channel(category=self.bot.get_channel(829230513516445736), name=f"{user.name} Partership Ticket", topic=f"User Id: {user.id}", overwrites=overwrites)
                 
         Tembed = discord.Embed(title=f"Hi {user.display_name}, Welcome to Server Support",
                                   color=0x008000,
@@ -289,7 +289,7 @@ def setup(bot):
 #     async def support(self, button: discord.ui.Button, interaction: discord.Interaction):
 #         await interaction.response.send_message("This Should Create New ticket", ephemeral=True)
     
-#     @discord.ui.button(label='Partership', style=discord.ButtonStyle.green, custom_id='ticket:partner_ship', emoji="<:partner:837272392472330250>")
+#     @discord.ui.button(label='Partnership ', style=discord.ButtonStyle.green, custom_id='ticket:partner_ship', emoji="<:partner:837272392472330250>")
 #     async def partnership(self, button: discord.ui.Button, interaction: discord.Interaction):
 #         await interaction.response.send_message("This Should Create New ticket", ephemeral=True)
 
