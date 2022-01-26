@@ -39,7 +39,7 @@ class PersistentView(discord.ui.View):
             mod_role: discord.PermissionOverwrite(read_messages=True, send_messages=True, attach_files=True,read_message_history=True),
             trmod_role: discord.PermissionOverwrite(read_messages=True, send_messages=True, attach_files=True,read_message_history=True),
         }
-        channel = await guild.create_text_channel(category=self.bot.get_channel(829230513516445736), name=f"{user.name} Stupport Ticket", topic=f"User Id: {user.id}", overwrites=overwrites)
+        channel = await guild.create_text_channel(category=self.bot.get_channel(829230513516445736), name=f"{user.name} Support Ticket", topic=f"User Id: {user.id}", overwrites=overwrites)
                 
         Tembed = discord.Embed(title=f"Hi {user.display_name}, Welcome to Server Support",
                                   color=0x008000,
