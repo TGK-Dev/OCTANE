@@ -132,7 +132,6 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
             embed.set_thumbnail(url=member.avatar.url or None)
         else:
             embed.set_thumbnail(url=member.default_avatar)
-        embed.add_field()
         await channel.send(f"{member.mention}", embed=embed)
 
 
@@ -159,7 +158,10 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
         log_channel = self.bot.get_channel(855784930494775296)
         log_embed = discord.Embed(title=f"🔨 Ban | Case ID: {data['case']}",
                                     description=f" **Offender**: {logs.target.name} | {logs.target.mention} \n**Reason**: {logs.reason}\n **Moderator**: {logs.user.name} {logs.user.mention}", color=0xE74C3C)
-        log_embed.set_thumbnail(url=member.avatar.url)
+        if member.avatar != None:
+            log_embed.set_thumbnail(url=member.avatar.url)
+        else:
+            log_embed.set_thumbnail(url=member.default_avatar)
         log_embed.timestamp = datetime.datetime.utcnow()
         log_embed.set_footer(text=f"ID: {member.id}")
 
@@ -186,7 +188,11 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
             log_channel = self.bot.get_channel(855784930494775296)
             log_embed = discord.Embed(title=f"🔓 UnBan | Case ID: {data['case']}",
                                       description=f" **Offender**: {logs.target.name} | {logs.target.mention} \n**Reason**: {logs.reason}\n **Moderator**: {logs.user.name} {logs.user.mention}", color=0x2ECC71)
-            log_embed.set_thumbnail(url=member.avatar.url)
+
+            if member.avatar != None:
+                log_embed.set_thumbnail(url=member.avatar.url)
+            else:
+                log_embed.set_thumbnail(url=member.default_avatar)
             log_embed.timestamp = datetime.datetime.utcnow()
             log_embed.set_footer(text=f"ID: {member.id}")
 

@@ -1,15 +1,8 @@
-import asyncio
-from code import interact
 import datetime
-from dis import dis
-from email import message
-from socket import timeout
-from typing import MutableSet
 import discord
 import re
-from discord import user
-from aiohttp import ClientSession
-import json
+from discord import Webhook
+import aiohttp
 
 from humanfriendly import format_timespan
 from copy import deepcopy
@@ -75,10 +68,58 @@ class TimeConverter(commands.Converter):
 class v2Moderation(commands.Cog, description=description, command_attrs=dict(hidden=False)):
     def __init__(self, bot):
         self.bot = bot
+        self.mute_task = self.check_current_bans.start()
+
+    def cog_unload(self):
+        self.mute_task.cancel()
+
+    @tasks.loop(seconds=5)
+    async def check_current_bans(self):
+        currentTime = datetime.datetime.now()
+        bans = deepcopy(self.bot.current_ban)
+        for key, value in bans.items():
+            if value['BanDuration'] is None:
+                continue
+
+            unmuteTime = value['BannedAt'] + relativedelta(seconds=value['BanDuration'])
+
+            if currentTime >= unmuteTime:
+                print(value)
+                guild = self.bot.get_guild(int(value['guildId']))
+                member = await self.bot.fetch_user(int(value['_id']))
+                moderator = guild.get_member(value['BanedBy'])
+                print("Event Trigger")
+                self.bot.dispatch('ban_expired', guild, member, moderator)
+
+                await self.bot.bans.delete(member.id)
+
+                try:
+                    self.bot.current_ban.pop(member.id)
+                except KeyError:
+                    pass
+
 
     @commands.Cog.listener()
     async def on_ready(self):
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
+    
+    @commands.Cog.listener()
+    async def on_ban_expired(self, guild: discord.Guild, user: discord.User, moderator: discord.Member):
+        if await guild.fetch_ban(user) == None:
+            return
+        await guild.unban(user, reason="Auto Automatic expired")
+        data = await self.bot.config.find(785839283847954433)
+        embed = discord.Embed(title=f"🔨 Ban | Case ID: {data['case']}",
+                                    description=f" **Offender**: {user.name} | {user.mention} \n**Reason**: Auto Automatic expired\n **Moderator**: {moderator.name} {moderator.mention}", color=0xE74C3C)
+        embed.timestamp = datetime.datetime.utcnow()
+        embed.set_footer(text=f"ID: {user.id}")
+        data["case"] += 1
+        await self.bot.config.upsert(data)
+
+        async with aiohttp.ClientSession() as session:
+            webhook = Webhook.from_url(self.bot.logging_webhook, session=session)
+            await webhook.send(username=f"{self.bot.user.name} Logging", avatar_url=self.bot.user.avatar.url,embed=embed)
+            await session.close()
 
     @commands.command(name="uerinfo", description="Give all Infomation about user", usage="[member]", aliases=['whois'])
     @commands.check_any(checks.can_use())

@@ -63,6 +63,7 @@ bot = commands.Bot(
 bot.config_token = os.getenv('TOKEN')
 bot.connection_url = str(os.getenv('MONGO'))
 bot.joke_api_key = os.getenv('DAD')
+bot.logging_webhook = os.getenv('WEBHOOK')
 
 logging.basicConfig(level=logging.INFO)
 
@@ -72,6 +73,7 @@ bot.guild_id = [797920317871357972]
 bot.cwd = cwd
 bot.perm = {}
 bot.afk_user = {}
+bot.current_ban = {}
 bot.mod_role = [797923152617275433, 848585998769455104]
 bot.version = "1.7"
 bot.uptime = datetime.datetime.utcnow()
@@ -112,6 +114,10 @@ async def on_ready():
     current_blacklist_user = await bot.config.find(785839283847954433)
     for blacklisted_user in current_blacklist_user['blacklist']:
         bot.blacklist_users.append(blacklisted_user)
+
+    current_banned_user = await bot.bans.get_all()
+    for banned_user in current_banned_user:
+        bot.current_ban[banned_user["_id"]] = banned_user
         
     current_afk_user = await bot.afk.get_all()
     for afk in current_afk_user:
@@ -132,6 +138,8 @@ async def on_ready():
     print("\n-----")
     print(f"Current blacklist:{len(bot.blacklist_users)}")
     print("\n-----")
+    print(f"Current Bans:{len(bot.current_ban)}")
+    print("\n-----")
     print("Database Connected\n-----")
 
 
@@ -145,6 +153,7 @@ async def on_message(message):
     # if the author is in the blacklisted list
     if message.author.id in bot.blacklist_users:
         return
+    
 
     # Whenever the bot is tagged, respond with its prefix
     if message.content.startswith(f"<@!{bot.user.id}>") and len(message.content) == len(
@@ -167,6 +176,7 @@ if __name__ == "__main__":
     bot.db = bot.mongo["tgk_database"]
     bot.config = Document(bot.db, "config")
     bot.afk = Document(bot.db, "afk")
+    bot.bans = Document(bot.db, "bans")
     bot.ticket = Document(bot.db, "ticket")
     bot.ticket_setup = Document(bot.db, "ticket_setup")
     bot.blacklist = Document(bot.db, "blacklist")
