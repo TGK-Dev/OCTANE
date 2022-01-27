@@ -29,6 +29,10 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
         current_afk_user = await self.bot.afk.get_all()
         for afk in current_afk_user:
             self.bot.afk_user[afk["_id"]] = afk
+        
+        current_banned_user = await self.bot.bans.get_all()
+        for banned_user in current_banned_user:
+            self.bot.current_ban[banned_user["_id"]] = banned_user
 
     @check_update_task.before_loop
     async def before_check_current_free(self):
@@ -124,7 +128,11 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
         embed = discord.Embed(title=f'**WELCOME TO TGK, {member.display_name}!**',
                               description=f"\n\nGet your favorite roles from [self-roles](https://discord.gg/58bc5QWE4q),\nand say _Hello_ to everyone in [chat](https://discord.gg/yEPYYDZ3dD)!\n\nAlso check out other fun game bots on the server:\n✦ [Casino](https://discord.gg/DJycdCqnqt) ✦ [Mudae](https://discord.gg/ujCHVRctHY) ✦ [Akinator](https://discord.gg/fzDTdGZFh6) ✦ [Pokemon](https://discord.gg/DpJ4mAUC9m)\n\nMake sure you follow the [rules](https://discord.gg/NmD4JGCaNc) of the house for a good time here. Also, check out rules and instructions of game bots in respective channels.\n\n:love_letter: To get in touch with staff, simply raise a ticket from [support](https://discord.gg/T8VWyvDfeB).\n\nHave fun!\n\n__Server Member Count:__ {guild.member_count - len([m for m in guild.members if m.bot])}",
                               color=0x000000)
-        embed.set_thumbnail(url=member.avatar.url or None)
+        if member.avatar != None:
+            embed.set_thumbnail(url=member.avatar.url or None)
+        else:
+            embed.set_thumbnail(url=member.default_avatar)
+        embed.add_field()
         await channel.send(f"{member.mention}", embed=embed)
 
 
