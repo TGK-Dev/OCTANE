@@ -64,6 +64,7 @@ bot.config_token = os.getenv('TOKEN')
 bot.connection_url = str(os.getenv('MONGO'))
 bot.joke_api_key = os.getenv('DAD')
 bot.logging_webhook = os.getenv('WEBHOOK')
+bot.nuke_webhook = os.getenv('NUKE')
 
 logging.basicConfig(level=logging.INFO)
 
@@ -186,7 +187,7 @@ if __name__ == "__main__":
     bot.inactive_cmd = Document(bot.db, "inactive_commands")
 
     for file in os.listdir(cwd + "/cogs"):
-        if file.endswith(".py") and not file.startswith("_") and not file.startswith("test"):
+        if file.endswith(".py") and not file.startswith("_") and file.startswith("test"):
             bot.load_extension(f"cogs.{file[:-3]}")
 
     bot.run(bot.config_token)
