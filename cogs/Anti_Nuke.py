@@ -25,7 +25,6 @@ class Anti_nuke(commands.Cog):
                     role = discord.utils.get(guild.roles, id=before.id)
                     logs = await guild.audit_logs(limit=10, action=discord.AuditLogAction.role_update).flatten()
                     for log in logs:
-                        print(log.user.name)
                         if log.target.id == before.id and log.user.id != self.bot.user.id:
                             log = log
                             break
