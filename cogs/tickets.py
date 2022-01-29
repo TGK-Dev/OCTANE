@@ -83,7 +83,7 @@ class PersistentView(discord.ui.View):
                                   color=0x008000,
                                   description="Kindly wait patiently. A staff member will assist you shortly.\nIf you're looking to approach a specific staff member, ping the member once. Do not spam ping any member or role.\n\nThank you.")
         Tembed.set_footer(text="Developed and Owned by Jay & utki007")
-        m = await channel.send(f"{user.mention} | `{partnership_m.mention}`", embed=Tembed)
+        m = await channel.send(f"{user.mention} | {partnership_m.mention}", embed=Tembed)
         await interaction.followup.send(f"You new Ticekt has Been Open in {channel.mention}", ephemeral=True)
 
         user_data = {'_id': user.id,
