@@ -3,11 +3,13 @@ import discord
 from discord.ext import commands, tasks
 from copy import deepcopy
 import datetime
+import requests
 
 class Votes(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.vote_task = self.check_current_votes.start()
+        self.web_page = self.check_webpage.start()
     
     def cog_unload(self):
         self.vote_task.cancel()
@@ -31,7 +33,17 @@ class Votes(commands.Cog):
                     self.bot.current_vote.pop(key)
                 except KeyError:
                     pass
+    
+    @tasks.loop(minutes=5)
+    async def check_webpage(self):
+        headers = {"Content-Type": "application/json"}
 
+        r = requests.post(f'https://vote-manger-tgk.herokuapp.com/',headers=headers)
+        if r.text == 'success':
+            pass
+        else:
+            user = self.bot.get_user(488614633670967307)
+            await user.send("Webpage is not responding")
 
     @commands.Cog.listener()
     async def on_vote_expired(self, data: dict):
