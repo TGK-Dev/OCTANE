@@ -191,5 +191,3 @@ if __name__ == "__main__":
 
     bot.run(bot.config_token)
 
-# help_command=Help(ending_note=f"Made By Jay and Utki", show_cooldown=False,
-#                       show_brief=True, timeout=60, timeout_delete=True)
