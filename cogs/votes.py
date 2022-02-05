@@ -25,7 +25,7 @@ class Votes(commands.Cog):
             if value['reminded'] == True:
                 continue
 
-            if (datetime.datetime.utcnow() - value['last_vote']).total_seconds() >= 10:
+            if (datetime.datetime.utcnow() - value['last_vote']).total_seconds() >= 86400:
 
                 try:
                     self.bot.current_vote.pop(key)
