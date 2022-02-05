@@ -55,8 +55,6 @@ bot = commands.Bot(
     command_prefix=get_prefix,
     case_insensitive=True,
     owner_ids=[391913988461559809, 488614633670967307, 301657045248114690],
-    help_command=Help(ending_note=f"Made By Jay and Utki", show_cooldown=False,
-                      show_brief=True, timeout=60, timeout_delete=True),
     intents=intents,
 )
 # change command_prefix='-' to command_prefix=get_prefix for custom prefixes
@@ -79,6 +77,7 @@ bot.mod_role = [797923152617275433, 848585998769455104]
 bot.version = "1.7"
 bot.uptime = datetime.datetime.utcnow()
 bot.automod = True
+bot.current_vote = {}
 bot.colors = {
     "WHITE": 0xFFFFFF,
     "AQUA": 0x1ABC9C,
@@ -124,10 +123,9 @@ async def on_ready():
     for afk in current_afk_user:
         bot.afk_user[afk["_id"]] = afk
 
-    datas = await bot.ticket_setup.get_all()
-    for data in datas:
-        setup = json.dumps(data)
-        bot.ticket_setups = json.loads(setup)
+    votes = await bot.votes.get_all()
+    for vote in votes:
+        bot.current_vote[vote["_id"]] = vote
 
     try:
         permissions = await bot.perms.get_all()
@@ -185,9 +183,13 @@ if __name__ == "__main__":
     bot.starboard = Document(bot.db, "starboard")
     bot.active_cmd = Document(bot.db, "Active_commands")
     bot.inactive_cmd = Document(bot.db, "inactive_commands")
+    bot.votes = Document(bot.db, "Votes")
 
     for file in os.listdir(cwd + "/cogs"):
-        if file.endswith(".py") and not file.startswith("_") and file.startswith("test"):
+        if file.endswith(".py") and not file.startswith("_") and not file.startswith("test"):
             bot.load_extension(f"cogs.{file[:-3]}")
 
     bot.run(bot.config_token)
+
+# help_command=Help(ending_note=f"Made By Jay and Utki", show_cooldown=False,
+#                       show_brief=True, timeout=60, timeout_delete=True)
