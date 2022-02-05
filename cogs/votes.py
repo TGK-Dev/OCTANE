@@ -13,6 +13,7 @@ class Votes(commands.Cog):
     
     def cog_unload(self):
         self.vote_task.cancel()
+        self.web_page.cancel()
     
     @commands.Cog.listener()
     async def on_ready(self):
@@ -40,10 +41,12 @@ class Votes(commands.Cog):
 
         r = requests.post(f'https://vote-manger-tgk.herokuapp.com/',headers=headers)
         if r.text == 'success':
-            pass
+            channel = self.bot.get_channel(855717169584537660)
+            await channel.send('Webpage is Working')
         else:
             user = self.bot.get_user(488614633670967307)
             await user.send("Webpage is not responding")
+
 
     @commands.Cog.listener()
     async def on_vote_expired(self, data: dict):
