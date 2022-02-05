@@ -33,6 +33,10 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
         current_banned_user = await self.bot.bans.get_all()
         for banned_user in current_banned_user:
             self.bot.current_ban[banned_user["_id"]] = banned_user
+        
+        votes = await self.bot.votes.get_all()
+        for vote in votes:
+            self.bot.current_vote[vote["_id"]] = vote
 
     @check_update_task.before_loop
     async def before_check_current_free(self):
