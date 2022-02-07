@@ -4,16 +4,15 @@ from discord.ext import commands, tasks
 from copy import deepcopy
 import datetime
 import requests
+from humanfriendly import format_timespan
 
 class Votes(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.vote_task = self.check_current_votes.start()
-        self.web_page = self.check_webpage.start()
     
     def cog_unload(self):
         self.vote_task.cancel()
-        self.web_page.cancel()
     
     @commands.Cog.listener()
     async def on_ready(self):
@@ -27,26 +26,16 @@ class Votes(commands.Cog):
 
             if value['reminded'] == True:
                 continue
+            
+            expired_time = value['last_vote'] + datetime.timedelta(hours=24)
 
-            if (datetime.datetime.utcnow() - value['last_vote']).total_seconds() >= 86400:
-
+            if currentTime >= expired_time:
+                            
+                self.bot.dispatch("vote_expired", value)
                 try:
                     self.bot.current_vote.pop(key)
                 except KeyError:
                     pass
-    
-    @tasks.loop(minutes=5)
-    async def check_webpage(self):
-        headers = {"Content-Type": "application/json"}
-
-        r = requests.post(f'https://vote-manger-tgk.herokuapp.com/',headers=headers)
-        if r.text == 'success':
-            channel = self.bot.get_channel(855717169584537660)
-            await channel.send('Webpage is Working')
-        else:
-            user = self.bot.get_user(488614633670967307)
-            await user.send("Webpage is not responding")
-
 
     @commands.Cog.listener()
     async def on_vote_expired(self, data: dict):
@@ -78,15 +67,7 @@ class Votes(commands.Cog):
     
     @commands.command(name="vote", description="Vote for a server")
     async def vote(self, ctx):
-        data = await self.bot.votes.find(ctx.author.id)
-
-        if not data:
-            embed = discord.Embed(title="Voting Perks!", description="❥ Special <@&786884615192313866> Role.\n❥ 2,500 Casino Cash. Collect using ,collectincome in <#786117471840895016>\n❥ Access to <#929613393097293874> with 2x Amaari\n❥ Guild wide 1x Amaari.", color=ctx.author.color)
-            view = discord.ui.View()
-            view.add_item(discord.ui.Button(label='Top.gg', url="https://top.gg/servers/785839283847954433/vote"))
-            await ctx.send(embed=embed, view=view)
-            return
-        
+        await ctx.message.delete()
         embed = discord.Embed(title=f"Vote for the {ctx.guild.name}", description="❥ Special <@&786884615192313866> Role.\n❥ 2,500 Casino Cash. Collect using ,collectincome in <#786117471840895016>\n❥ Access to <#929613393097293874> with 2x Amaari\n❥ Guild wide 1x Amaari.", color=ctx.author.color)
         view = discord.ui.View()
         view.add_item(discord.ui.Button(label=f'Top.gg', url="https://top.gg/servers/785839283847954433/vote"))
