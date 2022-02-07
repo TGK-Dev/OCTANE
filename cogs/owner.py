@@ -360,7 +360,8 @@ class Owner(commands.Cog, description=description):
         elif ctx.command == command: return await ctx.send("You cannot edit perm for this command")
         
         data = await self.bot.active_cmd.find(command.name)
-        if not data:return await ctx.send("NO data found")
+        if not data:
+            data = {"_id": command.name, "allowed_roles": [], 'allowed_users': [],"disable": False}
 
         for target in targets:
             if target in data['allowed_roles']:
