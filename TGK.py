@@ -184,6 +184,7 @@ if __name__ == "__main__":
     bot.starboard = Document(bot.db, "starboard")
     bot.active_cmd = Document(bot.db, "Active_commands")
     bot.inactive_cmd = Document(bot.db, "inactive_commands")
+    bot.embeds = Document(bot.db, "embeds")
     bot.votes = Document(bot.db, "Votes")
 
     for file in os.listdir(cwd + "/cogs"):
