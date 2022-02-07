@@ -129,7 +129,7 @@ class Embeds(commands.Cog):
         except asyncio.TimeoutError:
             return await ctx.send("TimeoutError")
     
-    @embed.command(name="steal", description="Steal any Embed from any guild")
+    @embed.command(name="steal", description="Steal Embed from any Message")
     @commands.check_any(checks.can_use())
     async def create(self, ctx, channel: discord.TextChannel, id: int):
         message = await channel.fetch_message(id)
