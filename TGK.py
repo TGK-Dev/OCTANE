@@ -56,6 +56,7 @@ bot = commands.Bot(
     case_insensitive=True,
     owner_ids=[391913988461559809, 488614633670967307, 301657045248114690],
     intents=intents,
+    help_command=Help(ending_note=f"Made By Jay and Utki", show_cooldown=False,show_brief=True, timeout=60, timeout_delete=True),
 )
 # change command_prefix='-' to command_prefix=get_prefix for custom prefixes
 bot.config_token = os.getenv('TOKEN')
@@ -190,4 +191,3 @@ if __name__ == "__main__":
             bot.load_extension(f"cogs.{file[:-3]}")
 
     bot.run(bot.config_token)
-
