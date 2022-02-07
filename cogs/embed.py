@@ -6,7 +6,7 @@ from utils.util import Pag
 
 
 class Save_embed(discord.ui.View):
-    def __init__(self, ctx, data, button_data, embed_name,bot):
+    def __init__(self, ctx, bot,embed_name,data,button_data=None):
         super().__init__()
         self.ctx = ctx
         self.data = data
@@ -18,9 +18,11 @@ class Save_embed(discord.ui.View):
     @discord.ui.button(label="Save Embed", style=discord.ButtonStyle.blurple)
     async def save_embed(self, button: discord.ui.Button, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
+
         embed_filter = {'guild_id': self.ctx.guild.id,'created_by': self.ctx.author.id, 'Key_name': self.embed_name}
         embed_data = {'embed': self.data, 'button_data': self.button_data}
         await self.bot.embeds.upsert_custom(embed_filter, embed_data)
+
         await interaction.followup.send("Embed saved!",ephemeral=True)
         for button in self.children:
             button.disabled = True
@@ -122,10 +124,36 @@ class Embeds(commands.Cog):
 
             await qestion_messge.delete()
 
-            await preview_message.reply("Do you want to Save This Emebed", view=Save_embed(ctx, data, button_data, embed_name,self.bot))
+            await preview_message.reply("Do you want to Save This Emebed", view=Save_embed(ctx, self.bot, embed_name,data,button_data))
 
         except asyncio.TimeoutError:
             return await ctx.send("TimeoutError")
     
+    @embed.command(name="steal", description="create an nice good looking Embed")
+    @commands.check_any(checks.can_use())
+    async def create(self, ctx, channel: discord.TextChannel, id: int):
+        message = await channel.fetch_message(id)
+        if len(message.embeds) == 0:
+            return await ctx.send("This message not have embed")        
+        else:
+            embed = message.embeds[0].to_dict()
+
+            await ctx.send("This is Preview Embed", embed=discord.Embed().from_dict(embed))
+            try:
+                qestion_messge = await ctx.send("Do you want to Save This Emebed (Yes/No)")
+                ans = await self.bot.wait_for('message', check=lambda m: m.author == ctx.author and m.channel == ctx.channel,timeout=120)
+                if ans.content.lower() == "yes" or 'y':
+                    qestion_messge = await ctx.send("Send name of Embed which will be use to send embed later")
+                    embed_name = await self.bot.wait_for('message', check=lambda message: message.author == ctx.author, timeout=120)
+                    embed_name = embed_name.content
+                    check_name = await self.bot.embeds.find_by_custom({"Key_name": embed_name})
+
+                    if check_name:
+                        return await ctx.send("Embed with this name already exist")
+                    
+                    await qestion_messge.edit(view=Save_embed(ctx, self.bot,embed_name ,embed))
+            except asyncio.TimeoutError:
+                return await ctx.send("TimeoutError")
+
 def setup(bot):
     bot.add_cog(Embeds(bot))
