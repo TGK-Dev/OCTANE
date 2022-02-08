@@ -131,7 +131,7 @@ class Embeds(commands.Cog):
     
     @embed.command(name="steal", description="Steal Embed from any Message")
     @commands.check_any(checks.can_use())
-    async def create(self, ctx, channel: discord.TextChannel, id: int):
+    async def steal(self, ctx, channel: discord.TextChannel, id: int):
         message = await channel.fetch_message(id)
         if len(message.embeds) == 0:
             return await ctx.send("This message not have embed")        
@@ -152,6 +152,8 @@ class Embeds(commands.Cog):
                         return await ctx.send("Embed with this name already exist")
                     
                     await qestion_messge.edit(view=Save_embed(ctx, self.bot,embed_name ,embed))
+                else:
+                    return
             except asyncio.TimeoutError:
                 return await ctx.send("TimeoutError")
 

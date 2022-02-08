@@ -27,7 +27,7 @@ class Votes(commands.Cog):
             if value['reminded'] == True:
                 continue
             
-            expired_time = value['last_vote'] + datetime.timedelta(hours=24)
+            expired_time = value['last_vote'] + datetime.timedelta(hours=12)
 
             if currentTime >= expired_time:
                             
