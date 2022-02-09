@@ -46,6 +46,8 @@ class Votes(commands.Cog):
 
         guild = self.bot.get_guild(785839283847954433)
         member = guild.get_member(data['_id'])
+        if member is None:
+            return await self.bot.votes.delete(data['_id'])
         await member.remove_roles(guild.get_role(786884615192313866))
         data['reminded'] = True
         await self.bot.votes.upsert(data)
