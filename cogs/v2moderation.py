@@ -68,10 +68,10 @@ class TimeConverter(commands.Converter):
 class v2Moderation(commands.Cog, description=description, command_attrs=dict(hidden=False)):
     def __init__(self, bot):
         self.bot = bot
-        self.mute_task = self.check_current_bans.start()
+        self.ban_task = self.check_current_bans.start()
 
     def cog_unload(self):
-        self.mute_task.cancel()
+        self.ban_task.cancel()
 
     @tasks.loop(seconds=5)
     async def check_current_bans(self):
@@ -81,14 +81,13 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
             if value['BanDuration'] is None:
                 continue
 
-            unmuteTime = value['BannedAt'] + relativedelta(seconds=value['BanDuration'])
+            unbantime = value['BannedAt'] + relativedelta(days=7)
 
-            if currentTime >= unmuteTime:
+            if currentTime >= unbantime:
                 print(value)
                 guild = self.bot.get_guild(int(value['guildId']))
                 member = await self.bot.fetch_user(int(value['_id']))
                 moderator = guild.get_member(value['BanedBy'])
-                print("Event Trigger")
                 self.bot.dispatch('ban_expired', guild, member, moderator)
 
                 await self.bot.bans.delete(member.id)
@@ -97,6 +96,10 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
                     self.bot.current_ban.pop(member.id)
                 except KeyError:
                     pass
+    
+    @check_current_bans.before_loop
+    async def before_check_current_bans(self):
+        await self.bot.wait_until_ready()
 
 
     @commands.Cog.listener()
@@ -109,7 +112,7 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
             return
         await guild.unban(user, reason="Auto Automatic expired")
         data = await self.bot.config.find(785839283847954433)
-        embed = discord.Embed(title=f"🔨 Ban | Case ID: {data['case']}",
+        embed = discord.Embed(title=f"🔨 UnBan | Case ID: {data['case']}",
                                     description=f" **Offender**: {user.name} | {user.mention} \n**Reason**: Auto Automatic expired\n **Moderator**: {moderator.name} {moderator.mention}", color=0xE74C3C)
         embed.timestamp = datetime.datetime.utcnow()
         embed.set_footer(text=f"ID: {user.id}")
