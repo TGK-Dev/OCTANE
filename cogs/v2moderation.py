@@ -110,7 +110,7 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
     async def on_ban_expired(self, guild: discord.Guild, user: discord.User, moderator: discord.Member):
         if await guild.fetch_ban(user) == None:
             return
-        await guild.unban(user, reason="Auto Automatic expired")
+        await guild.unban(user, reason="Auto Automatic ban expired")
         data = await self.bot.config.find(785839283847954433)
         embed = discord.Embed(title=f"🔨 UnBan | Case ID: {data['case']}",
                                     description=f" **Offender**: {user.name} | {user.mention} \n**Reason**: Auto Automatic expired\n **Moderator**: {moderator.name} {moderator.mention}", color=0xE74C3C)
