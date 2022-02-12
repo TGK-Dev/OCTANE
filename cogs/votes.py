@@ -64,7 +64,10 @@ class Votes(commands.Cog):
         if not data:
             await ctx.send("User has no votes")
             return
-        embed = discord.Embed(title=f"{user.name}'s votes", description=f"{user.mention} has {data['total_vote']} votes", color=user.color)
+        embed = discord.Embed(title=f"{user.name}'s votes", description=f"Total Votes: {data['total_vote']}\nVote Streak: {data['streak']}\nLast Vote: <t:{round(data['last_vote'].timestamp())}>", color=user.color)
+        embed.set_thumbnail(url="https://cdn.discordapp.com/emojis/830519601384128523.gif?v=1")
+        embed.timestamp =datetime.datetime.utcnow()
+        embed.set_footer(text=f"Requested by {ctx.author}", icon_url=ctx.author.avatar.url)
         await ctx.send(embed=embed)
     
     @commands.command(name="vote", description="Vote for a server")
