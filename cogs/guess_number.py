@@ -3,6 +3,12 @@ import random
 import asyncio
 from discord.ext import commands
 from utils.checks import checks
+from discord import SlashOption
+
+list_of_items =[
+    "Heist Starter",
+    "1 Mil Dmc",
+]
 
 class Confirm(discord.ui.View):
     def __init__(self, message: discord.Message, ctx, range:int, bot):
@@ -63,15 +69,29 @@ class start(discord.ui.View):
         else:
             await interaction.response.send_message("You nor the Staff or Host of the event", ephemeral=True)
 
+class Drop(discord.ui.View):
+    def __init__(self):
+        super().__init__(timeout=None)
+
+    @discord.ui.button(label='Drop', style=discord.ButtonStyle.blurple, emoji="<a:GiftShake:820323765941436446>", custom_id="Drop:drop")
+    async def drop(self, button: discord.ui.Button, interaction: discord.Interaction):
+        await interaction.response.send_message(content="You Won", ephemeral=True)
+        self.stop()
+        embed = interaction.message.embeds[0]
+        embed.add_field(name="Winner: ", value=f"{interaction.user.mention}",inline=False)
+        await interaction.message.edit(embed=embed)
+        for button in self.children:
+            button.disabled = True
+        await interaction.message.edit(view=self)
+
 class Guess_number(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.guess = 0
 
-
-
     @commands.Cog.listener()
     async def on_ready(self):
+        self.bot.add_view(Drop())
         print(f'{self.__class__.__name__} Cog has been loaded-----')
 
     @commands.Cog.listener()
@@ -121,6 +141,24 @@ class Guess_number(commands.Cog):
         else:
             await msg.delete()
 
+    @discord.slash_command(guild_ids=[785839283847954433], name="drop", description="Do a Drop of any item")
+    async def drop(self, interaction: discord.Interaction, item: str= SlashOption(required=False, description="name of price")):
+        if not interaction.user.guild_permissions.manage_messages:
+            return await interaction.send("You don't have permission to use this command")
+        embed = discord.Embed(title="Drop Incoming",color=interaction.user.color)
+        embed.add_field(name="Price:", value=f"{item}",inline=False)
+        await interaction.response.send_message("Drop droped",ephemeral=True)
+        await interaction.channel.send(embed=embed, view=Drop())
+    
+    @drop.on_autocomplete("item")
+    async def comman_items(self, interaction: discord.Interaction, item: str):
+        if not item:
+            await interaction.response.send_autocomplete(list_of_items)
+        
+        get_near_item = [
+            thing for thing in list_of_items if thing.lower().startswith(item.lower())
+        ]
+        await interaction.response.send_autocomplete(get_near_item)
 
 def setup(bot):
     bot.add_cog(Guess_number(bot))
