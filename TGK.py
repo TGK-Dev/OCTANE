@@ -100,6 +100,7 @@ bot.colors = {
     "DARK_RED": 0x992D22,
     "DARK_NAVY": 0x2C3E50,
 }
+bot.ban_event = {}
 bot.color_list = [c for c in bot.colors.values()]
 
 
@@ -128,12 +129,9 @@ async def on_ready():
     for vote in votes:
         bot.current_vote[vote["_id"]] = vote
 
-    try:
-        permissions = await bot.perms.get_all()
-        permission = json.dumps(permissions)
-        bot.perm = json.loads(permission)
-    except:
-        pass
+    battles = await bot.ban_backup.get_all()
+    for bans in battles:
+        bot.ban_event[bans["_id"]] = bans
 
     print("\n-----")
     print(f"Current blacklist:{len(bot.blacklist_users)}")
@@ -141,7 +139,6 @@ async def on_ready():
     print(f"Current Bans:{len(bot.current_ban)}")
     print("\n-----")
     print("Database Connected\n-----")
-
 
 @bot.event
 async def on_message(message):
@@ -186,9 +183,10 @@ if __name__ == "__main__":
     bot.inactive_cmd = Document(bot.db, "inactive_commands")
     bot.embeds = Document(bot.db, "embeds")
     bot.votes = Document(bot.db, "Votes")
+    bot.ban_backup = Document(bot.db, "ban_backup")
 
     for file in os.listdir(cwd + "/cogs"):
-        if file.endswith(".py") and not file.startswith("_") and not file.startswith("test"):
+        if file.endswith(".py") and not file.startswith("_") and file.startswith("guess_number"):
             bot.load_extension(f"cogs.{file[:-3]}")
 
     bot.run(bot.config_token)
