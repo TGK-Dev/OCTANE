@@ -186,7 +186,7 @@ if __name__ == "__main__":
     bot.ban_backup = Document(bot.db, "ban_backup")
 
     for file in os.listdir(cwd + "/cogs"):
-        if file.endswith(".py") and not file.startswith("_") and file.startswith("guess_number"):
+        if file.endswith(".py") and not file.startswith("_") and file.startswith("test"):
             bot.load_extension(f"cogs.{file[:-3]}")
 
     bot.run(bot.config_token)
