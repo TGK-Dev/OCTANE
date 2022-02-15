@@ -73,7 +73,7 @@ class Votes(commands.Cog):
     @commands.command(name="vote", description="Vote for a server")
     async def vote(self, ctx):
         await ctx.message.delete()
-        embed = discord.Embed(title=f"Vote for the {ctx.guild.name}", description="❥ Special <@&786884615192313866> Role.\n❥ 2,500 Casino Cash. Collect using ,collectincome in <#786117471840895016>\n❥ Access to <#929613393097293874> with 2x Amaari\n❥ Guild wide 1x Amaari.", color=ctx.author.color)
+        embed = discord.Embed(title=f"Vote for the {ctx.guild.name}", description="❥ Special <@&786884615192313866> Role, has 1x guild-wide mulit.\n❥ 2,500 Casino Cash. Collect using ,collectincome in <#786117471840895016>\n❥ Access to <#929613393097293874> with 2x Amaari\n❥ 1x extra entry into all frisky giveaways.", color=ctx.author.color)
         view = discord.ui.View()
         view.add_item(discord.ui.Button(label=f'Top.gg', url="https://top.gg/servers/785839283847954433/vote"))
         await ctx.send(embed=embed, view=view)
