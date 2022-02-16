@@ -7,6 +7,7 @@ from humanfriendly import format_timespan
 from discord_together import DiscordTogether
 
 from discord.ext import commands
+from utils.checks import checks
 
 description = "Some Basic commands"
 
@@ -94,6 +95,28 @@ class Basic(commands.Cog, description=description):
                          icon_url=self.bot.user.avatar.url)
 
         await ctx.send(embed=embed)
+
+    @commands.Cog.listener()
+    async def on_message_delete(self, message):
+        if message.author.bot: return
+        if message.content.startswith(">") or message.content.startswith('?'): return
+        self.bot.snipe[message.channel.id] = {'message': message.content, 'author': message.author.id}
+
+    @commands.command(name="snipe")
+    @commands.check_any(checks.can_use())
+    async def snipe(self, ctx):
+        data = self.bot.snipe.get(ctx.channel.id)
+        if data is None:
+            await ctx.send("there is nothing to snipe")
+            return
+        user = ctx.guild.get_member(data['author'])
+        if user is None:
+            user = await ctx.guild.fetch_member(data['author'])
+        embed = discord.Embed(description=data['message'], color=user.colour)
+        embed.set_author(name=user, icon_url=user.avatar.url)
+        embed.timestamp = datetime.datetime.utcnow()
+        embed.set_footer(text=f"Sniped by: {ctx.author}")
+        await ctx.reply(embed=embed, mention_author=False)
 
 
 def setup(bot):

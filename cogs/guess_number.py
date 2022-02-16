@@ -72,8 +72,7 @@ class start(discord.ui.View):
 class Drop(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
-        self.value = None
-
+        
     @discord.ui.button(label='Drop', style=discord.ButtonStyle.blurple, emoji="<a:GiftShake:820323765941436446>", custom_id="Drop:drop")
     async def drop(self, button: discord.ui.Button, interaction: discord.Interaction):
         self.stop()
@@ -83,7 +82,6 @@ class Drop(discord.ui.View):
         embed = interaction.message.embeds[0]
         embed.add_field(name="Winner: ", value=f"{interaction.user.mention}",inline=False)
         await interaction.message.edit(embed=embed)
-
 
 class Guess_number(commands.Cog):
     def __init__(self, bot):
@@ -149,8 +147,9 @@ class Guess_number(commands.Cog):
         embed = discord.Embed(title="Drop Incoming",color=interaction.user.color)
         embed.add_field(name="Price:", value=f"{item}",inline=False)
         await interaction.response.send_message("Drop droped",ephemeral=True)
-        view = Drop()
+
         await interaction.channel.send(embed=embed, view=view)
+
     
     @drop.on_autocomplete("item")
     async def comman_items(self, interaction: discord.Interaction, item: str):

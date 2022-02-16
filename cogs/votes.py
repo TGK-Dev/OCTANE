@@ -64,13 +64,16 @@ class Votes(commands.Cog):
         if not data:
             await ctx.send("User has no votes")
             return
-        embed = discord.Embed(title=f"{user.name}'s votes", description=f"{user.mention} has {data['total_vote']} votes", color=user.color)
+        embed = discord.Embed(title=f"{user.name}'s votes", description=f"Total Votes: {data['total_vote']}\nVote Streak: {data['streak']}\nLast Vote: <t:{round(data['last_vote'].timestamp())}>", color=user.color)
+        embed.set_thumbnail(url="https://cdn.discordapp.com/emojis/830519601384128523.gif?v=1")
+        embed.timestamp =datetime.datetime.utcnow()
+        embed.set_footer(text=f"Requested by {ctx.author}", icon_url=ctx.author.avatar.url)
         await ctx.send(embed=embed)
     
     @commands.command(name="vote", description="Vote for a server")
     async def vote(self, ctx):
         await ctx.message.delete()
-        embed = discord.Embed(title=f"Vote for the {ctx.guild.name}", description="❥ Special <@&786884615192313866> Role.\n❥ 2,500 Casino Cash. Collect using ,collectincome in <#786117471840895016>\n❥ Access to <#929613393097293874> with 2x Amaari\n❥ Guild wide 1x Amaari.", color=ctx.author.color)
+        embed = discord.Embed(title=f"Vote for the {ctx.guild.name}", description="❥ Special <@&786884615192313866> Role, has 1x guild-wide mulit.\n❥ 2,500 Casino Cash. Collect using ,collectincome in <#786117471840895016>\n❥ Access to <#929613393097293874> with 2x Amaari\n❥ 1x extra entry into all frisky giveaways.", color=ctx.author.color)
         view = discord.ui.View()
         view.add_item(discord.ui.Button(label=f'Top.gg', url="https://top.gg/servers/785839283847954433/vote"))
         await ctx.send(embed=embed, view=view)
