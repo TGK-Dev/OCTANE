@@ -80,7 +80,20 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
         elif isinstance(error, commands.CommandInvokeError):
             return
         elif isinstance(error, commands.CommandNotFound):
-            return
+            data_filter = ctx.message.content.replace('>', '')
+            embed_filter = {'Key_name': data_filter}
+            embed_data = await self.bot.embeds.find_by_custom(embed_filter)
+            if embed_data is None: return
+            await ctx.message.delete()
+            embed = embed_data['embed']
+            button = embed_data['buttons']    
+            if len(button) > 0:
+                view = discord.ui.View()
+                for i in button:
+                    view.add_item(discord.ui.Button(label=i['name'], url=i['url']))
+                await ctx.send(embed=discord.Embed().from_dict(embed), view=view)
+            else:
+                await ctx.send(embed=discord.Embed().from_dict(embed))
         else:
             #raise error
             embed = discord.Embed(color=0xE74C3C,
