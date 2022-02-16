@@ -147,7 +147,7 @@ class Guess_number(commands.Cog):
         embed = discord.Embed(title="Drop Incoming",color=interaction.user.color)
         embed.add_field(name="Price:", value=f"{item}",inline=False)
         await interaction.response.send_message("Drop droped",ephemeral=True)
-
+        view = Drop()
         await interaction.channel.send(embed=embed, view=view)
 
     
