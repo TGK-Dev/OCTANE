@@ -68,7 +68,7 @@ class Afk(commands.Cog, description="An Afk commands"):
 
     @commands.command(name="afk", description="set your status afk with this command")
     @commands.check_any(checks.can_use())
-    @commands.cooldown(1, 300, commands.BucketType.user)
+    @commands.cooldown(1, 30, commands.BucketType.user)
     async def afk(self, ctx, *, message=None):
         message = message if message else ""
 
@@ -80,7 +80,7 @@ class Afk(commands.Cog, description="An Afk commands"):
             await ctx.author.edit(nick=f"[AFK] {ctx.author.display_name}")
         except:
             pass
-        await ctx.send("I have set your status as afk")
+        await ctx.send(f"{ctx.author.mention}, **I set your afk:** {message}", allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
         await self.bot.afk.upsert(data)
         self.bot.afk_user[ctx.author.id] = data
 
