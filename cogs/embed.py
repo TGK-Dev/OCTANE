@@ -96,7 +96,7 @@ class Main_panel(discord.ui.View):
             return
 
         embed = self.message.embeds[0]
-        if thumbnail.content == "none" or thumbnail.content == "None":
+        if thumbnail.content in ("none", "None"):
             embed.set_thumbnail(url=discord.Embed.Empty)
         else:
             embed.set_thumbnail(url=thumbnail.content)
