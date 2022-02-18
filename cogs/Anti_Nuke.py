@@ -1,5 +1,4 @@
 import datetime
-import datetime
 import discord
 import aiohttp
 from discord.ext import commands
