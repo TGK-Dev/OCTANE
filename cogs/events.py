@@ -119,8 +119,9 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
                         f"❥ Access to <#929613393097293874> with 2x Amaari\n"
                         , mention_author=False, view=vote_button(guild), allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
 
+            immune_users = [301657045248114690, 413651113485533194, 488614633670967307, 562738920031256576, 413651113485533194, 928126608852811848, 690118001369808921, 457839031909351425, 651711446081601545]
             for word in ['when heist', 'where heist', 'heist when', 'where is the heist', 'heist?', 'heist']:
-                if word in messageContent and message.channel.id == 785847439579676672 and message.author.id != 301657045248114690:
+                if word in messageContent and message.channel.id == 785847439579676672 and message.author.id not in immune_users:
                     return await message.reply('Keep an 👁️ on <#927241961038045236> for heist related requirements/updates.', delete_after=30)
 
     @commands.Cog.listener()
