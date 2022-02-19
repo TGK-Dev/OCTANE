@@ -80,7 +80,7 @@ class Drop(discord.ui.View):
         await interaction.message.edit(view=self)
         await interaction.response.send_message(content="You Won", ephemeral=True)        
         embed = interaction.message.embeds[0]
-        embed.add_field(name="Winner: ", value=f"{interaction.user.mention}",inline=False)
+        embed.add_field(name="Winner: ", value=f"{interaction.user.mention}(**{interaction.user.display_name}**)",inline=False)
         await interaction.message.edit(embed=embed)
 
 class Guess_number(commands.Cog):
