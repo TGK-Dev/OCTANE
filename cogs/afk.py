@@ -64,7 +64,7 @@ class Afk(commands.Cog, description="An Afk commands"):
                 user = await message.guild.fetch_member(value['_id'])
                 if user in message.mentions:
                     time = round(value['time'].timestamp())
-                    await message.reply(f"{user.display_name} is afk {value['message']} -<t:{time}:R> <t:{time}:f>", mention_author=False, delete_after=30, allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
+                    await message.reply(f"**{user.display_name}** is currently afk: {value['message']} - <t:{time}:R> <t:{time}:f>", mention_author=False, delete_after=30, allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
 
     @commands.command(name="afk", description="set your status afk with this command")
     @commands.check_any(checks.can_use())
