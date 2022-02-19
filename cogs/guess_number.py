@@ -145,7 +145,8 @@ class Guess_number(commands.Cog):
         if not interaction.user.guild_permissions.manage_messages:
             return await interaction.send("You don't have permission to use this command")
         embed = discord.Embed(title="Drop Incoming",color=interaction.user.color)
-        embed.add_field(name="Price:", value=f"{item}",inline=False)
+        embed.add_field(name="Prize:", value=f"{item}",inline=False)
+        embed.add_field(name="Host:", value=f"**{interaction.user.display_name}**",inline=False)
         await interaction.response.send_message("Drop droped",ephemeral=True)
         view = Drop()
         await interaction.channel.send(embed=embed, view=view)
