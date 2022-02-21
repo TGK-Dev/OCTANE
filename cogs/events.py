@@ -103,14 +103,16 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
     
     @commands.Cog.listener()
     async def on_message(self, message):
-        word_list = ['vote link', 'vote Link', 'Vote link','how to get vote role', 'how to vote', 'pls vote', 'pls Vote', 'Pls vote']
+        word_list = ['vote link','how to get vote role', 'how to vote', 'pls vote', 'how to vote for server', 'link to vote']
         if message.author.bot:
             return
 
         messageContent = message.content.lower()
+        flag = 0
         if len(messageContent) > 0:
             for word in word_list:
                 if word in messageContent:
+                    flag = 1
                     guild = message.guild.id
                     return await message.reply(f"__**Voting Perks**__\n"
                         f"❥ Special <@&786884615192313866> Role with 1x guild-wide multi.\n"
@@ -119,9 +121,21 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
                         f"❥ Access to <#929613393097293874> with 2x Amaari\n"
                         , mention_author=False, view=vote_button(guild), allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
 
-            immune_users = [301657045248114690, 413651113485533194, 488614633670967307, 562738920031256576, 413651113485533194, 928126608852811848, 690118001369808921, 457839031909351425, 651711446081601545]
+            
+            channel_ids = [785847439579676672, 799364834927968336, 799378297855279125, 935763990670348309]
+            immune_users = [301657045248114690, 488614633670967307, 562738920031256576, 413651113485533194, 928126608852811848, 690118001369808921, 457839031909351425, 651711446081601545]
+            
+            if "vote" in messageContent and flag ==0 and message.channel.id in channel_ids and message.author.id not in immune_users:
+                guild = message.guild.id
+                return await message.reply(f"__**Voting Perks**__\n"
+                        f"❥ Special <@&786884615192313866> Role with 1x guild-wide multi.\n"
+                        f"❥ 1x extra entry into all frisky giveaways.\n"
+                        f"❥ 2,500 Casino Cash. Collect using ,collectincome in <#786117471840895016>.\n"
+                        f"❥ Access to <#929613393097293874> with 2x Amaari\n"
+                        , mention_author=False, view=vote_button(guild), allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
+
             for word in ['when heist', 'where heist', 'heist when', 'where is the heist', 'heist?', 'heist']:
-                if word in messageContent and message.channel.id == 785847439579676672 and message.author.id not in immune_users:
+                if word in messageContent and message.channel.id in channel_ids and message.author.id not in immune_users:
                     return await message.reply('Keep an 👁️ on <#927241961038045236> for heist related requirements/updates.', delete_after=30)
 
     @commands.Cog.listener()
