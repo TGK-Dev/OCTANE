@@ -69,7 +69,7 @@ class Afk(commands.Cog, description="An Afk commands"):
     @commands.command(name="afk", description="set your status afk with this command")
     @commands.check_any(checks.can_use())
     @commands.cooldown(1, 30, commands.BucketType.user)
-    async def afk(self, ctx, *, message=None):
+    async def afk(self, ctx, *, message="Afk"):
         message = message if message else ""
 
         data = {'_id': ctx.author.id,
