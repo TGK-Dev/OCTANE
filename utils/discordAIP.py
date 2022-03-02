@@ -1,4 +1,5 @@
 import aiohttp
+
 import discord
 from discord import Webhook
 import os
@@ -40,12 +41,12 @@ class BaseRequest():
 
                 else:
 
-                    embed = discord.Embed(title="Thank you for voting for Gambler's Kingdom", description=f"Thank you for the vote :)\nYou get Role <@&786884615192313866> for 12 Hours\n**Vote Count:** {total_votes}\n\nYou can vote on top.gg [here](https://top.gg/servers/785839283847954433/vote) every 12 hours!", color=0x00ffb3)
+                    embed = discord.Embed(title=f"Thank {r['user']['username']} for voting for Gambler's Kingdom", description=f"Thank <@{r['user']['id']}> for the vote :)\nYou get Role <@&786884615192313866> for 12 Hours\n**Vote Count:** {total_votes}\n\nYou can vote on top.gg [here](https://top.gg/servers/785839283847954433/vote) every 12 hours!", color=0x00ffb3)
                     embed.set_thumbnail(url=f"https://cdn.discordapp.com/emojis/830519601384128523.gif?v=1")
                     embed.set_footer(text="Made by Jay and Utki", icon_url=f"https://cdn.discordapp.com/avatars/816699167824281621/1bf01631b86f25cb052d64b69759e8d4.png?size=4096")
                     webhook = Webhook.from_url(vote_webhook, session=session)
 
-                    await webhook.send(content=f"<@{r['user']['id']}>",username=f"OCT∆NΞ Logging", avatar_url="https://cdn.discordapp.com/avatars/816699167824281621/1bf01631b86f25cb052d64b69759e8d4.png?size=4096",embed=embed)
+                    await webhook.send(username=f"OCT∆NΞ Logging", avatar_url="https://cdn.discordapp.com/avatars/816699167824281621/1bf01631b86f25cb052d64b69759e8d4.png?size=4096",embed=embed)
             
             add_role = f"https://discord.com/api/v9/guilds/785839283847954433/members/{id}/roles/786884615192313866"
             

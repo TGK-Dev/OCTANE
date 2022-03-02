@@ -9,10 +9,9 @@ app = Flask(__name__)
 
 
 load_dotenv()
-webhook_link = os.getenv('WEBHOOK')
 app.connection_url = os.getenv('MONGO')
 app.token = os.getenv('TOKEN')
-app.webhook_vote = os.getenv('VOTE')
+app.vote_webhook = os.getenv('VOTE')
 app.autho = os.getenv('PASSWORD')
 
 
@@ -25,15 +24,11 @@ async def webhook():
 
     if request.method == 'POST':
             vote_info = request.json
-
             if str(request.headers['Authorization']) != str(app.autho): return 'unauthorized', 401
-            
-            print(vote_info)
 
             filter = {"_id": int( vote_info['user'])}
             data = collection.find_one(filter)
 
-            print(f"Before Update: {data}")
 
             if not data:
 
@@ -41,7 +36,7 @@ async def webhook():
 
                 collection.insert(data)
                 
-                await BaseRequest.get_member(vote_info['user'], app.token, data['total_vote'], app.webhook_vote)
+                await BaseRequest.get_member(vote_info['user'], app.token, data['total_vote'], app.vote_webhook)
                 
                 return 'success', 200
             
@@ -56,9 +51,8 @@ async def webhook():
 
             collection.update_one(filter, {"$set": data})
 
-            print(f"After Update: {collection.find_one(filter)}")
 
-            await BaseRequest.get_member(vote_info['user'], app.token, data['total_vote'])
+            await BaseRequest.get_member(vote_info['user'], app.token, data['total_vote'], app.vote_webhook)
 
             return 'success', 200
 
