@@ -15,10 +15,11 @@ class checks():
 
     def can_use():
         async def predicate(ctx):
-            command = await ctx.bot.active_cmd.find(ctx.command.name)
-
-            if command is None:
+            try:
+                command = ctx.bot.perm[ctx.command.name]
+            except KeyError:
                 command = {"_id": ctx.command.name, "allowed_roles": [], 'allowed_users': [],"disable": False}
+            
             
             if command['disable'] == True:
                 raise CommandDisableByDev(ctx.message)
