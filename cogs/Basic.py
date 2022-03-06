@@ -102,7 +102,30 @@ class Basic(commands.Cog, description=description):
         if message.content.startswith(">") or message.content.startswith('?'): return
         self.bot.snipe[message.channel.id] = {'message': message.content, 'author': message.author.id}
 
-    @commands.command(name="snipe")
+    @commands.Cog.listener()
+    async def on_message_edit(self, before, after):
+        if before.author.bot: return
+        if before.content.startswith(">") or before.content.startswith('?'): return
+        self.bot.esnipe[before.channel.id] = {'message': before.content, 'author': before.author.id, 'after': after.content}
+
+    @commands.command(name="esnipe", aliases=["es"])
+    @commands.check_any(checks.can_use())
+    async def esnipe(self, ctx):
+        data = self.bot.esnipe.get(ctx.channel.id)
+        if data is None:
+            await ctx.send("there is nothing to snipe")
+            return
+        user = ctx.guild.get_member(data['author'])
+        if user is None:
+            user = await ctx.guild.fetch_member(data['author'])
+
+        embed = discord.Embed(description=f"**Before:** {data['message']}\n**After:** {data['after']}", color=user.colour)
+        embed.set_author(name=user, icon_url=user.avatar.url)
+        embed.timestamp = datetime.datetime.utcnow()
+        embed.set_footer(text=f"Sniped by: {ctx.author}")
+        await ctx.reply(embed=embed, mention_author=False)
+
+    @commands.command(name="snipe", aliases=["s"])
     @commands.check_any(checks.can_use())
     async def snipe(self, ctx):
         data = self.bot.snipe.get(ctx.channel.id)
