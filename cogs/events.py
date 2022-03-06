@@ -37,6 +37,10 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
         votes = await self.bot.votes.get_all()
         for vote in votes:
             self.bot.current_vote[vote["_id"]] = vote
+        
+        perm = await self.bot.active_cmd.get_all()
+        for p in perm:
+            self.bot.perm[p["_id"]] = p
 
     @check_update_task.before_loop
     async def before_check_current_free(self):
