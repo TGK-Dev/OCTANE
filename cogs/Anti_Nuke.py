@@ -2,7 +2,7 @@ import datetime
 import discord
 import aiohttp
 from discord.ext import commands
-from nextcord import Webhook
+from discord import Webhook
 
 class Anti_nuke(commands.Cog):
     def __init__(self, bot):
@@ -45,7 +45,7 @@ class Anti_nuke(commands.Cog):
                         async with aiohttp.ClientSession() as session:
                             webhook = Webhook.from_url(self.bot.nuke_webhook, session=session)
                             await webhook.send(content="@everyone",username=f"{self.bot.user.name} NuKe", avatar_url=self.bot.user.avatar.url,embed=embed)
-                            await session.close()
+
             
 def setup(bot):
     bot.add_cog(Anti_nuke(bot))
