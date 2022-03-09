@@ -103,7 +103,7 @@ bot.colors = {
 bot.ban_event = {}
 bot.color_list = [c for c in bot.colors.values()]
 bot.snipe = {}
-
+bot.esnipe = {}
 
 @bot.event
 async def on_ready():
