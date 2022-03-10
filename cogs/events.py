@@ -139,7 +139,7 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
                         f"❥ Access to <#929613393097293874> with 2x Amaari\n"
                         , mention_author=False, view=vote_button(guild), allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
 
-            for word in ['when heist', 'where heist', 'heist when', 'where is the heist', 'heist?']:
+            for word in ['when heist', 'where heist', 'heist when', 'where is the heist', 'heist?', 'heist']:
                 if word in messageContent and message.channel.id in channel_ids and message.author.id not in immune_users:
                     return await message.reply('Keep an 👁️ on <#927241961038045236> for heist related requirements/updates.', delete_after=30)
 
