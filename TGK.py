@@ -134,6 +134,10 @@ async def on_ready():
     for bans in battles:
         bot.ban_event[bans["_id"]] = bans
 
+    current_perm = await bot.activity_cmd.get_all()
+    for perm in current_perm:
+        bot.perm[perm["_id"]] = perm
+
     print("\n-----")
     print(f"Current blacklist:{len(bot.blacklist_users)}")
     print("\n-----")
