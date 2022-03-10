@@ -1,9 +1,8 @@
 import datetime
 import discord
-from discord import guild
+from discord import app_commands
 from utils.checks import CommandDisableByDev
 from discord.ext import commands, tasks
-
 
 class vote_button(discord.ui.View):
     def __init__(self, guild: int):
@@ -98,6 +97,8 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
                 await ctx.send(embed=discord.Embed().from_dict(embed), view=view)
             else:
                 await ctx.send(embed=discord.Embed().from_dict(embed))
+        elif isinstance(error, app_commands.CommandAlreadyRegistered):
+            pass
         else:
             #raise error
             embed = discord.Embed(color=0xE74C3C,
