@@ -1,7 +1,7 @@
+discord.py @ git+https://github.com/Rapptz/discord.py
 asyncio==3.4.3
 buttons==0.1.9
 chat-exporter==1.7.0
-nextcord==2.0.0a6
 DiscordUtils==1.2.8
 dnspython==1.16.0
 humanfriendly==9.2
@@ -16,6 +16,5 @@ psutil==5.8.0
 bs4==0.0.1
 discord-together==1.2.2
 requests==2.27.1
-nextcord-ext-menus==1.5.0
 flask[async]==2.0.2
 gunicorn==20.0.4
