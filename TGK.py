@@ -133,7 +133,7 @@ async def on_ready():
     print("\n-----")
     print("Database Connected\n-----")
     print("starting Slash Commands Sync")
-    #await sync_slash_command(bot)
+    await sync_slash_command(bot)
     print("Slash Commands Sync Complete")
 
 @bot.event

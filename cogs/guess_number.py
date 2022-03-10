@@ -102,7 +102,7 @@ class Guess_number(commands.Cog):
             view = Drop()
             await interaction.channel.send(embed=embed, view=view)
 
-        self.bot.tree.add_command(drop)
+        self.bot.slash_commands.append(drop)
 
         @drop.autocomplete('command')
         async def command_auto(self, interaction: discord.Interaction, current: str, namespace:app_commands.Namespace) -> List[app_commands.Choice[str]]:
