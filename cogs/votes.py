@@ -5,15 +5,18 @@ from copy import deepcopy
 import datetime
 import requests
 from humanfriendly import format_timespan
+from discord import app_commands
 
 class Votes(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        #self.load_tree_commands()
         self.vote_task = self.check_current_votes.start()
     
     def cog_unload(self):
         self.vote_task.cancel()
     
+
     @commands.Cog.listener()
     async def on_ready(self):
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")

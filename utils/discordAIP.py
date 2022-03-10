@@ -16,7 +16,7 @@ class BaseRequest():
         headers = {
             "Authorization": f"Bot {token} ", "Content-Type": "application/jsons"
         }
-        url = f"https://discord.com/api/v9/users/{id}"
+        url = f"https://discord.com/api/v10/users/{id}"
 
         async with aiohttp.ClientSession() as session:
             async with session.get(url, headers=headers) as response:
@@ -30,7 +30,7 @@ class BaseRequest():
             "Authorization": f"Bot {token}", "Content-Type": "application/jsons"
         }
 
-        url = f"https://discord.com/api/v9/guilds/785839283847954433/members/{id}"
+        url = f"https://discord.com/api/v10/guilds/785839283847954433/members/{id}"
 
         async with aiohttp.ClientSession() as session:
             async with session.get(url, headers=headers) as response:

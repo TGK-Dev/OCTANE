@@ -1,9 +1,8 @@
 import datetime
 import discord
-from discord import guild
+from discord import app_commands
 from utils.checks import CommandDisableByDev
 from discord.ext import commands, tasks
-
 
 class vote_button(discord.ui.View):
     def __init__(self, guild: int):
@@ -37,6 +36,10 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
         votes = await self.bot.votes.get_all()
         for vote in votes:
             self.bot.current_vote[vote["_id"]] = vote
+        
+        perm = await self.bot.active_cmd.get_all()
+        for p in perm:
+            self.bot.perm[p["_id"]] = p
 
     @check_update_task.before_loop
     async def before_check_current_free(self):
@@ -94,6 +97,8 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
                 await ctx.send(embed=discord.Embed().from_dict(embed), view=view)
             else:
                 await ctx.send(embed=discord.Embed().from_dict(embed))
+        elif isinstance(error, app_commands.CommandAlreadyRegistered):
+            pass
         else:
             #raise error
             embed = discord.Embed(color=0xE74C3C,
@@ -134,7 +139,7 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
                         f"❥ Access to <#929613393097293874> with 2x Amaari\n"
                         , mention_author=False, view=vote_button(guild), allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
 
-            for word in ['when heist', 'where heist', 'heist when', 'where is the heist', 'heist?']:
+            for word in ['when heist', 'where heist', 'heist when', 'where is the heist', 'heist?', 'heist']:
                 if word in messageContent and message.channel.id in channel_ids and message.author.id not in immune_users:
                     return await message.reply('Keep an 👁️ on <#927241961038045236> for heist related requirements/updates.', delete_after=30)
 

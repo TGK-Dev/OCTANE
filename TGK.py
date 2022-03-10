@@ -25,6 +25,7 @@ import utils.json_loader
 from utils.mongo import Document
 from utils.util import Pag
 from utils.util import clean_code
+from slash_cmd.permissions import Permissions
 
 load_dotenv()
 cwd = Path(__file__).parents[0]
@@ -47,6 +48,20 @@ async def get_prefix(bot, message):
     except:
         return commands.when_mentioned_or(bot.DEFAULTPREFIX)(bot, message)
 
+async def sync_slash_command(bot) -> None:
+        """
+        This function will sync every guild slash command.
+        """
+        # Waits until the client’s internal cache is all ready.
+        await bot.wait_until_ready()
+        for guild in bot.guilds:
+            for slash_command in bot.slash_commands:
+                bot.tree.add_command(slash_command, guild=discord.Object(id=785839283847954433))
+            try:
+                bot.tree.add_command(Permissions(bot), guild=discord.Object(id=785839283847954433))
+            except:
+                pass
+            await bot.tree.sync(guild=discord.Object(id=785839283847954433))
 
 intents = discord.Intents.all()  # Help command requires member intents
 DEFAULTPREFIX = "!"
@@ -69,41 +84,20 @@ logging.basicConfig(level=logging.INFO)
 
 bot.DEFAULTPREFIX = DEFAULTPREFIX
 bot.blacklist_users = []
+bot.slash_commands = []
 bot.guild_id = [797920317871357972]
 bot.cwd = cwd
 bot.perm = {}
 bot.afk_user = {}
 bot.current_ban = {}
-bot.mod_role = [797923152617275433, 848585998769455104]
 bot.version = "1.7"
 bot.uptime = datetime.datetime.utcnow()
 bot.automod = True
 bot.current_vote = {}
-bot.colors = {
-    "WHITE": 0xFFFFFF,
-    "AQUA": 0x1ABC9C,
-    "GREEN": 0x2ECC71,
-    "BLUE": 0x3498DB,
-    "PURPLE": 0x9B59B6,
-    "LUMINOUS_VIVID_PINK": 0xE91E63,
-    "GOLD": 0xF1C40F,
-    "ORANGE": 0xE67E22,
-    "RED": 0xE74C3C,
-    "NAVY": 0x34495E,
-    "DARK_AQUA": 0x11806A,
-    "DARK_GREEN": 0x1F8B4C,
-    "DARK_BLUE": 0x206694,
-    "DARK_PURPLE": 0x71368A,
-    "DARK_VIVID_PINK": 0xAD1457,
-    "DARK_GOLD": 0xC27C0E,
-    "DARK_ORANGE": 0xA84300,
-    "DARK_RED": 0x992D22,
-    "DARK_NAVY": 0x2C3E50,
-}
 bot.ban_event = {}
-bot.color_list = [c for c in bot.colors.values()]
-bot.snipe = {}
 
+bot.snipe = {}
+bot.esnipe = {}
 
 @bot.event
 async def on_ready():
@@ -111,8 +105,6 @@ async def on_ready():
         f"-----\nLogged in as: {bot.user.name} : {bot.user.id}\n-----\nMy current prefix is: {bot.DEFAULTPREFIX}\n-----"
     )
     await bot.change_presence(status=discord.Status.dnd)
-
-    os.system("pip uninstall -y discord.py==1.7.3")
 
     current_blacklist_user = await bot.config.find(785839283847954433)
     for blacklisted_user in current_blacklist_user['blacklist']:
@@ -144,6 +136,9 @@ async def on_ready():
     print(f"Current Bans:{len(bot.current_ban)}")
     print("\n-----")
     print("Database Connected\n-----")
+    print("starting Slash Commands Sync")
+    await sync_slash_command(bot)
+    print("Slash Commands Sync Complete")
 
 @bot.event
 async def on_message(message):

@@ -329,25 +329,44 @@ class Owner(commands.Cog, description=description):
 
     @permission.command()
     @commands.check_any(commands.has_any_role(785842380565774368, 803635405638991902,799037944735727636, 488614633670967307), checks.is_me())
-    async def check(self, ctx, command):
-        command = self.bot.get_command(command)
-        if command is None: return await ctx.send("I can't find a command with that name!")
+    async def check(self, ctx, target: Union[discord.Role, str]):
+        if type(target) == str:
+            
+            command = self.bot.get_command(target)
+            if command is None: return await ctx.send("I can't find a command with that name!")
 
-        cmd_data = await self.bot.active_cmd.find(command.name)
-        if not cmd_data:return await ctx.send("NO data found")
+            cmd_data = await self.bot.active_cmd.find(command.name)
+            if not cmd_data:return await ctx.send("NO data found")
 
-        embed = discord.Embed(title=f"permission {command.name}",color=ctx.author.color)
-        roles,users = [], []
+            embed = discord.Embed(title=f"permission {command.name}",color=ctx.author.color)
+            roles,users = [], []
 
-        for role in cmd_data['allowed_roles']: 
-            roles.append(f"<@&{role}>")
-        if len(roles) == 0: 
-            embed.add_field(name="Allowed roles", value="None")
-        else: 
-            embed.add_field(name="Allowed roles", value=", ".join(roles))
+            for role in cmd_data['allowed_roles']: 
+                roles.append(f"<@&{role}>")
+            if len(roles) == 0: 
+                embed.add_field(name="Allowed roles", value="None")
+            else: 
+                embed.add_field(name="Allowed roles", value=", ".join(roles))
 
-        embed.add_field(name="Disabed?:", value=cmd_data['disable'], inline=False)
-        await ctx.send(embed=embed)
+            embed.add_field(name="Disabed?:", value=cmd_data['disable'], inline=False)
+            await ctx.send(embed=embed)
+
+        if type(target) == discord.Role:
+            cmd_data = await self.bot.active_cmd.get_all()
+            if not cmd_data:return await ctx.send("NO data found")
+
+            embed = discord.Embed(description=f"***Permission's  {target.mention}***",color=ctx.author.color)
+            allowed_list = " "
+            for cmd in cmd_data:
+                if target.id in cmd['allowed_roles']: 
+                    allowed_list += f"{cmd['_id']}, "
+            
+            if allowed_list != " ":
+                embed.add_field(name="Allowed commands", value=allowed_list)
+            else:
+                embed.add_field(name="Allowed commands", value="None")
+
+            await ctx.send(embed=embed)
         
     @permission.command(name="add")
     @commands.check_any(checks.can_use(),commands.has_any_role(785842380565774368, 803635405638991902,799037944735727636))
@@ -378,10 +397,11 @@ class Owner(commands.Cog, description=description):
 
         await self.bot.active_cmd.upsert(data)
         await ctx.send(f"permission of {command.name} is Updated", allowed_mentions=discord.AllowedMentions(everyone=False, roles=False))
+        self.bot.perm[command.name] = data
     
     @permission.command(name="remove")
     @commands.check_any(checks.can_use(),commands.has_any_role(785842380565774368, 803635405638991902,799037944735727636))
-    async def remove(self, ctx, command, *targets: discord.Role):
+    async def remove(self, ctx, command, *targets: str.split(' ')):
         targets = [int(target.id) for target in targets]
 
         command = self.bot.get_command(command)
@@ -404,6 +424,7 @@ class Owner(commands.Cog, description=description):
 
         await self.bot.active_cmd.upsert(data)
         await ctx.send(f"permission of {command.name} is Updated", allowed_mentions=discord.AllowedMentions(everyone=False, roles=False))
+        self.bot.perm[command.name] = data
 
 def setup(bot):
     bot.add_cog(Owner(bot))
