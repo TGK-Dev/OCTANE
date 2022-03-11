@@ -28,105 +28,110 @@ class Tickets(commands.Cog):
     @commands.command(name="close", description="Close Current Ticket")
     @commands.check_any(checks.can_use())
     async def close(self, ctx):
-        data = await self.bot.ticket.find_by_custom({'channel': ctx.channel.id, 'guild': ctx.guild.id})
-        if not data: return await ctx.send("Please use this command only in tickets")
-        user = ctx.guild.get_member(int(data['_id']))
-        overwrite = discord.PermissionOverwrite()
-        overwrite.view_channel = False
-        await ctx.channel.set_permissions(user, overwrite=overwrite)
-        embed = discord.Embed(color=0x2f3136, description=f"Ticket Closed By {ctx.author.mention}")
-        await ctx.send(embed=embed)
+        await ctx.send("This commands has moved to Slash Command", delete_after=10)
+        # data = await self.bot.ticket.find_by_custom({'channel': ctx.channel.id, 'guild': ctx.guild.id})
+        # if not data: return await ctx.send("Please use this command only in tickets")
+        # user = ctx.guild.get_member(int(data['_id']))
+        # overwrite = discord.PermissionOverwrite()
+        # overwrite.view_channel = False
+        # await ctx.channel.set_permissions(user, overwrite=overwrite)
+        # embed = discord.Embed(color=0x2f3136, description=f"Ticket Closed By {ctx.author.mention}")
+        # await ctx.send(embed=embed)
     
     @commands.command(name="open", description="Open Current Ticket")
     @commands.check_any(checks.can_use())
     async def open(self, ctx):
-        data = await self.bot.ticket.find_by_custom({'channel': ctx.channel.id, 'guild': ctx.guild.id})
-        if not data: return await ctx.send("Please use this command only in tickets")
-        user = ctx.guild.get_member(int(data['_id']))
-        overwrite = discord.PermissionOverwrite()
-        overwrite.view_channel = True
-        await ctx.channel.set_permissions(user, overwrite=overwrite)
-        embed = discord.Embed(color=0x2f3136, description=f"Ticket Opend By {ctx.author.mention}")
-        await ctx.send(content=f"<@{data['_id']}>",embed=embed)
+        await ctx.send("This commands has moved to Slash Command", delete_after=10)
+        # data = await self.bot.ticket.find_by_custom({'channel': ctx.channel.id, 'guild': ctx.guild.id})
+        # if not data: return await ctx.send("Please use this command only in tickets")
+        # user = ctx.guild.get_member(int(data['_id']))
+        # overwrite = discord.PermissionOverwrite()
+        # overwrite.view_channel = True
+        # await ctx.channel.set_permissions(user, overwrite=overwrite)
+        # embed = discord.Embed(color=0x2f3136, description=f"Ticket Opend By {ctx.author.mention}")
+        # await ctx.send(content=f"<@{data['_id']}>",embed=embed)
 
     @commands.command(name="delete", description="delete the ticekt")
     @commands.check_any(checks.can_use())
     async def delete(self, ctx):
-        data = await self.bot.ticket.find_by_custom({'channel': ctx.channel.id, 'guild': ctx.guild.id})
+        await ctx.send("This commands has moved to Slash Command", delete_after=10)
+        # data = await self.bot.ticket.find_by_custom({'channel': ctx.channel.id, 'guild': ctx.guild.id})
 
-        if not data: return await ctx.send("Please use this command only in tickets")
+        # if not data: return await ctx.send("Please use this command only in tickets")
 
-        msg = await ctx.send("Deleting this Ticekt in 10s `type fs` to cancel this command")
-        try:
-            stop_m = await self.bot.wait_for('message', check=lambda m: m.author.id == ctx.author.id and m.channel.id == ctx.channel.id and m.content.lower() == "fs", timeout=10)
-            await stop_m.add_reaction("✅")
-            return await msg.edit(content="Ok cancelling the command")
-        except asyncio.TimeoutError:
-            await ctx.channel.delete()
-            await self.bot.ticket.delete(data['_id'])
+        # msg = await ctx.send("Deleting this Ticekt in 10s `type fs` to cancel this command")
+        # try:
+        #     stop_m = await self.bot.wait_for('message', check=lambda m: m.author.id == ctx.author.id and m.channel.id == ctx.channel.id and m.content.lower() == "fs", timeout=10)
+        #     await stop_m.add_reaction("✅")
+        #     return await msg.edit(content="Ok cancelling the command")
+        # except asyncio.TimeoutError:
+        #     await ctx.channel.delete()
+        #     await self.bot.ticket.delete(data['_id'])
 
     @commands.command(name="transcript", description="Save current ticket's transcript", usage="[limit] [time Zone]", aliases=["save"])
     @commands.check_any(checks.can_use())
     async def transcript(self, ctx, limit: int = None, *, ticket=None):
+        await ctx.send("This commands has moved to Slash Command", delete_after=10)
+        # ticket = ticket if ticket else "Topic Not Given"
 
-        ticket = ticket if ticket else "Topic Not Given"
+        # limit = limit if limit else 500
+        # tz_info = "Asia/Kolkata"
 
-        limit = limit if limit else 500
-        tz_info = "Asia/Kolkata"
+        # data = await self.bot.ticket.find_by_custom({'channel': ctx.channel.id, 'guild': ctx.guild.id})
+        # embed = discord.Embed(description=f"{ctx.author.mention} by Pressing bellow button your allowing as to save messages of this channel")
+        # m = await ctx.send(content="Saving Started",embed=None,view=None)
+        # channel = self.bot.get_channel(833386438338674718)
+        # transcript = await chat_exporter.export(ctx.channel, limit, tz_info)
+        # if transcript is None:
+        #     return
+        # transcript_file = discord.File(io.BytesIO(transcript.encode()),filename=f"transcript-{ctx.channel.name}.html")
 
-        data = await self.bot.ticket.find_by_custom({'channel': ctx.channel.id, 'guild': ctx.guild.id})
-        embed = discord.Embed(description=f"{ctx.author.mention} by Pressing bellow button your allowing as to save messages of this channel")
-        m = await ctx.send(content="Saving Started",embed=None,view=None)
-        channel = self.bot.get_channel(833386438338674718)
-        transcript = await chat_exporter.export(ctx.channel, limit, tz_info)
-        if transcript is None:
-            return
-        transcript_file = discord.File(io.BytesIO(transcript.encode()),filename=f"transcript-{ctx.channel.name}.html")
+        # link_msg = await channel.send(f"{ctx.channel.name} | {ticket}", file=transcript_file)
 
-        link_msg = await channel.send(f"{ctx.channel.name} | {ticket}", file=transcript_file)
+        # link_button = discord.ui.View()
+        # url = f"https://codebeautify.org/htmlviewer?url={link_msg.attachments[0].url}"
+        # link_button.add_item(discord.ui.Button(label='View Transcript', url=url))
 
-        link_button = discord.ui.View()
-        url = f"https://codebeautify.org/htmlviewer?url={link_msg.attachments[0].url}"
-        link_button.add_item(discord.ui.Button(label='View Transcript', url=url))
+        # await link_msg.edit(view=link_button)
+        # await m.edit(content=f"{ctx.author.mention} transcript Saved",)
 
-        await link_msg.edit(view=link_button)
-        await m.edit(content=f"{ctx.author.mention} transcript Saved",)
-
-        channel_file = discord.File(io.BytesIO(transcript.encode()),
-                                    filename=f"transcript-{ctx.channel.name}.html")
-        await ctx.send(f"{ctx.channel.name} | {ticket}", file=channel_file, view=link_button)
+        # channel_file = discord.File(io.BytesIO(transcript.encode()),
+        #                             filename=f"transcript-{ctx.channel.name}.html")
+        # await ctx.send(f"{ctx.channel.name} | {ticket}", file=channel_file, view=link_button)
     
     @commands.command(name="add", description="add User to the channel", usage="[member]")
     @commands.check_any(checks.can_use())
     async def add(self, ctx, *, target: Union[discord.Member, discord.Role]):
-        channel = ctx.channel
-        if ctx.channel.category.id == 829230513516445736:
+        await ctx.send("This commands has moved to Slash Command", delete_after=10)
+        # channel = ctx.channel
+        # if ctx.channel.category.id == 829230513516445736:
 
-            overwrite = channel.overwrites_for(target)
-            overwrite.view_channel = True
-            overwrite.send_messages = True
+        #     overwrite = channel.overwrites_for(target)
+        #     overwrite.view_channel = True
+        #     overwrite.send_messages = True
 
-            await channel.set_permissions(target, overwrite=overwrite)
-            embed = discord.Embed(
-                description=f"<:allow:819194696874197004> | Added {target.mention} to the Ticket")
+        #     await channel.set_permissions(target, overwrite=overwrite)
+        #     embed = discord.Embed(
+        #         description=f"<:allow:819194696874197004> | Added {target.mention} to the Ticket")
 
-            await ctx.send(embed=embed)
+        #     await ctx.send(embed=embed)
 
     @commands.command(name="remove", description="Remove User to the channel", usage="[member]")
     @commands.check_any(checks.can_use())
     async def remove(self, ctx, *, target: Union[discord.Member, discord.Role]):
-        channel = ctx.channel
-        if ctx.channel.category.id == 829230513516445736:
+        await ctx.send("This commands has moved to Slash Command", delete_after=10)
+        # channel = ctx.channel
+        # if ctx.channel.category.id == 829230513516445736:
 
-            overwrite = channel.overwrites_for(target)
-            overwrite.view_channel = False
-            overwrite.send_messages = False
+        #     overwrite = channel.overwrites_for(target)
+        #     overwrite.view_channel = False
+        #     overwrite.send_messages = False
 
-            await channel.set_permissions(target, overwrite=overwrite)
-            embed = discord.Embed(
-                description=f"<:allow:819194696874197004> | Removed {target.mention} to the Tick")
+        #     await channel.set_permissions(target, overwrite=overwrite)
+        #     embed = discord.Embed(
+        #         description=f"<:allow:819194696874197004> | Removed {target.mention} to the Tick")
 
-            await ctx.send(embed=embed)
+        #     await ctx.send(embed=embed)
 
 def setup(bot):
     bot.add_cog(Tickets(bot))

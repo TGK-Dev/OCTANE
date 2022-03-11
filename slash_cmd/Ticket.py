@@ -203,7 +203,7 @@ class Ticket_Commands(app_commands.Group):
         log_channel = self.bot.get_channel(self.bot.config_data[interaction.guild.id]["ticket_log_channel"])
         log_embed.set_author(name=f"{interaction.user.name}#{interaction.user.discriminator}", icon_url=interaction.user.avatar.url)
         log_embed.add_field(name="Ticket", value=interaction.channel.name)
-        log_embed.add_field(name="Action", value=f"Added {target.mention} from the ticket")
+        log_embed.add_field(name="Action", value=f"Added {target.mention} to the ticket")
         await log_channel.send(embed=log_embed)
     
     @app_commands.command(name="remove", description="Remove a user or role from a ticket")
@@ -241,7 +241,7 @@ class Ticket_Commands(app_commands.Group):
         log_channel = self.bot.get_channel(self.bot.config_data[interaction.guild.id]["ticket_log_channel"])
         log_embed.set_author(name=f"{interaction.user.name}#{interaction.user.discriminator}", icon_url=interaction.user.avatar.url)
         log_embed.add_field(name="Ticket", value=interaction.channel.name)
-        log_embed.add_field(name="Action", value=f"Removed {target.mention} from the ticket")
+        log_embed.add_field(name="Action", value=f"Removed {target.mention} to the ticket")
         await log_channel.send(embed=log_embed)
 
     @app_commands.command(name="stats", description="stats of tickets")
@@ -322,12 +322,13 @@ class Ticket_Commands(app_commands.Group):
         transcript_file = discord.File(io.BytesIO(transcript.encode()),filename=f"transcript-{interaction.channel.name}.html")
 
         transcript_log_channel = self.bot.get_channel(self.bot.config_data[interaction.guild.id]["transcript_log_channel"])
+
         link_msg = await transcript_log_channel.send(content=f"{interaction.channel.name} | {topic}",file=transcript_file)
         link_button = discord.ui.View()
         url = f"https://codebeautify.org/htmlviewer?url={link_msg.attachments[0].url}"
         link_button.add_item(discord.ui.Button(label='View Transcript', url=url))
 
-        await interaction.followup.send(embed=discord.Embed(description=f"<:save:819194696874197004> | Transcript Saved", color=0x2f3136),view=link_button)
+        await interaction.followup.send(embed=discord.Embed(description=f"<:save:819194696874197004> | Transcript Saved", color=0x00FF00),view=link_button)
 
         log_embed = discord.Embed(color=0x00FF00)
         log_channel = self.bot.get_channel(self.bot.config_data[interaction.guild.id]["ticket_log_channel"])
@@ -335,3 +336,8 @@ class Ticket_Commands(app_commands.Group):
         log_embed.add_field(name="Ticket", value=interaction.channel.name)
         log_embed.add_field(name="Action", value=f"Saved Transcript")
         await log_channel.send(embed=log_embed)
+        ticket_info = await self.bot.ticket.find(interaction.channel.id)
+        log_msg = await log_channel.fetch_message(ticket_info['log_message_id'])
+        embed = log_msg.embeds[0]
+        embed.add_field(name="Transcript", value=f"[Link](<{link_msg.attachments[0].url}>)")
+        await log_msg.edit(embed=embed)

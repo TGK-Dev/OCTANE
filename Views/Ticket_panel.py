@@ -57,7 +57,7 @@ class PartnerShip_model(discord.ui.Modal, title="PartnerShip Infomations"):
         log_embed = discord.Embed()
         log_embed.set_author(name=f"{interaction.user.name}#{interaction.user.discriminator}", icon_url=interaction.user.avatar.url)
         log_embed.add_field(name="Ticket Owner", value=f"{interaction.user.mention}")
-        log_embed.add_field(name="Ticket Created", value=f"{channel.mention}")
+        log_embed.add_field(name="Ticket Created", value=f"{channel.name}")
         log_embed.add_field(name="Ticket Type", value="Partnership")
         log_embed.color = 0x00FF00
 
@@ -123,7 +123,7 @@ class Ticket_panel(discord.ui.View):
         log_embed = discord.Embed()
         log_embed.set_author(name=f"{interaction.user.name}#{interaction.user.discriminator}", icon_url=interaction.user.avatar.url)
         log_embed.add_field(name="Ticket Owner", value=f"{interaction.user.mention}")
-        log_embed.add_field(name="Ticket Created", value=f"{channel.mention}")
+        log_embed.add_field(name="Ticket Created", value=f"{channel.name}")
         log_embed.add_field(name="Ticket Type", value="Support")
         log_embed.color = 0x00FF00
 
@@ -160,8 +160,11 @@ class Ticket_panel(discord.ui.View):
         else:
             data = await self.bot.ticket.find_many_by_custom({'ticket_owner': interaction.user.id})
             print(data)
-            if len(data) >= 2:
-                await interaction.response.send_message("You have a ticket open, please close it before creating a new one", ephemeral=True)
-                return False
+            if not interaction.user.guild_permissions.manage_messages:
+                if len(data) >= 2:
+                    await interaction.response.send_message("You have a ticket open, please close it before creating a new one", ephemeral=True)
+                    return False
+                else:
+                    return True
             else:
                 return True
