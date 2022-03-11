@@ -14,7 +14,8 @@ class Ticket_Commands(app_commands.Group):
     @app_commands.command(name="close", description="Close a ticket")
     async def close(self, interaction: Interaction):
         await interaction.response.defer(ephemeral=False, thinking=True)
-
+        chan = self.bot.get_channel(951901575817887794)
+        await chan.send( app_commands.command.__name__)
         can_run = await checks.slash_check(self.bot, interaction, app_commands.command.__name__)
 
         if can_run != True:
