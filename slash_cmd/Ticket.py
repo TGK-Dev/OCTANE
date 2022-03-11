@@ -308,7 +308,7 @@ class Ticket_Commands(app_commands.Group):
     async def save(self, interaction: Interaction, topic:str = 'No Topic Given', limit: app_commands.Range[int,0,1000]= 500):
         await interaction.response.defer(thinking=True)
         
-        can_run = await checks.slash_check(self.bot, interaction, "save")
+        can_run = await checks.slash_check(self.bot, interaction, "transcript")
         if can_run != True:
             return await interaction.followup.send("You do not have permission to run this command")
 
