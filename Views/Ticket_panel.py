@@ -43,7 +43,7 @@ class PartnerShip_model(discord.ui.Modal, title="PartnerShip Infomations"):
                                   description="Kindly wait patiently. A staff member will assist you shortly.\nIf you're looking to approach a specific staff member, ping the member once. Do not spam ping any member or role.\n\nThank you.")
         embed.set_footer(text="Developed and Owned by Jay & utki007")
 
-        await channel.send(embed=embed, content=f"{interaction.user.mention}| `{pm_role.mention}`")
+        await channel.send(embed=embed, content=f"{interaction.user.mention} | {pm_role.mention}")
 
         invite = await self.bot.fetch_invite(self.server_invite.value)
         
@@ -103,7 +103,7 @@ class Ticket_panel(discord.ui.View):
                                   description="Kindly wait patiently. A staff member will assist you shortly.\nIf you're looking to approach a specific staff member, ping the member once. Do not spam ping any member or role.\n\nThank you.")
         embed.set_footer(text="Developed and Owned by Jay & utki007")
 
-        await channel.send(embed=embed, content=f"{interaction.user.mention}| `{staff_role.mention}`")
+        await channel.send(embed=embed, content=f"{interaction.user.mention} | {staff_role.mention}")
 
         data = {
             '_id': channel.id,
