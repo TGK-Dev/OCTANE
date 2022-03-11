@@ -32,6 +32,7 @@ class PartnerShip_model(discord.ui.Modal, title="PartnerShip Infomations"):
         else:
 
             override = {
+                interaction.guild.default_role: discord.PermissionOverwrite(read_messages=False, view_channel=False),
                 interaction.guild.me: discord.PermissionOverwrite(read_messages=True, view_channel=True),
                 interaction.user: discord.PermissionOverwrite(read_messages=True, view_channel=True, attach_files=True),
                 staff_role: discord.PermissionOverwrite(read_messages=True, view_channel=True)
@@ -43,7 +44,7 @@ class PartnerShip_model(discord.ui.Modal, title="PartnerShip Infomations"):
                                   description="Kindly wait patiently. A staff member will assist you shortly.\nIf you're looking to approach a specific staff member, ping the member once. Do not spam ping any member or role.\n\nThank you.")
         embed.set_footer(text="Developed and Owned by Jay & utki007")
 
-        await channel.send(embed=embed, content=f"{interaction.user.mention} | {pm_role.mention}")
+        await channel.send(embed=embed, content=f"{interaction.user.mention} | `{pm_role.mention}`")
 
         invite = await self.bot.fetch_invite(self.server_invite.value)
         
@@ -53,6 +54,16 @@ class PartnerShip_model(discord.ui.Modal, title="PartnerShip Infomations"):
 
         await interaction.response.send_message(f"Your Ticket is Ready at: {channel.mention}", ephemeral=True)
 
+        log_embed = discord.Embed()
+        log_embed.set_author(name=f"{interaction.user.name}#{interaction.user.discriminator}", icon_url=interaction.user.avatar.url)
+        log_embed.add_field(name="Ticket Owner", value=f"{interaction.user.mention}")
+        log_embed.add_field(name="Ticket Created", value=f"{channel.mention}")
+        log_embed.add_field(name="Ticket Type", value="Partnership")
+        log_embed.color = 0x00FF00
+
+        log_channel = self.bot.get_channel(config['ticket_log_channel'])
+        log_msg = await log_channel.send(embed=log_embed)
+
         data = {
             '_id': channel.id,
             'ticket_owner': interaction.user.id,
@@ -60,7 +71,8 @@ class PartnerShip_model(discord.ui.Modal, title="PartnerShip Infomations"):
             'added_users': [],
             'type': 'partnership',
             'created_at': datetime.datetime.utcnow(),
-            'status': 'open'
+            'status': 'open',
+            'log_message_id': log_msg.id
         }
 
         await self.bot.ticket.upsert(data)
@@ -82,6 +94,7 @@ class Ticket_panel(discord.ui.View):
             staff_role = discord.utils.get(interaction.guild.roles, id=config['support_role'])
 
             override = {
+                interaction.guild.default_role: discord.PermissionOverwrite(read_messages=False, view_channel=False),
                 interaction.guild.me: discord.PermissionOverwrite(read_messages=True, view_channel=True),
                 staff_role: discord.PermissionOverwrite(read_messages=True, view_channel=True),
                 interaction.user: discord.PermissionOverwrite(read_messages=True, view_channel=True, attach_files=True)
@@ -103,7 +116,19 @@ class Ticket_panel(discord.ui.View):
                                   description="Kindly wait patiently. A staff member will assist you shortly.\nIf you're looking to approach a specific staff member, ping the member once. Do not spam ping any member or role.\n\nThank you.")
         embed.set_footer(text="Developed and Owned by Jay & utki007")
 
-        await channel.send(embed=embed, content=f"{interaction.user.mention} | {staff_role.mention}")
+        await channel.send(embed=embed, content=f"{interaction.user.mention} | `{staff_role.mention}`")
+
+        await interaction.followup.send(f"Your Ticket is created at {channel.mention}")
+
+        log_embed = discord.Embed()
+        log_embed.set_author(name=f"{interaction.user.name}#{interaction.user.discriminator}", icon_url=interaction.user.avatar.url)
+        log_embed.add_field(name="Ticket Owner", value=f"{interaction.user.mention}")
+        log_embed.add_field(name="Ticket Created", value=f"{channel.mention}")
+        log_embed.add_field(name="Ticket Type", value="Support")
+        log_embed.color = 0x00FF00
+
+        log_channel = self.bot.get_channel(config['ticket_log_channel'])
+        log_msg = await log_channel.send(embed=log_embed)
 
         data = {
             '_id': channel.id,
@@ -112,12 +137,11 @@ class Ticket_panel(discord.ui.View):
             'added_users': [],
             'type': 'support',
             'created_at': datetime.datetime.utcnow(),
-            'status': 'open'
+            'status': 'open',
+            'log_message_id': log_msg.id
         }
 
         await self.bot.ticket.upsert(data)
-
-        await interaction.followup.send(f"Your Ticket is created at {channel.mention}")
 
 
     @discord.ui.button(label='Partnership ', style=discord.ButtonStyle.green, custom_id='persistent_view:partner_ship', emoji="<:partner:837272392472330250>")
@@ -134,4 +158,10 @@ class Ticket_panel(discord.ui.View):
         if interaction.user.id in data:
             await interaction.response.send_message("Your Blacklisted from bot", ephemeral=True)
         else:
-            return True
+            data = await self.bot.ticket.find_many_by_custom({'ticket_owner': interaction.user.id})
+            print(data)
+            if len(data) >= 2:
+                await interaction.response.send_message("You have a ticket open, please close it before creating a new one", ephemeral=True)
+                return False
+            else:
+                return True

@@ -18,7 +18,7 @@ class Ticket_Commands(app_commands.Group):
         can_run = await checks.slash_check(self.bot, interaction, app_commands.command.__name__)
 
         if can_run != True:
-            await interaction.followup.send("You do not have permission to run this command")
+            return await interaction.followup.send("You do not have permission to run this command")
 
         if interaction.channel.category.id != self.bot.config_data[interaction.guild.id]["ticket_category"]:
             return await interaction.followup.send("This is not a ticket channel", ephemeral=True)
@@ -53,6 +53,13 @@ class Ticket_Commands(app_commands.Group):
 
         await interaction.followup.send(embed=discord.Embed(description=f"<:allow:819194696874197004> | Ticket closed by {interaction.user.mention}", color=0x2f3136))
 
+        log_embed = discord.Embed(color=0xFF0000)
+        log_channel = self.bot.get_channel(self.bot.config_data[interaction.guild.id]["ticket_log_channel"])
+        log_embed.set_author(name=f"{interaction.user.name}#{interaction.user.discriminator}", icon_url=interaction.user.avatar.url)
+        log_embed.add_field(name="Ticket", value=interaction.channel.name)
+        log_embed.add_field(name="Action", value=f"Closed {interaction.channel.name}")
+        await log_channel.send(embed=log_embed)
+
     @app_commands.command(name="open", description="ReOpen a ticket")
     async def open(self, interaction: Interaction):
 
@@ -60,7 +67,7 @@ class Ticket_Commands(app_commands.Group):
         can_run = await checks.slash_check(self.bot, interaction, app_commands.command.__name__)
 
         if can_run != True:
-            await interaction.followup.send("You do not have permission to run this command")
+            return await interaction.followup.send("You do not have permission to run this command")
 
         if interaction.channel.category.id != self.bot.config_data[interaction.guild.id]["ticket_category"]:
             await interaction.followup.send("This is not a ticket channel", ephemeral=True)
@@ -91,14 +98,21 @@ class Ticket_Commands(app_commands.Group):
         support_role = discord.utils.get(interaction.guild.roles, id=self.bot.config_data[interaction.guild.id]['support_role'])
         await interaction.channel.set_permissions(support_role, overwrite=overrite)
         await interaction.followup.send(embed=discord.Embed(description=f"<:allow:819194696874197004> | Ticket re-opened by {interaction.user.mention}", color=0x2f3136))
-    
+
+        log_embed = discord.Embed(color=0x00FF00)
+        log_channel = self.bot.get_channel(self.bot.config_data[interaction.guild.id]["ticket_log_channel"])
+        log_embed.set_author(name=f"{interaction.user.name}#{interaction.user.discriminator}", icon_url=interaction.user.avatar.url)
+        log_embed.add_field(name="Ticket", value=interaction.channel.name)
+        log_embed.add_field(name="Action", value=f"Opend {interaction.channel.name}")
+        await log_channel.send(embed=log_embed)
+
     @app_commands.command(name="delete", description="Delete a ticket")
     async def delete(self, interaction: Interaction):
-        data = await self.bot.ticket.find_by_custom({'channel': interaction.channel.id, 'guild': interaction.guild.id})
+        data = await self.bot.ticket.find(interaction.channel.id)
         
         can_run = await checks.slash_check(self.bot, interaction, app_commands.command.__name__)
         if can_run != True:
-            await interaction.followup.send("You do not have permission to run this command")
+            return await interaction.followup.send("You do not have permission to run this command")
 
         if interaction.channel.category.id != self.bot.config_data[interaction.guild.id]["ticket_category"]:
             return await interaction.response.send_message("This is not a ticket channel", ephemeral=True)
@@ -108,11 +122,42 @@ class Ticket_Commands(app_commands.Group):
             stop_m = await self.bot.wait_for('message', check=lambda m: m.author.id == interaction.user.id and m.channel.id == interaction.channel.id and m.content.lower() == "fs", timeout=10)
             await stop_m.add_reaction("✅")
             return await msg.edit(content="Ok cancelling the command")
+
         except asyncio.TimeoutError:
+            
+            user_in_channel = {}
+            async for message in interaction.channel.history(limit=None):
+                if message.author.id in user_in_channel.keys():
+                    user_in_channel[message.author.id] += 1
+                else:
+                    user_in_channel[message.author.id] = 1
+
+            print(user_in_channel)    
+            print("\n-----------------")
+
+            log_channel = self.bot.get_channel(self.bot.config_data[interaction.guild.id]["ticket_log_channel"])
+            log_message = await log_channel.fetch_message(data['log_message_id'])
+            embed = log_message.embeds[0]
+            users, i = "", 1
+
+            for key, value in user_in_channel.items():
+                users += f"{i}. <@{key}> - {value}\n"
+                i += 1
+
+            embed.add_field(name="Users in Ticket", value=users)
+            await log_message.edit(embed=embed)
+
             await self.bot.ticket.delete(interaction.channel.id)
             await interaction.channel.delete()
-            
 
+            log_embed = discord.Embed(color=0xFF0000)
+            log_channel = self.bot.get_channel(self.bot.config_data[interaction.guild.id]["ticket_log_channel"])
+            log_embed.set_author(name=f"{interaction.user.name}#{interaction.user.discriminator}", icon_url=interaction.user.avatar.url)
+            log_embed.add_field(name="Ticket", value=interaction.channel.name)
+            log_embed.add_field(name="Action", value=f"Deleted {interaction.channel.name}")
+            await log_channel.send(embed=log_embed)
+
+        
     @app_commands.command(name="add", description="Add a user or role to a ticket")
     @app_commands.describe(target='user/role')   
     async def add(self, interaction: Interaction, target: Union[discord.Member, discord.Role]):
@@ -120,7 +165,7 @@ class Ticket_Commands(app_commands.Group):
 
         can_run = await checks.slash_check(self.bot, interaction, app_commands.command.__name__)
         if can_run != True:
-            await interaction.followup.send("You do not have permission to run this command")
+            return await interaction.followup.send("You do not have permission to run this command")
 
         data = await self.bot.ticket.find(interaction.channel.id)
         if data is None and interaction.channel.category.id != self.bot.config_data[interaction.guild.id]["ticket_category"]:
@@ -128,7 +173,7 @@ class Ticket_Commands(app_commands.Group):
 
         if type(target) == discord.Role:
             if target.id in data['added_roles']:
-                await interaction.followup.send("This role is already added to the ticket")
+                return await interaction.followup.send("This role is already added to the ticket")
             else:
                 overwrite = discord.PermissionOverwrite()
                 overwrite.view_channel = True
@@ -141,7 +186,7 @@ class Ticket_Commands(app_commands.Group):
 
         elif type(target) == discord.Member:
             if target.id in data['added_users']:
-                await interaction.response.send_message("This user is already added to the ticket")
+                return await interaction.response.send_message("This user is already added to the ticket")
             else:
                 overwrite = discord.PermissionOverwrite()
                 overwrite.view_channel = True
@@ -153,6 +198,13 @@ class Ticket_Commands(app_commands.Group):
                 await self.bot.ticket.upsert(data)
         
         await interaction.followup.send(embed=discord.Embed(description=f"<:allow:819194696874197004> | {target.mention} added to the ticket", color=0x2f3136))
+
+        log_embed = discord.Embed(color=0x00FF00)
+        log_channel = self.bot.get_channel(self.bot.config_data[interaction.guild.id]["ticket_log_channel"])
+        log_embed.set_author(name=f"{interaction.user.name}#{interaction.user.discriminator}", icon_url=interaction.user.avatar.url)
+        log_embed.add_field(name="Ticket", value=interaction.channel.name)
+        log_embed.add_field(name="Action", value=f"Added {target.mention} from the ticket")
+        await log_channel.send(embed=log_embed)
     
     @app_commands.command(name="remove", description="Remove a user or role from a ticket")
     @app_commands.describe(target='user/role')
@@ -161,7 +213,7 @@ class Ticket_Commands(app_commands.Group):
 
         can_run = await checks.slash_check(self.bot, interaction, app_commands.command.__name__)
         if can_run != True:
-            await interaction.followup.send("You do not have permission to run this command")
+            return await interaction.followup.send("You do not have permission to run this command")
 
         data = await self.bot.ticket.find(interaction.channel.id)
         if data is None and interaction.channel.category.id != self.bot.config_data[interaction.guild.id]["ticket_category"]:
@@ -185,6 +237,13 @@ class Ticket_Commands(app_commands.Group):
 
         await interaction.followup.send(embed=discord.Embed(description=f"<:allow:819194696874197004> | {target.mention} removed from the ticket", color=0x2f3136))
 
+        log_embed = discord.Embed(color=0xFF0000)
+        log_channel = self.bot.get_channel(self.bot.config_data[interaction.guild.id]["ticket_log_channel"])
+        log_embed.set_author(name=f"{interaction.user.name}#{interaction.user.discriminator}", icon_url=interaction.user.avatar.url)
+        log_embed.add_field(name="Ticket", value=interaction.channel.name)
+        log_embed.add_field(name="Action", value=f"Removed {target.mention} from the ticket")
+        await log_channel.send(embed=log_embed)
+
     @app_commands.command(name="stats", description="stats of tickets")
     async def stats(self, interaction: Interaction):
         data = await self.bot.ticket.find(interaction.channel.id)
@@ -198,6 +257,7 @@ class Ticket_Commands(app_commands.Group):
         embed.add_field(name="Ticket Type", value=f"{data['type']}")
         embed.add_field(name="Added Roles", value=f"{len(data['added_roles'])}")
         embed.add_field(name="Added Users", value=f"{len(data['added_users'])}")
+        embed.color = 0x00FF00
         
         await interaction.response.send_message(embed=embed)
 
@@ -206,10 +266,11 @@ class Ticket_Commands(app_commands.Group):
     @app_commands.describe(support_role="support role of system")
     @app_commands.describe(pm_role="partner manager role of system")
     @app_commands.describe(transcript="transcript channel of system")
-    async def config(self, interaction: Interaction, category: discord.CategoryChannel=None, support_role: discord.Role=None, pm_role: discord.Role=None, transcript: discord.TextChannel=None):        
+    @app_commands.describe(ticket_log="ticket log channel of system")
+    async def config(self, interaction: Interaction, category: discord.CategoryChannel=None, support_role: discord.Role=None, pm_role: discord.Role=None, transcript: discord.TextChannel=None, ticket_log: discord.TextChannel=None):        
         can_run = await checks.slash_check(self.bot, interaction, app_commands.command.__name__)
         if can_run != True:
-            await interaction.followup.send("You do not have permission to run this command")
+            return await interaction.followup.send("You do not have permission to run this command")
 
         data = await self.bot.config.find(interaction.guild.id)
         if data is None:
@@ -226,8 +287,10 @@ class Ticket_Commands(app_commands.Group):
 
         if transcript:
             data['transcript_log_channel'] = transcript.id
+        if ticket_log:
+            data['ticket_log_channel'] = ticket_log.id
 
-        if support_role or category or pm_role or transcript:
+        if support_role or category or pm_role or transcript or ticket_log:
             await self.bot.config.upsert(data)
             await interaction.response.send_message("Configuration Updated")
         else:
@@ -236,6 +299,7 @@ class Ticket_Commands(app_commands.Group):
             embed.add_field(name="Support Role", value=f"<@&{data['support_role']}>")
             embed.add_field(name="Partner Manager Role", value=f"<@&{data['pm_role']}>")
             embed.add_field(name="Transcript Log Channel", value=f"<#{data['transcript_log_channel']}>")
+            embed.add_field(name="Ticket Log Channel", value=f"<#{data['ticket_log_channel']}>")
             embed.set_footer(text="Made by Jay and utki007")
             await interaction.response.send_message(embed=embed)
     
@@ -244,9 +308,10 @@ class Ticket_Commands(app_commands.Group):
     @app_commands.describe(limit="range of transcript")
     async def save(self, interaction: Interaction, topic:str = 'No Topic Given', limit: app_commands.Range[int,0,1000]= 500):
         await interaction.response.defer(thinking=True)
+        
         can_run = await checks.slash_check(self.bot, interaction, app_commands.command.__name__)
         if can_run != True:
-            await interaction.followup.send("You do not have permission to run this command")
+            return await interaction.followup.send("You do not have permission to run this command")
 
         transcript = await chat_exporter.export(interaction.channel, limit=limit,tz_info="Asia/Kolkata")
 
@@ -263,3 +328,10 @@ class Ticket_Commands(app_commands.Group):
         link_button.add_item(discord.ui.Button(label='View Transcript', url=url))
 
         await interaction.followup.send(embed=discord.Embed(description=f"<:save:819194696874197004> | Transcript Saved", color=0x2f3136),view=link_button)
+
+        log_embed = discord.Embed(color=0x00FF00)
+        log_channel = self.bot.get_channel(self.bot.config_data[interaction.guild.id]["ticket_log_channel"])
+        log_embed.set_author(name=f"{interaction.user.name}#{interaction.user.discriminator}", icon_url=interaction.user.avatar.url)
+        log_embed.add_field(name="Ticket", value=interaction.channel.name)
+        log_embed.add_field(name="Action", value=f"Saved Transcript")
+        await log_channel.send(embed=log_embed)
