@@ -14,9 +14,7 @@ class Ticket_Commands(app_commands.Group):
     @app_commands.command(name="close", description="Close a ticket")
     async def close(self, interaction: Interaction):
         await interaction.response.defer(ephemeral=False, thinking=True)
-        chan = self.bot.get_channel(951901575817887794)
-        await chan.send( app_commands.command.__name__)
-        can_run = await checks.slash_check(self.bot, interaction, app_commands.command.__name__)
+        can_run = await checks.slash_check(self.bot, interaction, "close")
 
         if can_run != True:
             return await interaction.followup.send("You do not have permission to run this command")
@@ -65,7 +63,7 @@ class Ticket_Commands(app_commands.Group):
     async def open(self, interaction: Interaction):
 
         await interaction.response.defer(thinking=True)
-        can_run = await checks.slash_check(self.bot, interaction, app_commands.command.__name__)
+        can_run = await checks.slash_check(self.bot, interaction, "open")
 
         if can_run != True:
             return await interaction.followup.send("You do not have permission to run this command")
@@ -111,7 +109,7 @@ class Ticket_Commands(app_commands.Group):
     async def delete(self, interaction: Interaction):
         data = await self.bot.ticket.find(interaction.channel.id)
         
-        can_run = await checks.slash_check(self.bot, interaction, app_commands.command.__name__)
+        can_run = await checks.slash_check(self.bot, interaction, "delete")
         if can_run != True:
             return await interaction.followup.send("You do not have permission to run this command")
 
@@ -164,7 +162,7 @@ class Ticket_Commands(app_commands.Group):
     async def add(self, interaction: Interaction, target: Union[discord.Member, discord.Role]):
         await interaction.response.defer(thinking=True)
 
-        can_run = await checks.slash_check(self.bot, interaction, app_commands.command.__name__)
+        can_run = await checks.slash_check(self.bot, interaction, "add")
         if can_run != True:
             return await interaction.followup.send("You do not have permission to run this command")
 
@@ -212,7 +210,7 @@ class Ticket_Commands(app_commands.Group):
     async def remove(self, interaction: Interaction, target: Union[discord.Member, discord.Role]):
         await interaction.response.defer(thinking=True)
 
-        can_run = await checks.slash_check(self.bot, interaction, app_commands.command.__name__)
+        can_run = await checks.slash_check(self.bot, interaction, "remove")
         if can_run != True:
             return await interaction.followup.send("You do not have permission to run this command")
 
@@ -310,7 +308,7 @@ class Ticket_Commands(app_commands.Group):
     async def save(self, interaction: Interaction, topic:str = 'No Topic Given', limit: app_commands.Range[int,0,1000]= 500):
         await interaction.response.defer(thinking=True)
         
-        can_run = await checks.slash_check(self.bot, interaction, app_commands.command.__name__)
+        can_run = await checks.slash_check(self.bot, interaction, "save")
         if can_run != True:
             return await interaction.followup.send("You do not have permission to run this command")
 
