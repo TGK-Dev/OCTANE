@@ -5,149 +5,9 @@ import io
 from discord.ext import commands
 from typing import Union
 from utils.checks import checks
+from Views.Ticket_panel import *
 
 description = "Ticket System For the Server Support"
-
-class PersistentView(discord.ui.View):
-    def __init__(self, bot):
-        self.bot = bot
-        super().__init__(timeout=None)
-        url = 'https://dyno.gg/form/99ad4f31'
-        self.add_item(discord.ui.Button(label='Ban Appeal', url=url))
-
-    @discord.ui.button(label='Server Support', style=discord.ButtonStyle.red, custom_id='persistent_view:red', emoji="<:support:837272254307106849>")
-    async def support(self, button: discord.ui.Button, interaction: discord.Interaction):
-        await interaction.response.defer(ephemeral=True)
-        user = interaction.user
-        guild = interaction.guild
-        data = await self.bot.ticket.find_by_custom({"_id": user.id, "guild": interaction.guild.id})
-        if interaction.user.guild_permissions.manage_messages:
-            pass
-        else: 
-            if data and data['type'] == "support":
-                return await interaction.followup.send(f"Your last tickets still excites: <#{data['channel']}>", ephemeral=True)
-
-        mod_role = discord.utils.get(guild.roles, id=787259553225637889)
-        trmod_role = discord.utils.get(guild.roles, id=843775369470672916)
-        robot = discord.utils.get(guild.roles, id=810153515610537994)
-
-        overwrites = {
-            guild.default_role: discord.PermissionOverwrite(read_messages=False),
-            guild.me: discord.PermissionOverwrite(read_messages=True),
-            interaction.user: discord.PermissionOverwrite(read_messages=True, send_messages=True, attach_files=True,read_message_history=True),
-            mod_role: discord.PermissionOverwrite(read_messages=True, send_messages=True, attach_files=True,read_message_history=True),
-            trmod_role: discord.PermissionOverwrite(read_messages=True, send_messages=True, attach_files=True,read_message_history=True),
-            robot: discord.PermissionOverwrite(read_messages=True, send_messages=True, attach_files=True,read_message_history=True),
-        }
-        channel = await guild.create_text_channel(category=self.bot.get_channel(829230513516445736), name=f"{user.name} Support Ticket", topic=f"User Id: {user.id}", overwrites=overwrites)
-                
-        Tembed = discord.Embed(title=f"Hi {user.display_name}, Welcome to Server Support",
-                                  color=0x008000,
-                                  description="Kindly wait patiently. A staff member will assist you shortly.\nIf you're looking to approach a specific staff member, ping the member once. Do not spam ping any member or role.\n\nThank you.")
-        Tembed.set_footer(text="Developed and Owned by Jay & utki007")
-        m = await channel.send(f"{user.mention} | <@&787259553225637889> <@&843775369470672916>", embed=Tembed)
-        await interaction.followup.send(f"You new Ticekt has Been Open in {channel.mention}", ephemeral=True)
-
-        user_data = {'_id': user.id,
-                    'guild': user.guild.id,
-                    'channel': channel.id,
-                    'type': 'support'}
-        await self.bot.ticket.upsert(user_data)
-
-    @discord.ui.button(label='Partnership ', style=discord.ButtonStyle.green, custom_id='persistent_view:partner_ship', emoji="<:partner:837272392472330250>")
-    async def partnership(self, button: discord.ui.Button, interaction: discord.Interaction):
-        await interaction.response.defer(ephemeral=True)
-        user = interaction.user
-        guild = interaction.guild
-        data = await self.bot.ticket.find_by_custom({"_id": user.id, "guild": interaction.guild.id})
-        if interaction.user.guild_permissions.manage_messages:
-            pass
-        else: 
-            if data and data['type'] == "partnership":
-                return await interaction.followup.send(f"Your last tickets still excites: <#{data['channel']}>", ephemeral=True)
-
-        partnership_m = discord.utils.get(guild.roles, id=831405039830564875)
-        mod_role = discord.utils.get(guild.roles, id=787259553225637889)
-        trmod_role = discord.utils.get(guild.roles, id=843775369470672916)
-        robot = discord.utils.get(guild.roles, id=810153515610537994)
-
-        overwrites = {
-            guild.default_role: discord.PermissionOverwrite(read_messages=False),
-            guild.me: discord.PermissionOverwrite(read_messages=True),
-            partnership_m: discord.PermissionOverwrite(read_messages=True, send_messages=True, attach_files=True,read_message_history=True),
-            interaction.user: discord.PermissionOverwrite(read_messages=True, send_messages=True, attach_files=True,read_message_history=True),
-            mod_role: discord.PermissionOverwrite(read_messages=True, send_messages=True, attach_files=True,read_message_history=True),
-            trmod_role: discord.PermissionOverwrite(read_messages=True, send_messages=True, attach_files=True,read_message_history=True),
-            robot: discord.PermissionOverwrite(read_messages=True, send_messages=True, attach_files=True,read_message_history=True),
-        }
-        channel = await guild.create_text_channel(category=self.bot.get_channel(829230513516445736), name=f"{user.name} Partnership Ticket", topic=f"User Id: {user.id}", overwrites=overwrites)
-                
-        Tembed = discord.Embed(title=f"Hi {user.display_name}, Welcome to Server Support",
-                                  color=0x008000,
-                                  description="Kindly wait patiently. A staff member will assist you shortly.\nIf you're looking to approach a specific staff member, ping the member once. Do not spam ping any member or role.\n\nThank you.")
-        Tembed.set_footer(text="Developed and Owned by Jay & utki007")
-        m = await channel.send(f"{user.mention} | {partnership_m.mention}", embed=Tembed)
-        await interaction.followup.send(f"You new Ticekt has Been Open in {channel.mention}", ephemeral=True)
-
-        user_data = {'_id': user.id,
-                    'guild': user.guild.id,
-                    'channel': channel.id,
-                    'type': 'partnership'}
-        await self.bot.ticket.upsert(user_data)
-
-    @discord.ui.button(label='Want bot like me ?', style=discord.ButtonStyle.blurple, custom_id='persistent_view:custom_bot', emoji="🤖")
-    async def custom_bot(self, button: discord.ui.Button, interaction: discord.Interaction):
-        embed = discord.Embed(description="Yes you can get a Bot like me With very cheap price with hosting\nJust Dm <@488614633670967307> or <@301657045248114690> and We don't take any bot currency as payment")
-        await interaction.response.send_message(embed=embed, ephemeral=True)
-
-    async def interaction_check(self ,interaction):
-        data = self.bot.blacklist_users
-        if interaction.user.id in data:
-            await interaction.response.send_message("Your Blacklisted from bot", ephemeral=True)
-        else:
-            return True
-
-class delete(discord.ui.View):
-    def __init__(self, bot, ctx):
-        super().__init__()
-        self.bot = bot
-        self.ctx = ctx
-    
-    @discord.ui.button(label="Yes", style=discord.ButtonStyle.red)
-    async def yes(self, button: discord.ui.Button, interaction: discord.Interaction):
-        await interaction.response.send_message(f"Invoking delete command on your behalf.", ephemeral=True)
-        await self.ctx.invoke(self.bot.get_command('delete'))
-
-    async def interaction_check(self ,interaction):
-        if interaction.user.id == self.ctx.author.id:
-            return True
-        else:
-            await interaction.response.send_message("You didn't invoked save command", ephemeral=True)
-            await interaction.message.delete()
-
-class Confirm(discord.ui.View):
-    def __init__(self, user=None):
-        super().__init__()
-        self.value = None
-        self.user = user
-
-    @discord.ui.button(label='Confirm', style=discord.ButtonStyle.green)
-    async def confirm(self, button: discord.ui.Button, interaction: discord.Interaction):
-        await interaction.response.send_message('Thanks For Allowing us', ephemeral=True)
-        self.value = True
-        self.stop()
-
-    @discord.ui.button(label='Cancel', style=discord.ButtonStyle.grey)
-    async def cancel(self, button: discord.ui.Button, interaction: discord.Interaction):
-        await interaction.response.send_message('Cancelling', ephemeral=True)
-        self.value = False
-        self.stop()
-
-    async def interaction_check(self ,interaction):
-        if interaction.user.id == self.user:
-            return True
-        else:
-            await interaction.response.send_message("You nor the Staff or Host of the event", ephemeral=True)
 
 class Tickets(commands.Cog):
     def __init__(self, bot):
@@ -155,7 +15,7 @@ class Tickets(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        self.bot.add_view(PersistentView(self.bot))
+        self.bot.add_view(Ticket_panel(self.bot))
         print(f'{self.__class__.__name__} Cog has been loaded\n-----')
 
     @commands.command()
@@ -163,7 +23,7 @@ class Tickets(commands.Cog):
     async def setup(self, ctx):
         embed = discord.Embed(title="Support Centre",description="This channel is for in-server support purpose only, talking anything here which is not related to the channel usage will result in warn or mute, mini-modding is also not allowed, we have enough staff members to handle it. Thank you for your cooperation.",color=0xff0000)
         embed.set_footer(text=ctx.guild.name, icon_url=ctx.guild.icon.url)
-        await ctx.send(embed=embed, view=PersistentView(self.bot))
+        await ctx.send(embed=embed, view=Ticket_panel(self.bot))
 
     @commands.command(name="close", description="Close Current Ticket")
     @commands.check_any(checks.can_use())
@@ -215,38 +75,26 @@ class Tickets(commands.Cog):
         tz_info = "Asia/Kolkata"
 
         data = await self.bot.ticket.find_by_custom({'channel': ctx.channel.id, 'guild': ctx.guild.id})
-        view = Confirm(ctx.author.id)
         embed = discord.Embed(description=f"{ctx.author.mention} by Pressing bellow button your allowing as to save messages of this channel")
-        m = await ctx.send(f"{ctx.author.mention}", embed=embed, view=view)
-        await view.wait()
-        if view.value is None:
-            await m.edit('Timed out...')
-        elif view.value:
-            await m.edit(content="Saving Started",embed=None,view=None)
-            channel = self.bot.get_channel(833386438338674718)
-            transcript = await chat_exporter.export(ctx.channel, limit, tz_info)
+        m = await ctx.send(content="Saving Started",embed=None,view=None)
+        channel = self.bot.get_channel(833386438338674718)
+        transcript = await chat_exporter.export(ctx.channel, limit, tz_info)
+        if transcript is None:
+            return
+        transcript_file = discord.File(io.BytesIO(transcript.encode()),filename=f"transcript-{ctx.channel.name}.html")
 
-            if transcript is None:
-                return
+        link_msg = await channel.send(f"{ctx.channel.name} | {ticket}", file=transcript_file)
 
-            transcript_file = discord.File(io.BytesIO(transcript.encode()),filename=f"transcript-{ctx.channel.name}.html")
+        link_button = discord.ui.View()
+        url = f"https://codebeautify.org/htmlviewer?url={link_msg.attachments[0].url}"
+        link_button.add_item(discord.ui.Button(label='View Transcript', url=url))
 
-            link_msg = await channel.send(f"{ctx.channel.name} | {ticket}", file=transcript_file)
+        await link_msg.edit(view=link_button)
+        await m.edit(content=f"{ctx.author.mention} transcript Saved",)
 
-            link_button = discord.ui.View()
-            url = f"https://codebeautify.org/htmlviewer?url={link_msg.attachments[0].url}"
-            link_button.add_item(discord.ui.Button(label='View Transcript', url=url))
-
-            await link_msg.edit(view=link_button)
-            await m.edit(content=f"{ctx.author.mention} transcript Saved",)
-
-            channel_file = discord.File(io.BytesIO(transcript.encode()),
-                                        filename=f"transcript-{ctx.channel.name}.html")
-            await ctx.send(f"{ctx.channel.name} | {ticket}", file=channel_file, view=link_button)
-
-            await ctx.send("Do want to delete this ticket?", view=delete(self.bot,ctx))
-        else: 
-            pass
+        channel_file = discord.File(io.BytesIO(transcript.encode()),
+                                    filename=f"transcript-{ctx.channel.name}.html")
+        await ctx.send(f"{ctx.channel.name} | {ticket}", file=channel_file, view=link_button)
     
     @commands.command(name="add", description="add User to the channel", usage="[member]")
     @commands.check_any(checks.can_use())

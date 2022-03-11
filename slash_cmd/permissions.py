@@ -17,6 +17,7 @@ class Permissions(app_commands.Group):
         allowed_list = " "
         if not interaction.user.guild_permissions.administrator:
             return await interaction.response.send_message("You don't have permission to use this command", ephemeral=True)
+
         if isinstance(target, discord.Member):
             for cmd in cmd_data:
                 if target.id in cmd['allowed_users']: 
@@ -32,7 +33,7 @@ class Permissions(app_commands.Group):
         if isinstance(target, discord.Role):
 
             for cmd in cmd_data:
-                if target.id in cmd['allowed_users']: 
+                if target.id in cmd['allowed_roles']:
                     allowed_list += f"{cmd['_id']}, "
             
             if allowed_list != " ":

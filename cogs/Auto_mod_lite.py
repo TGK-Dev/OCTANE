@@ -50,7 +50,7 @@ class AutoMod(commands.Cog):
     async def on_message(self, message):
         if self.bot.automod != True: return
         if message.author.bot: return
-        if message.guild.id != 785839283847954433: return
+        if message.guild.id != 785809841009070090: return
 
         link = is_link_there(message.content)
         if len(link) > 0:

@@ -26,6 +26,7 @@ from utils.mongo import Document
 from utils.util import Pag
 from utils.util import clean_code
 from slash_cmd.permissions import Permissions
+from slash_cmd.Ticket import Ticket_Commands
 
 load_dotenv()
 cwd = Path(__file__).parents[0]
@@ -58,7 +59,8 @@ async def sync_slash_command(bot) -> None:
             for slash_command in bot.slash_commands:
                 bot.tree.add_command(slash_command, guild=discord.Object(id=785839283847954433))
             try:
-                bot.tree.add_command(Permissions(bot), guild=discord.Object(id=785839283847954433))
+                bot.tree.add_command(Ticket_Commands(bot), guild=discord.Object(id=785839283847954433))
+                bot.tree.add_command(Permissions(bot), guild=discord.Object(id=785839283847954433))                
             except:
                 pass
             await bot.tree.sync(guild=discord.Object(id=785839283847954433))
@@ -98,6 +100,7 @@ bot.ban_event = {}
 
 bot.snipe = {}
 bot.esnipe = {}
+bot.config_data = {}
 
 @bot.event
 async def on_ready():
@@ -129,6 +132,10 @@ async def on_ready():
     current_perm = await bot.active_cmd.get_all()
     for perm in current_perm:
         bot.perm[perm["_id"]] = perm
+    
+    current_config = await bot.config.get_all()
+    for config in current_config:
+        bot.config_data[config["_id"]] = config
 
     print("\n-----")
     print(f"Current blacklist:{len(bot.blacklist_users)}")
