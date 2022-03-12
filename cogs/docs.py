@@ -9,10 +9,9 @@ import discord
 from discord.ext import commands
 
 
-# Sphinx reader object because d.py docs
-# are written in sphinx.
+
 class SphinxObjectFileReader:
-    # Inspired by Sphinx's InventoryFileReader
+   
     BUFSIZE = 16 * 1024
 
     def __init__(self, buffer):
@@ -40,7 +39,7 @@ class SphinxObjectFileReader:
             pos = buf.find(b"\n")
             while pos != -1:
                 yield buf[:pos].decode("utf-8")
-                buf = buf[pos + 1:]
+                buf = buf[pos + 1 :]
                 pos = buf.find(b"\n")
 
 
@@ -50,26 +49,9 @@ class Docs(commands.Cog, name="Documentation"):
         self.logger = logging.getLogger(__name__)
 
         self.page_types = {
-            "discord.py": "https://nextcord.readthedocs.io/en/latest/",
+            "discord.py": "https://discordpy.readthedocs.io/en/master/",
             "levelling": "https://discord-ext-levelling.readthedocs.io/en/latest/",
         }
-
-    def is_me():
-        def predicate(ctx):
-            return ctx.message.author.id in [488614633670967307, 301657045248114690]
-        return commands.check(predicate)
-
-    def perm_check():
-        async def predicate(ctx):
-            mod_role = [785842380565774368, 803635405638991902, 799037944735727636,
-                        785845265118265376, 787259553225637889, 843775369470672916]
-            for mod in mod_role:
-                role = discord.utils.get(ctx.guild.roles, id=mod)
-                if role in ctx.author.roles:
-                    permissions = await ctx.bot.config.find(role.id)
-                    check = permissions['perm']
-                    return (ctx.command.name in check)
-        return commands.check(predicate)
 
     def finder(self, text, collection, *, key=None, lazy=True):
         suggestions = []
@@ -93,29 +75,25 @@ class Docs(commands.Cog, name="Documentation"):
             return [z for _, _, z in sorted(suggestions, key=sort_key)]
 
     def parse_object_inv(self, stream, url):
-        # key: URL
+    
         result = {}
 
-        # first line is version info
+     
         inv_version = stream.readline().rstrip()
 
         if inv_version != "# Sphinx inventory version 2":
             raise RuntimeError("Invalid objects.inv file version.")
 
-        # next line is "# Project: <name>"
-        # then after that is "# Version: <version>"
         stream.readline().rstrip()[11:]
         stream.readline().rstrip()[11:]
 
-        # next line says if it's a zlib header
+
         line = stream.readline()
         if "zlib" not in line:
-            raise RuntimeError(
-                "Invalid objects.inv file, not z-lib compatible.")
+            raise RuntimeError("Invalid objects.inv file, not z-lib compatible.")
 
         # This code mostly comes from the Sphinx repository.
-        entry_regex = re.compile(
-            r"(?x)(.+?)\s+(\S*:\S*)\s+(-?\d+)\s+(\S+)\s+(.*)")
+        entry_regex = re.compile(r"(?x)(.+?)\s+(\S*:\S*)\s+(-?\d+)\s+(\S+)\s+(.*)")
         for line in stream.read_compressed_lines():
             match = entry_regex.match(line.rstrip())
             if not match:
@@ -124,14 +102,9 @@ class Docs(commands.Cog, name="Documentation"):
             name, directive, prio, location, dispname = match.groups()
             domain, _, subdirective = directive.partition(":")
             if directive == "py:module" and name in result:
-                # From the Sphinx Repository:
-                # due to a bug in 1.1 and below,
-                # two inventory entries are created
-                # for Python modules, and the first
-                # one is correct
+
                 continue
 
-            # Most documentation pages have a label
             if directive == "std:doc":
                 subdirective = "label"
 
@@ -173,30 +146,33 @@ class Docs(commands.Cog, name="Documentation"):
 
         cache = list(self._rtfm_cache[key].items())
 
-        self.matches = self.finder(
-            obj, cache, key=lambda t: t[0], lazy=False)[:8]
+        self.matches = self.finder(obj, cache, key=lambda t: t[0], lazy=False)[:8]
 
-        e = discord.Embed(colour=0xCE2029)
+        e = discord.Embed(colour=0x05FFF0)
+        e.set_footer(text=f'Requested By {ctx.author}', icon_url=f'{ctx.author.avatar.url}')
         if len(self.matches) == 0:
             return await ctx.send("Could not find anything. Sorry.")
 
-        e.description = "\n".join(
-            f"[`{key}`]({url})" for key, url in self.matches)
+        e.description = "\n".join(f"[`{key}`]({url})" for key, url in self.matches)
         await ctx.send(embed=e)
+
+    def is_me():
+        def predicate(ctx):
+            return ctx.message.author.id in [488614633670967307, 301657045248114690]
+        return commands.check(predicate)
 
     @commands.Cog.listener()
     async def on_ready(self):
-        print(f"{self.__class__.__name__} Cog has been loaded\n-----")
+        self.logger.info("I'm ready!")
 
     @commands.command(
         name="rtfm",
         description="Gives you a documentation link for a d.py entity.",
         aliases=["doc"],
     )
-    @commands.check_any(perm_check(), is_me())
+    @commands.check_any(is_me())
     async def rtfm(self, ctx, key: str = None, *, query: str = None):
         if not key or key.lower() not in self.page_types.keys():
-            # Avoid nonetypes
             query = query or ""
             key = key or ""
 
@@ -208,21 +184,11 @@ class Docs(commands.Cog, name="Documentation"):
                 await ctx.send(
                     embed=discord.Embed.from_dict(
                         {
-                            "title": "Read The Manual",
+                            "title": "Read The Fucking Manual",
+                            "color": "0x00FC7E",
                             "description": "You expect me to know?",
                             "footer": {"text": "Imagine including easter eggs"},
                         }
-                    )
-                )
-
-            elif query.lower() in ["developers", "devs"]:
-                await ctx.send(
-                    embed=discord.Embed.from_dict(
-                        {
-                            "title": "Hmmm",
-
-                        },
-
                     )
                 )
 
