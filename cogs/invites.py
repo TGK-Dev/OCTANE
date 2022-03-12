@@ -40,6 +40,8 @@ class Invites(commands.Cog, description=description):
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
+        if member.guild.id != 785839283847954433:
+            return
         inviter = await self.tracker.fetch_inviter(member)
         if inviter is None:
             return

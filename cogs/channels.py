@@ -84,7 +84,7 @@ class channel(commands.Cog, description=description):
         await ctx.message.delete()
 
         embed = discord.Embed(
-            color=0x02ff06, description=f'The {channel.mention} is Now Visibal for for @everyone')
+            color=0x02ff06, description=f'The {channel.mention} is Now Visible for for @everyone')
         await ctx.send(embed=embed, delete_after=10)
 
     @commands.command(name="Sync", description="Sync Channels permissions to it's Category", usage="[channel]")

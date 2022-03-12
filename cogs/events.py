@@ -51,8 +51,10 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
-        if guild.owner.id != 488614633670967307:
-            await self.bot.guild.leave()
+        if guild.owner.id in [self.bot.user.id, 301657045248114690, 488614633670967307]:
+            pass
+        else:
+            await guild.leave()
     
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):

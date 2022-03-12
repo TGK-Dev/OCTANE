@@ -76,6 +76,7 @@ class Cog_name(commands.Cog, description="Ban Battle Event Module"):
             except:
                 pass
         await ctx.message.add_reaction("✅")
+        await ctx.send("all Ban Battle servers have been deleted")
 
     @Ban.group(name="start", description="Start Ban battle server")
     @commands.check_any(checks.can_use())

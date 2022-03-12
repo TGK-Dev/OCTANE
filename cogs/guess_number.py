@@ -87,12 +87,13 @@ class Guess_number(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.guess = 0
+        self.load_tree_commands()
 
     def load_tree_commands(self):
 
         @app_commands.command(name="drop", description="Do a Drop of any item")
-        @app_commands.describe(item="Name of price")
-        async def drop(self, interaction: discord.Interaction, item: str):
+        @app_commands.describe(item="name of price")
+        async def drop(interaction: discord.Interaction, item: str):
             if not interaction.user.guild_permissions.manage_messages:
                 return await interaction.send("You don't have permission to use this command")
             embed = discord.Embed(title="Drop Incoming",color=interaction.user.color)
@@ -104,8 +105,8 @@ class Guess_number(commands.Cog):
 
         self.bot.slash_commands.append(drop)
 
-        @drop.autocomplete('command')
-        async def command_auto(self, interaction: discord.Interaction, current: str, namespace:app_commands.Namespace) -> List[app_commands.Choice[str]]:
+        @drop.autocomplete('item')
+        async def command_auto(interaction: discord.Interaction, current: str, namespace:app_commands.Namespace) -> List[app_commands.Choice[str]]:
             choice = [
                 app_commands.Choice(name=cmd , value=cmd)
                 for cmd in list_of_items if current.lower() in cmd.lower()

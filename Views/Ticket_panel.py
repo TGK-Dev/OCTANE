@@ -34,7 +34,7 @@ class PartnerShip_model(discord.ui.Modal, title="PartnerShip Infomations"):
                 interaction.user: discord.PermissionOverwrite(read_messages=True, view_channel=True, attach_files=True)
             }
 
-            channel = await interaction.guild.create_text_channel(name=f"{interaction.user.name} Partership",category=self.bot.get_channel(config['ticket_category']),overwrites=override,
+            channel = await interaction.guild.create_text_channel(name=f"{interaction.user.name} Partnership ",category=self.bot.get_channel(config['ticket_category']),overwrites=override,
                 topic=f"ID: {interaction.user.id}")
 
         else:
@@ -46,14 +46,14 @@ class PartnerShip_model(discord.ui.Modal, title="PartnerShip Infomations"):
                 staff_role: discord.PermissionOverwrite(read_messages=True, view_channel=True)
             }
 
-            channel = await interaction.guild.create_text_channel(name=f"{interaction.user.name} Partership",overwrites=override, category=interaction.channel.category)
+            channel = await interaction.guild.create_text_channel(name=f"{interaction.user.name} Partnership ",overwrites=override, category=interaction.channel.category)
         
         embed = discord.Embed(title=f"Hi {interaction.user.display_name}, Welcome to Server Support",
                                   color=0x008000,
                                   description="Kindly wait patiently. A staff member will assist you shortly.\nIf you're looking to approach a specific staff member, ping the member once. Do not spam ping any member or role.\n\nThank you.")
         embed.set_footer(text="Developed and Owned by Jay & utki007")
 
-        await channel.send(embed=embed, content=f"{interaction.user.mention} | {pm_role.mention}")
+        await channel.send(embed=embed, content=f"{interaction.user.mention} | `{pm_role.mention}`")
 
         info_m = await channel.send(info_data)
         await info_m.pin()
@@ -118,14 +118,14 @@ class Ticket_panel(discord.ui.View):
                 interaction.user: discord.PermissionOverwrite(read_messages=True, view_channel=True, attach_files=True),
                 staff_role: discord.PermissionOverwrite(read_messages=True, view_channel=True)
             }
-            channel = await interaction.guild.create_text_channel(name=f"{interaction.user.name} Partership",overwrites=override, category=interaction.channel.category)
+            channel = await interaction.guild.create_text_channel(name=f"{interaction.user.name} Support ",overwrites=override, category=interaction.channel.category)
         
         embed = discord.Embed(title=f"Hi {interaction.user.display_name}, Welcome to Server Support",
                                   color=0x008000,
                                   description="Kindly wait patiently. A staff member will assist you shortly.\nIf you're looking to approach a specific staff member, ping the member once. Do not spam ping any member or role.\n\nThank you.")
         embed.set_footer(text="Developed and Owned by Jay & utki007")
 
-        await channel.send(embed=embed, content=f"{interaction.user.mention} | {staff_role.mention}")
+        await channel.send(embed=embed, content=f"{interaction.user.mention} | `{staff_role.mention}`")
 
         await interaction.followup.send(f"Your Ticket is created at {channel.mention}")
 
