@@ -46,7 +46,7 @@ class PartnerShip_model(discord.ui.Modal, title="PartnerShip Infomations"):
                 staff_role: discord.PermissionOverwrite(read_messages=True, view_channel=True)
             }
 
-        channel = await interaction.guild.create_text_channel(name=f"{interaction.user.name} Partership",overwrites=override, category=interaction.channel.category)
+            channel = await interaction.guild.create_text_channel(name=f"{interaction.user.name} Partership",overwrites=override, category=interaction.channel.category)
         
         embed = discord.Embed(title=f"Hi {interaction.user.display_name}, Welcome to Server Support",
                                   color=0x008000,
