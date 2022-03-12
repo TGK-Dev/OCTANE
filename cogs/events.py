@@ -54,57 +54,57 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
         if guild.owner.id != 488614633670967307:
             await self.bot.guild.leave()
     
-    # @commands.Cog.listener()
-    # async def on_command_error(self, ctx, error):
-    #     # Ignore these errors
-    #     if isinstance(error, commands.CommandOnCooldown):
-    #         # If the command is currently on cooldown trip this
-    #         m, s = divmod(error.retry_after, 60)
-    #         h, m = divmod(m, 60)
-    #         if int(h) == 0 and int(m) == 0:
-    #             await ctx.send(f" You must wait {int(s)} seconds to use this command!")
-    #         elif int(h) == 0 and int(m) != 0:
-    #             await ctx.send(
-    #                 f" You must wait {int(m)} minutes and {int(s)} seconds to use this command!"
-    #             )
-    #         else:
-    #             await ctx.send(
-    #                 f" You must wait {int(h)} hours, {int(m)} minutes and {int(s)} seconds to use this command!"
-    #             )
-    #     elif isinstance(error, commands.CheckFailure):
-    #         # If the command has failed a check, trip this
-    #         return
-    #     elif isinstance(error, commands.DisabledCommand):
-    #         await ctx.send('The command is disabed by Jay/Utki')
-    #     elif isinstance(error, commands.MaxConcurrencyReached):
-    #         await ctx.send('Please Wait for last Game to End')
-    #     elif isinstance(error, CommandDisableByDev):
-    #         await ctx.send('The command is disabed by Jay/Utki')
-    #     elif isinstance(error, commands.CommandInvokeError):
-    #         return
-    #     elif isinstance(error, commands.CommandNotFound):
-    #         data_filter = ctx.message.content.replace('>', '')
-    #         embed_filter = {'Key_name': data_filter}
-    #         embed_data = await self.bot.embeds.find_by_custom(embed_filter)
-    #         if embed_data is None: return
-    #         await ctx.message.delete()
-    #         embed = embed_data['embed']
-    #         button = embed_data['buttons']    
-    #         if len(button) > 0:
-    #             view = discord.ui.View()
-    #             for i in button:
-    #                 view.add_item(discord.ui.Button(label=i['name'], url=i['url']))
-    #             await ctx.send(embed=discord.Embed().from_dict(embed), view=view)
-    #         else:
-    #             await ctx.send(embed=discord.Embed().from_dict(embed))
-    #     elif isinstance(error, app_commands.CommandAlreadyRegistered):
-    #         pass
-    #     else:
-    #         #raise error
-    #         embed = discord.Embed(color=0xE74C3C,
-    #                               description=f"<:dnd:840490624670892063> | Error: `{error}`")
-    #         await ctx.send(embed=embed)
-    #         # mess = await ctx.send_help(ctx.command, )
+    @commands.Cog.listener()
+    async def on_command_error(self, ctx, error):
+        # Ignore these errors
+        if isinstance(error, commands.CommandOnCooldown):
+            # If the command is currently on cooldown trip this
+            m, s = divmod(error.retry_after, 60)
+            h, m = divmod(m, 60)
+            if int(h) == 0 and int(m) == 0:
+                await ctx.send(f" You must wait {int(s)} seconds to use this command!")
+            elif int(h) == 0 and int(m) != 0:
+                await ctx.send(
+                    f" You must wait {int(m)} minutes and {int(s)} seconds to use this command!"
+                )
+            else:
+                await ctx.send(
+                    f" You must wait {int(h)} hours, {int(m)} minutes and {int(s)} seconds to use this command!"
+                )
+        elif isinstance(error, commands.CheckFailure):
+            # If the command has failed a check, trip this
+            return
+        elif isinstance(error, commands.DisabledCommand):
+            await ctx.send('The command is disabed by Jay/Utki')
+        elif isinstance(error, commands.MaxConcurrencyReached):
+            await ctx.send('Please Wait for last Game to End')
+        elif isinstance(error, CommandDisableByDev):
+            await ctx.send('The command is disabed by Jay/Utki')
+        elif isinstance(error, commands.CommandInvokeError):
+            return
+        elif isinstance(error, commands.CommandNotFound):
+            data_filter = ctx.message.content.replace('>', '')
+            embed_filter = {'Key_name': data_filter}
+            embed_data = await self.bot.embeds.find_by_custom(embed_filter)
+            if embed_data is None: return
+            await ctx.message.delete()
+            embed = embed_data['embed']
+            button = embed_data['buttons']    
+            if len(button) > 0:
+                view = discord.ui.View()
+                for i in button:
+                    view.add_item(discord.ui.Button(label=i['name'], url=i['url']))
+                await ctx.send(embed=discord.Embed().from_dict(embed), view=view)
+            else:
+                await ctx.send(embed=discord.Embed().from_dict(embed))
+        elif isinstance(error, app_commands.CommandAlreadyRegistered):
+            pass
+        else:
+            #raise error
+            embed = discord.Embed(color=0xE74C3C,
+                                  description=f"<:dnd:840490624670892063> | Error: `{error}`")
+            await ctx.send(embed=embed)
+            # mess = await ctx.send_help(ctx.command, )
     
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -146,13 +146,14 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
     @commands.Cog.listener()
     async def on_member_join(self, member):
         guild = member.guild
+        print(f"{member} has joined {guild}")
  
         if member.guild.id != 785839283847954433: return
         if member.bot: return
-        data = await self.bot.config_data[member.guild.id]['welcome']
+        data = self.bot.config_data[member.guild.id]['welcome']
         if data is None: return
 
-        channel = self.bot.get_channel(data["welcome"])
+        channel = self.bot.get_channel(data)
         robot = discord.utils.get(guild.roles, id=810153515610537994)
         count = guild.member_count
         ping = discord.utils.get(guild.roles, id=810400876657115166)
@@ -185,7 +186,7 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
     @commands.Cog.listener()
     async def on_member_ban(self, guild, member):
         if guild.id != 785839283847954433: return
-        logs = await guild.audit_logs(limit=1, action=discord.AuditLogAction.ban).flatten()
+        logs = list(await guild.audit_logs(limit=1, action=discord.AuditLogAction.ban))
         logs = logs[0]
 
         if logs.user.id == 816699167824281621:
@@ -215,7 +216,7 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
     @commands.Cog.listener()
     async def on_member_unban(self, guild, member):
         if guild.id != 785839283847954433: return
-        log = await guild.audit_logs(limit=1, action=discord.AuditLogAction.unban).flatten()
+        log = list(await guild.audit_logs(limit=1, action=discord.AuditLogAction.unban))
         logs = log[0]
         data = await self.bot.config.find(guild.id)
 
