@@ -15,7 +15,7 @@ class Ticket_Commands(app_commands.Group):
         
         error = f"Error happened while executing command: ```py\n{error}\n```"
         embed = discord.Embed(title="Error", description=f"Error Ac", color=0xFF0000)
-        await interaction.response.send_message(embed=embed, ephemeral=True)
+        await interaction.followup.send(embed=embed)
     
 
     @app_commands.command(name="close", description="Close a ticket")
