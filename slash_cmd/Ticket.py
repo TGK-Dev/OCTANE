@@ -13,7 +13,7 @@ class Ticket_Commands(app_commands.Group):
     
     async def on_error(self, interaction: Interaction, command: app_commands.Command, error: app_commands.AppCommandError) -> None:
         
-        error = "Error happened while executing command: ```py{}```\n\n{}".format(command.qualified_name, error)
+        error = f"Error happened while executing command: ```py\n{error}\n```"
         embed = discord.Embed(title="Error", description=f"Error Ac", color=0xFF0000)
         await interaction.response.send_message(embed=embed, ephemeral=True)
     
