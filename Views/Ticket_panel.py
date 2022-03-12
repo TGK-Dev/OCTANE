@@ -45,11 +45,13 @@ class PartnerShip_model(discord.ui.Modal, title="PartnerShip Infomations"):
         embed.set_footer(text="Developed and Owned by Jay & utki007")
 
         await channel.send(embed=embed, content=f"{interaction.user.mention} | {pm_role.mention}")
-
-        invite = await self.bot.fetch_invite(self.server_invite.value)
+        try:
+            invite = await self.bot.fetch_invite(self.server_invite.value)
+            info_m = await channel.send(f"**Server Invite:** {invite.url}\n**Server Name:** {self.server_name.value}\n**Server ID:** {invite.guild.id}\n**Partnership Type:** {self.partership_type.value}")
+        except:
+            info_m = await channel.send(f"**Server Invite:** {self.server_invite.value}\n**Server Name:** {self.server_name.value}\n**Server ID:** Didn't Get Done\n**Partnership Type:** {self.partership_type.value}")
+            pass
         
-        info_m = await channel.send(f"**Server Invite:** {invite.url}\n**Server Name:** {self.server_name.value}\n**Server ID:** {invite.guild.id}\n**Partnership Type:** {self.partership_type.value}")
-
         await info_m.pin()
 
         await interaction.response.send_message(f"Your Ticket is Ready at: {channel.mention}", ephemeral=True)
