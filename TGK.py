@@ -57,13 +57,17 @@ async def sync_slash_command(bot) -> None:
         await bot.wait_until_ready()
         for guild in bot.guilds:
             for slash_command in bot.slash_commands:
-                bot.tree.add_command(slash_command, guild=discord.Object(id=785839283847954433))
+                try:
+                    bot.tree.add_command(slash_command, guild=discord.Object(id=785839283847954433))
+                except:
+                    pass
             try:
                 bot.tree.add_command(Ticket_Commands(bot), guild=discord.Object(id=785839283847954433))
                 bot.tree.add_command(Permissions(bot), guild=discord.Object(id=785839283847954433))                
+                await bot.tree.sync(guild=discord.Object(id=785839283847954433))
             except:
                 pass
-            await bot.tree.sync(guild=discord.Object(id=785839283847954433))
+            
 
 intents = discord.Intents.all()  # Help command requires member intents
 DEFAULTPREFIX = "!"
