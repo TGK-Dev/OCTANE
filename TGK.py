@@ -64,9 +64,9 @@ async def sync_slash_command(bot) -> None:
             try:
                 bot.tree.add_command(Ticket_Commands(bot), guild=discord.Object(id=785839283847954433))
                 bot.tree.add_command(Permissions(bot), guild=discord.Object(id=785839283847954433))                
-                await bot.tree.sync(guild=discord.Object(id=785839283847954433))
             except:
                 pass
+            await bot.tree.sync(guild=discord.Object(id=785839283847954433))
             
 
 intents = discord.Intents.all()  # Help command requires member intents

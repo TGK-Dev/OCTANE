@@ -241,8 +241,6 @@ class Ticket_Commands(app_commands.Group):
 
             await interaction.followup.send("Ticket is now Admin Only")
 
-
-
     @app_commands.command(name="delete", description="Delete a ticket")
     async def delete(self, interaction: Interaction):
         data = await self.bot.ticket.find(interaction.channel.id)
