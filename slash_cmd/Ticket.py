@@ -11,6 +11,13 @@ class Ticket_Commands(app_commands.Group):
         super().__init__(name=name)
         self.bot = bot
     
+    async def on_error(self, interaction: Interaction, command: app_commands.Command, error: app_commands.AppCommandError) -> None:
+        
+        error = "Error happened while executing command: ```py{}```\n\n{}".format(command.qualified_name, error)
+        embed = discord.Embed(title="Error", description=f"Error Ac", color=0xFF0000)
+        await interaction.response.send_message(embed=embed, ephemeral=True)
+    
+
     @app_commands.command(name="close", description="Close a ticket")
     async def close(self, interaction: Interaction):
         await interaction.response.defer(ephemeral=False, thinking=True)

@@ -149,7 +149,7 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
  
         if member.guild.id != 785839283847954433: return
         if member.bot: return
-        data = await self.bot.config.find(guild.id)
+        data = await self.bot.config_data[member.guild.id]['welcome']
         if data is None: return
 
         channel = self.bot.get_channel(data["welcome"])

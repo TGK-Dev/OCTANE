@@ -15,6 +15,14 @@ class PartnerShip_model(discord.ui.Modal, title="PartnerShip Infomations"):
         staff_role = discord.utils.get(interaction.guild.roles, id=config['support_role'])
         pm_role = discord.utils.get(interaction.guild.roles, id=config['pm_role'])
 
+        try:
+            invite = await self.bot.fetch_invite(self.server_invite.value)
+            info_data = f"**Server Invite:** {invite.url}\n**Server Name:** {self.server_name.value}\n**Server ID:** {invite.guild.id}\n**Partnership Type:** {self.partership_type.value}"
+        except:
+            info_data = f"**Server Invite:** {self.server_invite.value}\n**Server Name:** {self.server_name.value}\n**Server ID:** Didn't Get Done\n**Partnership Type:** {self.partership_type.value}"
+            pass
+
+
         if config and config['ticket_category'] is not None:
             staff_role = discord.utils.get(interaction.guild.roles, id=config['support_role'])
 
@@ -37,7 +45,8 @@ class PartnerShip_model(discord.ui.Modal, title="PartnerShip Infomations"):
                 interaction.user: discord.PermissionOverwrite(read_messages=True, view_channel=True, attach_files=True),
                 staff_role: discord.PermissionOverwrite(read_messages=True, view_channel=True)
             }
-            channel = await interaction.guild.create_text_channel(name=f"{interaction.user.name} Partership",overwrites=override, category=interaction.channel.category)
+
+        channel = await interaction.guild.create_text_channel(name=f"{interaction.user.name} Partership",overwrites=override, category=interaction.channel.category)
         
         embed = discord.Embed(title=f"Hi {interaction.user.display_name}, Welcome to Server Support",
                                   color=0x008000,
@@ -45,13 +54,8 @@ class PartnerShip_model(discord.ui.Modal, title="PartnerShip Infomations"):
         embed.set_footer(text="Developed and Owned by Jay & utki007")
 
         await channel.send(embed=embed, content=f"{interaction.user.mention} | {pm_role.mention}")
-        try:
-            invite = await self.bot.fetch_invite(self.server_invite.value)
-            info_m = await channel.send(f"**Server Invite:** {invite.url}\n**Server Name:** {self.server_name.value}\n**Server ID:** {invite.guild.id}\n**Partnership Type:** {self.partership_type.value}")
-        except:
-            info_m = await channel.send(f"**Server Invite:** {self.server_invite.value}\n**Server Name:** {self.server_name.value}\n**Server ID:** Didn't Get Done\n**Partnership Type:** {self.partership_type.value}")
-            pass
-        
+
+        info_m = await channel.send(info_data)
         await info_m.pin()
 
         await interaction.response.send_message(f"Your Ticket is Ready at: {channel.mention}", ephemeral=True)
@@ -78,6 +82,9 @@ class PartnerShip_model(discord.ui.Modal, title="PartnerShip Infomations"):
         }
 
         await self.bot.ticket.upsert(data)
+    
+    async def on_error(self, error: Exception, interaction: discord.Interaction) -> None:
+        await interaction.response.send_message(f"An Error Occured. {error}\nContact Admin/Owner", ephemeral=True)
 
 class Ticket_panel(discord.ui.View):
     def __init__(self, bot):
