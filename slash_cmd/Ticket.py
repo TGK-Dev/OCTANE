@@ -35,7 +35,6 @@ class Ticket_Commands(app_commands.Group):
 
         overrite = discord.PermissionOverwrite()
         overrite.view_channel = False
-        await interaction.channel.set_permissions(ticket_owner, overwrite=overrite)
 
         staff_overrite = discord.PermissionOverwrite()
         staff_overrite.view_channel = True
@@ -79,7 +78,10 @@ class Ticket_Commands(app_commands.Group):
             await interaction.followup.send("This is not a ticket channel", ephemeral=True)
         
         data = await self.bot.ticket.find(interaction.channel.id)
-        ticket_owner = self.bot.get_user(int(data['ticket_owner']))
+        ticket_owner = interaction.guild.get_member(int(data['ticket_owner']))
+        if ticket_owner == None:
+            return await interaction.followup.send("Ticket owner is not in the server, you may delete the ticket", ephemeral=False)
+            
         await interaction.channel.edit(sync_permissions=True)
 
         overrite = discord.PermissionOverwrite()
