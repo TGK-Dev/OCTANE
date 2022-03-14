@@ -22,6 +22,7 @@ class Suggestions(commands.Cog):
         await message.add_reaction('<a:up_suggest:952869422178111498>')
         await message.add_reaction('<a:down_suggest:952869487642812446>')
         self.bot.total_suggestions += 1
+        await ctx.message.delete()
     
     @commands.command(name="approve", description="Approve a suggestion")
     @commands.check_any(checks.can_use())
