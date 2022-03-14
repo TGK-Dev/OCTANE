@@ -139,12 +139,21 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
         usercolor = member.color
 
         embed = discord.Embed(title=f'{member.name}', color=usercolor)
-        embed.set_thumbnail(url=member.avatar.url)
+
+        if member.avatar != None:
+            embed.set_thumbnail(url=member.avatar.url or None)
+        else:
+            embed.set_thumbnail(url=member.default_avatar)
+
         embed.add_field(name='Account Name:',
                         value=f'{member.name}', inline=False)
         embed.add_field(
             name='Created at:', value=f"{fomat_time(member.created_at)}")
-        embed.add_field(name='Joined at', value=fomat_time(member.joined_at))
+        try:
+            embed.add_field(name='Joined at', value=member.joined_at.timestamp())
+        except:
+            embed.add_field(name='Joined at', value=f"{fomat_time(member.joined_at)}")
+
         embed.add_field(name='Account Status',
                         value=str(member.status).title())
         embed.add_field(name='Account Activity',
