@@ -49,6 +49,11 @@ async def get_prefix(bot, message):
     except:
         return commands.when_mentioned_or(bot.DEFAULTPREFIX)(bot, message)
 
+# async def load_extensions(bot) -> None:
+#     for file in os.listdir(cwd + "/cogs"):
+#         if file.endswith(".py") and not file.startswith("_") and not file.startswith("test"):
+#             await bot.load_extension(f"cogs.{file[:-3]}")
+
 async def sync_slash_command(bot) -> None:
         """
         This function will sync every guild slash command.
@@ -101,7 +106,7 @@ bot.uptime = datetime.datetime.utcnow()
 bot.automod = True
 bot.current_vote = {}
 bot.ban_event = {}
-
+bot.total_suggestions = 0
 bot.snipe = {}
 bot.esnipe = {}
 bot.config_data = {}
@@ -140,6 +145,9 @@ async def on_ready():
     current_config = await bot.config.get_all()
     for config in current_config:
         bot.config_data[config["_id"]] = config
+    
+    current_suggestions = await bot.suggest.get_all()
+    bot.total_suggestions = len(current_suggestions)
 
     print("\n-----")
     print(f"Current blacklist:{len(bot.blacklist_users)}")
@@ -147,9 +155,12 @@ async def on_ready():
     print(f"Current Bans:{len(bot.current_ban)}")
     print("\n-----")
     print("Database Connected\n-----")
-    print("starting Slash Commands Sync")
+    print("starting Slash Commands Sync\n-----")
     await sync_slash_command(bot)
-    print("Slash Commands Sync Complete")
+    print("Slash Commands Sync Complete\n-----")
+    # print("Starting Loading Extensions\n-----")
+    # await load_extensions(bot)
+    # print("Extensions Loaded\n-----")
 
 @bot.event
 async def on_message(message):
@@ -195,6 +206,7 @@ if __name__ == "__main__":
     bot.embeds = Document(bot.db, "embeds")
     bot.votes = Document(bot.db, "Votes")
     bot.ban_backup = Document(bot.db, "ban_backup")
+    bot.suggest = Document(bot.db, "suggestions")
 
     for file in os.listdir(cwd + "/cogs"):
         if file.endswith(".py") and not file.startswith("_") and not file.startswith("test"):
