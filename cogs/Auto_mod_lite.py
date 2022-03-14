@@ -9,7 +9,10 @@ import datetime
 def is_link_there(str: str):
     regex = r"(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'\".,<>?«»“”‘’]))"
     url = re.findall(regex,str)
-    return [x[0] for x in url]
+    if url:
+        return [x[0] for x in url]
+    else:
+        return []
 
 def is_link_bad(link: str):
     url = f"https://bad-domains.walshy.dev/check"
@@ -48,14 +51,21 @@ class AutoMod(commands.Cog):
     
     @commands.Cog.listener()
     async def on_message(self, message):
+        
         if self.bot.automod != True: return
         if message.author.bot: return
-        try:
-            if message.guild.id != 785809841009070090: return
-        except:
-            pass
+        if message.guild.id != 785839283847954433: return
 
-        link = is_link_there(message.content)
+        link = is_link_there(message.content)        
+        print(len(message.mentions))
+        if len(message.mentions) >= 9:
+            if message.author.id in [301657045248114690,488614633670967307,413651113485533194,651711446081601545,810041263452848179,457839031909351425]:
+                return
+
+            await message.delete()
+            await message.channel.send(f"{message.author.mention} have been warned for mentioning more than 10 people in a message")
+            await message.author.edit(timed_out_until=discord.utils.utcnow() + datetime.timedelta(hours=10))
+
         if len(link) > 0:
             r = is_link_bad(link[0])
             if r['badDomain'] == True:
