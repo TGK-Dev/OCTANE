@@ -1,4 +1,4 @@
-discord.py @ git+https://github.com/Rapptz/discord.py
+discord.py @ git+https://github.com/Rapptz/discord.py@d22a7fb793331257eebdad696087754659e5c511
 asyncio==3.4.3
 buttons==0.1.9
 DiscordUtils==1.2.8
