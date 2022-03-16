@@ -156,7 +156,7 @@ async def on_ready():
     print("\n-----")
     print("Database Connected\n-----")
     print("starting Slash Commands Sync\n-----")
-    await sync_slash_command(bot)
+    #await sync_slash_command(bot)
     print("Slash Commands Sync Complete\n-----")
     # print("Starting Loading Extensions\n-----")
     # await load_extensions(bot)
@@ -209,7 +209,7 @@ if __name__ == "__main__":
     bot.suggest = Document(bot.db, "suggestions")
 
     for file in os.listdir(cwd + "/cogs"):
-        if file.endswith(".py") and not file.startswith("_") and not file.startswith("test"):
+        if file.endswith(".py") and not file.startswith("_") and not file.startswith("embed"):
             bot.load_extension(f"cogs.{file[:-3]}")
 
     bot.run(bot.config_token)
