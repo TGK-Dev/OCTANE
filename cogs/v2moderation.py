@@ -142,8 +142,10 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
 
         if member.avatar != None:
             embed.set_thumbnail(url=member.avatar.url or None)
+            embed.set_footer(text=f'ID {member.id}', icon_url=member.avatar.url)
         else:
             embed.set_thumbnail(url=member.default_avatar)
+            embed.set_footer(text=f'ID {member.id}', icon_url=member.default_avatar)
 
         embed.add_field(name='Account Name:',
                         value=f'{member.name}', inline=False)
@@ -158,7 +160,6 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
                         value=str(member.status).title())
         embed.add_field(name='Account Activity',
                         value=f"{str(member.activity.type).title().split('.')[1]} {member.activity.name}" if member.activity is not None else "None")
-        embed.set_footer(text=f'ID {member.id}', icon_url=member.avatar.url)
 
         Member = await self.bot.fetch_user(member.id)
         if Member.banner:
