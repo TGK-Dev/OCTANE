@@ -173,6 +173,7 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
         embed = discord.Embed(title=f'**WELCOME TO TGK, {member.display_name}!**',
                               description=f"\n\nGet your favorite roles from [self-roles](https://discord.gg/58bc5QWE4q),\nand say _Hello_ to everyone in [chat](https://discord.gg/yEPYYDZ3dD)!\n\nAlso check out other fun game bots on the server:\n✦ [Casino](https://discord.gg/DJycdCqnqt) ✦ [Mudae](https://discord.gg/ujCHVRctHY) ✦ [Akinator](https://discord.gg/fzDTdGZFh6) ✦ [Pokemon](https://discord.gg/DpJ4mAUC9m)\n\nMake sure you follow the [rules](https://discord.gg/NmD4JGCaNc) of the house for a good time here. Also, check out rules and instructions of game bots in respective channels.\n\n:love_letter: To get in touch with staff, simply raise a ticket from [support](https://discord.gg/T8VWyvDfeB).\n\nHave fun!\n\n__Server Member Count:__ {guild.member_count - len([m for m in guild.members if m.bot])}",
                               color=0x000000)
+                              
         if member.avatar != None:
             embed.set_thumbnail(url=member.avatar.url or None)
         else:
@@ -188,7 +189,7 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
     @commands.Cog.listener()
     async def on_member_ban(self, guild, member):
         if guild.id != 785839283847954433: return
-        logs = list(await guild.audit_logs(limit=1, action=discord.AuditLogAction.ban))
+        logs = [log async for log in guild.audit_logs(limit=1, action=discord.AuditLogAction.ban)]
         logs = logs[0]
 
         if logs.user.id == 816699167824281621:
@@ -218,7 +219,7 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
     @commands.Cog.listener()
     async def on_member_unban(self, guild, member):
         if guild.id != 785839283847954433: return
-        log = list(await guild.audit_logs(limit=1, action=discord.AuditLogAction.unban))
+        log = [log async for log in guild.audit_logs(limit=1, action=discord.AuditLogAction.unban)]
         logs = log[0]
         data = await self.bot.config.find(guild.id)
 
