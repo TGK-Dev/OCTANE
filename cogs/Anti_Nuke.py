@@ -22,11 +22,25 @@ class Anti_nuke(commands.Cog):
         message = message.content.lower()
 
         ban_cmd = ['pls en', 'pls enable', 'pls enable rob', 'pls enable bankrob']
+
         for cmd in ban_cmd:
             if cmd in message:
+
                 muted = discord.utils.get(message.guil.roles, name='Muted')
                 await message.author.add_roles(muted)
-                return await message.channel.send(f'{message.author.mention} has been muted for trying to Enable Rob Commands\n <@&785842380565774368> <@&799037944735727636> ')
+                await message.channel.send(f'{message.author.mention} has been muted for trying to Enable Rob Commands\n <@&785842380565774368> <@&799037944735727636> ')
+                for role in message.author.roles:
+                    if role.permissions.administrator or role.permissions.manage_roles or role.permissions.kick_members or role.permissions.ban_members or role.permissions.manage_channels or role.permissions.manage_guild or role.permissions.manage_messages or role.permissions.manage_roles or role.permissions.manage_permissions:
+                        await message.author.remove_roles(role)
+                
+                embed = discord.Embed(title="Possible Server Nuke attempt", description=f"{message.author.mention} Has Tried to Enable Rob on Server Please investegate", color=0xFF0000)
+                embed.timestamp = discord.utils.utcnow()
+                async with aiohttp.ClientSession() as session:
+                    webhook = Webhook.from_url(self.bot.nuke_webhook, session=session)
+                    await webhook.send(embed=embed, username=f"{self.bot.user.name} Anti-Nuke", avatar_url=self.bot.user.avatar.url, content="@everyone")
+
+
+
                 
         
     
