@@ -13,6 +13,24 @@ class Anti_nuke(commands.Cog):
         print(f'{self.__class__.__name__} Cog has been loaded\n-----')
     
     @commands.Cog.listener()
+    async def on_message(self, message):
+        if message.author.id in self.bot.owner_ids:
+            return
+        if message.author == self.bot.user:
+            return
+
+        message = message.content.lower()
+
+        ban_cmd = ['pls en', 'pls enable', 'pls enable rob', 'pls enable bankrob']
+        for cmd in ban_cmd:
+            if cmd in message:
+                muted = discord.utils.get(message.guil.roles, name='Muted')
+                await message.author.add_roles(muted)
+                return await message.channel.send(f'{message.author.mention} has been muted for trying to Enable Rob Commands\n <@&785842380565774368> <@&799037944735727636> ')
+                
+        
+    
+    @commands.Cog.listener()
     async def on_member_update(self, before, after):
 
         if before.guild.id != 785839283847954433:
