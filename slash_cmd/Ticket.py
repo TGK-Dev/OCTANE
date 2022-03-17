@@ -15,8 +15,7 @@ class Ticket_Commands(app_commands.Group):
 
     async def on_error(self, interaction: Interaction, command: app_commands.Command, error: app_commands.AppCommandError) -> None:
         
-        error = f"Error happened while executing command: ```py\n{error}\n```"
-        embed = discord.Embed(title="Error", description=f"Error Ac", color=0xFF0000)
+        embed = discord.Embed(title="Error", description=f"Error: {error}", color=0xFF0000)
         await interaction.followup.send(embed=embed)
 
     
@@ -29,7 +28,6 @@ class Ticket_Commands(app_commands.Group):
     ])
     
     async def edit(self, interaction: Interaction, option: Choice[int], target: Union[discord.Role, discord.Member]):
-        print(option.value)
         if option.value == 1:
             await interaction.response.defer(thinking=True)
 
@@ -271,9 +269,6 @@ class Ticket_Commands(app_commands.Group):
                 else:
                     user_in_channel[message.author.id] = 1
 
-            print(user_in_channel)    
-            print("\n-----------------")
-
             log_channel = self.bot.get_channel(self.bot.config_data[interaction.guild.id]["ticket_log_channel"])
             log_message = await log_channel.fetch_message(data['log_message_id'])
             embed = log_message.embeds[0]
@@ -358,11 +353,13 @@ class Ticket_Commands(app_commands.Group):
 
         transcript_log_channel = self.bot.get_channel(self.bot.config_data[interaction.guild.id]["transcript_log_channel"])
 
+        link_msg = await transcript_log_channel.send(content=f"{interaction.channel.name} | {topic}",file=transcript_file)
+
         link_button = discord.ui.View()
         url = f"https://codebeautify.org/htmlviewer?url={link_msg.attachments[0].url}"
         link_button.add_item(discord.ui.Button(label='View Transcript', url=url))
 
-        link_msg = await transcript_log_channel.send(content=f"{interaction.channel.name} | {topic}",file=transcript_file, view=link_button)
+        await link_msg.edit(view=link_button)
 
         await interaction.followup.send(embed=discord.Embed(description=f"<:save:819194696874197004> | Transcript Saved", color=0x00FF00),view=link_button)
 
