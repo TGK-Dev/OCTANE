@@ -358,10 +358,11 @@ class Ticket_Commands(app_commands.Group):
 
         transcript_log_channel = self.bot.get_channel(self.bot.config_data[interaction.guild.id]["transcript_log_channel"])
 
-        link_msg = await transcript_log_channel.send(content=f"{interaction.channel.name} | {topic}",file=transcript_file)
         link_button = discord.ui.View()
         url = f"https://codebeautify.org/htmlviewer?url={link_msg.attachments[0].url}"
         link_button.add_item(discord.ui.Button(label='View Transcript', url=url))
+
+        link_msg = await transcript_log_channel.send(content=f"{interaction.channel.name} | {topic}",file=transcript_file, view=link_button)
 
         await interaction.followup.send(embed=discord.Embed(description=f"<:save:819194696874197004> | Transcript Saved", color=0x00FF00),view=link_button)
 
