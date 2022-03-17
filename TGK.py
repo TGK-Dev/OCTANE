@@ -116,7 +116,7 @@ async def on_ready():
     print(
         f"-----\nLogged in as: {bot.user.name} : {bot.user.id}\n-----\nMy current prefix is: {bot.DEFAULTPREFIX}\n-----"
     )
-    await bot.change_presence(status=discord.Status.dnd)
+    await bot.change_presence(status=discord.Status.dnd, activity=discord.Activity(type=discord.ActivityType.watching, name="Server Security"))
 
     current_blacklist_user = await bot.config.find(785839283847954433)
     for blacklisted_user in current_blacklist_user['blacklist']:
