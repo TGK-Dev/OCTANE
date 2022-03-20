@@ -127,7 +127,6 @@ class Guess_number(commands.Cog):
                 return True
             elif m.channel.id == channel.id and m.content != str(right):
                 self.guess = self.guess +1
-                print(self.guess)
         try:
             win_msg = await self.bot.wait_for("message", check=check, timeout=3600)
             await win_msg.reply(f"{win_msg.author.mention} You Guessed The Right Number")         

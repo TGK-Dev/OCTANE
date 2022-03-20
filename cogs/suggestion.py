@@ -33,7 +33,6 @@ class Suggestions(commands.Cog):
         channel = self.bot.get_channel(int(self.bot.config_data[ctx.guild.id]['suggestion']))
         message = await channel.fetch_message(id)
         embed = message.embeds[0]
-        print(embed.fields)
         embed.title += f" Approved By {ctx.author}"
         embed.color = 0x00ff00
         embed.add_field(name=f"Reason:", value=reason, inline=False)

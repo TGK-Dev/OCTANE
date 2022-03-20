@@ -84,7 +84,6 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
             unbantime = value['BannedAt'] + relativedelta(days=7)
 
             if currentTime >= unbantime:
-                print(value)
                 guild = self.bot.get_guild(int(value['guildId']))
                 member = await self.bot.fetch_user(int(value['_id']))
                 moderator = guild.get_member(value['BanedBy'])
