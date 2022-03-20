@@ -10,6 +10,17 @@ class vote_button(discord.ui.View):
         url = f"https://top.gg/servers/785839283847954433/vote"
         self.add_item(discord.ui.Button(label='Click Here', url=url))
 
+class verify(discord.ui.View):
+    def __init__(self, bot):
+        super().__init__(timeout=None)
+        self.bot =  bot
+        self.guild = self.bot.get_guild(785839283847954433)
+        self.role = discord.utils.get(self.guild.roles, id=953006119436030054)
+    
+    @discord.ui.button(label="Verify", style=discord.ButtonStyle.green, custom_id="verify")
+    async def verify(self, button: discord.ui.Button, interaction: discord.Interaction):
+        await interaction.response.send_message("Verifing...", ephemeral=True)
+        await interaction.user.remove_roles(self.role)
 
 class Events(commands.Cog, command_attrs=dict(hidden=True)):
     def __init__(self, bot):
@@ -48,6 +59,7 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
     @commands.Cog.listener()
     async def on_ready(self):
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
+        self.bot.add_view(verify(self.bot))
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
@@ -55,7 +67,10 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
             pass
         else:
             await guild.leave()
-    
+    @commands.command()
+    async def verify(self, ctx):
+        embed = discord.Embed(title="Verification", description="Click the button below to verify your Self", color=0xffffff)
+        await ctx.send(embed=embed, view=verify(self.bot))
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
         # Ignore these errors

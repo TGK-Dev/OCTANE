@@ -20,7 +20,7 @@ class Invite_Panel(discord.ui.View):
     async def public_invite(self, button: discord.ui.Button, interaction: discord.Interaction):
         await interaction.response.send_message(self.public_invite, ephemeral=True)
 
-class Cog_name(commands.Cog, description="Ban Battle Event Module"): 
+class Ban_Battle(commands.Cog, description="Ban Battle Event Module",):
     def __init__(self, bot):
         self.bot = bot
     
@@ -56,6 +56,7 @@ class Cog_name(commands.Cog, description="Ban Battle Event Module"):
         await self.bot.ban_backup.upsert(data)
         self.bot.ban_event[guild.id] = data
 
+
     @Ban.group(name="Takeover", description="Takeover Ban battle server")
     @commands.check_any(checks.can_use())
     async def takeover(self, ctx, guild: discord.Guild):
@@ -69,8 +70,6 @@ class Cog_name(commands.Cog, description="Ban Battle Event Module"):
     async def cleanup(self, ctx):
         for guild in self.bot.guilds:
             try:
-                name = guild.name
-
                 await guild.delete()
                 await self.bot_event.delete(guild.id)
             except:
@@ -85,7 +84,6 @@ class Cog_name(commands.Cog, description="Ban Battle Event Module"):
             for invites in await ctx.guild.invites():
                 await invites.delete()
             channel = ctx.guild.get_channel(self.bot.ban_event[ctx.guild.id]['public_channel'])
-            print(channel)
             overwrite = channel.overwrites_for(ctx.guild.default_role)
             overwrite.send_messages = True
 
@@ -108,16 +106,19 @@ class Cog_name(commands.Cog, description="Ban Battle Event Module"):
             if member.id in [488614633670967307, 301657045248114690,413651113485533194,651711446081601545]:
                 await member.add_roles(role)
 
-    @commands.command(name="Eliminat", description="eliminate a user from ban battle", aliases=["el"])
+    @commands.command(name="Eliminate", description="Eliminate a user from ban battle", aliases=["el"])
     async def ban(self, ctx, member: discord.Member):
         if ctx.guild.name == "Ban Battle":
-            role = discord.utils.get(ctx.guild.roles, name="TG Staff")
+            role = discord.utils.get(ctx.guild.roles, name="GK Staff")
             if role in member.roles:
                 return await ctx.send("You can't eliminat this user")
-            #await member.ban(delete_message_days=0, reason="Eliminated")
+            await member.ban(delete_message_days=0, reason="Eliminated")
             broadcast = self.bot.get_channel(self.bot.ban_event[member.guild.id]['broadcast'])
             await broadcast.send(f"{ctx.author.mention} has eliminated {member.mention}")
             await ctx.send(f"{member.name} has been banned")
 
+
+
+
 def setup(bot):
-    bot.add_cog(Cog_name(bot))
+    bot.add_cog(Ban_Battle(bot))
