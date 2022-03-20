@@ -68,12 +68,15 @@ class Ban_Battle(commands.Cog, description="Ban Battle Event Module",):
     @Ban.group(name="cleanup", description="Cleanup Ban battle server")
     @commands.check_any(checks.can_use())
     async def cleanup(self, ctx):
-        for guild in self.bot.guilds:
+        battles = await self.bot.ban_backup.get_all()
+        for battle in battles:
             try:
+                guild = await self.bot.fetch_guild(battle['guildID'])
                 await guild.delete()
-                await self.bot_event.delete(guild.id)
+                await self.bot.ban_backup.delete(battle['_id'])
             except:
-                pass
+                await self.bot.ban_backup.delete(battle['_id'])
+
         await ctx.message.add_reaction("✅")
         await ctx.send("all Ban Battle servers have been deleted")
 
@@ -102,21 +105,39 @@ class Ban_Battle(commands.Cog, description="Ban Battle Event Module",):
                     pass
                 await member.kick(reason="No in Main Server")
 
-            role = discord.utils.get(member.guild.roles, name="TG Staff")
-            if member.id in [488614633670967307, 301657045248114690,413651113485533194,651711446081601545]:
+            role = discord.utils.get(member.guild.roles, name="GK Staff")
+            public = discord.utils.get(member.guild.roles, name="Alive")
+            if member.id in [488614633670967307, 301657045248114690, 651711446081601545, 562738920031256576, 413651113485533194, 457839031909351425]:
                 await member.add_roles(role)
+            else:
+                await member.add_roles(public)
 
     @commands.command(name="Eliminate", description="Eliminate a user from ban battle", aliases=["el"])
     async def ban(self, ctx, member: discord.Member):
         if ctx.guild.name == "Ban Battle":
             role = discord.utils.get(ctx.guild.roles, name="GK Staff")
+
             if role in member.roles:
                 return await ctx.send("You can't eliminat this user")
+            if member == self.bot.user:
+                return await ctx.send("You can't eliminat me")
+
             await member.ban(delete_message_days=0, reason="Eliminated")
             broadcast = self.bot.get_channel(self.bot.ban_event[member.guild.id]['broadcast'])
             await broadcast.send(f"{ctx.author.mention} has eliminated {member.mention}")
             await ctx.send(f"{member.name} has been banned")
-
+    
+    @commands.Cog.listener()
+    async def on_member_remove(self, member):
+        if member.guild.name == "Ban Battle":
+            role = discord.utils.get(member.guild.roles, name="GK Staff")
+            public_role = discord.utils.get(member.guild.roles, name="Alive")
+            if len(public_role.members) == 1:
+                broadcast = self.bot.get_channel(self.bot.ban_event[member.guild.id]['broadcast'])
+                await broadcast.send(f"{member.name} has Won the Battle")
+                await broadcast.send("Locking The Broadcast Thread...")
+                await broadcast.edit(locked=True, archived=True)
+                await broadcast.send("Locked")
 
 
 
