@@ -38,7 +38,8 @@ class starboard(commands.Cog):
             pass
 
         if reacts:
-            react = list(map(lambda u: u.id, await reacts[0].users().flatten()))
+            react = [user async for user in reacts[0].users()]
+            
             if msg.author.id in react:
                 del react[react.index(msg.author.id)]
             
@@ -115,7 +116,7 @@ class starboard(commands.Cog):
                 pass
             
             if reacts:
-                react = list(map(lambda u: u.id, await reacts[0].users().flatten()))
+                react = [user async for user in reacts[0].users()]
                 if msg.author.id in react:
                     del react[react.index(msg.author.id)]
 
