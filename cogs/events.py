@@ -17,10 +17,13 @@ class verify(discord.ui.View):
         self.guild = self.bot.get_guild(785839283847954433)
         self.role = discord.utils.get(self.guild.roles, id=953006119436030054)
     
-    @discord.ui.button(label="Verify", style=discord.ButtonStyle.green, custom_id="verify")
+    @discord.ui.button(label="Verify", style=discord.ButtonStyle.green, custom_id="verify", emoji="<:YES_TICK:957348921120792717>")
     async def verify(self, button: discord.ui.Button, interaction: discord.Interaction):
-        await interaction.response.send_message("Verifing...", ephemeral=True)
-        await interaction.user.remove_roles(self.role)
+        if self.role in interaction.user.roles:
+            await interaction.response.send_message("Verified", ephemeral=True)
+            await interaction.user.remove_roles(self.role)
+        else:
+            await interaction.response.send_message("You are already verified, create ticket from <#785901543349551104>", ephemeral=True)
 
 class Events(commands.Cog, command_attrs=dict(hidden=True)):
     def __init__(self, bot):
