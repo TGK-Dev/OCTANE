@@ -110,7 +110,7 @@ class Ticket_Commands(app_commands.Group):
             log_embed.add_field(name="Action", value=f"Removed {target.mention} from ticket")
             await log_channel.send(embed=log_embed)
     
-    @app_commands.command(name="status", description="close/open/delete")
+    @app_commands.command(name="status", description="close/open/Secure")
     @app_commands.describe(option="Select Status Options")
     @app_commands.choices(option=[
         Choice(name="Close", value=1),
@@ -254,7 +254,7 @@ class Ticket_Commands(app_commands.Group):
         if interaction.channel.category.id != self.bot.config_data[interaction.guild.id]["ticket_category"]:
             return await interaction.response.send_message("This is not a ticket channel", ephemeral=True)
 
-        msg = await interaction.response.send_message("Deleting this Ticekt in 10s `type fs` to cancel this command")
+        msg = await interaction.response.send_message("Deleting this ticket in 10s `type fs` to cancel this command")
         try:
             stop_m = await self.bot.wait_for('message', check=lambda m: m.author.id == interaction.user.id and m.channel.id == interaction.channel.id and m.content.lower() == "fs", timeout=10)
             await stop_m.add_reaction("✅")
