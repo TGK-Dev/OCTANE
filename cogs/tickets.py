@@ -6,7 +6,7 @@ from discord.ext import commands
 from typing import Union
 from utils.checks import checks
 from Views.Ticket_panel import *
-
+from Views.Ticket_panel import Ticket_Control
 description = "Ticket System For the Server Support"
 
 class Tickets(commands.Cog):
@@ -16,6 +16,7 @@ class Tickets(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         self.bot.add_view(Ticket_panel(self.bot))
+        self.bot.add_view(Ticket_Control(self.bot))
         print(f'{self.__class__.__name__} Cog has been loaded\n-----')
 
     @commands.command()

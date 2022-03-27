@@ -1,5 +1,288 @@
 import discord
 import datetime
+from utils.checks import checks
+import asyncio
+import chat_exporter
+import io
+
+class Ticket_Control(discord.ui.View):
+    def __init__(self, bot):
+        self.bot = bot
+        super().__init__(timeout=None)
+    
+    @discord.ui.button(label="Open", custom_id="Control:Open", style=discord.ButtonStyle.gray, disabled=True, emoji="🔓")
+    async def Open(self, button: discord.Button,interaction: discord.Interaction):
+        await interaction.response.defer(thinking=True)
+        can_run = await checks.slash_check(self.bot, interaction, "open")
+
+        if can_run != True:
+            return await interaction.followup.send("You do not have permission to run this command")
+
+        if interaction.channel.category.id != self.bot.config_data[interaction.guild.id]["ticket_category"]:
+            await interaction.followup.send("This is not a ticket channel", ephemeral=True)
+        
+        data = await self.bot.ticket.find(interaction.channel.id)
+        ticket_owner = interaction.guild.get_member(int(data['ticket_owner']))
+        if ticket_owner == None:
+            return await interaction.followup.send("Ticket owner is not in the server, you may delete the ticket", ephemeral=False)
+            
+        await interaction.channel.edit(sync_permissions=True)
+
+        overrite = discord.PermissionOverwrite()
+        overrite.view_channel = True
+        overrite.send_messages = True
+        overrite.read_messages = True
+        overrite.attach_files = True
+
+        await interaction.channel.set_permissions(ticket_owner, overwrite=overrite)
+
+        for i in data['added_roles']:
+            role = discord.utils.get(interaction.guild.roles, id=int(i))
+            await interaction.channel.set_permissions(role, overwrite=overrite)
+        
+        for i in data['added_users']:
+            user = self.bot.get_user(int(i))
+            await interaction.channel.set_permissions(user, overwrite=overrite)
+
+        data['status'] = "open"
+        await self.bot.ticket.upsert(data)
+
+        support_role = discord.utils.get(interaction.guild.roles, id=self.bot.config_data[interaction.guild.id]['support_role'])
+        await interaction.channel.set_permissions(support_role, overwrite=overrite)
+        await interaction.followup.send(embed=discord.Embed(description=f"<:allow:819194696874197004> | Ticket re-opened by {interaction.user.mention}", color=0x2f3136))
+
+        log_embed = discord.Embed(color=0x00FF00)
+        log_channel = self.bot.get_channel(self.bot.config_data[interaction.guild.id]["ticket_log_channel"])
+        log_embed.set_author(name=f"{interaction.user.name}#{interaction.user.discriminator}", icon_url=interaction.user.avatar.url)
+        log_embed.add_field(name="Ticket", value=interaction.channel.name)
+        log_embed.add_field(name="Action", value=f"Opend {interaction.channel.name}")
+        await log_channel.send(embed=log_embed)
+
+        for button in self.children:
+            if button.custom_id == "Control:Close":
+                button.disabled = False
+            if button.custom_id == "Control:Open":
+                button.disabled = True
+        
+        await interaction.message.edit(view=self)
+
+    @discord.ui.button(label="Close", custom_id="Control:Close", style=discord.ButtonStyle.gray, emoji="🔒")
+    async def Close(self, button: discord.Button,interaction: discord.Interaction):
+        await interaction.response.defer(ephemeral=False, thinking=True)
+
+        can_run = await checks.slash_check(self.bot, interaction, "close")
+
+        if can_run != True:
+            return await interaction.followup.send("You do not have permission to run this command")
+
+        if interaction.channel.category.id != self.bot.config_data[interaction.guild.id]["ticket_category"]:
+            return await interaction.followup.send("This is not a ticket channel", ephemeral=True)
+        
+        data = await self.bot.ticket.find(interaction.channel.id)
+        ticket_owner = self.bot.get_user(int(data['ticket_owner']))
+        await interaction.channel.edit(sync_permissions=True)
+
+        overrite = discord.PermissionOverwrite()
+        overrite.view_channel = False
+
+        staff_overrite = discord.PermissionOverwrite()
+        staff_overrite.view_channel = True
+        staff_overrite.send_messages = True
+        staff_overrite.read_messages = True
+        staff_overrite.attach_files = True
+
+        for i in data['added_roles']:
+            role = discord.utils.get(interaction.guild.roles, id=int(i))
+            await interaction.channel.set_permissions(role, overwrite=overrite)
+        
+        for i in data['added_users']:
+            user = self.bot.get_user(int(i))
+            await interaction.channel.set_permissions(user, overwrite=overrite)
+
+        support_role = discord.utils.get(interaction.guild.roles, id=self.bot.config_data[interaction.guild.id]["support_role"])
+        await interaction.channel.set_permissions(support_role, overwrite=staff_overrite)
+
+        data['status'] = "closed"
+        await self.bot.ticket.upsert(data)
+
+        await interaction.followup.send(embed=discord.Embed(description=f"<:allow:819194696874197004> | Ticket closed by {interaction.user.mention}", color=0x2f3136))
+
+        log_embed = discord.Embed(color=0xFF0000)
+        log_channel = self.bot.get_channel(self.bot.config_data[interaction.guild.id]["ticket_log_channel"])
+        log_embed.set_author(name=f"{interaction.user.name}#{interaction.user.discriminator}", icon_url=interaction.user.avatar.url)
+        log_embed.add_field(name="Ticket", value=interaction.channel.name)
+        log_embed.add_field(name="Action", value=f"Closed {interaction.channel.name}")
+        await log_channel.send(embed=log_embed)
+
+        for button in self.children:
+            if button.custom_id == "Control:Close":
+                button.disabled = True
+            if button.custom_id == "Control:Open":
+                button.disabled = False
+        
+        await interaction.message.edit(view=self)
+    
+    @discord.ui.button(label="Secure", custom_id="Control:Secure", style=discord.ButtonStyle.gray, emoji="🔐")
+    async def Secure(self, button: discord.Button,interaction: discord.Interaction):
+            ticket_info = await self.bot.ticket.find(interaction.channel.id)
+            await interaction.response.defer(ephemeral=False, thinking=True)
+            message = await interaction.followup.send("Securing ticket...")
+
+            if ticket_info is None:
+                return await interaction.followup.send("Ticket Not Found")
+            
+            await interaction.channel.edit(sync_permissions=True)
+            ticket_owner = interaction.guild.get_member(int(ticket_info['ticket_owner']))
+            if not ticket_owner:
+                return await interaction.followup.send("Ticket Owner Not Found")
+            
+            overwrite = discord.PermissionOverwrite()
+            overwrite.view_channel = False
+            overwrite.read_messages = False
+            overwrite.send_messages = False
+            overwrite.attach_files = False
+
+            for i in interaction.channel.overwrites:
+                await interaction.channel.set_permissions(i, overwrite=overwrite)
+            
+            owner_owrite = discord.PermissionOverwrite()
+            owner_owrite.view_channel = True
+            owner_owrite.send_messages = True
+            owner_owrite.read_messages = True
+            owner_owrite.attach_files = True
+
+            await interaction.channel.set_permissions(ticket_owner, overwrite=owner_owrite)
+
+            await message.edit(content=None,embed=discord.Embed(description=f"<:allow:819194696874197004> | Ticket secured by {interaction.user.mention}", color=0x2f3136))
+
+            button.disabled = True
+            await interaction.message.edit(view=self)
+    
+    @discord.ui.button(label="Save", custom_id="Control:Save", style=discord.ButtonStyle.green, emoji="📩")
+    async def Save(self, button: discord.Button,interaction: discord.Interaction):
+        await interaction.response.defer(thinking=True)
+        message = await interaction.followup.send("Saving ticket ...")
+        topic = interaction.channel.name
+        can_run = await checks.slash_check(self.bot, interaction, "transcript")
+        if can_run != True:
+            return await interaction.followup.send("You do not have permission to run this command")
+
+        transcript = await chat_exporter.export(interaction.channel, limit=None,tz_info="Asia/Kolkata")
+
+        if transcript is None:
+            await interaction.followup.send("An Error Occured, Try Again Later")
+            return
+        
+        transcript_file = discord.File(io.BytesIO(transcript.encode()),filename=f"transcript-{interaction.channel.name}.html")
+
+        transcript_log_channel = self.bot.get_channel(self.bot.config_data[interaction.guild.id]["transcript_log_channel"])
+
+        link_msg = await transcript_log_channel.send(content=f"{interaction.channel.name} | {topic}",file=transcript_file)
+
+        link_button = discord.ui.View()
+        url = f"https://codebeautify.org/htmlviewer?url={link_msg.attachments[0].url}"
+        link_button.add_item(discord.ui.Button(label='View Transcript', url=url))
+
+        await link_msg.edit(view=link_button)
+
+    
+        await message.edit(content=None,embed=discord.Embed(description=f"<:save:819194696874197004> | Transcript Saved", color=0x00FF00),view=link_button)
+
+        log_embed = discord.Embed(color=0x00FF00)
+        log_channel = self.bot.get_channel(self.bot.config_data[interaction.guild.id]["ticket_log_channel"])
+        log_embed.set_author(name=f"{interaction.user.name}#{interaction.user.discriminator}", icon_url=interaction.user.avatar.url)
+        log_embed.add_field(name="Ticket", value=interaction.channel.name)
+        log_embed.add_field(name="Action", value=f"Saved Transcript")
+        await log_channel.send(embed=log_embed)
+        ticket_info = await self.bot.ticket.find(interaction.channel.id)
+        log_msg = await log_channel.fetch_message(ticket_info['log_message_id'])
+        embed = log_msg.embeds[0]
+        embed.add_field(name="Transcript", value=f"[Link](<{link_msg.attachments[0].url}>)")
+        await log_msg.edit(embed=embed)
+
+        for button in self.children:
+            if button.custom_id == "Control:Save":
+                #button.disabled = True
+                pass
+        
+        await interaction.message.edit(view=self)
+    
+    @discord.ui.button(label="Delete", custom_id="Control:Delete", style=discord.ButtonStyle.red, emoji="🗑️")
+    async def Delete(self, button: discord.Button,interaction: discord.Interaction):
+        data = await self.bot.ticket.find(interaction.channel.id)
+        
+        can_run = await checks.slash_check(self.bot, interaction, "delete")
+        if can_run != True:
+            return await interaction.followup.send("You do not have permission to run this command")
+
+        if interaction.channel.category.id != self.bot.config_data[interaction.guild.id]["ticket_category"]:
+            return await interaction.response.send_message("This is not a ticket channel", ephemeral=True)
+
+        await interaction.response.defer(thinking=True)
+        msg = await interaction.followup.send("Deleting this ticket in 10s `type fs` to cancel this command")
+        
+        try:
+            stop_m = await self.bot.wait_for('message', check=lambda m: m.author.id == interaction.user.id and m.channel.id == interaction.channel.id and m.content.lower() == "fs", timeout=10)
+            await stop_m.add_reaction("✅")
+            return await msg.edit(content="Ok cancelling the command")
+
+        except asyncio.TimeoutError:
+            
+            user_in_channel = {}
+            async for message in interaction.channel.history(limit=None):
+                if message.author.id in user_in_channel.keys():
+                    user_in_channel[message.author.id] += 1
+                else:
+                    user_in_channel[message.author.id] = 1
+
+            log_channel = self.bot.get_channel(self.bot.config_data[interaction.guild.id]["ticket_log_channel"])
+            log_message = await log_channel.fetch_message(data['log_message_id'])
+            embed = log_message.embeds[0]
+            users, i = "", 1
+
+            for key, value in user_in_channel.items():
+                users += f"{i}. <@{key}> - {value}\n"
+                i += 1
+
+            embed.add_field(name="Users in Ticket", value=users)
+            await log_message.edit(embed=embed)
+
+            await self.bot.ticket.delete(interaction.channel.id)
+            await interaction.channel.delete()
+
+            log_embed = discord.Embed(color=0xFF0000)
+            log_channel = self.bot.get_channel(self.bot.config_data[interaction.guild.id]["ticket_log_channel"])
+            log_embed.set_author(name=f"{interaction.user.name}#{interaction.user.discriminator}", icon_url=interaction.user.avatar.url)
+            log_embed.add_field(name="Ticket", value=interaction.channel.name)
+            log_embed.add_field(name="Action", value=f"Deleted {interaction.channel.name}")
+            await log_channel.send(embed=log_embed)
+
+    @discord.ui.button(label="Add Shero", custom_id="Control:shero", style=discord.ButtonStyle.gray, emoji="🤖")
+    async def add_shero(self, button: discord.Button,interaction: discord.Interaction) -> None:
+
+        shero = interaction.guild.get_member(692570006969516032)
+        if not shero:
+            await interaction.response.send_message(f"Shero is not in the server. Please contact the owner", ephemeral=True)
+            return
+
+        await interaction.response.defer(thinking=True)
+        data = await self.bot.ticket.find(interaction.channel.id)
+        if data['type'] == 'partnership':
+
+            if shero.bot:
+                overwrite = discord.PermissionOverwrite()
+                overwrite.view_channel = True
+                overwrite.send_messages = True
+                overwrite.read_messages = True
+                overwrite.attach_files = True
+                await interaction.channel.set_permissions(shero, overwrite=overwrite)
+                await interaction.followup.send(embed=discord.Embed(description=f"<:allow:819194696874197004> | {shero.mention} added to the ticket", color=0x2f3136))
+                for button in self.children:
+                    button.disabled = True
+                    await interaction.message.edit(view=self)
+        else:
+            await interaction.followup.send("This is not a partnership ticket", ephemeral=True)
+
 
 class PartnerShip_model(discord.ui.Modal, title="PartnerShip Infomations"):
     def __init__(self, bot):
@@ -53,12 +336,7 @@ class PartnerShip_model(discord.ui.Modal, title="PartnerShip Infomations"):
                                   description="Kindly wait patiently. A staff member will assist you shortly.\nIf you're looking to approach a specific staff member, ping the member once. Do not spam ping any member or role.\n\nThank you.")
         embed.set_footer(text="Developed and Owned by Jay & utki007")
 
-        await channel.send(embed=embed, content=f"{interaction.user.mention} | {pm_role.mention}")
-
-        info_m = await channel.send(info_data)
-        await info_m.pin()
-
-        await interaction.response.send_message(f"Your Ticket is Ready at: {channel.mention}", ephemeral=True)
+        await interaction.response.send_message(f"Your Partnership ticket is now available at {channel.mention}", ephemeral=True)
 
         log_embed = discord.Embed()
         log_embed.set_author(name=f"{interaction.user.name}#{interaction.user.discriminator}", icon_url=interaction.user.avatar.url)
@@ -82,7 +360,22 @@ class PartnerShip_model(discord.ui.Modal, title="PartnerShip Infomations"):
         }
 
         await self.bot.ticket.upsert(data)
-    
+
+        View = Ticket_Control(self.bot)
+
+        if data['type'] == "partnership":
+            pass
+        else:
+            for button in View.children:
+                if button.label == "Add Shero":
+                    item = button
+            View.remove_item(item)
+        message = await channel.send(embed=embed, content=f"{interaction.user.mention} | `{pm_role.mention}`", view=View)
+
+        info_m = await channel.send(info_data)
+        await message.pin()
+        await info_m.pin()
+
     async def on_error(self, error: Exception, interaction: discord.Interaction) -> None:
         await interaction.response.send_message(f"An Error Occured. {error}\nContact Admin/Owner", ephemeral=True)
 
@@ -125,9 +418,7 @@ class Ticket_panel(discord.ui.View):
                                   description="Kindly wait patiently. A staff member will assist you shortly.\nIf you're looking to approach a specific staff member, ping the member once. Do not spam ping any member or role.\n\nThank you.")
         embed.set_footer(text="Developed and Owned by Jay & utki007")
 
-        await channel.send(embed=embed, content=f"{interaction.user.mention} | {staff_role.mention}")
-
-        await interaction.followup.send(f"Your Ticket is created at {channel.mention}")
+        await interaction.followup.send(f"Your support ticket is now available at {channel.mention}")
 
         log_embed = discord.Embed()
         log_embed.set_author(name=f"{interaction.user.name}#{interaction.user.discriminator}", icon_url=interaction.user.avatar.url)
@@ -151,6 +442,17 @@ class Ticket_panel(discord.ui.View):
         }
 
         await self.bot.ticket.upsert(data)
+        View = Ticket_Control(self.bot)
+        if data['type'] == "partnership":
+            pass
+        else:
+            for button in View.children:
+                if button.label == "Add Shero":
+                    item = button
+            View.remove_item(item)
+
+        msg = await channel.send(embed=embed, content=f"{interaction.user.mention} | `{staff_role.mention}`",view=View)
+        await msg.pin()
 
 
     @discord.ui.button(label='Partnership ', style=discord.ButtonStyle.green, custom_id='persistent_view:partner_ship', emoji="<:partner:837272392472330250>")

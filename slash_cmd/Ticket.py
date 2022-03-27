@@ -7,7 +7,7 @@ import asyncio
 from utils.checks import checks
 import chat_exporter
 import io
-
+from Views.Ticket_panel import Ticket_Control
 class Ticket_Commands(app_commands.Group):
     def __init__(self, bot, name="ticket"):
         super().__init__(name=name)
@@ -25,9 +25,10 @@ class Ticket_Commands(app_commands.Group):
     @app_commands.choices(option=[
         Choice(name="Add", value=1),
         Choice(name="Remove", value=2),
+        Choice(name="Panel", value=3)
     ])
     
-    async def edit(self, interaction: Interaction, option: Choice[int], target: Union[discord.Role, discord.Member]):
+    async def edit(self, interaction: Interaction, option: Choice[int], target: Union[discord.Role, discord.Member]=None):
         if option.value == 1:
             await interaction.response.defer(thinking=True)
 
@@ -109,187 +110,20 @@ class Ticket_Commands(app_commands.Group):
             log_embed.add_field(name="Ticket", value=interaction.channel.name)
             log_embed.add_field(name="Action", value=f"Removed {target.mention} from ticket")
             await log_channel.send(embed=log_embed)
-    
-    @app_commands.command(name="status", description="close/open/Secure")
-    @app_commands.describe(option="Select Status Options")
-    @app_commands.choices(option=[
-        Choice(name="Close", value=1),
-        Choice(name="Open", value=2),
-        Choice(name="Secure", value=3),
-    ])
-    async def status(self, interaction: Interaction, option: Choice[int]):
-        if option.value == 1:
-            await interaction.response.defer(ephemeral=False, thinking=True)
-            can_run = await checks.slash_check(self.bot, interaction, "close")
-
-            if can_run != True:
-                return await interaction.followup.send("You do not have permission to run this command")
-
-            if interaction.channel.category.id != self.bot.config_data[interaction.guild.id]["ticket_category"]:
-                return await interaction.followup.send("This is not a ticket channel", ephemeral=True)
-            
-            data = await self.bot.ticket.find(interaction.channel.id)
-            ticket_owner = self.bot.get_user(int(data['ticket_owner']))
-            await interaction.channel.edit(sync_permissions=True)
-
-            overrite = discord.PermissionOverwrite()
-            overrite.view_channel = False
-
-            staff_overrite = discord.PermissionOverwrite()
-            staff_overrite.view_channel = True
-            staff_overrite.send_messages = True
-            staff_overrite.read_messages = True
-            staff_overrite.attach_files = True
-
-            for i in data['added_roles']:
-                role = discord.utils.get(interaction.guild.roles, id=int(i))
-                await interaction.channel.set_permissions(role, overwrite=overrite)
-            
-            for i in data['added_users']:
-                user = self.bot.get_user(int(i))
-                await interaction.channel.set_permissions(user, overwrite=overrite)
-
-            support_role = discord.utils.get(interaction.guild.roles, id=self.bot.config_data[interaction.guild.id]["support_role"])
-            await interaction.channel.set_permissions(support_role, overwrite=staff_overrite)
-
-            data['status'] = "closed"
-            await self.bot.ticket.upsert(data)
-
-            await interaction.followup.send(embed=discord.Embed(description=f"<:allow:819194696874197004> | Ticket closed by {interaction.user.mention}", color=0x2f3136))
-
-            log_embed = discord.Embed(color=0xFF0000)
-            log_channel = self.bot.get_channel(self.bot.config_data[interaction.guild.id]["ticket_log_channel"])
-            log_embed.set_author(name=f"{interaction.user.name}#{interaction.user.discriminator}", icon_url=interaction.user.avatar.url)
-            log_embed.add_field(name="Ticket", value=interaction.channel.name)
-            log_embed.add_field(name="Action", value=f"Closed {interaction.channel.name}")
-            await log_channel.send(embed=log_embed)
-        
-        if option.value == 2:
-            await interaction.response.defer(thinking=True)
-            can_run = await checks.slash_check(self.bot, interaction, "open")
-
-            if can_run != True:
-                return await interaction.followup.send("You do not have permission to run this command")
-
-            if interaction.channel.category.id != self.bot.config_data[interaction.guild.id]["ticket_category"]:
-                await interaction.followup.send("This is not a ticket channel", ephemeral=True)
-            
-            data = await self.bot.ticket.find(interaction.channel.id)
-            ticket_owner = interaction.guild.get_member(int(data['ticket_owner']))
-            if ticket_owner == None:
-                return await interaction.followup.send("Ticket owner is not in the server, you may delete the ticket", ephemeral=False)
-                
-            await interaction.channel.edit(sync_permissions=True)
-
-            overrite = discord.PermissionOverwrite()
-            overrite.view_channel = True
-            overrite.send_messages = True
-            overrite.read_messages = True
-            overrite.attach_files = True
-
-            await interaction.channel.set_permissions(ticket_owner, overwrite=overrite)
-
-            for i in data['added_roles']:
-                role = discord.utils.get(interaction.guild.roles, id=int(i))
-                await interaction.channel.set_permissions(role, overwrite=overrite)
-            
-            for i in data['added_users']:
-                user = self.bot.get_user(int(i))
-                await interaction.channel.set_permissions(user, overwrite=overrite)
-
-            data['status'] = "open"
-            await self.bot.ticket.upsert(data)
-
-            support_role = discord.utils.get(interaction.guild.roles, id=self.bot.config_data[interaction.guild.id]['support_role'])
-            await interaction.channel.set_permissions(support_role, overwrite=overrite)
-            await interaction.followup.send(embed=discord.Embed(description=f"<:allow:819194696874197004> | Ticket re-opened by {interaction.user.mention}", color=0x2f3136))
-
-            log_embed = discord.Embed(color=0x00FF00)
-            log_channel = self.bot.get_channel(self.bot.config_data[interaction.guild.id]["ticket_log_channel"])
-            log_embed.set_author(name=f"{interaction.user.name}#{interaction.user.discriminator}", icon_url=interaction.user.avatar.url)
-            log_embed.add_field(name="Ticket", value=interaction.channel.name)
-            log_embed.add_field(name="Action", value=f"Opend {interaction.channel.name}")
-            await log_channel.send(embed=log_embed)
         
         if option.value == 3:
-
-            ticket_info = await self.bot.ticket.find(interaction.channel.id)
-            await interaction.response.defer(thinking=True)
-
-            if ticket_info is None:
-                return await interaction.followup.send("Ticket Not Found")
-            
-            await interaction.channel.edit(sync_permissions=True)
-            ticket_owner = interaction.guild.get_member(int(ticket_info['ticket_owner']))
-            if not ticket_owner:
-                return await interaction.followup.send("Ticket Owner Not Found")
-            
-            overwrite = discord.PermissionOverwrite()
-            overwrite.view_channel = False
-            overwrite.read_messages = False
-            overwrite.send_messages = False
-            overwrite.attach_files = False
-
-            for i in interaction.channel.overwrites:
-                await interaction.channel.set_permissions(i, overwrite=overwrite)
-            
-            owner_owrite = discord.PermissionOverwrite()
-            owner_owrite.view_channel = True
-            owner_owrite.send_messages = True
-            owner_owrite.read_messages = True
-            owner_owrite.attach_files = True
-
-            await interaction.channel.set_permissions(ticket_owner, overwrite=owner_owrite)
-
-            await interaction.followup.send("Ticket is now Admin Only")
-
-    @app_commands.command(name="delete", description="Delete a ticket")
-    async def delete(self, interaction: Interaction):
-        data = await self.bot.ticket.find(interaction.channel.id)
-        
-        can_run = await checks.slash_check(self.bot, interaction, "delete")
-        if can_run != True:
-            return await interaction.followup.send("You do not have permission to run this command")
-
-        if interaction.channel.category.id != self.bot.config_data[interaction.guild.id]["ticket_category"]:
-            return await interaction.response.send_message("This is not a ticket channel", ephemeral=True)
-
-        msg = await interaction.response.send_message("Deleting this ticket in 10s `type fs` to cancel this command")
-        try:
-            stop_m = await self.bot.wait_for('message', check=lambda m: m.author.id == interaction.user.id and m.channel.id == interaction.channel.id and m.content.lower() == "fs", timeout=10)
-            await stop_m.add_reaction("✅")
-            return await msg.edit(content="Ok cancelling the command")
-
-        except asyncio.TimeoutError:
-            
-            user_in_channel = {}
-            async for message in interaction.channel.history(limit=None):
-                if message.author.id in user_in_channel.keys():
-                    user_in_channel[message.author.id] += 1
-                else:
-                    user_in_channel[message.author.id] = 1
-
-            log_channel = self.bot.get_channel(self.bot.config_data[interaction.guild.id]["ticket_log_channel"])
-            log_message = await log_channel.fetch_message(data['log_message_id'])
-            embed = log_message.embeds[0]
-            users, i = "", 1
-
-            for key, value in user_in_channel.items():
-                users += f"{i}. <@{key}> - {value}\n"
-                i += 1
-
-            embed.add_field(name="Users in Ticket", value=users)
-            await log_message.edit(embed=embed)
-
-            await self.bot.ticket.delete(interaction.channel.id)
-            await interaction.channel.delete()
-
-            log_embed = discord.Embed(color=0xFF0000)
-            log_channel = self.bot.get_channel(self.bot.config_data[interaction.guild.id]["ticket_log_channel"])
-            log_embed.set_author(name=f"{interaction.user.name}#{interaction.user.discriminator}", icon_url=interaction.user.avatar.url)
-            log_embed.add_field(name="Ticket", value=interaction.channel.name)
-            log_embed.add_field(name="Action", value=f"Deleted {interaction.channel.name}")
-            await log_channel.send(embed=log_embed)
+            Panel_embed = discord.Embed(title="Ticket Control Panel",color=0x008000)
+            Panel_embed.description = f"""**Open**: To Open current Ticket\n**Close**: To Close current Ticket\n**Secure**: Make Ticket Adminitrator Only\n**Save**: Save Ticket Transhcript\n**Delete**: Delete Ticket\n6.**Add Shero**: add Shero bot to Ticket only works in Partnership Ticket\n"""
+            View = Ticket_Control(self.bot)
+            if data['type'] == "Partnership":
+                pass
+            else:
+                for button in View.children:
+                    if button.name == "Add Shero":
+                        item = button
+                        break
+                View.remove_item(item)
+            await interaction.response.send_message(embed=Panel_embed, view=Ticket_Control(self.bot))
 
     # @app_commands.command(name="config", description="Configure the ticket system")
     # @app_commands.describe(category="category of ticket")
