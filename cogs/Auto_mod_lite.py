@@ -56,8 +56,7 @@ class AutoMod(commands.Cog):
         if message.author.bot: return
         if message.guild.id != 785839283847954433: return
 
-        link = is_link_there(message.content)        
-        print(len(message.mentions))
+        link = is_link_there(message.content)
         if len(message.mentions) >= 9:
             if message.author.id in [301657045248114690,488614633670967307,413651113485533194,651711446081601545,810041263452848179,457839031909351425]:
                 return
