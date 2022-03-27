@@ -102,7 +102,8 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
             if Member.banner:
                 embed.set_image(url=Member.banner)
 
-            m = await interaction.response.send_message(embed=embed)
+            message = await interaction.response.send_message(embed=embed, delete_after=60)
+            #await message.edit(view=roles(self.bot, member, message))
 
         self.bot.slash_commands.append(whois)
 
@@ -184,12 +185,10 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
 
         embed.add_field(name='Account Name:',
                         value=f'{member.name}', inline=False)
+
         embed.add_field(
-            name='Created at:', value=f"{fomat_time(member.created_at)}")
-        try:
-            embed.add_field(name='Joined at', value=member.joined_at.timestamp())
-        except:
-            embed.add_field(name='Joined at', value=f"{fomat_time(member.joined_at)}")
+            name='Created at:', value=f"<t:{round(member.created_at.timestamp())}:R>")
+        embed.add_field(name='Joined at', value=f"<t:{round(member.joined_at.timestamp())}:R>")
 
         embed.add_field(name='Account Status',
                         value=str(member.status).title())
@@ -197,10 +196,13 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
                         value=f"{str(member.activity.type).title().split('.')[1]} {member.activity.name}" if member.activity is not None else "None")
 
         Member = await self.bot.fetch_user(member.id)
+
         if Member.banner:
             embed.set_image(url=Member.banner)
-        m = await ctx.send(embed=embed)
-        await m.edit(view=roles(self.bot, ctx, member, m))
+
+        message = await ctx.send(embed=embed)
+
+        await message.edit(view=roles(self.bot, member, message))
 
 
     @commands.command(name="mute", description="put user in timeout", usage="[member] [time]", aliases=["timeout"])
