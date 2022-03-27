@@ -10,17 +10,17 @@ from dateutil.relativedelta import relativedelta
 from discord.ext import commands
 from discord.ext import tasks
 from utils.checks import checks
-
+from discord import app_commands
+from typing import Union
 time_regex = re.compile("(?:(\d{1,5})(h|s|m|d))+?")
 time_dict = {"h": 3600, "s": 1, "m": 60, "d": 86400}
 
 description = "Moderation commands"
 
 class roles(discord.ui.View):
-    def __init__(self, bot, ctx, user: discord.Member, message: discord.Message):
+    def __init__(self, bot, user: discord.Member, message: discord.Message):
         super().__init__(timeout=60)
         self.bot = bot
-        self.ctx = ctx
         self.user = user
         self.message = message
     
@@ -69,6 +69,42 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
     def __init__(self, bot):
         self.bot = bot
         self.ban_task = self.check_current_bans.start()
+        self.load_tree_commands()
+
+    def load_tree_commands(self):
+        
+        @app_commands.context_menu(name="Whois")
+        async def whois(interaction: discord.Interaction, member: Union[discord.Member, discord.User]):
+            usercolor = member.color
+
+            embed = discord.Embed(title=f'{member.name}', color=usercolor)
+
+            if member.avatar != None:
+                embed.set_thumbnail(url=member.avatar.url or None)
+                embed.set_footer(text=f'ID {member.id}', icon_url=member.avatar.url)
+            else:
+                embed.set_thumbnail(url=member.default_avatar)
+                embed.set_footer(text=f'ID {member.id}', icon_url=member.default_avatar)
+
+            embed.add_field(name='Account Name:',
+                            value=f'{member.name}', inline=False)
+            embed.add_field(
+                name='Created at:', value=f"<t:{round(member.created_at.timestamp())}:R>")
+            embed.add_field(name='Joined at', value=f"<t:{round(member.joined_at.timestamp())}:R>")
+
+            embed.add_field(name='Account Status',
+                            value=str(member.status).title())
+            embed.add_field(name='Account Activity',
+                            value=f"{str(member.activity.type).title().split('.')[1]} {member.activity.name}" if member.activity is not None else "None")
+
+            Member = await self.bot.fetch_user(member.id)
+
+            if Member.banner:
+                embed.set_image(url=Member.banner)
+
+            m = await interaction.response.send_message(embed=embed)
+
+        self.bot.slash_commands.append(whois)
 
     def cog_unload(self):
         self.ban_task.cancel()
