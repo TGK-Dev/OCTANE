@@ -153,7 +153,7 @@ class Ticket_Control(discord.ui.View):
 
             await interaction.channel.set_permissions(ticket_owner, overwrite=owner_owrite)
 
-            await message.edit(content=None,embed=discord.Embed(description=f"<:allow:819194696874197004> | Ticket secured by {interaction.user.mention}", color=0x2f3136))
+            await message.edit(content=None,embed=discord.Embed(description=f"<:allow:819194696874197004> | Ticket secured by {interaction.user.mention}", color=0x00FF00))
 
             button.disabled = True
             await interaction.message.edit(view=self)
@@ -370,7 +370,7 @@ class PartnerShip_model(discord.ui.Modal, title="PartnerShip Infomations"):
                 if button.label == "Add Shero":
                     item = button
             View.remove_item(item)
-        message = await channel.send(embed=embed, content=f"{interaction.user.mention} | `{pm_role.mention}`", view=View)
+        message = await channel.send(embed=embed, content=f"{interaction.user.mention} | {pm_role.mention}", view=View)
 
         info_m = await channel.send(info_data)
         await message.pin()
@@ -451,7 +451,7 @@ class Ticket_panel(discord.ui.View):
                     item = button
             View.remove_item(item)
 
-        msg = await channel.send(embed=embed, content=f"{interaction.user.mention} | `{staff_role.mention}`",view=View)
+        msg = await channel.send(embed=embed, content=f"{interaction.user.mention} | {staff_role.mention}",view=View)
         await msg.pin()
 
 
