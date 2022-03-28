@@ -151,12 +151,6 @@ class Owner(commands.Cog, description=description):
         await self.bot.change_presence(activity=discord.Game(name=f"{activity}"), status=discord.Status.dnd)
         await ctx.send('Bot activity is Updated')
 
-    @commands.command(name="Say", description="And classic say command", usage="[anything]")
-    @commands.check_any(checks.can_use())
-    async def say(self, ctx, *, say):
-        await ctx.message.delete()
-        await ctx.send(f'{say}')
-
     @commands.command(
         name="logout",
         aliases=["disconnect", "stopbot"],
