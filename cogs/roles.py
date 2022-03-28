@@ -6,7 +6,6 @@ from discord.ext import commands
 
 description = "Role Mangement Commands"
 
-
 def comman_ping(role1, role2):
     ping1 = set(role1)
     ping2 = set(role2)
@@ -19,7 +18,6 @@ def comman_ping(role1, role2):
 
 def fomat_time(time):
     return time.strftime('%d-%B-%Y %I:%m %p')
-
 
 class roles(commands.Cog,  description=description):
     def __init__(self, bot):
@@ -98,92 +96,6 @@ class roles(commands.Cog,  description=description):
 
         await ctx.send(embed=embed, delete_after=60)
 
-    # getting Mutual Pings
-    @commands.command(name="mping", description="Mutual Pings for tow role", usage="[role 1] [role 2]",)
-    @commands.check_any(checks.can_use())
-    async def mping(self, ctx, role1: discord.Role, role2: discord.Role):
-        pings1 = role1.members
-        pings2 = role2.members
-
-        if role1 == role2:
-            return await ctx.send("you can't use same role for mutual pings")
-
-        embed = discord.Embed(title="Mutual Pings", color=0xF1C40F,
-                              description=f"Showing Mutual pings for the two Role\n1.Role {role1.mention} total members: {len(pings1)}\n2.Role{role2.mention} total members: {len(pings2)}\n\n**Unique Members are: {int(len(pings1) + len(pings2) - len(comman_ping(pings1, pings2)))}**")  # (comman_ping(pings1, pings2))
-
-        await ctx.send(embed=embed)
-
 
 def setup(bot):
     bot.add_cog(roles(bot))
-
-
-"""
- @commands.command(name="temprole", description="add the Temp role to user", usage="[member] [role.id]")
-    @commands.has_any_role(785842380565774368, 799037944735727636, 785845265118265376)
-    async def temprole(self, ctx, member: discord.Member, role: discord.Role, *, time: TimeConverter=None):
-        await ctx.message.delete()
-        
-        data = {
-            '_id': member.id,
-            'temp_role': role.name,
-            'temp_roledAt': datetime.datetime.now(),
-            'temp_roleDuration': time,
-            'temptedBy': ctx.author.id,
-            'guildId': ctx.guild.id,
-        }
-        await self.bot.temp_roles.upsert(data)
-        self.bot.temp_roled_users[member.id] = data
-
-        await member.add_roles(role)
-
-        if time and time < 30:
-            await asyncio.sleep(time)
-
-            if role in member.role:
-                await member.remove_roles(role)
-
-            await self.bot.temp_roles.delete(member.id)
-            try:
-                self.bot.temp_roled_users.pop(member.id)
-            except  KeyError:
-                pass
-"""
-"""
-Taskks 
-"""
-"""
-        self.temp_role_task = self.check_current_temp_roles.start()
-
-        def cog_unload(self):
-            self.temp_role_task.cancel()
-
-    @tasks.loop(minutes=5)
-    async def check_current_temp_roles(self):
-        currentTime = datetime.datetime.now()
-        temp_roles = deepcopy(self.bot.temp_roled_users)
-        for key, value in temp_roles.items():
-            if value['temp_roleDuration'] is None:
-                continue
-
-            untemp_roleTime = value['temp_roledAt'] + relativedelta(seconds=value['temp_roleDuration'])
-
-            if currentTime >= untemp_roleTime:
-                guild = self.bot.get_guild(value['guildId'])
-                member = guild.get_member(value['_id'])
-
-                role = discord.utils.get(guild.roles, name=f"{value['temp_role']}")
-                if role in member.roles:
-                    await member.remove_roles(role)
-                    print(f"Untemp_roled: {member.display_name}")
-
-                await self.bot.temp_roles.delete(member.id)
-                try:
-                    self.bot.temp_roled_users.pop(member.id)
-                except KeyError:
-                    pass
-
-    @check_current_temp_roles.before_loop
-    async def before_check_current_temp_roles(self):
-        await self.bot.wait_until_ready()
-"""
