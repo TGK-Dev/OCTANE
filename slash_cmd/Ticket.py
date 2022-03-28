@@ -207,4 +207,4 @@ class Ticket_Commands(app_commands.Group):
         log_msg = await log_channel.fetch_message(ticket_info['log_message_id'])
         embed = log_msg.embeds[0]
         embed.add_field(name="Transcript", value=f"[Link](<{link_msg.attachments[0].url}>)")
-        await log_msg.edit(embed=embed)
+        await log_msg.edit(embed=embed) 
