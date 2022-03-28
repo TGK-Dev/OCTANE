@@ -4,7 +4,6 @@ import time
 import platform
 import datetime
 from humanfriendly import format_timespan
-from discord_together import DiscordTogether
 
 from discord.ext import commands
 from utils.checks import checks
@@ -27,16 +26,6 @@ class Basic(commands.Cog, description=description):
     async def on_ready(self):
         self.bot.togetherControl = await DiscordTogether(self.bot.config_token)
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
-
-    @commands.command(name="vcgame")
-    async def activity(self, ctx):
-        if ctx.author.voice == None: return await ctx.send("Join vc fist")
-        link = await self.bot.togetherControl.create_link(ctx.author.voice.channel.id, 'youtube', max_age=60)
-        plink = await self.bot.togetherControl.create_link(ctx.author.voice.channel.id, 'poker', max_age=60)
-        embed = discord.Embed(description="You can Start Your Activiy By pressing bellow Button\n Avtivity is still in beta can break discord")
-        embed.set_footer(text="Only Works wth Pc version")
-        await ctx.message.reply(embed=embed, view=Link(link, plink), mention_author=False)
-        
 
     @commands.command()
     async def ping(self, ctx):
