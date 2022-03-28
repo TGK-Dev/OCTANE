@@ -71,11 +71,17 @@ class Anti_nuke(commands.Cog):
                         await after.edit(timed_out_until=discord.utils.utcnow() + datetime.timedelta(hours=10),reason="Possible Server Nuke attempt")
                         for role in logs[0].user.roles:
                             if role.permissions.administrator or role.permissions.manage_roles or role.permissions.kick_members or role.permissions.ban_members or role.permissions.manage_channels or role.permissions.manage_guild or role.permissions.manage_messages or role.permissions.manage_roles or role.permissions.manage_permissions:
-                                await logs[0].user.remove_roles(role, reason="Possible Server Nuke attempt")
+                                try:
+                                    await logs[0].user.remove_roles(role, reason="Possible Server Nuke attempt")
+                                except discord.Forbidden:
+                                    pass
                         
                         timeout = discord.utils.utcnow() + datetime.timedelta(hours=25)
-                        await logs.user.edit(timed_out_until=timeout, reason="Possible Server Nuke attempt")
-                        await before.user.edit(timed_out_until=timeout, reason="Possible Server Nuke attempt")
+                        if logs[0].user.bot:
+                            pass
+                        else:
+                            await logs[0].user.edit(timed_out_until=timeout, reason="Possible Server Nuke attempt")
+                        await before.edit(timed_out_until=timeout, reason="Possible Server Nuke attempt")
 
                         embed = discord.Embed(title="Possible Server Nuke attempt", description=f"{logs[0].user.mention} Has tryed to Give Moderator role to {after.mention}, Role is remove from {after.mention} and both user has put in Timeout", color=0xFF0000)
                         embed.timestamp = discord.utils.utcnow()
@@ -136,7 +142,7 @@ class Anti_nuke(commands.Cog):
                     await event.user.remove_roles(role, reason="Possible Server Nuke attempt")
             event.user.edit(timed_out_until=discord.utils.utcnow() + datetime.timedelta(hours=25), reason="Possible Server Nuke attempt")
             embed = discord.Embed(title="Alert", description=f"{event.user.mention} Has deleted channel, user all mod role are removed and put in timeout")
-            
+
             async with aiohttp.ClientSession() as session:
                 webhook = Webhook.from_url(self.bot.nuke_webhook, session=session)
                 await webhook.send(content="@everyone",username=f"{self.bot.user.name} NuKe", avatar_url=self.bot.user.avatar.url,embed=embed)
