@@ -24,7 +24,6 @@ class Basic(commands.Cog, description=description):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        self.bot.togetherControl = await DiscordTogether(self.bot.config_token)
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
 
     @commands.command()
