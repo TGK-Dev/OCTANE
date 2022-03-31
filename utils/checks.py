@@ -19,8 +19,7 @@ class checks():
                 command = ctx.bot.perm[ctx.command.name]
             except KeyError:
                 command = {"_id": ctx.command.name, "allowed_roles": [], 'allowed_users': [],"disable": False}
-            
-            
+                        
             if command['disable'] == True:
                 raise CommandDisableByDev(ctx.message)
                 
@@ -39,6 +38,28 @@ class checks():
                 return False
                 
         return commands.check(predicate)
+    
+    def help_ckeck(bot, command, interaction):
+        try:
+            command = bot.perm[command.name]
+        except KeyError:
+            command = {"_id": command.name, "allowed_roles": [], 'allowed_users': [],"disable": False}
+        
+        if interaction.user.id in [488614633670967307, 301657045248114690]: return True
+
+        user_roles = [role.id for role in interaction.user.roles]
+
+        if interaction.user.id in command['allowed_users']: return True
+
+        if (set(user_roles) & set(command['allowed_roles'])):
+            return True
+        else:
+            return False
+
+
+
+                        
+            
     
     async def slash_check(bot, interaction: discord.Interaction,command):
         try:
