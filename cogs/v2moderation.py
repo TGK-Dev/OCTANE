@@ -102,7 +102,7 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
             if Member.banner:
                 embed.set_image(url=Member.banner)
 
-            message = await interaction.response.send_message(embed=embed, delete_after=60)
+            message = await interaction.response.send_message(embed=embed, ephemeral=True)
             #await message.edit(view=roles(self.bot, member, message))
 
         self.bot.slash_commands.append(whois)
