@@ -34,7 +34,7 @@ class Basic(commands.Cog, description=description):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        self.bot.add_cog(April_FOOl(self.bot))
+        self.bot.add_view(April_FOOl(self.bot))
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
     
     @commands.command()
