@@ -16,7 +16,10 @@ class Ticket_Commands(app_commands.Group):
     async def on_error(self, interaction: Interaction, command: app_commands.Command, error: app_commands.AppCommandError) -> None:
         
         embed = discord.Embed(title="Error", description=f"Error: {error}", color=0xFF0000)
-        await interaction.followup.send(embed=embed)
+        try:
+            await interaction.followup.send(embed=embed)
+        except:
+            await interaction.response.send_message(embed=embed)
 
     
     @app_commands.command(name="edit", description="Edit current ticket")
@@ -113,13 +116,14 @@ class Ticket_Commands(app_commands.Group):
         
         if option.value == 3:
             Panel_embed = discord.Embed(title="Ticket Control Panel",color=0x008000)
+            data = await self.bot.ticket.find(interaction.channel.id)
             Panel_embed.description = f"""**Open**: To Open current Ticket\n**Close**: To Close current Ticket\n**Secure**: Make Ticket Adminitrator Only\n**Save**: Save Ticket Transhcript\n**Delete**: Delete Ticket\n6.**Add Shero**: add Shero bot to Ticket only works in Partnership Ticket\n"""
             View = Ticket_Control(self.bot)
             if data['type'] == "Partnership":
                 pass
             else:
                 for button in View.children:
-                    if button.name == "Add Shero":
+                    if button.label == "Add Shero":
                         item = button
                         break
                 View.remove_item(item)
