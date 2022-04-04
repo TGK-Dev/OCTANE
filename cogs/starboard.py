@@ -184,6 +184,51 @@ class starboard(commands.Cog):
             await self.bot.config.upsert(data)
         if not channel:
             await ctx.send(f"Current starboard channel is <#{data['starboard_channel']}>")
+    
+    @starboard.group(invoke_without_command=True, name="force")
+    @commands.check_any(checks.can_use())
+    async def force(self, ctx, message_id: int):
+        data = await self.bot.config.find(ctx.guild.id)
+        if not data: return await ctx.send("No config found")
+        try:
+            msg = await ctx.channel.fetch_message(message_id)
+        except discord.HTTPException:
+            return await ctx.send("Message not found")
+        if msg.author.id == ctx.author.id:
+            return await ctx.send("You can't force star yours message")
+        if not data['starboard_channel']:
+            return await ctx.send("You can't force star a message when there is no starboard")
+        
+        sdata = await self.bot.starboard.find(msg.id)
+        if sdata:
+            return await ctx.send("Message already starred")
+
+
+        embed = discord.Embed(color=0x9e3bff, timestamp=datetime.datetime.now())
+        embed.set_author(name=f"{msg.author.display_name}",icon_url=msg.author.avatar.url)
+        embed.set_footer(text=f"ID: {msg.id}")
+        embed.add_field(name="Message", value=msg.content, inline=False)
+        embed.add_field(name="Original", value=f"[Jump!]({msg.jump_url})", inline=False)
+        if msg.reference:
+            reply_to = await channel.fetch_message(msg.reference.message_id)
+            if not reply_to:
+                pass
+            else:
+                embed.add_field(name="Replying to...", value=f"[{reply_to.content}]({reply_to.jump_url})", inline=False)
+        
+        attach = msg.attachments[0] if msg.attachments else None
+        if attach:
+            embed.set_image(url=attach.url)
+        
+        starboard_message = await self.bot.get_channel(data['starboard_channel']).send(embed=embed)
+        await msg.add_reaction("⭐")
+        sdata = {"_id": msg.id,
+                "guildId": ctx.guild.id,
+                "authorId": ctx.author.id,
+                "channelId": ctx.channel.id,
+                "starboard_message_id": starboard_message.id}
+
+        await ctx.send(f"Message {msg.id} has been force starred")
 
 def setup(bot):
     bot.add_cog(starboard(bot))

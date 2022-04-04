@@ -1,12 +1,9 @@
-import asyncio
 import discord
-import random
 import re
-import datetime
 from discord.ext import commands
 from humanfriendly import format_timespan
 from utils.checks import checks
-
+from discord import app_commands
 time_regex = re.compile("(?:(\d{1,5})(h|s|m|d))+?")
 time_dict = {"h": 3600, "s": 1, "m": 60, "d": 86400}
 
@@ -32,6 +29,26 @@ class TimeConverter(commands.Converter):
 class channel(commands.Cog, description=description):
     def __init__(self, bot):
         self.bot = bot
+        self.load_tree_commands()
+    
+    def load_tree_commands(self):
+
+        @app_commands.command(name="slowmod", description="Set the slowmode of a channel")
+        @app_commands.describe(time="Slowmode time Exp: 1h30m",)
+        async def slowmod(interaction: discord.Interaction, time: str):
+            time = await TimeConverter().convert(interaction, time)
+            if not interaction.user.guild_permissions.manage_messages:
+                return await interaction.send("You don't have permission to use this command")
+            if time is None or time == 0:
+                await interaction.channel.edit(slowmode_delay=None)
+                embed = discord.Embed(description=f"<:allow:819194696874197004> | Removed slowmode from {interaction.channel.mention}",color=0x2f3136)
+                await interaction.response.send_message(embed=embed)
+            else:
+                await interaction.channel.edit(slowmode_delay=time)
+                embed = discord.Embed(description=f"<:allow:819194696874197004> | Set slowmode to {time}s on {interaction.channel.mention}",color=0x2f3136)
+                await interaction.response.send_message(embed=embed)
+        
+        self.bot.slash_commands.append(slowmod)
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -58,42 +75,6 @@ class channel(commands.Cog, description=description):
         embed = discord.Embed(description=f"<:allow:819194696874197004> | Set {channel.mention} slowmode to {format_timespan(time)}",
                               color=0x2f3136)
         await ctx.send(embed=embed)
-
-    @commands.command(name="Hide", description="Hide Channels For mentioned Role", usage="[role]")
-    @commands.check_any(checks.can_use())
-    async def hide(self, ctx):
-        channel = ctx.channel
-        role =  ctx.guild.default_role
-        overwrite = channel.overwrites_for(role)
-        overwrite.view_channel = False
-        await channel.set_permissions(role, overwrite=overwrite)
-        await ctx.message.delete()
-
-        embed = discord.Embed(
-            color=0x02ff06, description=f'The {channel.mention} is now hidden for @everyone')
-        await ctx.send(embed=embed, delete_after=10)
-
-    @commands.command(name="Unhide", description="Unhide Channels For mentioned Role", usage="[role]")
-    @commands.check_any(checks.can_use())
-    async def unhide(self, ctx, role: discord.Role = None):
-        channel = ctx.channel
-        role = ctx.guild.default_role
-        overwrite = channel.overwrites_for(role)
-        overwrite.view_channel = True
-        await channel.set_permissions(role, overwrite=overwrite)
-        await ctx.message.delete()
-
-        embed = discord.Embed(
-            color=0x02ff06, description=f'The {channel.mention} is Now Visible for for @everyone')
-        await ctx.send(embed=embed, delete_after=10)
-
-    @commands.command(name="Sync", description="Sync Channels permissions to it's Category", usage="[channel]")
-    @commands.check_any(checks.can_use())
-    async def sync(self, ctx, channel: discord.TextChannel = None):
-        channel = channel if channel else ctx.channel
-
-        await channel.edit(sync_permissions=True)
-        await ctx.send("permissions are Synced", delete_after=15)
 
 def setup(bot):
     bot.add_cog(channel(bot))

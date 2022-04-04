@@ -10,7 +10,7 @@ class Suggestions(commands.Cog):
     async def on_ready(self):
         print(f'{self.__class__.__name__} Cog has been loaded\n-----')
 
-    @commands.command(name='suggestion', description="Suggest something for serve", aliases=['suggest'])
+    @commands.command(name='suggestion', description="Suggest something for serve", usage="<suggestion>")
     @commands.check_any(checks.can_use())
     async def suggestion(self, ctx, *, suggestion):
         embed = discord.Embed(title=f"Suggestion # {self.bot.total_suggestions + 1}", description=suggestion, color=0x7289da)
@@ -24,7 +24,7 @@ class Suggestions(commands.Cog):
         self.bot.total_suggestions += 1
         await ctx.message.delete()
     
-    @commands.command(name="approve", description="Approve a suggestion")
+    @commands.command(name="approve", description="Approve a suggestion", usage="[message id]")
     @commands.check_any(checks.can_use())
     async def approve(self, ctx, id: int, *,reason: str):
         data = await self.bot.suggest.find(id)
@@ -39,7 +39,7 @@ class Suggestions(commands.Cog):
         await message.edit(embed=embed)
         await message.clear_reactions()
     
-    @commands.command(name="deny", description="Deny a suggestion")
+    @commands.command(name="deny", description="Deny a suggestion", usage="[message id]")
     @commands.check_any(checks.can_use())
     async def deny(self, ctx, id: int, *,reason: str):
         data = await self.bot.suggest.find(id)
@@ -54,7 +54,7 @@ class Suggestions(commands.Cog):
         await message.edit(embed=embed)
         await message.clear_reactions()
     
-    @commands.command(name="considered", description="Mark a suggestion as considered")
+    @commands.command(name="considered", description="Mark a suggestion as considered", usage="[message id]")
     @commands.check_any(checks.can_use())
     async def considered(self, ctx, id: int, *,reason: str):
         data = await self.bot.suggest.find(id)
@@ -69,7 +69,7 @@ class Suggestions(commands.Cog):
         await message.edit(embed=embed)
         await message.clear_reactions()
     
-    @commands.command(name="implemented", description="Mark a suggestion as implemented")
+    @commands.command(name="implemented", description="Mark a suggestion as implemented", usage="[message id]")
     @commands.check_any(checks.can_use())
     async def implemented(self, ctx, id: int, *,reason: str):
         data = await self.bot.suggest.find(id)

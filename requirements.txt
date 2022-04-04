@@ -13,7 +13,6 @@ python-dateutil==2.8.1
 python-string-utils==1.0.0
 psutil==5.8.0
 bs4==0.0.1
-discord-together==1.2.2
 requests==2.27.1
 flask[async]==2.0.2
 gunicorn==20.0.4

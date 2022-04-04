@@ -207,6 +207,7 @@ if __name__ == "__main__":
     bot.votes = Document(bot.db, "Votes")
     bot.ban_backup = Document(bot.db, "ban_backup")
     bot.suggest = Document(bot.db, "suggestions")
+    bot.april = Document(bot.db, "april")
 
     for file in os.listdir(cwd + "/cogs"):
         if file.endswith(".py") and not file.startswith("_") and not file.startswith("embed"):

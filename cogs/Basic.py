@@ -1,42 +1,46 @@
 import discord
-import psutil
 import time
 import platform
 import datetime
 from humanfriendly import format_timespan
-from discord_together import DiscordTogether
-
 from discord.ext import commands
 from utils.checks import checks
 
 description = "Some Basic commands"
 
-class Link(discord.ui.View):
-    def __init__(self, url, url_poker):
-        self.url = url
-        self.url_poker = url_poker
+class April_FOOl(discord.ui.View):
+    def __init__(self, bot):
+        self.bot = bot
         super().__init__(timeout=None)
-        self.add_item(discord.ui.Button(label='Youtube', url=self.url, emoji="<:yt:929015299481673749>"))
-        self.add_item(discord.ui.Button(label='Poker Night', url=self.url_poker, emoji="🪙"))
-
+    
+    @discord.ui.button(label="Mystery Button", style=discord.ButtonStyle.green, custom_id="mystery")
+    async def mystery_button(self, button: discord.Button, interaction: discord.Interaction):
+        data = await self.bot.april.find(interaction.user.id)
+        await interaction.response.defer(thinking=True, ephemeral=True)
+        if data:
+            return await interaction.followup.send(f"You have already Clicked the Mystery Button")
+        last_name = interaction.user.display_name
+        try:
+            await interaction.user.edit(nick=interaction.user.name [::-1])
+        except:
+            return await interaction.followup.send("Missing Permissions", ephemeral=True)
+        await interaction.followup.send("Something happened", ephemeral=True)
+        await self.bot.april.upsert({"_id": interaction.user.id, "last_name": last_name})
+        await self.bot.get_channel(959157972985081856).send(f"{interaction.user.mention} Clicked the Mystery Button")
+        
 class Basic(commands.Cog, description=description):
     def __init__(self, bot):
         self.bot = bot
 
     @commands.Cog.listener()
     async def on_ready(self):
-        self.bot.togetherControl = await DiscordTogether(self.bot.config_token)
+        self.bot.add_view(April_FOOl(self.bot))
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
-
-    @commands.command(name="vcgame")
-    async def activity(self, ctx):
-        if ctx.author.voice == None: return await ctx.send("Join vc fist")
-        link = await self.bot.togetherControl.create_link(ctx.author.voice.channel.id, 'youtube', max_age=60)
-        plink = await self.bot.togetherControl.create_link(ctx.author.voice.channel.id, 'poker', max_age=60)
-        embed = discord.Embed(description="You can Start Your Activiy By pressing bellow Button\n Avtivity is still in beta can break discord")
-        embed.set_footer(text="Only Works wth Pc version")
-        await ctx.message.reply(embed=embed, view=Link(link, plink), mention_author=False)
-        
+    
+    @commands.command()
+    @commands.check(checks.is_me())
+    async def april(self, ctx):
+        await ctx.send("An Random Button has appeared, who have power to click it", view=April_FOOl(self.bot))
 
     @commands.command()
     async def ping(self, ctx):
@@ -68,7 +72,6 @@ class Basic(commands.Cog, description=description):
         dpyVersion = discord.__version__
         serverCount = len(self.bot.guilds)
         memberCount = len(set(self.bot.get_all_members()))
-        cpu = round(psutil.cpu_percent(), 1)
 
         embed = discord.Embed(
             colour=ctx.author.colour,
@@ -77,13 +80,10 @@ class Basic(commands.Cog, description=description):
 
         embed.add_field(name="Bot Version:", value=self.bot.version)
         embed.add_field(name="Python Version:", value=pythonVersion)
-        embed.add_field(name="Nextcord Version", value=dpyVersion)
+        embed.add_field(name="Discord.py Version", value=dpyVersion)
         embed.add_field(name="Total Guilds:", value=serverCount)
         embed.add_field(name="Total Users:", value=memberCount)
         embed.add_field(name="Total Commands:", value=len(list(self.bot.commands)))
-        embed.add_field(name="CPU Useage:", value=f"{str(cpu)}%")
-        embed.add_field(name="RAM Useage:",
-                        value=f"{round(psutil.virtual_memory().percent,1)}%")
         embed.add_field(name="Bot Developers:",
                         value="<@488614633670967307>\n<@301657045248114690>")
         embed.add_field(name="Embed Format:",

@@ -124,17 +124,18 @@ class Guess_number(commands.Cog):
         #
         def check(m, total_guess=self.guess):
             if m.channel.id == channel.id and m.content == str(right):
+                self.guess += 1
                 return True
             elif m.channel.id == channel.id and m.content != str(right):
-                self.guess = self.guess +1
+                self.guess += 1
         try:
             win_msg = await self.bot.wait_for("message", check=check, timeout=3600)
             await win_msg.reply(f"{win_msg.author.mention} You Guessed The Right Number")         
             await channel.edit(name="Game Has Ended",archived=True, locked=True)
-            data = message.embeds[0].to_dict()
-            (data['fields'][len(data['fields'])-1]) = {'name': 'Winner', 'value': f'{win_msg.author.mention} | {win_msg.author.name}', 'inline': None}
-            data['fields'].append({'name': 'Total Guesse', 'value': f'{self.guess}', 'inline': False})
-            await message.edit(embed=discord.Embed().from_dict(data))
+            data = message.embeds[0]
+            data.add_field(name="Winner: ", value=f"{win_msg.author.mention}(**{win_msg.author.display_name}**)",inline=True)
+            data.add_field(name="Guesses: ", value=f"{self.guess}", inline=True )
+            await message.edit(embed=data)
             win_embed = discord.Embed(description=f"🏆 {win_msg.author.mention} Guessed The Correct Number", color=win_msg.author.color)
             await message.reply(embed=win_embed)
             
@@ -151,7 +152,7 @@ class Guess_number(commands.Cog):
         description=f"Start guessing the number in thread below after the event starts")
         embed.add_field(name="Range", value=f"0-{max}")
         embed.add_field(name="Channel", value=ctx.channel.mention)
-        embed.add_field(name="Note:", value="Confirm The Range and Channel and use buttons below", inline=False)
+        embed.set_footer(text=f"Confirm The Range and Channel and use buttons below")
 
         msg = await ctx.channel.send(embed=embed)
         view = Confirm(msg ,ctx, max, self.bot)
@@ -164,28 +165,6 @@ class Guess_number(commands.Cog):
             pass
         else:
             await msg.delete()
-
-    # @discord.slash_command(guild_ids=[785839283847954433], name="drop", description="Do a Drop of any item")
-    # async def drop(self, interaction: discord.Interaction, item: str= SlashOption(required=False, description="name of price")):
-    #     if not interaction.user.guild_permissions.manage_messages:
-    #         return await interaction.send("You don't have permission to use this command")
-    #     embed = discord.Embed(title="Drop Incoming",color=interaction.user.color)
-    #     embed.add_field(name="Prize:", value=f"{item}",inline=False)
-    #     embed.add_field(name="Host:", value=f"**{interaction.user.display_name}**",inline=False)
-    #     await interaction.response.send_message("Drop droped",ephemeral=True)
-    #     view = Drop()
-    #     await interaction.channel.send(embed=embed, view=view)
-
-    
-    # @drop.on_autocomplete("item")
-    # async def comman_items(self, interaction: discord.Interaction, item: str):
-    #     if not item:
-    #         await interaction.response.send_autocomplete(list_of_items)
-        
-    #     get_near_item = [
-    #         thing for thing in list_of_items if thing.lower().startswith(item.lower())
-    #     ]
-    #     await interaction.response.send_autocomplete(get_near_item)
 
 def setup(bot):
     bot.add_cog(Guess_number(bot))
