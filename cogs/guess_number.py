@@ -87,32 +87,28 @@ class Guess_number(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.guess = 0
-        self.load_tree_commands()
+        
+    async def item_auto(self, interaction: discord.Interaction, current: str) -> List[app_commands.Choice[str]]:
+        choice = [
+            app_commands.Choice(name=cmd , value=cmd)
+            for cmd in list_of_items if current.lower() in cmd.lower()
+        ]
 
-    def load_tree_commands(self):
+        return(choice)
 
-        @app_commands.command(name="drop", description="Do a Drop of any item")
-        @app_commands.describe(item="name of price")
-        async def drop(interaction: discord.Interaction, item: str):
-            if not interaction.user.guild_permissions.manage_messages:
-                return await interaction.send("You don't have permission to use this command")
-            embed = discord.Embed(title="Drop Incoming",color=interaction.user.color)
-            embed.add_field(name="Prize:", value=f"{item}",inline=False)
-            embed.add_field(name="Host:", value=f"**{interaction.user.display_name}**",inline=False)
-            await interaction.response.send_message("Drop droped",ephemeral=True)
-            view = Drop()
-            await interaction.channel.send(embed=embed, view=view)
-
-        self.bot.slash_commands.append(drop)
-
-        @drop.autocomplete('item')
-        async def command_auto(interaction: discord.Interaction, current: str, namespace:app_commands.Namespace) -> List[app_commands.Choice[str]]:
-            choice = [
-                app_commands.Choice(name=cmd , value=cmd)
-                for cmd in list_of_items if current.lower() in cmd.lower()
-            ]
-
-            return(choice)
+    @app_commands.command(name="drop", description="Do a Drop of any item")
+    @app_commands.describe(item="name of price")
+    @app_commands.autocomplete(item=item_auto)
+    @app_commands.guilds(discord.Object(785839283847954433))
+    async def drop(self, interaction: discord.Interaction, item: str):
+        if not interaction.user.guild_permissions.manage_messages:
+            return await interaction.send("You don't have permission to use this command")
+        embed = discord.Embed(title="Drop Incoming",color=interaction.user.color)
+        embed.add_field(name="Prize:", value=f"{item}",inline=False)
+        embed.add_field(name="Host:", value=f"**{interaction.user.display_name}**",inline=False)
+        await interaction.response.send_message("Drop droped",ephemeral=True)
+        view = Drop()
+        await interaction.channel.send(embed=embed, view=view)
 
     @commands.Cog.listener()
     async def on_ready(self):

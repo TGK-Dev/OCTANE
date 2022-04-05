@@ -8,11 +8,7 @@ import os
 import textwrap
 
 from discord.ext import commands
-from discord.ext.buttons import Paginator
-from traceback import format_exception
 import traceback
-from utils.util import Pag
-from utils.util import clean_code
 from utils.checks import checks
 from typing import Union
 description = "Owners Commands"
@@ -211,45 +207,6 @@ class Owner(commands.Cog, description=description):
                 description="`Time out canceling the command`")
             await ctx.send(embed=embed)
 
-    @commands.command(name="eval", description="Let Owner Run Code within bot", aliases=["exec"])
-    @commands.check_any(checks.is_me())
-    async def _eval(self, ctx, *, code):
-        code = clean_code(code)
-
-        local_variables = {
-            "discord": discord,
-            "commands": commands,
-            "bot": self.bot,
-            "ctx": ctx,
-            "channel": ctx.channel,
-            "author": ctx.author,
-            "guild": ctx.guild,
-            "message": ctx.message
-        }
-
-        stdout = io.StringIO()
-
-        try:
-            with contextlib.redirect_stdout(stdout):
-                exec(
-                    f"async def func():\n{textwrap.indent(code, '    ')}", local_variables,
-                )
-
-                obj = await local_variables["func"]()
-                result = f"{stdout.getvalue()}\n-- {obj}\n"
-        except Exception as e:
-            result = "".join(format_exception(e, e, e.__traceback__))
-
-        pager = Pag(
-            timeout=100,
-            entries=[result[i: i + 2000] for i in range(0, len(result), 2000)],
-            length=1,
-            prefix="```py\n",
-            suffix="```"
-        )
-
-        await pager.start(ctx)
-
     @commands.command(
         name='reload', description="Reload all/one of the bots cogs!", usage="", hidden=True
     )
@@ -266,8 +223,8 @@ class Owner(commands.Cog, description=description):
                 for ext in os.listdir("./cogs/"):
                     if ext.endswith(".py") and not ext.startswith("_"):
                         try:
-                            self.bot.unload_extension(f"cogs.{ext[:-3]}")
-                            self.bot.load_extension(f"cogs.{ext[:-3]}")
+                            await self.bot.unload_extension(f"cogs.{ext[:-3]}")
+                            await self.bot.load_extension(f"cogs.{ext[:-3]}")
                             embed.add_field(
                                 name=f"Reloaded: `{ext}`",
                                 value='\uFEFF',
@@ -300,8 +257,8 @@ class Owner(commands.Cog, description=description):
 
                 elif ext.endswith(".py") and not ext.startswith("_"):
                     try:
-                        self.bot.unload_extension(f"cogs.{ext[:-3]}")
-                        self.bot.load_extension(f"cogs.{ext[:-3]}")
+                        await self.bot.unload_extension(f"cogs.{ext[:-3]}")
+                        await self.bot.load_extension(f"cogs.{ext[:-3]}")
                         embed.add_field(
                             name=f"Reloaded: `{ext}`",
                             value='\uFEFF',
