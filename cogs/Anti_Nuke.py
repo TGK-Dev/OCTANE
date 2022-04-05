@@ -128,13 +128,13 @@ class Anti_nuke(commands.Cog):
         if channel.guild.id != 785839283847954433:
             return
         
-        event_data = [log async for log in channel.guild.audit_logs(limit=1, action=discord.AuditLogAction.role_update)]
+        event_data = [log async for log in channel.guild.audit_logs(limit=1, action=discord.AuditLogAction.channel_delete)]
         for event in event_data:
             if event.target.id == channel.id:
                 event = event
                 break
-        
-        if event.user.id in [488614633670967307, 301657045248114690, self.bot.user.id]:
+        print(event.user)
+        if event.user == self.bot.user or event.user.id in self.bot.owner_ids:
             return
         else:
             for role in event.user.roles:
@@ -149,5 +149,5 @@ class Anti_nuke(commands.Cog):
 
 
             
-def setup(bot):
-    bot.add_cog(Anti_nuke(bot))
+async def setup(bot):
+    await bot.add_cog(Anti_nuke(bot))

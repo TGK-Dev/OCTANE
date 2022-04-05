@@ -147,5 +147,5 @@ class Invites(commands.Cog, description=description):
             await ctx.send(f"Here is list of all user invited by {user.mention}", file=discord.File(file, f"Users Invited by {user.name}| {user.id}.txt"))
         os.remove("ids_list.txt")
 
-def setup(bot):
-    bot.add_cog(Invites(bot))
+async def setup(bot):
+    await bot.add_cog(Invites(bot))

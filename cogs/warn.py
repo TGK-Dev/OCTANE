@@ -63,5 +63,5 @@ class Warns(commands.Cog, description=description):
             length=2
         ).start(ctx)
 
-def setup(bot):
-    bot.add_cog(Warns(bot))
+async def setup(bot):
+    await bot.add_cog(Warns(bot))

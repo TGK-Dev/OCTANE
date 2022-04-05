@@ -20,13 +20,13 @@ class Confirm(discord.ui.View):
         self.bot = bot
 
     @discord.ui.button(label='Confirm', style=discord.ButtonStyle.green)
-    async def confirm(self, button: discord.ui.Button, interaction: discord.Interaction):
+    async def confirm(self, interaction: discord.Interaction,button: discord.ui.Button):
         await interaction.response.edit_message(view=start(self.ctx, self.message, self.range, self.bot))
         self.value = True
         self.stop()
 
     @discord.ui.button(label='Cancel', style=discord.ButtonStyle.grey)
-    async def cancel(self, button: discord.ui.Button, interaction: discord.Interaction):
+    async def cancel(self, interaction: discord.Interaction,button: discord.ui.Button):
         await interaction.response.send_message('Cancelling', ephemeral=True)
         self.value = False
         self.stop()
@@ -51,7 +51,7 @@ class start(discord.ui.View):
         self.bot = bot
 
     @discord.ui.button(label='Start Game!', style=discord.ButtonStyle.green)
-    async def Start(self, button: discord.ui.Button, interaction: discord.Interaction):
+    async def Start(self, interaction: discord.Interaction,button: discord.ui.Button):
         right_num = random.randint(0, self.max_num)
         await interaction.response.send_message(f"Starting, right number is: {right_num}", ephemeral=True)
         await interaction.user.send(f"Right Number is: {right_num}")
@@ -74,7 +74,7 @@ class Drop(discord.ui.View):
         super().__init__(timeout=None)
         
     @discord.ui.button(label='Drop', style=discord.ButtonStyle.blurple, emoji="<a:GiftShake:820323765941436446>", custom_id="Drop:drop")
-    async def drop(self, button: discord.ui.Button, interaction: discord.Interaction):
+    async def drop(self, interaction: discord.Interaction,button: discord.ui.Button):
         self.stop()
         self.children[0].disabled=True
         await interaction.message.edit(view=self)
@@ -166,5 +166,5 @@ class Guess_number(commands.Cog):
         else:
             await msg.delete()
 
-def setup(bot):
-    bot.add_cog(Guess_number(bot))
+async def setup(bot):
+    await bot.add_cog(Guess_number(bot))

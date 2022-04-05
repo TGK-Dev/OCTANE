@@ -100,5 +100,5 @@ class Afk(commands.Cog, description="An Afk commands"):
         await ctx.send("User Afk message has been reset")
 
 
-def setup(bot):
-    bot.add_cog(Afk(bot))
+async def setup(bot):
+    await bot.add_cog(Afk(bot))

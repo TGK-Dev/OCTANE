@@ -247,5 +247,5 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
         await ctx.author.edit(timeout=time)        
         await ctx.reply(f"You Have SelfMuted your self for {format_timespan(mutet)}\nPlease don't ask staff for unmute")
 
-def setup(bot):
-    bot.add_cog(v2Moderation(bot))
+async def setup(bot):
+    await bot.add_cog(v2Moderation(bot))

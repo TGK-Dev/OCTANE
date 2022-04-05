@@ -97,5 +97,5 @@ class roles(commands.Cog,  description=description):
         await ctx.send(embed=embed, delete_after=60)
 
 
-def setup(bot):
-    bot.add_cog(roles(bot))
+async def setup(bot):
+    await bot.add_cog(roles(bot))

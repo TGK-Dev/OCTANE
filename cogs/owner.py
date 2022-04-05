@@ -420,5 +420,5 @@ class Owner(commands.Cog, description=description):
         await ctx.send(f"permission of {command.name} is Updated", allowed_mentions=discord.AllowedMentions(everyone=False, roles=False))
         self.bot.perm[command.name] = data
 
-def setup(bot):
-    bot.add_cog(Owner(bot))
+async def setup(bot):
+    await bot.add_cog(Owner(bot))

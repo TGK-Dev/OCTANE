@@ -230,8 +230,8 @@ class starboard(commands.Cog):
 
         await ctx.send(f"Message {msg.id} has been force starred")
 
-def setup(bot):
-    bot.add_cog(starboard(bot))
+async def setup(bot):
+    await bot.add_cog(starboard(bot))
     
 """
     create_option(name="toggle", description="Toggle the starbord", required=False, option_type=5),

@@ -84,5 +84,5 @@ class Suggestions(commands.Cog):
         await message.edit(embed=embed)
         await message.clear_reactions()
 
-def setup(bot):
-    bot.add_cog(Suggestions(bot))
+async def setup(bot):
+    await bot.add_cog(Suggestions(bot))
