@@ -146,8 +146,6 @@ class Anti_nuke(commands.Cog):
             async with aiohttp.ClientSession() as session:
                 webhook = Webhook.from_url(self.bot.nuke_webhook, session=session)
                 await webhook.send(content="@everyone",username=f"{self.bot.user.name} NuKe", avatar_url=self.bot.user.avatar.url,embed=embed)
-
-
-            
+                            
 async def setup(bot):
     await bot.add_cog(Anti_nuke(bot))
