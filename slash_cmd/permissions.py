@@ -6,6 +6,15 @@ class Permissions(app_commands.Group):
     def __init__(self, bot, name: str = "permissons", parent=None):
         super().__init__(name=name, parent=parent)
         self.bot = bot
+    
+    async def command_auto(self, interaction: discord.Interaction, current: str) -> List[app_commands.Choice[str]]:
+        current_command = [cmd.name for cmd in self.bot.commands]
+        choice = [
+            app_commands.Choice(name=cmd , value=cmd)
+            for cmd in current_command if current.lower() in cmd.lower()
+        ]
+
+        return(choice[:24])
 
 
     @app_commands.command(name="check", description="Check permissions of role or user")
@@ -47,6 +56,7 @@ class Permissions(app_commands.Group):
 
     @app_commands.command(name='cmd')
     @app_commands.describe(command='check permissions of a command')
+    @app_commands.autocomplete(command=command_auto)
     async def cmd_check(
         self, 
         interaction: discord.Interaction, 
@@ -75,20 +85,11 @@ class Permissions(app_commands.Group):
         embed.add_field(name="Disabed?:", value=cmd_data['disable'], inline=False)
         await interaction.response.send_message(embed=embed)
 
-    @cmd_check.autocomplete('command')
-    async def command_auto(self, interaction: discord.Interaction, current: str, namespace:app_commands.Namespace) -> List[app_commands.Choice[str]]:
-        current_command = [cmd.name for cmd in self.bot.commands]
-        choice = [
-            app_commands.Choice(name=cmd , value=cmd)
-            for cmd in current_command if current.lower() in cmd.lower()
-        ]
-
-        return(choice[:24])
-
     @app_commands.command(name="edit", description="Edit permissions of a command")
     @app_commands.describe(command='command you want to edit')
     @app_commands.describe(target="role or user")
     @app_commands.describe(choice="Action you want to do")
+    @app_commands.autocomplete(command=command_auto)
     @app_commands.choices(choice=[
         Choice(name="Add", value=1),
         Choice(name="Remove", value=2),
@@ -160,17 +161,6 @@ class Permissions(app_commands.Group):
                 await interaction.followup.send("This command is disabled")
         
         self.bot.perm[command.name] = cmd_data
-        
-
-    @edit.autocomplete('command')
-    async def command_auto(self, interaction: discord.Interaction, current: str, namespace:app_commands.Namespace) -> List[app_commands.Choice[str]]:
-        current_command = [cmd.name for cmd in self.bot.commands]
-        choice = [
-            app_commands.Choice(name=cmd , value=cmd)
-            for cmd in current_command if current.lower() in cmd.lower()
-        ]
-
-        return(choice[:24])
 
     # async def on_error(self, interaction: discord.Interaction, command, error):
     #     return await interaction.response.send_message("An error occured", ephemeral=True)

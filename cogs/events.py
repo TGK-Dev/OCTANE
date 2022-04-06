@@ -3,6 +3,7 @@ import discord
 from discord import app_commands
 from utils.checks import CommandDisableByDev
 from discord.ext import commands, tasks
+from utils.Slash_check import DisableByDev
 
 class vote_button(discord.ui.View):
     def __init__(self, guild: int):
@@ -29,6 +30,36 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
     def __init__(self, bot):
         self.bot = bot
         self.update_task = self.check_update_task.start()
+        self.slash_error_handle()
+    
+    def slash_error_handle(self):
+        tree = self.bot.tree
+
+        @tree.error
+        async def on_app_command_error(interaction: discord.Interaction, command, error):
+            if isinstance(error ,app_commands.CommandOnCooldown):
+                m, s = divmod(error.retry_after, 60)
+                h, m = divmod(m, 60)
+                if int(h) == 0 and int(m) == 0:
+                    await interaction.response.send_message(f" You must wait {int(s)} seconds to use this command!", ephemeral=True)
+                elif int(h) == 0 and int(m) != 0:
+                    await interaction.response.send_message(
+                        f" You must wait {int(m)} minutes and {int(s)} seconds to use this command!", ephemeral=True
+                    )
+                else:
+                    await interaction.response.send_message(
+                        f" You must wait {int(h)} hours, {int(m)} minutes and {int(s)} seconds to use this command!", ephemeral=True
+                    )
+            elif isinstance(error, app_commands.CheckFailure):
+                await interaction.response.send_message("Hey, You can't use this command!", ephemeral=True)
+            
+            elif isinstance(error, DisableByDev):
+                await interaction.response.send_message("Command Disabled by Developer", ephemeral=True)
+            else:
+                embed = discord.Embed(color=0xE74C3C,
+                    description=f"<:dnd:840490624670892063> | Error: `{error}`")
+                
+                await interaction.response.send_message(embed=embed, ephemeral=True)
 
     @tasks.loop(seconds=900)
     async def check_update_task(self):
@@ -74,6 +105,7 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
     async def verify(self, ctx):
         embed = discord.Embed(title="Verification", description="Click the button below to verify your Self", color=0xffffff)
         await ctx.send(embed=embed, view=verify(self.bot))
+
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
         # Ignore these errors
@@ -124,8 +156,7 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
             embed = discord.Embed(color=0xE74C3C,
                                   description=f"<:dnd:840490624670892063> | Error: `{error}`")
             await ctx.send(embed=embed)
-            # mess = await ctx.send_help(ctx.command, )
-    
+        
     @commands.Cog.listener()
     async def on_message(self, message):
         word_list = ['vote link','how to get vote role', 'how to vote', 'pls vote', 'how to vote for server', 'link to vote']
@@ -264,5 +295,5 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
             data["case"] += 1
             await self.bot.config.upsert(data)
 
-def setup(bot):
-    bot.add_cog(Events(bot))
+async def setup(bot):
+    await bot.add_cog(Events(bot))

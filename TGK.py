@@ -12,19 +12,14 @@ import datetime
 import discord
 import json
 import motor.motor_asyncio
-
+import asyncio
 from traceback import format_exception
 
 from discord.ext import commands
 from pathlib import Path
-from better_help import Help
 
 # Local code
-import utils.json_loader
-
 from utils.mongo import Document
-from utils.util import Pag
-from utils.util import clean_code
 from slash_cmd.permissions import Permissions
 from slash_cmd.Ticket import Ticket_Commands
 
@@ -48,11 +43,6 @@ async def get_prefix(bot, message):
         return commands.when_mentioned_or(data["prefix"])(bot, message)
     except:
         return commands.when_mentioned_or(bot.DEFAULTPREFIX)(bot, message)
-
-# async def load_extensions(bot) -> None:
-#     for file in os.listdir(cwd + "/cogs"):
-#         if file.endswith(".py") and not file.startswith("_") and not file.startswith("test"):
-#             await bot.load_extension(f"cogs.{file[:-3]}")
 
 async def sync_slash_command(bot) -> None:
         """
@@ -82,7 +72,8 @@ bot = commands.Bot(
     case_insensitive=True,
     owner_ids=[391913988461559809, 488614633670967307, 301657045248114690],
     intents=intents,
-    help_command=Help(ending_note=f"Made By Jay and Utki", show_cooldown=False,show_brief=True, timeout=60, timeout_delete=True),
+    help_command=None
+    #Help(ending_note=f"Made By Jay and Utki", show_cooldown=False,show_brief=True, timeout=60, timeout_delete=True),
 )
 # change command_prefix='-' to command_prefix=get_prefix for custom prefixes
 bot.config_token = os.getenv('TOKEN')
@@ -90,6 +81,8 @@ bot.connection_url = str(os.getenv('MONGO'))
 bot.joke_api_key = os.getenv('DAD')
 bot.logging_webhook = os.getenv('WEBHOOK')
 bot.nuke_webhook = os.getenv('NUKE')
+bot.Amri_token = os.getenv('AMRI')
+bot.connection_money = os.getenv('MONGOMONEY')
 
 logging.basicConfig(level=logging.INFO)
 
@@ -110,6 +103,7 @@ bot.total_suggestions = 0
 bot.snipe = {}
 bot.esnipe = {}
 bot.config_data = {}
+bot.guess_number = {}
 
 @bot.event
 async def on_ready():
@@ -159,8 +153,7 @@ async def on_ready():
     await sync_slash_command(bot)
     print("Slash Commands Sync Complete\n-----")
     # print("Starting Loading Extensions\n-----")
-    # await load_extensions(bot)
-    # print("Extensions Loaded\n-----")
+    print("Extensions Loaded\n-----")
 
 @bot.event
 async def on_message(message):
@@ -188,11 +181,13 @@ async def on_message(message):
     await bot.process_commands(message)
 
 
-if __name__ == "__main__":
-    # When running this file, if it is the 'main' file
-    # I.E its not being imported from another python file run this
+async def Run_bot(bot: commands.Bot) -> None:
+
     bot.mongo = motor.motor_asyncio.AsyncIOMotorClient(str(bot.connection_url))
+    bot.moneyDB = motor.motor_asyncio.AsyncIOMotorClient(str(bot.connection_money))
     bot.db = bot.mongo["tgk_database"]
+    bot.db_money = bot.moneyDB["TGK"]
+    bot.money = Document(bot.db_money, 'donorBank')
     bot.config = Document(bot.db, "config")
     bot.afk = Document(bot.db, "afk")
     bot.bans = Document(bot.db, "bans")
@@ -210,7 +205,16 @@ if __name__ == "__main__":
     bot.april = Document(bot.db, "april")
 
     for file in os.listdir(cwd + "/cogs"):
-        if file.endswith(".py") and not file.startswith("_") and not file.startswith("embed"):
-            bot.load_extension(f"cogs.{file[:-3]}")
+        if file.endswith(".py") and not file.startswith("_") :#and not file.startswith("test"):
+            await bot.load_extension(f"cogs.{file[:-3]}")
+    
+    await bot.start(bot.config_token)
 
-    bot.run(bot.config_token)
+loop = asyncio.new_event_loop()
+
+try:
+    loop.run_until_complete(Run_bot(bot))
+except KeyboardInterrupt:
+    print("\n-----\nShutting down...\n-----\n")
+    loop.close()
+    print("-----\nShutdown Complete\n-----\n")

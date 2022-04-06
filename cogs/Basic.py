@@ -7,26 +7,6 @@ from discord.ext import commands
 from utils.checks import checks
 
 description = "Some Basic commands"
-
-class April_FOOl(discord.ui.View):
-    def __init__(self, bot):
-        self.bot = bot
-        super().__init__(timeout=None)
-    
-    @discord.ui.button(label="Mystery Button", style=discord.ButtonStyle.green, custom_id="mystery")
-    async def mystery_button(self, button: discord.Button, interaction: discord.Interaction):
-        data = await self.bot.april.find(interaction.user.id)
-        await interaction.response.defer(thinking=True, ephemeral=True)
-        if data:
-            return await interaction.followup.send(f"You have already Clicked the Mystery Button")
-        last_name = interaction.user.display_name
-        try:
-            await interaction.user.edit(nick=interaction.user.name [::-1])
-        except:
-            return await interaction.followup.send("Missing Permissions", ephemeral=True)
-        await interaction.followup.send("Something happened", ephemeral=True)
-        await self.bot.april.upsert({"_id": interaction.user.id, "last_name": last_name})
-        await self.bot.get_channel(959157972985081856).send(f"{interaction.user.mention} Clicked the Mystery Button")
         
 class Basic(commands.Cog, description=description):
     def __init__(self, bot):
@@ -34,13 +14,7 @@ class Basic(commands.Cog, description=description):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        self.bot.add_view(April_FOOl(self.bot))
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
-    
-    @commands.command()
-    @commands.check(checks.is_me())
-    async def april(self, ctx):
-        await ctx.send("An Random Button has appeared, who have power to click it", view=April_FOOl(self.bot))
 
     @commands.command()
     async def ping(self, ctx):
@@ -142,5 +116,5 @@ class Basic(commands.Cog, description=description):
         await ctx.reply(embed=embed, mention_author=False)
 
 
-def setup(bot):
-    bot.add_cog(Basic(bot))
+async def setup(bot):
+    await bot.add_cog(Basic(bot))

@@ -10,7 +10,10 @@ class checks():
 
     def is_me():
         def predicate(ctx):
-            return ctx.author.id in [488614633670967307, 301657045248114690]
+            try:
+                return ctx.author.id in [488614633670967307, 301657045248114690]
+            except:
+                return ctx.user.id in [488614633670967307, 301657045248114690]
         return commands.check(predicate)
 
     def can_use():
@@ -44,6 +47,23 @@ class checks():
             command = bot.perm[command.name]
         except KeyError:
             command = {"_id": command.name, "allowed_roles": [], 'allowed_users': [],"disable": False}
+        
+        if interaction.user.id in [488614633670967307, 301657045248114690]: return True
+
+        user_roles = [role.id for role in interaction.user.roles]
+
+        if interaction.user.id in command['allowed_users']: return True
+
+        if (set(user_roles) & set(command['allowed_roles'])):
+            return True
+        else:
+            return False
+    
+    def ManualCheck(bot, command, interaction):
+        try:
+            command = bot.perm[command]
+        except KeyError:
+            command = {"_id": command, "allowed_roles": [], 'allowed_users': [],"disable": False}
         
         if interaction.user.id in [488614633670967307, 301657045248114690]: return True
 
