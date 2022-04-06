@@ -1,26 +1,55 @@
-# basic dependencies
+
 import discord
 from discord.ext import commands
-
-# aiohttp should be installed if discord.py is
 import aiohttp
-
-# PIL can be installed through
-# `pip install -U Pillow`
 from PIL import Image, ImageChops, ImageDraw, ImageFont
-
-# partial lets us prepare a new function with args for run_in_executor
 from functools import partial
-
-# BytesIO allows us to convert bytes into a file-like byte stream.
 from io import BytesIO
-
-# this just allows for nice function annotation, and stops my IDE from complaining.
 from typing import Union
 from amari import AmariClient
 import math
 from datetime import timezone
 import datetime
+from discord import app_commands
+
+def get_time(time: datetime.datetime):
+    now = datetime.datetime.now(timezone.utc)
+    new_time = now - time
+    year = new_time.days // 365
+    month = (new_time.days - year * 365) // 30
+    if new_time.days <= 0:
+        return f"Today"
+    elif new_time.days <= 30:
+        return f"{new_time.days} days ago"
+    elif year < 1 and month > 1:
+        return f"{month} Months Ago"
+    else:
+        return f"{year} Year Ago"
+
+def get_status(member: discord.Member, moneydata: dict= None):
+    owner_role = discord.utils.get(member.guild.roles, id=785842380565774368)
+    staff_role = discord.utils.get(member.guild.roles, id=818129661325869058)
+    og_role = discord.utils.get(member.guild.roles, id=931072410365607946)
+    grinder = discord.utils.get(member.guild.roles, id=836228842397106176)
+    if owner_role in member.roles:
+        return "Owner"
+    elif  member.guild_permissions.administrator:
+        return "Adminisrator"
+    elif member.guild_permissions.manage_messages and member.guild_permissions.ban_members:
+        return "Moderator"
+    elif member.guild_permissions.manage_messages and not member.guild_permissions.ban_members:
+        return "Staff Team"
+    elif staff_role in member.roles:
+        return "Staff Team"
+    elif grinder in member.roles:
+        return "Grinder"
+    elif moneydata != None and moneydata['bal'] > 25000000:
+        return "Robinhood"
+    elif og_role in member.roles:
+        return "Loyal member"
+    else:
+        return "Member"
+    
 def circle(pfp, size = (215, 215)):
 
     pfp = pfp.resize(size, Image.ANTIALIAS).convert("RGBA")
@@ -42,74 +71,62 @@ def millify(n):
 
     return '{:.0f}{}'.format(n / 10**(3 * millidx), millnames[millidx])
 
+def is_me(interaction: discord.Interaction):
+    return interaction.user.id in [488614633670967307, 301657045248114690]
+    
 class ImageCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.Amari_api = AmariClient(self.bot.Amri_token)
 
-    @commands.command(name="profile", description="Display user profile")
-    #@commands.check_any(is_me())
-    async def profile(self, ctx, member: discord.Member=None):
-        print("start")
-        member = member if member else ctx.author
+    async def on_ready(self):
+        print(f"{self.__class__.__name__} Cog has been loaded\n-----")
 
-        Id, status =str(member.id), str(member.status)
+    @app_commands.command(name="profile", description="Display user profile")
+    @app_commands.check(is_me)
+    @app_commands.guilds(discord.Object(785839283847954433))
+    @app_commands.describe(member="The user you want to display profile of")
+    async def profile(self, interaction: discord.Interaction, member: discord.Member=None):
+        await interaction.response.defer(thinking=True)
+        member = member if member else interaction.user
+
+        Id =str(member.id)
 
         name = f"{member.name[:16]}.." if len(member.name) > 16 else f"{member.name}#{member.discriminator}"
         if member.name == member.display_name:
             nick = None
         else:
-            nick = f"{member.display_name[:16]}.." if len(member.display_name) > 16 else f"{member.display_name}"
+            nick = f"AKA - {member.display_name[:16]}.." if len(member.display_name) > 16 else f"{member.display_name}"
 
-        join = member.joined_at
-        created = member.created_at
-        now = datetime.datetime.now(timezone.utc)
-        join_d = now - join
-        year = join_d.days //365
-        month = (join_d.days - year * 365) // 30
-
-        if year < 1 and month > 1:
-            joined_at = f"{month} Months Ago"
-        elif year < 1 and month < 1:
-            joined_at = f"{join_d.days} Days Ago"
-        else:
-            joined_at = f"{year} Year Ago"
-        
-        created_d = now - created
-        year = created_d.days //365
-        month = (created_d.days - year * 365) // 30
-
-        if year < 1 and month > 1:
-            created_at = f"{month} Months Ago"
-        elif year < 1 and month < 1:
-            created_at = f"{created_d.days} Days Ago"
-        else:
-            created_at = f"{year} Year Ago"
-
-        
-        
-
-        leveldata = await self.Amari_api.fetch_user(ctx.guild.id, member.id)
+        leveldata = await self.Amari_api.fetch_user(interaction.guild.id, member.id)
         level = str(leveldata.level)
         moneydata = await self.bot.money.find(member.id)
+
         if not moneydata:
             money = "0"
         else:
-            money = str(millify(moneydata['bal']))
+            money = str(f"{millify(moneydata['bal'])}")
 
-        base = Image.open("base.png").convert("RGBA")
-        background = Image.open("bg.png").convert("RGBA")
+        created_at = get_time(member.created_at)
+        joined_at = get_time(member.joined_at)
+        status = get_status(member, moneydata)
 
-        pfp = member.avatar.with_format("png")
+        base = Image.open("assets/base.png").convert("RGBA")
+        background = Image.open("assets/bg.png").convert("RGBA")
+
+        if not member.avatar:
+            pfp = member.default_avatar.with_format("png")
+        else:
+            pfp = member.avatar.with_format("png")
         pfp = pfp.with_size(256)
         data = BytesIO(await pfp.read())
         pfp = Image.open(data).convert("RGBA")
 
         draw = ImageDraw.Draw(base)
         pfp = circle(pfp, (215, 215))
-        font = ImageFont.truetype("nunito-regular.ttf", size=38)
-        akafont = ImageFont.truetype("nunito-regular.ttf", size=30)
-        subfont = ImageFont.truetype("nunito-regular.ttf", size=25)
+        font = ImageFont.truetype("assets/nunito-regular.ttf", size=38)
+        akafont = ImageFont.truetype("assets/nunito-regular.ttf", size=30)
+        subfont = ImageFont.truetype("assets/nunito-regular.ttf", size=25)
 
         draw.text((280, 240), name, font=font)
         if nick:
@@ -126,7 +143,7 @@ class ImageCog(commands.Cog):
         with BytesIO() as buffer:
             background.save(buffer, "png")
             buffer.seek(0)
-            await ctx.send(file=discord.File(buffer, "profile.png"))
+            await interaction.followup.send(file=discord.File(buffer, "profile.png"))
 
 # setup function so this can be loaded as an extension
 async def setup(bot: commands.Bot):
