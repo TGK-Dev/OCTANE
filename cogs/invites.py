@@ -3,7 +3,6 @@ import datetime
 import discord
 import os
 from discord.ext import commands
-from utils.util import Pag
 from utils.checks import checks
 
 
@@ -101,28 +100,6 @@ class Invites(commands.Cog, description=description):
         embed = discord.Embed(
             color=0x2f3136, description=f"{member.mention} Was invited by <@{data['_id']}>")
         await ctx.send(embed=embed)
-
-    @commands.command(name='ilb', description="invites leaderboard")
-    async def ilb(self, ctx):
-        invites = await self.bot.invites.get_all()
-
-        invites = sorted(invites, key=lambda x: x["count"], reverse=True)
-        i = 1
-        pages = []
-        for invite in invites:
-            description = f"""
-            {i}.Member: <@{invite['_id']}>
-            Toal Inivits: {invite['count']}
-            """
-            i += 1
-            pages.append(description)
-
-        await Pag(
-            title=f"Inivits leaderboard",
-            colour=0xCE2029,
-            entries=pages,
-            length=5
-        ).start(ctx)
     
     @commands.command()
     @commands.check_any(checks.can_use())
@@ -147,5 +124,5 @@ class Invites(commands.Cog, description=description):
             await ctx.send(f"Here is list of all user invited by {user.mention}", file=discord.File(file, f"Users Invited by {user.name}| {user.id}.txt"))
         os.remove("ids_list.txt")
 
-def setup(bot):
-    bot.add_cog(Invites(bot))
+async def setup(bot):
+    await bot.add_cog(Invites(bot))

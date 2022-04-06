@@ -8,19 +8,63 @@ import os
 import textwrap
 
 from discord.ext import commands
-from discord.ext.buttons import Paginator
-from traceback import format_exception
 import traceback
-from utils.util import Pag
-from utils.util import clean_code
 from utils.checks import checks
 from typing import Union
+from discord import app_commands
+from utils.util import clean_code
+from traceback import format_exception
+from paginator import Paginator
 description = "Owners Commands"
 
-
+def is_me(interaction: discord.Interaction):
+    return interaction.user.id in [488614633670967307, 301657045248114690]
+    
 class Owner(commands.Cog, description=description):
     def __init__(self, bot):
         self.bot = bot
+        self.load_app_command()
+
+    def load_app_command(self):
+
+        @app_commands.context_menu(name="eval")
+        async def eval_(interaction: discord.Interaction, message: discord.Message):
+            if interaction.user.id not in [488614633670967307, 301657045248114690]: 
+                return await interaction.response.send_message("You don't have permission to use this command", ephemeral=True)
+
+            code = clean_code(message.content)
+            local_variables = {
+                "discord": discord,
+                "commands": commands,
+                "bot": self.bot,
+                "ctx": interaction,
+                "channel": interaction.channel,
+                "author": interaction.user,
+                "guild": interaction.guild,
+                "message": interaction.message
+            }
+            stdout = io.StringIO()
+
+            try:
+                with contextlib.redirect_stdout(stdout):
+
+                    exec(
+                        f"async def func():\n{textwrap.indent(code, '    ')}", local_variables,
+                    )
+                    obj = await local_variables["func"]()
+
+                    result = f"{stdout.getvalue()}\n-- {obj}\n"
+                
+            except Exception as e:
+                result = "".join(format_exception(e,e,e.__traceback__))
+            page = []
+            for i in range(0, len(result), 2000):
+                page.append(discord.Embed(description=f'```py\n{result[i:i + 2000]}\n```', color=interaction.user.color))
+
+            await Paginator(interaction, page).start(embeded=True, quick_navigation=False)
+
+        self.bot.slash_commands.append(eval_)
+
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -211,45 +255,6 @@ class Owner(commands.Cog, description=description):
                 description="`Time out canceling the command`")
             await ctx.send(embed=embed)
 
-    @commands.command(name="eval", description="Let Owner Run Code within bot", aliases=["exec"])
-    @commands.check_any(checks.is_me())
-    async def _eval(self, ctx, *, code):
-        code = clean_code(code)
-
-        local_variables = {
-            "discord": discord,
-            "commands": commands,
-            "bot": self.bot,
-            "ctx": ctx,
-            "channel": ctx.channel,
-            "author": ctx.author,
-            "guild": ctx.guild,
-            "message": ctx.message
-        }
-
-        stdout = io.StringIO()
-
-        try:
-            with contextlib.redirect_stdout(stdout):
-                exec(
-                    f"async def func():\n{textwrap.indent(code, '    ')}", local_variables,
-                )
-
-                obj = await local_variables["func"]()
-                result = f"{stdout.getvalue()}\n-- {obj}\n"
-        except Exception as e:
-            result = "".join(format_exception(e, e, e.__traceback__))
-
-        pager = Pag(
-            timeout=100,
-            entries=[result[i: i + 2000] for i in range(0, len(result), 2000)],
-            length=1,
-            prefix="```py\n",
-            suffix="```"
-        )
-
-        await pager.start(ctx)
-
     @commands.command(
         name='reload', description="Reload all/one of the bots cogs!", usage="", hidden=True
     )
@@ -266,8 +271,8 @@ class Owner(commands.Cog, description=description):
                 for ext in os.listdir("./cogs/"):
                     if ext.endswith(".py") and not ext.startswith("_"):
                         try:
-                            self.bot.unload_extension(f"cogs.{ext[:-3]}")
-                            self.bot.load_extension(f"cogs.{ext[:-3]}")
+                            await self.bot.unload_extension(f"cogs.{ext[:-3]}")
+                            await self.bot.load_extension(f"cogs.{ext[:-3]}")
                             embed.add_field(
                                 name=f"Reloaded: `{ext}`",
                                 value='\uFEFF',
@@ -300,8 +305,8 @@ class Owner(commands.Cog, description=description):
 
                 elif ext.endswith(".py") and not ext.startswith("_"):
                     try:
-                        self.bot.unload_extension(f"cogs.{ext[:-3]}")
-                        self.bot.load_extension(f"cogs.{ext[:-3]}")
+                        await self.bot.unload_extension(f"cogs.{ext[:-3]}")
+                        await self.bot.load_extension(f"cogs.{ext[:-3]}")
                         embed.add_field(
                             name=f"Reloaded: `{ext}`",
                             value='\uFEFF',
@@ -420,5 +425,5 @@ class Owner(commands.Cog, description=description):
         await ctx.send(f"permission of {command.name} is Updated", allowed_mentions=discord.AllowedMentions(everyone=False, roles=False))
         self.bot.perm[command.name] = data
 
-def setup(bot):
-    bot.add_cog(Owner(bot))
+async def setup(bot):
+    await bot.add_cog(Owner(bot))

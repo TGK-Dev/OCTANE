@@ -26,5 +26,5 @@ class Tickets(commands.Cog):
         embed.set_footer(text=ctx.guild.name, icon_url=ctx.guild.icon.url)
         await ctx.send(embed=embed, view=Ticket_panel(self.bot))
 
-def setup(bot):
-    bot.add_cog(Tickets(bot))
+async def setup(bot):
+    await bot.add_cog(Tickets(bot))

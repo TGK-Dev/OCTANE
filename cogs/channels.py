@@ -76,5 +76,5 @@ class channel(commands.Cog, description=description):
                               color=0x2f3136)
         await ctx.send(embed=embed)
 
-def setup(bot):
-    bot.add_cog(channel(bot))
+async def setup(bot):
+    await bot.add_cog(channel(bot))

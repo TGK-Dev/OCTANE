@@ -11,7 +11,7 @@ class Ticket_Control(discord.ui.View):
         super().__init__(timeout=None)
     
     @discord.ui.button(label="Open", custom_id="Control:Open", style=discord.ButtonStyle.gray, disabled=True, emoji="🔓")
-    async def Open(self, button: discord.Button,interaction: discord.Interaction):
+    async def Open(self, interaction: discord.Interaction ,button: discord.Button):
         await interaction.response.defer(thinking=True)
         can_run = await checks.slash_check(self.bot, interaction, "open")
 
@@ -67,7 +67,7 @@ class Ticket_Control(discord.ui.View):
         await interaction.message.edit(view=self)
 
     @discord.ui.button(label="Close", custom_id="Control:Close", style=discord.ButtonStyle.gray, emoji="🔒")
-    async def Close(self, button: discord.Button,interaction: discord.Interaction):
+    async def Close(self, interaction: discord.Interaction ,button: discord.Button):
         await interaction.response.defer(ephemeral=False, thinking=True)
 
         can_run = await checks.slash_check(self.bot, interaction, "close")
@@ -123,7 +123,7 @@ class Ticket_Control(discord.ui.View):
         await interaction.message.edit(view=self)
     
     @discord.ui.button(label="Secure", custom_id="Control:Secure", style=discord.ButtonStyle.gray, emoji="🔐")
-    async def Secure(self, button: discord.Button,interaction: discord.Interaction):
+    async def Secure(self, interaction: discord.Interaction ,button: discord.Button):
             ticket_info = await self.bot.ticket.find(interaction.channel.id)
             await interaction.response.defer(ephemeral=False, thinking=True)
             message = await interaction.followup.send("Securing ticket...")
@@ -159,7 +159,7 @@ class Ticket_Control(discord.ui.View):
             await interaction.message.edit(view=self)
     
     @discord.ui.button(label="Save", custom_id="Control:Save", style=discord.ButtonStyle.green, emoji="📩")
-    async def Save(self, button: discord.Button,interaction: discord.Interaction):
+    async def Save(self, interaction: discord.Interaction ,button: discord.Button):
         await interaction.response.defer(thinking=True)
         message = await interaction.followup.send("Saving ticket ...")
         topic = interaction.channel.name
@@ -208,12 +208,8 @@ class Ticket_Control(discord.ui.View):
         await interaction.message.edit(view=self)
     
     @discord.ui.button(label="Delete", custom_id="Control:Delete", style=discord.ButtonStyle.red, emoji="🗑️")
-    async def Delete(self, button: discord.Button,interaction: discord.Interaction):
+    async def Delete(self, interaction: discord.Interaction ,button: discord.Button):
         data = await self.bot.ticket.find(interaction.channel.id)
-        
-        can_run = await checks.slash_check(self.bot, interaction, "delete")
-        if can_run != True:
-            return await interaction.followup.send("You do not have permission to run this command")
 
         if interaction.channel.category.id != self.bot.config_data[interaction.guild.id]["ticket_category"]:
             return await interaction.response.send_message("This is not a ticket channel", ephemeral=True)
@@ -258,7 +254,7 @@ class Ticket_Control(discord.ui.View):
             await log_channel.send(embed=log_embed)
 
     @discord.ui.button(label="Add Shero", custom_id="Control:shero", style=discord.ButtonStyle.gray, emoji="🤖")
-    async def add_shero(self, button: discord.Button,interaction: discord.Interaction) -> None:
+    async def add_shero(self, interaction: discord.Interaction ,button: discord.Button) -> None:
 
         shero = interaction.guild.get_member(692570006969516032)
         if not shero:
@@ -282,7 +278,13 @@ class Ticket_Control(discord.ui.View):
                     await interaction.message.edit(view=self)
         else:
             await interaction.followup.send("This is not a partnership ticket", ephemeral=True)
-
+    
+    async def interaction_check(self, interaction: discord.Interaction):
+        if interaction.user.guild_permissions.manage_messages:
+            return True
+        else:
+            await interaction.response.send_message("You do not have permission to run this command", ephemeral=True)
+            return False
 
 class PartnerShip_model(discord.ui.Modal, title="PartnerShip Infomations"):
     def __init__(self, bot):
@@ -387,7 +389,7 @@ class Ticket_panel(discord.ui.View):
         self.add_item(discord.ui.Button(label='Ban Appeal', url=url))
 
     @discord.ui.button(label='Server Support', style=discord.ButtonStyle.red, custom_id='persistent_view:red', emoji="<:support:837272254307106849>")
-    async def support(self, button: discord.ui.Button, interaction: discord.Interaction):
+    async def support(self, interaction: discord.Interaction ,button: discord.Button):
         await interaction.response.defer(ephemeral=True, thinking=True)
         config = await self.bot.config.find(interaction.guild.id)
         staff_role = discord.utils.get(interaction.guild.roles, id=config['support_role'])
@@ -456,11 +458,11 @@ class Ticket_panel(discord.ui.View):
 
 
     @discord.ui.button(label='Partnership ', style=discord.ButtonStyle.green, custom_id='persistent_view:partner_ship', emoji="<:partner:837272392472330250>")
-    async def partnership(self, button: discord.ui.Button, interaction: discord.Interaction):
+    async def partnership(self, interaction: discord.Interaction ,button: discord.Button):
         await interaction.response.send_modal(PartnerShip_model(self.bot))
 
     @discord.ui.button(label='Want bot like me ?', style=discord.ButtonStyle.blurple, custom_id='persistent_view:custom_bot', emoji="🤖")
-    async def custom_bot(self, button: discord.ui.Button, interaction: discord.Interaction):
+    async def custom_bot(self, interaction: discord.Interaction ,button: discord.Button):
         embed = discord.Embed(description="Yes you can get a Bot like me With very cheap price with hosting\nJust Dm <@488614633670967307> or <@301657045248114690> and We don't take any bot currency as payment")
         await interaction.response.send_message(embed=embed, ephemeral=True)
 

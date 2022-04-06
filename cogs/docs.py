@@ -195,5 +195,5 @@ class Docs(commands.Cog, name="Documentation"):
         await self.do_rtfm(ctx, key, query)
 
 
-def setup(bot):
-    bot.add_cog(Docs(bot))
+async def setup(bot):
+    await bot.add_cog(Docs(bot))
