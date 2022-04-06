@@ -220,7 +220,7 @@ class starboard(commands.Cog):
         if attach:
             embed.set_image(url=attach.url)
         
-        starboard_message = await self.bot.get_channel(data['starboard_channel']).send(embed=embed)
+        starboard_message = await self.bot.get_channel(data['starboard_channel']).send(content=f":dizzy: 1 | <#{data['starboard_channel']}>",embed=embed)
         await msg.add_reaction("⭐")
         sdata = {"_id": msg.id,
                 "guildId": ctx.guild.id,
@@ -232,12 +232,5 @@ class starboard(commands.Cog):
 
 async def setup(bot):
     await bot.add_cog(starboard(bot))
-    
-"""
-    create_option(name="toggle", description="Toggle the starbord", required=False, option_type=5),
-        create_option(name="threshold", description="Set threshhold for the reactions", required=False, option_type=4),
-        create_option(name="channel", description="Set Channel for Starbord", required=False, option_type=7),
-    ])
-"""
 
             
