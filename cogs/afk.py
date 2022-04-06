@@ -3,13 +3,10 @@ import datetime
 from copy import deepcopy
 from discord.ext import commands
 import re
-from cogs.v2moderation import roles
 from utils.checks import checks
 
 pc_mention_regex = re.compile("(@)(!|&)(\d\d\d)")
 mo_mention_regex = re.compile("<(@)")
-
-
 class Afk(commands.Cog, description="An Afk commands"):
     def __init__(self, bot):
         self.bot = bot
