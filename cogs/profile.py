@@ -32,19 +32,19 @@ def get_status(member: discord.Member, moneydata: dict= None):
     og_role = discord.utils.get(member.guild.roles, id=931072410365607946)
     grinder = discord.utils.get(member.guild.roles, id=836228842397106176)
     if owner_role in member.roles:
-        return "Owner"
+        return "King"
     elif  member.guild_permissions.administrator:
-        return "Adminisrator"
+        return "Chief"
     elif member.guild_permissions.manage_messages and member.guild_permissions.ban_members:
         return "Moderator"
     elif member.guild_permissions.manage_messages and not member.guild_permissions.ban_members:
-        return "Staff Team"
+        return "Ministers"
     elif staff_role in member.roles:
-        return "Staff Team"
+        return "Ministers"
     elif grinder in member.roles:
         return "Grinder"
     elif moneydata != None and moneydata['bal'] > 25000000:
-        return "Robinhood"
+        return "Treasury"
     elif og_role in member.roles:
         return "Loyal member"
     else:
@@ -83,13 +83,13 @@ class ImageCog(commands.Cog):
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
 
     @app_commands.command(name="profile", description="Display user profile")
-    @app_commands.check(is_me)
     @app_commands.guilds(discord.Object(785839283847954433))
     @app_commands.describe(member="The user you want to display profile of")
     async def profile(self, interaction: discord.Interaction, member: discord.Member=None):
         await interaction.response.defer(thinking=True)
         member = member if member else interaction.user
-
+        if member.bot:
+            return await interaction.response.send_message("Stop Staking us", ephemeral=True)
         Id =str(member.id)
 
         name = f"{member.name[:16]}.." if len(member.name) > 16 else f"{member.name}#{member.discriminator}"
