@@ -12,6 +12,8 @@ from discord.ext import tasks
 from utils.checks import checks
 from discord import app_commands
 from typing import Union
+from utils.Slash_check import can_use_slash
+
 time_regex = re.compile("(?:(\d{1,5})(h|s|m|d))+?")
 time_dict = {"h": 3600, "s": 1, "m": 60, "d": 86400}
 
@@ -64,6 +66,9 @@ class TimeConverter(commands.Converter):
                 raise commands.BadArgument(f"{key} is not a number!")
         return round(time)
 
+def is_me(interaction: discord.Interaction):
+    return interaction.user.id in [488614633670967307, 301657045248114690]
+
 
 class v2Moderation(commands.Cog, description=description, command_attrs=dict(hidden=False)):
     def __init__(self, bot):
@@ -74,6 +79,8 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
     def load_tree_commands(self):
         
         @app_commands.context_menu(name="Whois")
+        @app_commands.check(is_me)
+        @app_commands.guilds(discord.Object(785839283847954433))
         async def whois(interaction: discord.Interaction, member: Union[discord.Member, discord.User]):
             usercolor = member.color
 
@@ -163,15 +170,12 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
             await webhook.send(username=f"{self.bot.user.name} Logging", avatar_url=self.bot.user.avatar.url,embed=embed)
             await session.close()
 
-    @commands.command(name="uerinfo", description="Give all Infomation about user", usage="[member]", aliases=['whois'])
-    @commands.check_any(checks.can_use())
-    async def uerinfo(self, ctx, member: discord.Member = None):
-        await ctx.message.delete()
+    @app_commands.command(name="whois", description="Give all Infomation about user")
+    @app_commands.check(can_use_slash)
+    @app_commands.guilds(discord.Object(785839283847954433))
+    async def uerinfo(self, interaction: discord.interactions, member: discord.Member = None):
 
-        def fomat_time(time):
-            return time.strftime('%d-%B-%Y %I:%m %p')
-
-        member = member if member else ctx.author
+        member = member if member else interaction.user
         usercolor = member.color
 
         embed = discord.Embed(title=f'{member.name}', color=usercolor)
@@ -200,52 +204,10 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
         if Member.banner:
             embed.set_image(url=Member.banner)
 
-        message = await ctx.send(embed=embed)
+        await interaction.respond.send_message(embed=embed)
+        # await interaction.followup.
+        # await message.edit(view=roles(self.bot, member, message))
 
-        await message.edit(view=roles(self.bot, member, message))
-
-
-    @commands.command(name="mute", description="put user in timeout", usage="[member] [time]", aliases=["timeout"])
-    @commands.check_any(checks.can_use())
-    async def mute(self, ctx, user: discord.Member, time: TimeConverter):
-        await ctx.message.delete()
-        if int(time) > 2419200:return await ctx.send("You can't set timeout for more than 28days")
-        time = datetime.datetime.utcnow() + datetime.timedelta(seconds=time)
-        
-        await user.edit(timeout=time)
-
-        embed = discord.Embed(description=f"<:dynosuccess:898244185814081557> ***{user} Was Timeout***",color=0x11eca4)
-        await ctx.channel.send(embed=embed)
-
-        log_embed = discord.Embed(title=f"Mute | {user}")
-        log_embed.add_field(name="User", value=user.mention)
-        log_embed.add_field(name="Moderator", value=ctx.author.mention)
-        channel = self.bot.get_channel(803687264110247987)
-        await channel.send(embed=log_embed)
-    
-    @commands.command(name="unmute", description="Remove timeout from user", usage="[member] [time]")
-    @commands.check_any(checks.can_use())
-    async def unmute(self, ctx, user: discord.Member):
-        await ctx.message.delete()
-        
-        await user.edit(timeout=None)
-
-        embed = discord.Embed(description=f"<:dynosuccess:898244185814081557> ***{user} Was Timeout***",color=0x11eca4)
-        await ctx.channel.send(embed=embed)
-
-        log_embed = discord.Embed(title=f"UnMute | {user}")
-        log_embed.add_field(name="User", value=user.mention)
-        log_embed.add_field(name="Moderator", value=ctx.author.mention)
-        channel = self.bot.get_channel(803687264110247987)
-        await channel.send(embed=log_embed)
-    
-    @commands.command(name="selfmute", description="put Your self in timeout", usage="[member] [time]", aliases=["smt"])
-    async def selfmute(self, ctx, time: TimeConverter):
-        if int(time) > 2419200:return await ctx.send("You can't set timeout for more than 28days")
-        mutet = time
-        time = datetime.datetime.utcnow()+ datetime.timedelta(seconds=time)
-        await ctx.author.edit(timeout=time)        
-        await ctx.reply(f"You Have SelfMuted your self for {format_timespan(mutet)}\nPlease don't ask staff for unmute")
 
 async def setup(bot):
     await bot.add_cog(v2Moderation(bot))
