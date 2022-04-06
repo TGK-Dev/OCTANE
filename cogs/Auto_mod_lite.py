@@ -54,7 +54,10 @@ class AutoMod(commands.Cog):
         
         if self.bot.automod != True: return
         if message.author.bot: return
-        if message.guild.id != 785839283847954433: return
+        try:
+            if message.guild.id != 785839283847954433: return
+        except AttributeError:
+            return
 
         link = is_link_there(message.content)
         if len(message.mentions) >= 9:
