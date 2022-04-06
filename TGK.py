@@ -72,7 +72,8 @@ bot = commands.Bot(
     case_insensitive=True,
     owner_ids=[391913988461559809, 488614633670967307, 301657045248114690],
     intents=intents,
-    help_command=None#Help(ending_note=f"Made By Jay and Utki", show_cooldown=False,show_brief=True, timeout=60, timeout_delete=True),
+    help_command=None
+    #Help(ending_note=f"Made By Jay and Utki", show_cooldown=False,show_brief=True, timeout=60, timeout_delete=True),
 )
 # change command_prefix='-' to command_prefix=get_prefix for custom prefixes
 bot.config_token = os.getenv('TOKEN')
@@ -80,6 +81,8 @@ bot.connection_url = str(os.getenv('MONGO'))
 bot.joke_api_key = os.getenv('DAD')
 bot.logging_webhook = os.getenv('WEBHOOK')
 bot.nuke_webhook = os.getenv('NUKE')
+bot.Amri_token = os.getenv('AMRI')
+bot.connection_money = os.getenv('MONGOMONEY')
 
 logging.basicConfig(level=logging.INFO)
 
@@ -149,8 +152,7 @@ async def on_ready():
     await sync_slash_command(bot)
     print("Slash Commands Sync Complete\n-----")
     # print("Starting Loading Extensions\n-----")
-    # await load_extensions(bot)
-    # print("Extensions Loaded\n-----")
+    print("Extensions Loaded\n-----")
 
 @bot.event
 async def on_message(message):
@@ -181,7 +183,10 @@ async def on_message(message):
 async def Run_bot(bot: commands.Bot) -> None:
 
     bot.mongo = motor.motor_asyncio.AsyncIOMotorClient(str(bot.connection_url))
+    bot.moneyDB = motor.motor_asyncio.AsyncIOMotorClient(str(bot.connection_money))
     bot.db = bot.mongo["tgk_database"]
+    bot.db_money = bot.moneyDB["TGK"]
+    bot.money = Document(bot.db_money, 'donorBank')
     bot.config = Document(bot.db, "config")
     bot.afk = Document(bot.db, "afk")
     bot.bans = Document(bot.db, "bans")
