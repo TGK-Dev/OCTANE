@@ -17,7 +17,9 @@ from traceback import format_exception
 from paginator import Paginator
 description = "Owners Commands"
 
-
+def is_me(interaction: discord.Interaction):
+    return interaction.user.id in [488614633670967307, 301657045248114690]
+    
 class Owner(commands.Cog, description=description):
     def __init__(self, bot):
         self.bot = bot
