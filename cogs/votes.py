@@ -6,7 +6,7 @@ import datetime
 import requests
 from humanfriendly import format_timespan
 from discord import app_commands
-
+from utils.Slash_check import can_bypass_cd
 class Votes(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -59,21 +59,23 @@ class Votes(commands.Cog):
         except discord.HTTPException:
             pass
 
-    @commands.command(name="votes", description="Get the count of votes of a user", aliases=["v"])
-    @commands.cooldown(3,60 , commands.BucketType.user)
-    async def votes(self, ctx, user: discord.Member=None):
-        user = user if user else ctx.author
+    @app_commands.command(name="votes", description="Get the count of votes of a user")
+    @app_commands.guilds(discord.Object(785839283847954433))
+    @app_commands.checks.dynamic_cooldown(can_bypass_cd)
+    @app_commands.describe(user="Select a user to get the vote count")
+    async def votes(self, interaction: discord.Interaction, user: discord.Member=None):
+        user = user if user else interaction.user
         data = await self.bot.votes.find(user.id)
         if not data:
             view = discord.ui.View()
             view.add_item(discord.ui.Button(label=f'Vote for us here!', url="https://top.gg/servers/785839283847954433/vote"))
-            await ctx.send(content=f"{ctx.author.mention}, you have 0 votes!", view=view)
+            await interaction.response.send_message(content=f"{user.mention}, you have 0 votes!", view=view)
             return
         embed = discord.Embed(title=f"{user.name}'s votes", description=f"Total Votes: {data['total_vote']}\nVote Streak: {data['streak']}\nLast Vote: <t:{round(data['last_vote'].timestamp())}:R>", color=user.color)
         embed.set_thumbnail(url="https://cdn.discordapp.com/emojis/830519601384128523.gif?v=1")
         embed.timestamp =datetime.datetime.utcnow()
-        embed.set_footer(text=f"Requested by {ctx.author}", icon_url=ctx.author.avatar.url)
-        await ctx.send(embed=embed)
+        embed.set_footer(text=f"Requested by {interaction.user.mention}", icon_url=interaction.user.avatar.url)
+        await interaction.response.send_message(embed=embed)
     
     @commands.command(name="vote", description="Vote for a server")
     async def vote(self, ctx):
