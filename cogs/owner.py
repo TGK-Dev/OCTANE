@@ -11,12 +11,58 @@ from discord.ext import commands
 import traceback
 from utils.checks import checks
 from typing import Union
+from discord import app_commands
+from utils.util import clean_code
+from traceback import format_exception
+from paginator import Paginator
 description = "Owners Commands"
 
 
 class Owner(commands.Cog, description=description):
     def __init__(self, bot):
         self.bot = bot
+        self.load_app_command()
+
+    def load_app_command(self):
+
+        @app_commands.context_menu(name="eval")
+        async def eval_(interaction: discord.Interaction, message: discord.Message):
+            if interaction.user.id not in [488614633670967307, 301657045248114690]: 
+                return await interaction.response.send_message("You don't have permission to use this command", ephemeral=True)
+
+            code = clean_code(message.content)
+            local_variables = {
+                "discord": discord,
+                "commands": commands,
+                "bot": self.bot,
+                "ctx": interaction,
+                "channel": interaction.channel,
+                "author": interaction.user,
+                "guild": interaction.guild,
+                "message": interaction.message
+            }
+            stdout = io.StringIO()
+
+            try:
+                with contextlib.redirect_stdout(stdout):
+
+                    exec(
+                        f"async def func():\n{textwrap.indent(code, '    ')}", local_variables,
+                    )
+                    obj = await local_variables["func"]()
+
+                    result = f"{stdout.getvalue()}\n-- {obj}\n"
+                
+            except Exception as e:
+                result = "".join(format_exception(e,e,e.__traceback__))
+            page = []
+            for i in range(0, len(result), 2000):
+                page.append(discord.Embed(description=f'```py\n{result[i:i + 2000]}\n```', color=interaction.user.color))
+
+            await Paginator(interaction, page).start(embeded=True, quick_navigation=False)
+
+        self.bot.slash_commands.append(eval_)
+
 
     @commands.Cog.listener()
     async def on_ready(self):
