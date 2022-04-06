@@ -103,6 +103,7 @@ bot.total_suggestions = 0
 bot.snipe = {}
 bot.esnipe = {}
 bot.config_data = {}
+bot.guess_number = {}
 
 @bot.event
 async def on_ready():
@@ -204,7 +205,7 @@ async def Run_bot(bot: commands.Bot) -> None:
     bot.april = Document(bot.db, "april")
 
     for file in os.listdir(cwd + "/cogs"):
-        if file.endswith(".py") and not file.startswith("_") and not file.startswith("test"):
+        if file.endswith(".py") and not file.startswith("_") :#and not file.startswith("test"):
             await bot.load_extension(f"cogs.{file[:-3]}")
     
     await bot.start(bot.config_token)
