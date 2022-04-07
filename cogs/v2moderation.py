@@ -204,7 +204,7 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
         if Member.banner:
             embed.set_image(url=Member.banner)
 
-        await interaction.respond.send_message(embed=embed)
+        await interaction.response.send_message(embed=embed)
         # await interaction.followup.
         # await message.edit(view=roles(self.bot, member, message))
 
