@@ -20,21 +20,20 @@ time_dict = {"h": 3600, "s": 1, "m": 60, "d": 86400}
 description = "Moderation commands"
 
 class roles(discord.ui.View):
-    def __init__(self, bot, user: discord.Member, message: discord.Message):
+    def __init__(self, bot, user: discord.Member):
         super().__init__(timeout=60)
         self.bot = bot
         self.user = user
-        self.message = message
     
     @discord.ui.button(label="Show Roles", style=discord.ButtonStyle.blurple)
-    async def roles(self, button: discord.ui.Button, interaction: discord.Interaction):
+    async def roles(self,interaction: discord.Interaction, button: discord.ui.Button):
         hsorted_roles = sorted([role for role in self.user.roles[1:]], key=lambda x: x.position)
         embed = discord.Embed(description=", ".join(role.mention for role in hsorted_roles),color=self.user.color)
         embed.add_field(name="Total Roles", value=len(self.user.roles))
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
     @discord.ui.button(label="Permissions", style=discord.ButtonStyle.blurple)
-    async def perms(self, button: discord.ui.Button, interaction: discord.Interaction):
+    async def perms(self,interaction: discord.Interaction, button: discord.ui.Button):
         perm = ", ".join([str(p[0]).replace("_", " ").title() for p in self.user.guild_permissions if p[1]])
         embed = discord.Embed(description=f"`{perm}`", color=self.user.color)
         await interaction.response.send_message(embed=embed, ephemeral=True)
@@ -44,11 +43,6 @@ class roles(discord.ui.View):
             return True
         else:
             return False
-
-    async def on_timeout(self):
-        for b in self.children:
-            b.disabled = True
-        await self.message.edit(view=self)
 
 class TimeConverter(commands.Converter):
     async def convert(self, ctx, argument):
@@ -204,10 +198,7 @@ class v2Moderation(commands.Cog, description=description, command_attrs=dict(hid
         if Member.banner:
             embed.set_image(url=Member.banner)
 
-        await interaction.response.send_message(embed=embed)
-        # await interaction.followup.
-        # await message.edit(view=roles(self.bot, member, message))
-
+        msg = await interaction.response.send_message(embed=embed, view=roles(self.bot, member))
 
 async def setup(bot):
     await bot.add_cog(v2Moderation(bot))

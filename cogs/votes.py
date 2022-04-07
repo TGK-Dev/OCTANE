@@ -74,7 +74,7 @@ class Votes(commands.Cog):
         embed = discord.Embed(title=f"{user.name}'s votes", description=f"Total Votes: {data['total_vote']}\nVote Streak: {data['streak']}\nLast Vote: <t:{round(data['last_vote'].timestamp())}:R>", color=user.color)
         embed.set_thumbnail(url="https://cdn.discordapp.com/emojis/830519601384128523.gif?v=1")
         embed.timestamp =datetime.datetime.utcnow()
-        embed.set_footer(text=f"Requested by {interaction.user.mention}", icon_url=interaction.user.avatar.url)
+        embed.set_footer(text=f"Requested by {interaction.user.name}", icon_url=interaction.user.avatar.url)
         await interaction.response.send_message(embed=embed)
     
     @commands.command(name="vote", description="Vote for a server")
