@@ -16,6 +16,19 @@ class Basic(commands.Cog, description=description):
     async def on_ready(self):
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
 
+    @commands.Cog.listener()
+    async def on_message(self, message):
+        if message.author.id != 520830713696878592: return
+        if message.author.bot and message.channel.id == 962771383996284979:
+            update_channel = self.bot.get_guild(785839283847954433).get_channel(855717169584537660)
+            if len(message.embeds) > 0:
+                await update_channel.send(embeds=message.embeds)
+            if len(message.attachments) > 0:
+                await update_channel.send(attachments=message.attachments)
+            if message.content:
+                await update_channel.send(content=message.content)
+            
+
     @commands.command()
     async def ping(self, ctx):
         start_time = time.time()
