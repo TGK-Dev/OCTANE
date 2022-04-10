@@ -70,7 +70,7 @@ bot = commands.Bot(
     description="commands List of Me",
     command_prefix=get_prefix,
     case_insensitive=True,
-    owner_ids=[391913988461559809, 488614633670967307, 301657045248114690],
+    owner_ids=[488614633670967307, 301657045248114690],
     intents=intents,
     help_command=None
     #Help(ending_note=f"Made By Jay and Utki", show_cooldown=False,show_brief=True, timeout=60, timeout_delete=True),
@@ -104,6 +104,7 @@ bot.snipe = {}
 bot.esnipe = {}
 bot.config_data = {}
 bot.guess_number = {}
+bot.auto_mod_cache = {}
 
 @bot.event
 async def on_ready():
@@ -150,7 +151,7 @@ async def on_ready():
     print("\n-----")
     print("Database Connected\n-----")
     print("starting Slash Commands Sync\n-----")
-    await sync_slash_command(bot)
+    #await sync_slash_command(bot)
     print("Slash Commands Sync Complete\n-----")
     # print("Starting Loading Extensions\n-----")
     print("Extensions Loaded\n-----")
