@@ -188,11 +188,11 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
                         f"❥ 1x extra entry into all frisky giveaways.\n"
                         f"❥ 2,500 Casino Cash. Collect using ,collectincome in <#786117471840895016>.\n"
                         f"❥ Access to <#929613393097293874> with 2x Amaari\n"
-                        , mention_author=False, view=vote_button(guild), allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
+                        , mention_author=False, view=vote_button(guild), allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False),delete_after=5)
 
-            for word in ['when heist', 'where heist', 'heist when', 'where is the heist', 'heist?']:
+            for word in ['heist']:
                 if word in messageContent and message.channel.id in channel_ids and message.author.id not in immune_users:
-                    return await message.reply('Keep an 👁️ on <#960535386768166992> for heist related requirements/updates.', delete_after=30)
+                    return await message.reply('Keep an 👁️ on <#960535386768166992> for heist related requirements/updates.', delete_after=3, mention_author=False)
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
