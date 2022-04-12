@@ -38,9 +38,6 @@ class Anti_nuke(commands.Cog):
                 async with aiohttp.ClientSession() as session:
                     webhook = Webhook.from_url(self.bot.nuke_webhook, session=session)
                     await webhook.send(embed=embed, username=f"{self.bot.user.name} Anti-Nuke", avatar_url=self.bot.user.avatar.url, content="@everyone")
-
-
-
                 
         
     
@@ -63,7 +60,8 @@ class Anti_nuke(commands.Cog):
 
                 logs = [log async for log in guild.audit_logs(limit=1, action=discord.AuditLogAction.member_role_update) if log.target.id == after.id]
                 if logs:
-
+                    if logs[0].user.id == self.bot.user.id: 
+                        return
                     if logs[0].user.id in [301657045248114690, 488614633670967307, 651711446081601545,457839031909351425,413651113485533194]:
                         return
                     else:
@@ -77,7 +75,7 @@ class Anti_nuke(commands.Cog):
                                     pass
                         
                         timeout = discord.utils.utcnow() + datetime.timedelta(hours=25)
-                        if logs[0].user.bot:
+                        if logs[0].user.id != self.bot.user.id:
                             pass
                         else:
                             await logs[0].user.edit(timed_out_until=timeout, reason="Possible Server Nuke attempt")

@@ -178,8 +178,10 @@ async def on_message(message):
         else:
             prefix = data["prefix"]
         await message.channel.send(f"My prefix here is `{prefix}`", delete_after=15)
-
-    await bot.process_commands(message)
+    if message.guild.id == 811037093715116072:
+        pass
+    else:
+        await bot.process_commands(message)
 
 
 async def Run_bot(bot: commands.Bot) -> None:

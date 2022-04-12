@@ -97,10 +97,11 @@ class Events(commands.Cog, command_attrs=dict(hidden=True)):
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
-        if guild.owner.id in [self.bot.user.id, 301657045248114690, 488614633670967307]:
-            pass
-        else:
+        if guild.id != [785839283847954433, 811037093715116072] or guild.name != "Ban Battle":
             await guild.leave()
+            return       
+
+
     @commands.command()
     async def verify(self, ctx):
         embed = discord.Embed(title="Verification", description="Click the button below to verify your Self", color=0xffffff)
