@@ -121,11 +121,20 @@ class Owner(commands.Cog, description=description):
     @config.command(name="event", description="set event channel")
     @commands.check_any(checks.can_use())
     async def event(self, ctx, channel: discord.TextChannel):
-        data = self.bot.config.find(ctx.guil.id)
+        data = await self.bot.config.find(ctx.guild.id)
         if data is None:
             return await ctx.send("Please use the `config` command frist")
-        await self.bot.upsert({"_id": ctx.guild.id, "event": channel.id})
+        await self.bot.config.upsert({"_id": ctx.guild.id, "event": channel.id})
         await ctx.send("welcome channel Updated")
+    
+    @config.command(name="royal", description="set royal role")
+    @commands.check_any(checks.can_use())
+    async def royal(self, ctx, role: discord.Role):
+        data = await self.bot.config.find(ctx.guild.id)
+        if data is None:
+            data = {"_id": ctx.guild.id, "prefix": "!", "case": 0, 'royal_role': role.id}
+        await self.bot.config.upsert(data)
+        await ctx.send("Royal role Updated")
 
     @commands.command(
         name="blacklist",
@@ -255,72 +264,6 @@ class Owner(commands.Cog, description=description):
             embed = discord.Embed(
                 description="`Time out canceling the command`")
             await ctx.send(embed=embed)
-
-    # @commands.command(
-    #     name='reload', description="Reload all/one of the bots cogs!", usage="", hidden=True
-    # )
-    # @commands.check_any(checks.is_me())
-    # async def reload(self, ctx, cog=None):
-    #     if not cog:
-    #         # No cog, means we reload all cogs
-    #         async with ctx.typing():
-    #             embed = discord.Embed(
-    #                 title="Reloading all cogs!",
-    #                 color=0x808080,
-    #                 timestamp=ctx.message.created_at
-    #             )
-    #             for ext in os.listdir("./cogs/"):
-    #                 if ext.endswith(".py") and not ext.startswith("_"):
-    #                     try:
-    #                         await self.bot.unload_extension(f"cogs.{ext[:-3]}")
-    #                         await self.bot.load_extension(f"cogs.{ext[:-3]}")
-    #                         embed.add_field(
-    #                             name=f"Reloaded: `{ext}`",
-    #                             value='\uFEFF',
-    #                             inline=False
-    #                         )
-    #                     except Exception as e:
-    #                         embed.add_field(
-    #                             name=f"Failed to reload: `{ext}`",
-    #                             value=e,
-    #                             inline=False
-    #                         )
-    #                     await asyncio.sleep(0.5)
-    #             await ctx.send(embed=embed)
-    #     else:
-    #         # reload the specific cog
-    #         async with ctx.typing():
-    #             embed = discord.Embed(
-    #                 title="Reloading all cogs!",
-    #                 color=0x808080,
-    #                 timestamp=ctx.message.created_at
-    #             )
-    #             ext = f"{cog.lower()}.py"
-    #             if not os.path.exists(f"./cogs/{ext}"):
-    #                 # if the file does not exist
-    #                 embed.add_field(
-    #                     name=f"Failed to reload: `{ext}`",
-    #                     value="This cog does not exist.",
-    #                     inline=False
-    #                 )
-
-    #             elif ext.endswith(".py") and not ext.startswith("_"):
-    #                 try:
-    #                     await self.bot.unload_extension(f"cogs.{ext[:-3]}")
-    #                     await self.bot.load_extension(f"cogs.{ext[:-3]}")
-    #                     embed.add_field(
-    #                         name=f"Reloaded: `{ext}`",
-    #                         value='\uFEFF',
-    #                         inline=False
-    #                     )
-    #                 except Exception:
-    #                     desired_trace = traceback.format_exc()
-    #                     embed.add_field(
-    #                         name=f"Failed to reload: `{ext}`",
-    #                         value=desired_trace,
-    #                         inline=False
-    #                     )
-    #             await ctx.send(embed=embed)
     
     @commands.command(name="reload", description="Reload all/one of the bots cogs!", usage=None, hidden=True)
     @commands.check_any(checks.is_me())
