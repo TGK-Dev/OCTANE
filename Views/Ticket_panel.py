@@ -273,9 +273,8 @@ class Ticket_Control(discord.ui.View):
                 overwrite.attach_files = True
                 await interaction.channel.set_permissions(shero, overwrite=overwrite)
                 await interaction.followup.send(embed=discord.Embed(description=f"<:allow:819194696874197004> | {shero.mention} added to the ticket", color=0x2f3136))
-                for button in self.children:
-                    button.disabled = True
-                    await interaction.message.edit(view=self)
+                button.disabled = True
+                await interaction.message.edit(view=self)
         else:
             await interaction.followup.send("This is not a partnership ticket", ephemeral=True)
     
@@ -285,6 +284,84 @@ class Ticket_Control(discord.ui.View):
         else:
             await interaction.response.send_message("You do not have permission to run this command", ephemeral=True)
             return False
+
+class Support_model(discord.ui.Modal, title="Your Question"):
+    def __init__(self, bot):
+        self.bot = bot
+        super().__init__(timeout=None)
+
+    qestion = discord.ui.TextInput(label="Question", placeholder=None, custom_id="question:input",required=False)
+
+    async def on_submit(self, interaction: discord.Interaction):
+        await interaction.response.defer(ephemeral=True, thinking=True)
+        config = await self.bot.config.find(interaction.guild.id)
+        staff_role = discord.utils.get(interaction.guild.roles, id=config['support_role'])
+
+        if config and config['ticket_category'] is not None:
+            staff_role = discord.utils.get(interaction.guild.roles, id=config['support_role'])
+
+            override = {
+                interaction.guild.default_role: discord.PermissionOverwrite(read_messages=False, view_channel=False),
+                interaction.guild.me: discord.PermissionOverwrite(read_messages=True, view_channel=True),
+                staff_role: discord.PermissionOverwrite(read_messages=True, view_channel=True),
+                interaction.user: discord.PermissionOverwrite(read_messages=True, view_channel=True, attach_files=True)
+            }
+
+            channel = await interaction.guild.create_text_channel(name=f"{interaction.user.name} Support",category=self.bot.get_channel(config['ticket_category']),overwrites=override,
+                topic=f"ID: {interaction.user.id}")
+        else:
+            override = {
+                interaction.guild.default_role: discord.PermissionOverwrite(read_messages=False, view_channel=False),
+                interaction.guild.me: discord.PermissionOverwrite(read_messages=True, view_channel=True),
+                interaction.user: discord.PermissionOverwrite(read_messages=True, view_channel=True, attach_files=True),
+                staff_role: discord.PermissionOverwrite(read_messages=True, view_channel=True)
+            }
+            channel = await interaction.guild.create_text_channel(name=f"{interaction.user.name} Support ",overwrites=override, category=interaction.channel.category)
+        
+        embed = discord.Embed(title=f"Hi {interaction.user.display_name}, Welcome to Server Support",
+                                  color=0x008000,
+                                  description="Kindly wait patiently. A staff member will assist you shortly.\nIf you're looking to approach a specific staff member, ping the member once. Do not spam ping any member or role.\n\nThank you.")
+        embed.set_footer(text="Developed and Owned by Jay & utki007")
+        embed.add_field(value="Reason for opening a ticket", name=self.qestion.value if self.qestion.value else "Not Provaided", inline=False)
+
+        await interaction.followup.send(f"Your support ticket is now available at {channel.mention}")
+
+        log_embed = discord.Embed()
+        log_embed.set_author(name=f"{interaction.user.name}#{interaction.user.discriminator}", icon_url=interaction.user.avatar.url)
+        log_embed.add_field(name="Ticket Owner", value=f"{interaction.user.mention}")
+        log_embed.add_field(name="Ticket Created", value=f"{channel.name}")
+        log_embed.add_field(name="Ticket Type", value="Support")
+        log_embed.color = 0x00FF00
+
+        log_channel = self.bot.get_channel(config['ticket_log_channel'])
+        log_msg = await log_channel.send(embed=log_embed)
+
+        data = {
+            '_id': channel.id,
+            'ticket_owner': interaction.user.id,
+            'added_roles': [],
+            'added_users': [],
+            'type': 'support',
+            'created_at': datetime.datetime.utcnow(),
+            'status': 'open',
+            'log_message_id': log_msg.id
+        }
+
+        await self.bot.ticket.upsert(data)
+        View = Ticket_Control(self.bot)
+        if data['type'] == "partnership":
+            pass
+        else:
+            for button in View.children:
+                if button.label == "Add Shero":
+                    item = button
+            View.remove_item(item)
+
+        msg = await channel.send(embed=embed, content=f"{interaction.user.mention} | <@&843775369470672916>",view=View)
+        await msg.pin()
+    
+    async def on_error(self, error: Exception, interaction: discord.Interaction) -> None:
+        await interaction.response.send_message(f"An Error Occured. {error}\nContact Admin/Owner", ephemeral=True)    
 
 class PartnerShip_model(discord.ui.Modal, title="PartnerShip Infomations"):
     def __init__(self, bot):
@@ -390,71 +467,7 @@ class Ticket_panel(discord.ui.View):
 
     @discord.ui.button(label='Server Support', style=discord.ButtonStyle.red, custom_id='persistent_view:red', emoji="<:support:837272254307106849>")
     async def support(self, interaction: discord.Interaction ,button: discord.Button):
-        await interaction.response.defer(ephemeral=True, thinking=True)
-        config = await self.bot.config.find(interaction.guild.id)
-        staff_role = discord.utils.get(interaction.guild.roles, id=config['support_role'])
-
-        if config and config['ticket_category'] is not None:
-            staff_role = discord.utils.get(interaction.guild.roles, id=config['support_role'])
-
-            override = {
-                interaction.guild.default_role: discord.PermissionOverwrite(read_messages=False, view_channel=False),
-                interaction.guild.me: discord.PermissionOverwrite(read_messages=True, view_channel=True),
-                staff_role: discord.PermissionOverwrite(read_messages=True, view_channel=True),
-                interaction.user: discord.PermissionOverwrite(read_messages=True, view_channel=True, attach_files=True)
-            }
-
-            channel = await interaction.guild.create_text_channel(name=f"{interaction.user.name} Support",category=self.bot.get_channel(config['ticket_category']),overwrites=override,
-                topic=f"ID: {interaction.user.id}")
-        else:
-            override = {
-                interaction.guild.default_role: discord.PermissionOverwrite(read_messages=False, view_channel=False),
-                interaction.guild.me: discord.PermissionOverwrite(read_messages=True, view_channel=True),
-                interaction.user: discord.PermissionOverwrite(read_messages=True, view_channel=True, attach_files=True),
-                staff_role: discord.PermissionOverwrite(read_messages=True, view_channel=True)
-            }
-            channel = await interaction.guild.create_text_channel(name=f"{interaction.user.name} Support ",overwrites=override, category=interaction.channel.category)
-        
-        embed = discord.Embed(title=f"Hi {interaction.user.display_name}, Welcome to Server Support",
-                                  color=0x008000,
-                                  description="Kindly wait patiently. A staff member will assist you shortly.\nIf you're looking to approach a specific staff member, ping the member once. Do not spam ping any member or role.\n\nThank you.")
-        embed.set_footer(text="Developed and Owned by Jay & utki007")
-
-        await interaction.followup.send(f"Your support ticket is now available at {channel.mention}")
-
-        log_embed = discord.Embed()
-        log_embed.set_author(name=f"{interaction.user.name}#{interaction.user.discriminator}", icon_url=interaction.user.avatar.url)
-        log_embed.add_field(name="Ticket Owner", value=f"{interaction.user.mention}")
-        log_embed.add_field(name="Ticket Created", value=f"{channel.name}")
-        log_embed.add_field(name="Ticket Type", value="Support")
-        log_embed.color = 0x00FF00
-
-        log_channel = self.bot.get_channel(config['ticket_log_channel'])
-        log_msg = await log_channel.send(embed=log_embed)
-
-        data = {
-            '_id': channel.id,
-            'ticket_owner': interaction.user.id,
-            'added_roles': [],
-            'added_users': [],
-            'type': 'support',
-            'created_at': datetime.datetime.utcnow(),
-            'status': 'open',
-            'log_message_id': log_msg.id
-        }
-
-        await self.bot.ticket.upsert(data)
-        View = Ticket_Control(self.bot)
-        if data['type'] == "partnership":
-            pass
-        else:
-            for button in View.children:
-                if button.label == "Add Shero":
-                    item = button
-            View.remove_item(item)
-
-        msg = await channel.send(embed=embed, content=f"{interaction.user.mention} | {staff_role.mention}",view=View)
-        await msg.pin()
+        await interaction.response.send_modal(Support_model(self.bot))
 
 
     @discord.ui.button(label='Partnership ', style=discord.ButtonStyle.green, custom_id='persistent_view:partner_ship', emoji="<:partner:837272392472330250>")
@@ -472,7 +485,6 @@ class Ticket_panel(discord.ui.View):
             await interaction.response.send_message("Your Blacklisted from bot", ephemeral=True)
         else:
             data = await self.bot.ticket.find_many_by_custom({'ticket_owner': interaction.user.id})
-            print(data)
             if not interaction.user.guild_permissions.manage_messages:
                 if len(data) >= 2:
                     await interaction.response.send_message("You have a ticket open, please close it before creating a new one", ephemeral=True)

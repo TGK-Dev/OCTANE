@@ -7,6 +7,7 @@ from typing import Union
 from utils.checks import checks
 from Views.Ticket_panel import *
 from Views.Ticket_panel import Ticket_Control
+from Views.Ticket_panel import Support_model
 description = "Ticket System For the Server Support"
 
 class Tickets(commands.Cog):
