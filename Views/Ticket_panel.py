@@ -322,7 +322,7 @@ class Support_model(discord.ui.Modal, title="Your Question"):
                                   color=0x008000,
                                   description="Kindly wait patiently. A staff member will assist you shortly.\nIf you're looking to approach a specific staff member, ping the member once. Do not spam ping any member or role.\n\nThank you.")
         embed.set_footer(text="Developed and Owned by Jay & utki007")
-        embed.add_field(value="Reason for opening a ticket", name=self.qestion.value if self.qestion.value else "Not Provaided", inline=False)
+        embed.add_field(name="Reason for opening a ticket", value=self.qestion.value if self.qestion.value else "Not Provaided", inline=False)
 
         await interaction.followup.send(f"Your support ticket is now available at {channel.mention}")
 
