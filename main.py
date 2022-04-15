@@ -24,10 +24,24 @@ bot.mongo_connection = os.environ['MONGO']
 
 #global bot atributes
 bot.blacklist_users = []
+bot.current_votes = {}
+bot.current_bans = {}
+bot.snipe = {'delete': {}, 'edit': {}}
 @bot.event
 async def on_ready():
     print(f"Logged in as {bot.user} | {bot.user.id}")
     await bot.change_presence(status=discord.Status.dnd, activity=discord.Activity(type=discord.ActivityType.watching, name="Server Security"))
+
+    current_vote = await bot.votes.get_all()
+    for votes in current_vote:
+        bot.current_votes[votes['id']] = votes['votes']
+    
+    current_ban = await bot.bans.get_all()
+    for bans in current_ban:
+        bot.current_bans[bans['id']] = bans['bans']
+    
+    await bot.tree.sync(guild=discord.Object(964377652813234206))
+    print('Bot is ready')
 
 @bot.event
 async def on_message(message):
@@ -46,6 +60,8 @@ async def run_bot():
     bot.config = Document(bot.db, 'config')
     bot.blacklist = Document(bot.db, 'blacklist')
     bot.suggestions = Document(bot.db, 'suggestions')
+    bot.votes = Document(bot.db, 'votes')
+    bot.bans = Document(bot.db, 'bans')
 
     for file in os.listdir('./cogs'):
         if file.endswith('.py') and not file.startswith("_"):
