@@ -27,6 +27,8 @@ bot.blacklist_users = []
 bot.current_votes = {}
 bot.current_bans = {}
 bot.snipe = {'delete': {}, 'edit': {}}
+bot.current_afk = {}
+
 @bot.event
 async def on_ready():
     print(f"Logged in as {bot.user} | {bot.user.id}")
@@ -34,11 +36,15 @@ async def on_ready():
 
     current_vote = await bot.votes.get_all()
     for votes in current_vote:
-        bot.current_votes[votes['id']] = votes['votes']
+        bot.current_votes[votes['_id']] = votes
     
     current_ban = await bot.bans.get_all()
     for bans in current_ban:
-        bot.current_bans[bans['id']] = bans['bans']
+        bot.current_bans[bans['_id']] = bans
+    
+    current_afk = await bot.afk.get_all()
+    for afk in current_afk:
+        bot.current_afk[afk['_id']] = afk
     
     await bot.tree.sync(guild=discord.Object(964377652813234206))
     print('Bot is ready')
@@ -62,6 +68,7 @@ async def run_bot():
     bot.suggestions = Document(bot.db, 'suggestions')
     bot.votes = Document(bot.db, 'votes')
     bot.bans = Document(bot.db, 'bans')
+    bot.afk = Document(bot.db, 'afk')
 
     for file in os.listdir('./cogs'):
         if file.endswith('.py') and not file.startswith("_"):
