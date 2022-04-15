@@ -57,7 +57,7 @@ class Owner(commands.Cog, name="Owner", description="Owner/admin commands."):
         embed.add_field(name="Mod Log Channel", value=f"<#{guild_data['mod_log']}>")
         embed.add_field(name="Case Number", value=f"{guild_data['case']}")
         embed.add_field(name="Starboard Channel", value=f"<#{guild_data['starboard']['channel']}>\nThreshold: {guild_data['starboard']['threshold']}\nSelf Star: {guild_data['starboard']['self_star']}\nToggle: {guild_data['starboard']['toggle']}")
-        embed.add_field(name="Suggestion Channel", value=f"<#{guild_data['suggestion']}>")
+        embed.add_field(name="Suggestion Channel", value=f"<#{guild_data['suggestion_channel']}>")
         embed.timestamp = ctx.message.created_at
         embed.set_footer(text=f"Requested by {ctx.author}", icon_url=ctx.author.avatar.url)
         await ctx.send(embed=embed)
