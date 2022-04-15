@@ -40,7 +40,6 @@ class AFK(commands.Cog, name="AFK", description="Member Afk Module"):
                     user = message.guild.get_member(key)
                     return await message.reply(f"{user.display_name} is afk {value['message']} -<t:{value['time']}:R> <t:{value['time']}:f>", mention_author=False, delete_after=30, allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
 
-        print(message.mentions)
         if len(message.mentions) > 0:
             for key, value in current_afk.items():
                 if key in [_id.id for _id in message.mentions]:
