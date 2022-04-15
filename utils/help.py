@@ -19,7 +19,7 @@ class HelpGroupPaginator(menus.ListPageSource):
             value = '...'
             if command.brief:
                 value = (command.brief)
-            embed.add_field(name=command.name, value=value, inline=False)
+            embed.add_field(name=command.name, value=value, inline=True)
 
         embed.set_footer(text="use gk.help [command] for more info on a command")
 
@@ -50,9 +50,9 @@ class EmbedHelpCommand(commands.HelpCommand):
             if filtered:
                 value = '\u2002'.join(c.name for c in commands)
                 if cog and cog.description:
-                    value = '{0}\n`{1}`'.format((cog.description), (value))
+                    value = '{0}\n'.format((cog.description))
 
-                embed.add_field(name=name, value=value)
+                embed.add_field(name=name, value=value, inline=False)
 
         embed.set_footer(text="use gk.help [command] for more info on a command")
         await self.get_destination().send(embed=embed)
