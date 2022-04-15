@@ -45,6 +45,7 @@ async def run_bot():
     bot.db = bot.mongo['db']
     bot.config = Document(bot.db, 'config')
     bot.blacklist = Document(bot.db, 'blacklist')
+    bot.suggestions = Document(bot.db, 'suggestions')
 
     for file in os.listdir('./cogs'):
         if file.endswith('.py') and not file.startswith("_"):
