@@ -28,6 +28,7 @@ bot.current_votes = {}
 bot.current_bans = {}
 bot.snipe = {'delete': {}, 'edit': {}}
 bot.current_afk = {}
+bot.current_mutes = {}
 
 @bot.event
 async def on_ready():
@@ -45,6 +46,10 @@ async def on_ready():
     current_afk = await bot.afk.get_all()
     for afk in current_afk:
         bot.current_afk[afk['_id']] = afk
+    
+    current_mute = await bot.mutes.get_all()
+    for mute in current_mute:
+        bot.current_mutes[mute['_id']] = mute
     
     await bot.tree.sync(guild=discord.Object(964377652813234206))
     print('Bot is ready')
@@ -69,6 +74,7 @@ async def run_bot():
     bot.votes = Document(bot.db, 'votes')
     bot.bans = Document(bot.db, 'bans')
     bot.afk = Document(bot.db, 'afk')
+    bot.mutes = Document(bot.db, 'mutes')
 
     for file in os.listdir('./cogs'):
         if file.endswith('.py') and not file.startswith("_"):
@@ -76,7 +82,7 @@ async def run_bot():
     
     await bot.start(bot.token)
 
-loop = asyncio.get_event_loop()
+loop = asyncio.new_event_loop()
 
 try:
     loop.run_until_complete(run_bot())
