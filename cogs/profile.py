@@ -76,7 +76,7 @@ def is_me(interaction: discord.Interaction):
 class ImageCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.Amari_api = AmariClient(self.bot.Amri_token)
+        self.Amari_api = AmariClient(self.bot.Amari_token)
 
     async def on_ready(self):
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
