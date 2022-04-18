@@ -70,9 +70,23 @@ class Votes(commands.Cog, name="Votes",description="Server Vote counter with Top
         embed.set_footer(text=f"Requested by {ctx.author.name}", icon_url=ctx.author.avatar.url)
         await ctx.send(embed=embed)
 
-    @commands.command(name="vote", aliases=["v"], description="Vote for us on top.gg", brife="vote")
+    @commands.command(name="vote", description="Vote for a server", brife="vote")
     async def vote(self, ctx):
-        await ctx.send(f"{ctx.author.mention}, you have voted for us!\nYou can now use the `!votes` command to see your votes count!")
+        await ctx.message.delete()
+        embed = discord.Embed(
+            title=f"Vote for {ctx.guild.name}", 
+            description =
+                f"❥ Special <@&786884615192313866> Role with 1x guild-wide multi.\n"
+                f"❥ 1x extra entry into all frisky giveaways.\n"
+                f"❥ 2,500 Casino Cash. Collect using ,collectincome in <#786117471840895016>.\n"
+                f"❥ Access to <#929613393097293874> with 2x Amaari\n", 
+            color=ctx.author.color
+        )
+        embed.set_thumbnail(url = "https://cdn.discordapp.com/emojis/942521024476487741.webp?size=128&quality=lossless")
+        view = discord.ui.View()
+        view.add_item(discord.ui.Button(label=f'Top.gg', url="https://top.gg/servers/785839283847954433/vote"))
+        await ctx.send(embed=embed, view=view)
+        
 
 async def setup(bot):
     await bot.add_cog(Votes(bot))
