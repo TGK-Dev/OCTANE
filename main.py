@@ -21,6 +21,8 @@ bot = commands.Bot(
 load_dotenv()
 bot.token = os.environ['TOKEN']
 bot.mongo_connection = os.environ['MONGO']
+bot.Amari_token = os.environ['AMRI']
+bot.connection_money = os.getenv('MONGOMONEY')
 
 #global bot atributes
 bot.blacklist_users = []
@@ -29,6 +31,8 @@ bot.current_bans = {}
 bot.snipe = {'delete': {}, 'edit': {}}
 bot.current_afk = {}
 bot.current_mutes = {}
+bot.guess_number = {}
+bot.bot_temp_star = {}
 
 @bot.event
 async def on_ready():
@@ -75,6 +79,7 @@ async def run_bot():
     bot.bans = Document(bot.db, 'bans')
     bot.afk = Document(bot.db, 'afk')
     bot.mutes = Document(bot.db, 'mutes')
+    bot.starboard = Document(bot.db, 'starboard')
 
     for file in os.listdir('./cogs'):
         if file.endswith('.py') and not file.startswith("_"):
