@@ -46,3 +46,9 @@ class Commands_Checks():
                 
         return commands.check(predicate)
 
+    def slash_check():
+        async def predicate(interaction: discord.Interaction):
+            print(interaction.command.name)
+            print(interaction.client.snipe)
+            return True
+        return app_commands.check(predicate)
