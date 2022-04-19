@@ -1,8 +1,16 @@
 from discord.ext import commands
 from discord import app_commands
 from typing import Union
-import discord
 from utils.functions import make_db_temp
+from utils.checks import Commands_Checks
+from utils.functions import clean_code
+from traceback import format_exception
+from utils.paginator import Contex_Paginator
+import discord
+import io
+import contextlib
+import textwrap
+
 
 class Owner(commands.Cog, name="Owner", description="Owner/admin commands."):
     def __init__(self, bot):
@@ -94,6 +102,42 @@ class Owner(commands.Cog, name="Owner", description="Owner/admin commands."):
         guild_data['suggestion'] = channel.id
         await self.bot.config.upsert(guild_data)
         await ctx.send(f"{channel.mention} is now the suggestion channel.")
+    
+    @commands.command(name="eval", description="Evaluate a code", brief="eval [code]", hidden=True)
+    @commands.check_any(Commands_Checks.is_me())
+    async def _eval(self, ctx, *,code):
+        code = clean_code(code)
+        local_variables = {
+            "discord": discord,
+            "commands": commands,
+            "bot": self.bot,
+            "ctx": ctx,
+            "channel": ctx.channel,
+            "author": ctx.author,
+            "guild": ctx.guild,
+            "message": ctx.message
+        }
+
+        stdout = io.StringIO()
+
+        try:
+            with contextlib.redirect_stdout(stdout):
+
+                exec(
+                    f"async def func():\n{textwrap.indent(code, '    ')}", local_variables,
+                )
+                obj = await local_variables["func"]()
+
+                result = f"{stdout.getvalue()}\n-- {obj}\n"
+                
+        except Exception as e:
+            result = "".join(format_exception(e,e,e.__traceback__))
+        page = []
+        for i in range(0, len(result), 2000):
+            page.append(discord.Embed(description=f'```py\n{result[i:i + 2000]}\n```', color=ctx.author.color))
+        
+        await Contex_Paginator(ctx, page).start(embeded=True, quick_navigation=False)
+
 
 async def setup(bot):
     await bot.add_cog(Owner(bot))
