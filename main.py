@@ -82,6 +82,7 @@ async def run_bot():
     bot.mutes = Document(bot.db, 'mutes')
     bot.starboard = Document(bot.db, 'starboard')
     bot.ticket = Document(bot.db, 'ticket')
+    bot.warns = Document(bot.db, 'warns')
 
     for file in os.listdir('./cogs'):
         if file.endswith('.py') and not file.startswith("_"):
