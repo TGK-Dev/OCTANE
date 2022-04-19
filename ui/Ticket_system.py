@@ -168,7 +168,7 @@ class Ticket_Control(discord.ui.View):
         
         transcript_file = discord.File(io.BytesIO(transcript.encode()),filename=f"transcript-{interaction.channel.name}.html")
 
-        transcript_log_channel = self.bot.get_channel(self.bot.config_data[interaction.guild.id]["transcript_log_channel"])
+        transcript_log_channel = self.bot.get_channel(ticket_data["transcript"])
 
         link_msg = await transcript_log_channel.send(content=f"{interaction.channel.name} | {topic}",file=transcript_file)
 
