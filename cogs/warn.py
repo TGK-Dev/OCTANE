@@ -19,7 +19,6 @@ class Warn(commands.Cog, name="Warning System", description="Server Warning logg
     async def warn(self, ctx , user: discord.Member, *, reason:str):
         warn_data = {"user":user.id, "reason":reason, "mod":ctx.author.id, 'time': datetime.datetime.utcnow(), "guild":ctx.guild.id}
         guild_data = await self.bot.config.find(ctx.guild.id)
-        print(guild_data)
         if not ctx.interaction:
             await ctx.message.delete()
         await self.bot.warns.insert(warn_data)

@@ -3,7 +3,7 @@ import datetime
 import discord
 import os
 from discord.ext import commands
-
+from utils.checks import Commands_Checks
 
 def fomat_time(time):
     return time.strftime('%d-%B-%Y %I:%m %p')
@@ -86,6 +86,7 @@ class Invites(commands.Cog, name="Invites",description=description):
             await ctx.send(embed=embed)
 
     @commands.command(name="inviter", description="Find out who invited who")
+    @commands.check_any(Commands_Checks.is_me(), Commands_Checks.is_owner(), Commands_Checks.can_use())
     async def inviter(self, ctx, member: discord.Member):
 
         invites_filter = {"userInvited": member.id}

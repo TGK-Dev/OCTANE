@@ -49,6 +49,7 @@ class Guess_number(commands.Cog, name="Guess The Number", description="Guess The
 
     @app_commands.command(name="guessnumber",description="Guess The Number Game")
     @app_commands.describe(number="Max Range of Number")
+    @app_commands.checks.has_permissions(manage_messages=True)
     @app_commands.guilds(964377652813234206)
     async def guess_number(self, interaction: Interaction, number: app_commands.Range[int, 100, 1000]):
         embed = discord.Embed(title=f"{interaction.user} is Starting An Guess The Number Game",color=interaction.user.color,
