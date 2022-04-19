@@ -33,6 +33,7 @@ bot.current_afk = {}
 bot.current_mutes = {}
 bot.guess_number = {}
 bot.bot_temp_star = {}
+bot.auto_mod_cache = {}
 
 @bot.event
 async def on_ready():
