@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 from copy import deepcopy
-
+from utils.checks import Commands_Checks
 class AFK(commands.Cog, name="AFK", description="Member Afk Module"):
     def __init__(self, bot):
         self.bot = bot
@@ -49,6 +49,7 @@ class AFK(commands.Cog, name="AFK", description="Member Afk Module"):
     @commands.hybrid_command(name="afk", description="Set your AFK status", brief="afk [status]")
     @app_commands.guilds(964377652813234206)
     @app_commands.describe(status="Your AFK reason")
+    @commands.check_any(Commands_Checks.is_me(), Commands_Checks.is_owner(), Commands_Checks.can_use())
     async def afk(self, ctx, status: str = None):
         afk_data = await self.bot.afk.find(ctx.author.id)
         if afk_data:
