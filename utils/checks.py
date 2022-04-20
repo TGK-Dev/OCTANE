@@ -8,6 +8,11 @@ class CommandDisableByDev(commands.CommandError):
         self.user = user
         super().__init__(*args, **kwargs)
 
+class CommandDisableByDev_Slash(app_commands.AppCommandError):
+    def __init__(self, user, *args, **kwargs):
+        self.user = user
+        super().__init__(*args, **kwargs)
+
 class Commands_Checks():
 
     def is_owner():
@@ -34,7 +39,7 @@ class Commands_Checks():
 
             user_roles = [role.id for role in ctx.author.roles]
 
-            if ctx.author.id in command['allowed_users']: 
+            if ctx.author.id in command['allowed_users']:
                 return True
             else:
                 pass
@@ -48,7 +53,26 @@ class Commands_Checks():
 
     def slash_check():
         async def predicate(interaction: discord.Interaction):
-            print(interaction.command.name)
-            print(interaction.client.snipe)
-            return True
+            slash_command = interaction.command
+            try:
+                command_data = interaction.client.perm[slash_command.name]
+            except KeyError:
+                command_data = {"_id": slash_command.name, "allowed_roles": [], 'allowed_users': [],"disable": False}
+                await interaction.client.perms.insert(command_data)
+            
+            if command_data['disable'] == True:
+                raise CommandDisableByDev_Slash(interaction)
+            
+            if interaction.user.id in [488614633670967307, 301657045248114690]: return True
+
+            user_roles = [role.id for role in interaction.user.roles]
+
+            if interaction.user.id in command_data['allowed_users']:
+                return True
+            
+            if (set(user_roles) & set(command_data['allowed_roles'])):
+                return True
+            else:
+                return False
+            
         return app_commands.check(predicate)

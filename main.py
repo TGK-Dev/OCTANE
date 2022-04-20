@@ -34,6 +34,7 @@ bot.current_mutes = {}
 bot.guess_number = {}
 bot.bot_temp_star = {}
 bot.auto_mod_cache = {}
+bot.perm = {}
 
 @bot.event
 async def on_ready():
@@ -55,6 +56,10 @@ async def on_ready():
     current_mute = await bot.mutes.get_all()
     for mute in current_mute:
         bot.current_mutes[mute['_id']] = mute
+    
+    current_perm = await bot.perms.get_all()
+    for perm in current_perm:
+        bot.perm[perm['_id']] = perm
     
     await bot.tree.sync(guild=discord.Object(964377652813234206))
     print('Bot is ready')
@@ -83,6 +88,7 @@ async def run_bot():
     bot.starboard = Document(bot.db, 'starboard')
     bot.ticket = Document(bot.db, 'ticket')
     bot.warns = Document(bot.db, 'warns')
+    bot.perms = Document(bot.db, 'perms')
 
     for file in os.listdir('./cogs'):
         if file.endswith('.py') and not file.startswith("_"):

@@ -181,7 +181,4 @@ class Contex_Paginator:
 		kwargs['view'] = view
 
 		await self.interaction.channel.send(**kwargs)
-
-		await view.wait()
 		
-		await self.interaction.delete_original_message()
