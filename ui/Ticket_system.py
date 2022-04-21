@@ -371,7 +371,7 @@ class Partnership_model(discord.ui.Modal, title="Partnership Ticket Form"):
             interaction.user: discord.PermissionOverwrite(read_messages=True, view_channel=True, attach_files=True, send_messages=True)
         }
 
-        for role in ticket_data['partner_ship']['support_roles']:
+        for role in ticket_data['partner_ship']['supprot_roles']:
             role = discord.utils.get(interaction.guild.roles, id=int(role))
             if role:
                 overwrites[role] = discord.PermissionOverwrite(read_messages=True, view_channel=True, attach_files=True, send_messages=True)

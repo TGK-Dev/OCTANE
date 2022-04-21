@@ -4,17 +4,51 @@ from ui.Ticket_system import Ticket_main, Ticket_Control
 from discord.app_commands import Choice
 from discord import Interaction
 from typing import Union
+from utils.checks import Commands_Checks
+from utils.functions import make_db_temp
 import discord
 
 class Ticket_slash(app_commands.Group, name="ticket", description="ticket system commands"):
     def __init__(self, bot):
         self.bot = bot
         super().__init__(name='ticket')
-    
+
+    @app_commands.command(name="config", description="configure ticket system")
+    @app_commands.describe(option="configure settings option", target="your option")
+    @app_commands.choices(option=[Choice(name="Support Channel", value="support_channel"), Choice(name="Category", value="ticket_category"), Choice(name="Log Channel", value="ticket_log"), Choice(name="Transcript", value="transcript")])
+    @app_commands.guilds(964377652813234206)
+    async def config(self, interaction: Interaction, option: Choice[str], target: Union[discord.TextChannel, discord.CategoryChannel]):
+        await interaction.response.defer()
+        guild_data = await self.bot.config.find(interaction.guild.id)
+        if guild_data is None:
+            guild_data = make_db_temp(interaction.guild.id)
+            await self.bot.config.insert(guild_data)
+        ticket_data = guild_data['Tickets']
+        Change = ""
+        if option.value == "support_channel":
+            ticket_data['channel'] = target.id
+            Change += f"Support channel set to {target.mention}"
+        
+        elif option.value == "ticket_category":
+            ticket_data['category'] = target.id
+            Change += f"Ticket category set to `{target.name}`"
+        
+        elif option.value == "ticket_log":
+            ticket_data['log_channel'] = target.id
+            Change += f"Ticket log channel set to {target.mention}"
+        
+        elif option.value == "transcript":
+            ticket_data['transcript'] = target.id
+            Change += f"Transcript channel set to {target.mention}"
+        
+        await self.bot.config.update(guild_data)
+        await interaction.followup.send(Change)
+
     @app_commands.command(name="edit", description="Edit Ticket")
     @app_commands.guilds(964377652813234206)
     @app_commands.describe(option="Select Option")
     @app_commands.describe(target="User/Role")
+    @Commands_Checks.slash_check()
     @app_commands.choices(option=[
         Choice(name="Add", value=1),
         Choice(name="Remove", value=2),
