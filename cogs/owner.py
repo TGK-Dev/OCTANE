@@ -65,7 +65,8 @@ class Owner(commands.Cog, name="Owner", description="Owner/admin commands."):
         embed.add_field(name="Mod Log Channel", value=f"<#{guild_data['mod_log']}>")
         embed.add_field(name="Case Number", value=f"{guild_data['case']}")
         embed.add_field(name="Starboard Channel", value=f"<#{guild_data['starboard']['channel']}>\nThreshold: {guild_data['starboard']['threshold']}\nSelf Star: {guild_data['starboard']['self_star']}\nToggle: {guild_data['starboard']['toggle']}")
-        embed.add_field(name="Suggestion Channel", value=f"<#{guild_data['suggestion_channel']}>")
+        embed.add_field(name="Suggestion Channel", value=f"<#{guild_data['suggestion']}>")
+        embed.add_field(name="Auto Roles", value=",".join([f"<@&{role}>" for role in guild_data['join_roles']]))
         embed.timestamp = ctx.message.created_at
         embed.set_footer(text=f"Requested by {ctx.author}", icon_url=ctx.author.avatar.url)
         await ctx.send(embed=embed)
@@ -102,6 +103,18 @@ class Owner(commands.Cog, name="Owner", description="Owner/admin commands."):
         guild_data['suggestion'] = channel.id
         await self.bot.config.upsert(guild_data)
         await ctx.send(f"{channel.mention} is now the suggestion channel.")
+    
+    @config.command(name="joinr", aliases=["joinrole", "join-role"], description="Set the join role", brief="config joinr [role]")
+    @commands.has_guild_permissions(administrator=True)
+    async def joinr(self, ctx, role: discord.Role):
+        guild_data = await self.bot.config.find(ctx.guild.id)
+        if not guild_data:
+            guild_data = make_db_temp(ctx.guild.id)
+            await self.bot.config.insert(guild_data)
+
+        guild_data['join_roles'].append(role.id)
+        await self.bot.config.update(guild_data)
+        await ctx.send(f"{role.mention} is now the join role.", allowed_mentions=discord.AllowedMentions(roles=False))
     
     @commands.command(name="eval", description="Evaluate a code", brief="eval [code]", hidden=True)
     @commands.check_any(Commands_Checks.is_me())

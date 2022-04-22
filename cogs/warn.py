@@ -15,7 +15,7 @@ class Warn(commands.Cog, name="Warning System", description="Server Warning logg
     
     @commands.hybrid_command(name="warn", description="Warn a user", brife="warning <user> <reason>")
     @app_commands.describe(user="The user to warn", reason="The reason for the warning")
-    @app_commands.guilds(964377652813234206)
+    @app_commands.guilds(785839283847954433)
     async def warn(self, ctx , user: discord.Member, *, reason:str):
         warn_data = {"user":user.id, "reason":reason, "mod":ctx.author.id, 'time': datetime.datetime.utcnow(), "guild":ctx.guild.id}
         guild_data = await self.bot.config.find(ctx.guild.id)
@@ -40,7 +40,7 @@ class Warn(commands.Cog, name="Warning System", description="Server Warning logg
 
     @app_commands.command(name="warnings", description="Get a user's warnings")
     @app_commands.describe(user="The user to get warnings for")
-    @app_commands.guilds(964377652813234206)
+    @app_commands.guilds(785839283847954433)
     async def warnings(self, interaction: discord.Interaction, user: discord.Member):
         warns = await self.bot.warns.find_many_by_custom({'user':user.id, 'guild':interaction.guild.id})
         
@@ -57,7 +57,7 @@ class Warn(commands.Cog, name="Warning System", description="Server Warning logg
     
     @app_commands.command(name="clearwarn", description="Clear a user's warnings")
     @app_commands.describe(user="The user to clear warnings for")
-    @app_commands.guilds(964377652813234206)
+    @app_commands.guilds(785839283847954433)
     async def clearwarn(self, interaction: discord.Interaction, user: discord.Member, reason:str):
         warns = await self.bot.warns.find_many_by_custom({'user':user.id, 'guild':interaction.guild.id})
         guild_data = await self.bot.config.find(interaction.guild.id)
@@ -83,7 +83,7 @@ class Warn(commands.Cog, name="Warning System", description="Server Warning logg
     
     @app_commands.command(name="delwarn", description="Delete a warning")
     @app_commands.describe(warn="The warning ID to delete")
-    @app_commands.guilds(964377652813234206)
+    @app_commands.guilds(785839283847954433)
     async def delwarn(self, interaction: discord.Interaction, warn: str):
         warn_id = ObjectId(warn)
         warn = await self.bot.warns.find({"_id":warn_id})

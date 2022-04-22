@@ -56,6 +56,7 @@ class Commands_Checks():
             slash_command = interaction.command
             try:
                 command_data = interaction.client.perm[slash_command.name]
+
             except KeyError:
                 command_data = {"_id": slash_command.name, "allowed_roles": [], 'allowed_users': [],"disable": False}
                 await interaction.client.perms.insert(command_data)
@@ -76,3 +77,10 @@ class Commands_Checks():
                 return False
             
         return app_commands.check(predicate)
+
+class Dynamic_cooldown():
+
+    def is_me(interaction: discord.Interaction):
+        if interaction.user.id in [488614633670967307, 301657045248114690]:
+            return None
+        return app_commands.Cooldown(1, 300)

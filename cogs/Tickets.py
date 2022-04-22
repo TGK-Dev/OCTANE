@@ -16,7 +16,7 @@ class Ticket_slash(app_commands.Group, name="ticket", description="ticket system
     @app_commands.command(name="config", description="configure ticket system")
     @app_commands.describe(option="configure settings option", target="your option")
     @app_commands.choices(option=[Choice(name="Support Channel", value="support_channel"), Choice(name="Category", value="ticket_category"), Choice(name="Log Channel", value="ticket_log"), Choice(name="Transcript", value="transcript")])
-    @app_commands.guilds(964377652813234206)
+    @app_commands.guilds(785839283847954433)
     async def config(self, interaction: Interaction, option: Choice[str], target: Union[discord.TextChannel, discord.CategoryChannel]):
         await interaction.response.defer()
         guild_data = await self.bot.config.find(interaction.guild.id)
@@ -45,7 +45,7 @@ class Ticket_slash(app_commands.Group, name="ticket", description="ticket system
         await interaction.followup.send(Change)
 
     @app_commands.command(name="edit", description="Edit Ticket")
-    @app_commands.guilds(964377652813234206)
+    @app_commands.guilds(785839283847954433)
     @app_commands.describe(option="Select Option")
     @app_commands.describe(target="User/Role")
     @Commands_Checks.slash_check()
@@ -123,7 +123,7 @@ class Ticket(commands.Cog, name="Ticket System", description="Create Ticket With
     async def on_ready(self):
         self.bot.add_view(Ticket_main(self.bot))
         self.bot.add_view(Ticket_Control(self.bot))
-        self.bot.tree.add_command(Ticket_slash(self.bot), guild=discord.Object(964377652813234206))
+        self.bot.tree.add_command(Ticket_slash(self.bot), guild=discord.Object(785839283847954433))
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
     
     @commands.command()

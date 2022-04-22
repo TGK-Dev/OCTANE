@@ -10,7 +10,7 @@ import logging
 logging.basicConfig(level=logging.INFO)
 
 bot = commands.Bot(
-    command_prefix='gk.', 
+    command_prefix='-', 
     description='GK Bot', 
     case_insensitive=True, 
     help_command=EmbedHelpCommand(), 
@@ -35,7 +35,8 @@ bot.guess_number = {}
 bot.bot_temp_star = {}
 bot.auto_mod_cache = {}
 bot.perm = {}
-
+bot.config_cache = {}
+tree = bot.tree
 @bot.event
 async def on_ready():
     print(f"Logged in as {bot.user} | {bot.user.id}")
@@ -61,7 +62,11 @@ async def on_ready():
     for perm in current_perm:
         bot.perm[perm['_id']] = perm
     
-    await bot.tree.sync(guild=discord.Object(964377652813234206))
+    current_config = await bot.config.get_all()
+    for config in current_config:
+        bot.config_cache[config['_id']] = config
+    
+    await bot.tree.sync(guild=discord.Object(785839283847954433))
     print('Bot is ready')
 
 @bot.event
@@ -74,10 +79,15 @@ async def on_message(message):
     
     await bot.process_commands(message)
 
+
+
 async def run_bot():
 
     bot.mongo = motor.motor_asyncio.AsyncIOMotorClient(bot.mongo_connection)
-    bot.db = bot.mongo['db']
+    bot.moneyDB = motor.motor_asyncio.AsyncIOMotorClient(str(bot.connection_money))
+    bot.db_money = bot.moneyDB["TGK"]
+    bot.money = Document(bot.db_money, 'donorBank')
+    bot.db = bot.mongo['tgk_database']
     bot.config = Document(bot.db, 'config')
     bot.blacklist = Document(bot.db, 'blacklist')
     bot.suggestions = Document(bot.db, 'suggestions')

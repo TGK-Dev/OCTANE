@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 from copy import deepcopy
-from utils.checks import Commands_Checks
+from utils.checks import Commands_Checks, Dynamic_cooldown
 class AFK(commands.Cog, name="AFK", description="Member Afk Module"):
     def __init__(self, bot):
         self.bot = bot
@@ -47,8 +47,9 @@ class AFK(commands.Cog, name="AFK", description="Member Afk Module"):
                     return await message.reply(f"{user.display_name} is afk {value['message']} -<t:{value['time']}:R> <t:{value['time']}:f>", mention_author=False, delete_after=30, allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))        
 
     @commands.hybrid_command(name="afk", description="Set your AFK status", brief="afk [status]")
-    @app_commands.guilds(964377652813234206)
+    @app_commands.guilds(785839283847954433)
     @app_commands.describe(status="Your AFK reason")
+    @app_commands.checks.dynamic_cooldown(Dynamic_cooldown.is_me)
     @commands.check_any(Commands_Checks.is_me(), Commands_Checks.is_owner(), Commands_Checks.can_use())
     async def afk(self, ctx, status: str = None):
         afk_data = await self.bot.afk.find(ctx.author.id)

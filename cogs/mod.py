@@ -13,6 +13,7 @@ from discord import app_commands
 from typing import Union
 from utils.converter import TimeConverter
 from utils.functions import make_db_temp
+from utils.checks import Commands_Checks
 import ui.models as models
 
 
@@ -142,7 +143,9 @@ class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
 
     @commands.hybrid_command(name="slowmode", aliases=["sm"], description="Set slowmode for a channel", usage="<time>")
     @app_commands.describe(time="Slowmod Time")
-    @app_commands.guilds(964377652813234206)
+    @Commands_Checks.slash_check()
+    @commands.check_any(Commands_Checks.can_use(), Commands_Checks.is_me())
+    @app_commands.guilds(785839283847954433)
     async def slowmode(self, ctx, time: TimeConverter=None):
 
         if time is None:
@@ -159,11 +162,12 @@ class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
             return await ctx.send(embed=embed)
 
     @app_commands.command(name="ban", description="Ban a user")
-    @app_commands.guilds(964377652813234206)
-    @app_commands.checks.has_permissions(ban_members=True)
+    @app_commands.guilds(785839283847954433)
     @app_commands.describe(member="User to ban")
     @app_commands.describe(reason="Reason for ban")
     @app_commands.describe(time="Duration of ban")
+    @Commands_Checks.slash_check()
+    @commands.check_any(Commands_Checks.can_use(), Commands_Checks.is_me())
     async def ban(self, interaction: discord.Interaction, member: discord.Member, time: str=None, reason: str="No reason given"):
         await interaction.response.defer()
         time = await TimeConverter().convert(interaction, time)
@@ -205,9 +209,10 @@ class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
             pass
     
     @app_commands.command(name="unban", description="Unban a user")
-    @app_commands.guilds(964377652813234206)
-    @app_commands.checks.has_permissions(ban_members=True)
+    @app_commands.guilds(785839283847954433)
     @app_commands.describe(member="User to unban")
+    @Commands_Checks.slash_check()
+    @commands.check_any(Commands_Checks.can_use(), Commands_Checks.is_me())
     async def unban(self, interaction: discord.Interaction, member: discord.User, reason: str="No reason given"):
         await interaction.response.defer()
 
@@ -239,10 +244,11 @@ class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
             pass
     
     @app_commands.command(name="kick", description="Kick a user")
-    @app_commands.guilds(964377652813234206)
-    @app_commands.checks.has_permissions(kick_members=True)
+    @app_commands.guilds(785839283847954433)
     @app_commands.describe(member="User to kick")
     @app_commands.describe(reason="Reason for kick")
+    @Commands_Checks.slash_check()
+    @commands.check_any(Commands_Checks.can_use(), Commands_Checks.is_me())
     async def kick(self, interaction: discord.Interaction, member: discord.Member, reason: str="No reason given"):
         await interaction.response.defer()
         if member.id in [self.bot.owner_id, self.bot.user.id]:
@@ -277,18 +283,19 @@ class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
         await interaction.followup.send(embed=response_embed)
     
     @app_commands.command(name="massban", description="Massban a users")
-    @app_commands.guilds(964377652813234206)
+    @app_commands.guilds(785839283847954433)
     @app_commands.checks.has_permissions(administrator=True)
     @app_commands.describe(reason="Reason for ban")
     async def massban(self, interaction: discord.Interaction, reason: str="No reason given"):
         await interaction.response.send_modal(models.Mass_ban(self.bot, interaction, reason))
 
     @app_commands.command(name="mute", description="Mute a user")
-    @app_commands.guilds(964377652813234206)
-    @app_commands.checks.has_permissions(moderate_members=True)
+    @app_commands.guilds(785839283847954433)
     @app_commands.describe(member="User to mute")
     @app_commands.describe(time="Time to mute")
     @app_commands.describe(reason="Reason for mute")
+    @Commands_Checks.slash_check()
+    @commands.check_any(Commands_Checks.can_use(), Commands_Checks.is_me())
     async def mute(self, interaction: discord.Interaction, member: discord.Member, time: str=None, reason: str="No reason given"):
         await interaction.response.defer(thinking=True)
         time = await TimeConverter().convert(interaction, time)

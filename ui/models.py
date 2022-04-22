@@ -2,6 +2,7 @@ from discord import Interaction
 from discord.ext import commands
 import discord.ui as ui
 import discord
+import json
 
 class Mass_ban(ui.Modal, title="Mass Ban Modal"):
     def __init__(self, bot: commands.Bot, interaction: Interaction, reason: str):
@@ -36,3 +37,17 @@ class Mass_ban(ui.Modal, title="Mass Ban Modal"):
         else:
             await interaction.response.send_message("You do not have permission to use this command/modal.", ephemeral=True)
             return False
+
+class Embed_Modal(discord.ui.Modal, title="Embed Modal"):
+    def __init__(self, bot):
+        super().__init__(timeout=None)
+        self.bot = bot
+    
+    embed_code = ui.TextInput(label="Embed Code", placeholder="Enter the embed code", style=discord.TextStyle.paragraph, custom_id="EMBED:CODE", required=True)
+
+    async def on_submit(self, interaction: Interaction):
+        await interaction.response.defer(thinking=True)
+        embed = json.loads(self.embed_code.value)
+        embed['type'] = 'rich'        
+
+        await interaction.followup.send(embed=discord.Embed.from_dict(embed))

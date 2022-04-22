@@ -2,8 +2,8 @@ from discord import app_commands
 from discord.ext import commands
 from utils.checks import Commands_Checks
 from typing import Union, Optional, List
+from discord.app_commands import Choice
 import discord 
-
 
 class Permission_slash(app_commands.Group, name="permission", description="Bot Commands Permission System"):
     def __init__(self, bot):
@@ -16,17 +16,39 @@ class Permission_slash(app_commands.Group, name="permission", description="Bot C
             app_commands.Choice(name=cmd , value=cmd)
             for cmd in current_command if current.lower() in cmd.lower()
         ]
-        if len(choice) == 0:
+        if len(choice) == 1:
             current_command = [cmd.name for cmd in self.bot.tree.get_commands(guild=interaction.guild)]
             for cmd in current_command:
-                choice.append(app_commands.Choice(name=cmd, value=cmd))
-        return(choice[:24])
+                if current.lower() in cmd.lower():
+                    choice.append(app_commands.Choice(name=cmd , value=cmd))
 
+        return(list(choice[:24]))
 
     @app_commands.command(name="check", description="Check permissions of role or user")
     @app_commands.describe(target='The member or role or to check')
     async def check(self, interaction: discord.Interaction, target: Union[discord.Member, discord.Role]):
-        await interaction.response.send_message("Checking permissions of {}".format(target.name))
+        await interaction.response.defer(thinking=True)
+        cmd_data = await self.bot.perms.get_all()
+        allowd_cmd = ""
+        if isinstance(target, discord.Member):
+
+            for cmd in cmd_data:
+                if target.id in cmd['allowed_users']:
+                    allowd_cmd += f"{cmd['_id']}\n"
+        
+        elif isinstance(target, discord.Role):
+
+            for cmd in cmd_data:
+                if target.id in cmd['allowed_roles']:
+                    allowd_cmd += f"{cmd['_id']}\n"
+        
+        embed = discord.Embed(description=f"***Permission's  {target.mention}***",color=interaction.user.color)
+
+        if allowd_cmd == "":
+            allowd_cmd = "None"
+        embed.add_field(name="Allowed Commands", value=allowd_cmd)
+
+        await interaction.followup.send(embed=embed)
     
     @app_commands.command(name='cmd')
     @app_commands.describe(command='check permissions of a command')
@@ -35,15 +57,24 @@ class Permission_slash(app_commands.Group, name="permission", description="Bot C
         self, 
         interaction: discord.Interaction, 
         command: str,
-    ):
+    ):  
+        print(command)
         if not interaction.user.guild_permissions.administrator:
             return await interaction.response.send_message("You don't have permission to use this command",ephemeral=True)
+        await interaction.response.defer(thinking=True)
+        
         command = self.bot.get_command(command)
+        if not command:
+            for cmd in self.bot.tree.get_commands(guild=interaction.guild):
+                if command == cmd.name: 
+                    command = cmd 
+                    break
+        if not command:
+            return await interaction.followup.send("Command not found",ephemeral=True)
+        cmd_data = await self.bot.perms.find(command.name)
 
-        if command is None: return await interaction.response.send_message("I can't find a command with that name!")
-
-        cmd_data = await self.bot.active_cmd.find(command.name)
-        if not cmd_data:return await interaction.response.send_message("NO data found")
+        if cmd_data is None:
+            return await interaction.followup.send("Command not found",ephemeral=True)
 
         embed = discord.Embed(title=f"permission {command.name}",color=interaction.user.color)
 
@@ -51,13 +82,97 @@ class Permission_slash(app_commands.Group, name="permission", description="Bot C
 
         for role in cmd_data['allowed_roles']: 
             roles.append(f"<@&{role}>")
+        for user in cmd_data['allowed_users']:
+            users.append(f"<@{user}>")
+
         if len(roles) == 0: 
             embed.add_field(name="Allowed roles", value="None")
         else: 
             embed.add_field(name="Allowed roles", value=", ".join(roles))
+        
+        if len(users) == 0:
+            embed.add_field(name="Allowed users", value="None")
+        else:
+            embed.add_field(name="Allowed users", value=", ".join(users))
 
         embed.add_field(name="Disabed?:", value=cmd_data['disable'], inline=False)
         await interaction.response.send_message(embed=embed)
+    
+    @app_commands.command(name="edit", description="Add a role/user to a command")
+    @app_commands.describe(target='Role or User to add')
+    @app_commands.describe(command='Command to add to')
+    @app_commands.describe(type="add/remove")
+    @app_commands.choices(type=[Choice(name="add", value="add"), Choice(name="remove", value="remove")])
+    @app_commands.autocomplete(command=command_auto)
+    async def edit(self, interaction: discord.Interaction, target: Union[discord.Role, discord.Member], command: str, type: Choice[str]):
+        if not interaction.user.guild_permissions.administrator:
+            return await interaction.response.send_message("You don't have permission to use this command",ephemeral=True)
+
+        await interaction.response.defer(thinking=True)
+        if command == "*":
+            all_data = await self.bot.perms.get_all()
+            for data in all_data:
+                if type.value == "add":
+                    if isinstance(target, discord.Member):
+                        if target.id not in data['allowed_users']:
+                            data['allowed_users'].append(target.id)
+                    elif isinstance(target, discord.Role):
+                        if target.id not in data['allowed_roles']:
+                            data['allowed_roles'].append(target.id)
+                elif type.value == "remove":
+                    if isinstance(target, discord.Member):
+                        if target.id in data['allowed_users']:
+                            data['allowed_users'].remove(target.id)
+                    elif isinstance(target, discord.Role):
+                        if target.id in data['allowed_roles']:
+                            data['allowed_roles'].remove(target.id)
+                
+                await self.bot.perms.update(data)
+            if type.value == "add":
+                return await interaction.followup.send(f"{target.mention} is now allowed to use all commands")
+            elif type.value == "remove":
+                return await interaction.followup.send(f"{target.mention} rmeoved from all commands")
+                
+        command = self.bot.get_command(command)
+        if not command:
+            for cmd in self.bot.tree.get_commands(guild=interaction.guild):
+                if command == cmd.name: 
+                    command = cmd 
+                    break
+        
+        if not command:
+            return await interaction.followup.send("Command not found",ephemeral=True)
+        
+        cmd_data = await self.bot.perms.find(command.name)
+        if cmd_data is None:
+            cmd_data = {"_id": command.name, "allowed_roles": [], "allowed_users": [],}
+        
+        if type.value == "add":
+            if isinstance(target, discord.Role):
+                if target.id in cmd_data['allowed_roles']:
+                    return await interaction.followup.send("Role already allowed", ephemeral=True)
+                cmd_data['allowed_roles'].append(target.id)
+            else:
+                if target.id in cmd_data['allowed_users']:
+                    return await interaction.followup.send("User already allowed", ephemeral=True)
+                cmd_data['allowed_users'].append(target.id)
+            
+            await interaction.followup.send(f"Added {target.name} to {command.name}")
+            
+        elif type.value == "remove":
+            if isinstance(target, discord.Role):
+                if target.id not in cmd_data['allowed_roles']:
+                    return await interaction.followup.send("Role not allowed", ephemeral=True)
+                cmd_data['allowed_roles'].remove(target.id)
+            else:
+                if target.id not in cmd_data['allowed_users']:
+                    return await interaction.followup.send("User not allowed", ephemeral=True)
+                cmd_data['allowed_users'].remove(target.id)
+
+            await interaction.followup.send(f"Removed {target.name} from {command.name}")
+
+        await self.bot.perms.update(cmd_data)
+        self.bot.perms[command.name] = cmd_data
 
 class Permission(commands.Cog, name="Permission", description="Bot Commands Permission System"):
     def __init__(self, bot):
@@ -65,7 +180,7 @@ class Permission(commands.Cog, name="Permission", description="Bot Commands Perm
     
     @commands.Cog.listener()
     async def on_ready(self):
-        self.bot.tree.add_command(Permission_slash(self.bot), guild=discord.Object(964377652813234206))
+        self.bot.tree.add_command(Permission_slash(self.bot), guild=discord.Object(785839283847954433))
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
     
 async def setup(bot):

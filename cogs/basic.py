@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 from typing import Literal
+from utils.checks import Commands_Checks
 class Basic(commands.Cog, name="Basic", description="General Basic Commands"):
     def __init__(self, bot):
         self.bot = bot
@@ -27,12 +28,12 @@ class Basic(commands.Cog, name="Basic", description="General Basic Commands"):
         self.bot.snipe['edit'][before.channel.id] = (before.content, after.content)
     
     @commands.hybrid_command(name="ping", description="Pong!")
-    @app_commands.guilds(964377652813234206)
+    @app_commands.guilds(785839283847954433)
     async def ping(self, ctx: commands.Context):
         await ctx.send(f"Pong! {round(self.bot.latency * 1000)}ms")
     
     @commands.hybrid_command(name="snipe", description="Snipe the message in current channel")
-    @app_commands.guilds(964377652813234206)
+    @app_commands.guilds(785839283847954433)
     @app_commands.describe(type="Select a type of snipe")
     async def snipe(self, ctx: commands.Context, type: Literal['delete', 'edit'], hidden: bool):
         if type == 'delete':
@@ -57,6 +58,7 @@ class Basic(commands.Cog, name="Basic", description="General Basic Commands"):
             embed.description = f"**Before:** {message_data[0]}\n**After:** {message_data[1]}"
             embed.set_footer(text=f"Sniped by {ctx.author}", icon_url=ctx.author.avatar.url)
             await ctx.send(embed=embed, ephemeral=hidden)
+
             
 
 async def setup(bot):

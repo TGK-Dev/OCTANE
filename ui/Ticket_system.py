@@ -16,14 +16,13 @@ class Ticket_Control(discord.ui.View):
         await interaction.response.defer(thinking=True)
         ticket_data = await self.bot.config.find(interaction.guild.id)
         ticket_data = ticket_data['Tickets']
-        if interaction.channel.category.id != self.bot.config_data[interaction.guild.id]["ticket_category"]:
-            await interaction.followup.send("This is not a ticket channel", ephemeral=True)
         
         data = await self.bot.ticket.find(interaction.channel.id)
         ticket_owner = interaction.guild.get_member(int(data['ticket_owner']))
         if ticket_owner == None:
             return await interaction.followup.send("Ticket owner is not in the server, you may delete the ticket", ephemeral=False)
-            
+        elif data is None:
+            return await interaction.followup.send("Ticket does not exist", ephemeral=False)
         await interaction.channel.edit(sync_permissions=True)
 
         overrite = discord.PermissionOverwrite()
@@ -45,8 +44,9 @@ class Ticket_Control(discord.ui.View):
         data['status'] = "open"
         await self.bot.ticket.upsert(data)
 
-        support_role = discord.utils.get(interaction.guild.roles, id=self.bot.config_data[interaction.guild.id]['support_role'])
-        await interaction.channel.set_permissions(support_role, overwrite=overrite)
+        for role in ticket_data[data['type']]['supprot_roles']:
+            role = discord.utils.get(interaction.guild.roles, id=int(role))
+            await interaction.channel.set_permissions(role, overwrite=overrite)
         await interaction.followup.send(embed=discord.Embed(description=f"<:allow:819194696874197004> | Ticket re-opened by {interaction.user.mention}", color=0x2f3136))
 
         log_embed = discord.Embed(color=0x00FF00)
@@ -68,8 +68,9 @@ class Ticket_Control(discord.ui.View):
     async def Close(self, interaction: discord.Interaction ,button: discord.Button):
         await interaction.response.defer(ephemeral=False, thinking=True)
         ticket_data = await self.bot.config.find(interaction.guild.id)
+
         ticket_data = ticket_data['Tickets']
-        if interaction.channel.category.id != self.bot.config_data[interaction.guild.id]["ticket_category"]:
+        if interaction.channel.category.id != ticket_data["category"]:
             return await interaction.followup.send("This is not a ticket channel", ephemeral=True)
         
         data = await self.bot.ticket.find(interaction.channel.id)
@@ -93,11 +94,12 @@ class Ticket_Control(discord.ui.View):
             user = self.bot.get_user(int(i))
             await interaction.channel.set_permissions(user, overwrite=overrite)
 
-        support_role = discord.utils.get(interaction.guild.roles, id=self.bot.config_data[interaction.guild.id]["support_role"])
-        await interaction.channel.set_permissions(support_role, overwrite=staff_overrite)
+        for role in ticket_data[data['type']]['supprot_roles']:
+            role = discord.utils.get(interaction.guild.roles, id=int(role))
+            await interaction.channel.set_permissions(role, overwrite=staff_overrite)
 
         data['status'] = "closed"
-        await self.bot.ticket.upsert(data)
+        await self.bot.ticket.update(data)
 
         await interaction.followup.send(embed=discord.Embed(description=f"<:allow:819194696874197004> | Ticket closed by {interaction.user.mention}", color=0x2f3136))
 
@@ -118,39 +120,39 @@ class Ticket_Control(discord.ui.View):
     
     @discord.ui.button(label="Secure", custom_id="Control:Secure", style=discord.ButtonStyle.gray, emoji="🔐")
     async def Secure(self, interaction: discord.Interaction ,button: discord.Button):
-            ticket_info = await self.bot.ticket.find(interaction.channel.id)
-            await interaction.response.defer(ephemeral=False, thinking=True)
-            message = await interaction.followup.send("Securing ticket...")
+        ticket_info = await self.bot.ticket.find(interaction.channel.id)
+        await interaction.response.defer(ephemeral=False, thinking=True)
+        message = await interaction.followup.send("Securing ticket...")
 
-            if ticket_info is None:
-                return await interaction.followup.send("Ticket Not Found")
-            
-            await interaction.channel.edit(sync_permissions=True)
-            ticket_owner = interaction.guild.get_member(int(ticket_info['ticket_owner']))
-            if not ticket_owner:
-                return await interaction.followup.send("Ticket Owner Not Found")
-            
-            overwrite = discord.PermissionOverwrite()
-            overwrite.view_channel = False
-            overwrite.read_messages = False
-            overwrite.send_messages = False
-            overwrite.attach_files = False
+        if ticket_info is None:
+            return await interaction.followup.send("Ticket Not Found")
+        
+        await interaction.channel.edit(sync_permissions=True)
+        ticket_owner = interaction.guild.get_member(int(ticket_info['ticket_owner']))
+        if not ticket_owner:
+            return await interaction.followup.send("Ticket Owner Not Found")
+        
+        overwrite = discord.PermissionOverwrite()
+        overwrite.view_channel = False
+        overwrite.read_messages = False
+        overwrite.send_messages = False
+        overwrite.attach_files = False
 
-            for i in interaction.channel.overwrites:
-                await interaction.channel.set_permissions(i, overwrite=overwrite)
-            
-            owner_owrite = discord.PermissionOverwrite()
-            owner_owrite.view_channel = True
-            owner_owrite.send_messages = True
-            owner_owrite.read_messages = True
-            owner_owrite.attach_files = True
+        for i in interaction.channel.overwrites:
+            await interaction.channel.set_permissions(i, overwrite=overwrite)
+        
+        owner_owrite = discord.PermissionOverwrite()
+        owner_owrite.view_channel = True
+        owner_owrite.send_messages = True
+        owner_owrite.read_messages = True
+        owner_owrite.attach_files = True
 
-            await interaction.channel.set_permissions(ticket_owner, overwrite=owner_owrite)
+        await interaction.channel.set_permissions(ticket_owner, overwrite=owner_owrite)
 
-            await message.edit(content=None,embed=discord.Embed(description=f"<:allow:819194696874197004> | Ticket secured by {interaction.user.mention}", color=0x00FF00))
+        await message.edit(content=None,embed=discord.Embed(description=f"<:allow:819194696874197004> | Ticket secured by {interaction.user.mention}", color=0x00FF00))
 
-            button.disabled = True
-            await interaction.message.edit(view=self)
+        button.disabled = True
+        await interaction.message.edit(view=self)
     
     @discord.ui.button(label="Save", custom_id="Control:Save", style=discord.ButtonStyle.green, emoji="📩")
     async def Save(self, interaction: discord.Interaction ,button: discord.Button):
@@ -339,10 +341,9 @@ class Support_model(discord.ui.Modal, title="Support Ticket Form"):
         View = Ticket_Control(self.bot)
         if data['type'] == "support":
             for button in View.children:
-                if button.label == "Add Shero":
-                    item = button
-                    break
-            View.remove_item(item)
+                if button.custom_id == "Control:shero":
+                    button.disabled = False
+                    break                                
         
         msg = await channel.send(embed=embed, content=f"{interaction.user.mention} | <@&{ticket_data['support']['ping_role']}>",view=View)
         await msg.pin()
