@@ -81,7 +81,7 @@ class Permission_slash(app_commands.Group, name="permission", description="Bot C
             embed.add_field(name="Allowed users", value=", ".join(users))
 
         embed.add_field(name="Disabed?:", value=cmd_data['disable'], inline=False)
-        await interaction.response.send_message(embed=embed)
+        await interaction.followup.send(embed=embed)
     
     @app_commands.command(name="edit", description="Add a role/user to a command")
     @app_commands.describe(target='Role or User to add')
@@ -119,9 +119,10 @@ class Permission_slash(app_commands.Group, name="permission", description="Bot C
                 return await interaction.followup.send(f"{target.mention} rmeoved from all commands")
 
         
-        cmd_data = await self.bot.perms.find(command.name)
+        cmd_data = await self.bot.perms.find(command)
         if cmd_data is None:
-            cmd_data = {"_id": command.name, "allowed_roles": [], "allowed_users": [], 'disable': False}
+            cmd_data = {"_id": command, "allowed_roles": [], "allowed_users": [], 'disable': False}
+            await self.bot.perms.insert(cmd_data)
         
         if type.value == "add":
             if isinstance(target, discord.Role):
@@ -133,7 +134,7 @@ class Permission_slash(app_commands.Group, name="permission", description="Bot C
                     return await interaction.followup.send("User already allowed", ephemeral=True)
                 cmd_data['allowed_users'].append(target.id)
             
-            await interaction.followup.send(f"Added {target.name} to {command.name}")
+            await interaction.followup.send(f"Added {target.name} to {command}")
             
         elif type.value == "remove":
             if isinstance(target, discord.Role):
@@ -145,10 +146,10 @@ class Permission_slash(app_commands.Group, name="permission", description="Bot C
                     return await interaction.followup.send("User not allowed", ephemeral=True)
                 cmd_data['allowed_users'].remove(target.id)
 
-            await interaction.followup.send(f"Removed {target.name} from {command.name}")
+            await interaction.followup.send(f"Removed {target.name} from {command}")
 
         await self.bot.perms.update(cmd_data)
-        self.bot.perms[command.name] = cmd_data
+        self.bot.perm[cmd_data["_id"]] = cmd_data
 
 class Permission(commands.Cog, name="Permission", description="Bot Commands Permission System"):
     def __init__(self, bot):
