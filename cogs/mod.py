@@ -355,6 +355,23 @@ class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
             await member.send(f"You have been muted from {interaction.guild.name} for {reason}\n Unmute in <t:{remove_time}:R>")
         except discord.HTTPException:
             pass
+    
+    @app_commands.command(name="role", description="add/remove a role to a user")
+    @app_commands.guilds(785839283847954433)
+    @app_commands.describe(member="User to add/remove a role", role="Role to add/remove")
+    @Commands_Checks.can_use()
+    async def role(self, interaction: discord.Interaction, member: discord.Member, role: discord.Role):
+        if role.permissions.administrator or role.permissions.manage_guild or role.permissions.manage_roles or role.permissions.manage_channels or role.permissions.ban_members or role.permissions.kick_members:
+            return await interaction.response.send_message("You can't add/remove this role due to security reasons, contact the owner if you think this is a mistake", ephemeral=True)
+           
+        await interaction.response.defer(thinking=True)
+        if role in member.roles:
+            await member.remove_roles(role)
+            response_embed = discord.Embed(description=f"<:allow:819194696874197004> | Removed {role.name} from {member.mention}", color=0x32CD32)
+        else:
+            await member.add_roles(role)
+            response_embed = discord.Embed(description=f"<:allow:819194696874197004> | Added {role.name} to {member.mention}", color=0x32CD32)
+        await interaction.followup.send(embed=response_embed)
 
 async def setup(bot):
     await bot.add_cog(Mod(bot))

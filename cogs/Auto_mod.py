@@ -85,7 +85,7 @@ class AutoMod(commands.Cog):
                 embed.timestamp = discord.utils.utcnow()
                 await log_channel.send(embed=embed)
                 
-        print(self.bot.auto_mod_cache)
+        self.bot.auto_mod_cache
 
 async def setup(bot):
     await bot.add_cog(AutoMod(bot))

@@ -131,7 +131,7 @@ class Anti_nuke(commands.Cog):
             if event.target.id == channel.id:
                 event = event
                 break
-        print(event.user)
+
         if event.user == self.bot.user or event.user.id in self.bot.owner_ids:
             return
         else:

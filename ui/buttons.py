@@ -2,6 +2,7 @@ from discord import Interaction
 from discord.ext import commands
 import random
 import discord
+import asyncio
 class verify(discord.ui.View):
     def __init__(self, bot):
         super().__init__(timeout=None)
@@ -9,14 +10,14 @@ class verify(discord.ui.View):
         self.guild = self.bot.get_guild(785839283847954433)
         self.role = discord.utils.get(self.guild.roles, id=953006119436030054)
     
-    @discord.ui.button(label="Verify", style=discord.ButtonStyle.green, custom_id="verify", emoji="<:YES_TICK:957348921120792717>")
-    async def verify(self, button: discord.ui.Button, interaction: discord.Interaction):
+    @discord.ui.button(label="Verify", style=discord.ButtonStyle.gray, custom_id="verify", emoji="<:verify_TGK:966187540774269008>")
+    async def verify(self, interaction: discord.Interaction, button: discord.ui.Button):
         if self.role in interaction.user.roles:
-            await interaction.response.send_message("Verified", ephemeral=True)
+            await interaction.response.send_message(f"you have been verified, check <#944670176115294228> and <#944670050252648468>", ephemeral=True)
+            await asyncio.sleep(2)
             await interaction.user.remove_roles(self.role)
         else:
             await interaction.response.send_message("You are already verified, create ticket from <#785901543349551104>", ephemeral=True)
-
 class Start_Gn(discord.ui.View):
     def __init__(self, bot, interaction, number):
         self.bot = bot

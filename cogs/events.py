@@ -1,4 +1,5 @@
 from discord.ext import commands, tasks
+from ui.buttons import verify
 import datetime
 import discord
 
@@ -36,6 +37,7 @@ class Events(commands.Cog):
     
     @commands.Cog.listener()
     async def on_ready(self):
+        self.bot.add_view(verify(self.bot))
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
     
     @commands.Cog.listener()

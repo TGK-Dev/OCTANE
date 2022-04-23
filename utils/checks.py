@@ -74,6 +74,8 @@ class Commands_Checks():
             if (set(user_roles) & set(command_data['allowed_roles'])):
                 return True
             else:
+                if interaction.user.guild_permissions.administrator:
+                    return True
                 return False
             
         return app_commands.check(predicate)

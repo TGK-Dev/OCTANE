@@ -17,21 +17,16 @@ class Guess_number(commands.Cog, name="Guess The Number", description="Guess The
     
     @commands.Cog.listener()
     async def on_game_start(self, message: discord.Message, channel: discord.Thread, right_num: int,):
-        print("Game Started")
 
         def check(m):
-            if message.author.bot:
-                return False        
-            if m.channel.id == channel.id and m.content == str(right_num):
+            if m.channel.id == channel.id and m.content == str(right_num) and not m.author.bot:
                 self.bot.guess_number[m.channel.id]['guess_num'] += 1
                 return True
-            elif m.channel.id == channel.id and m.content != str(right_num):
+            if m.channel.id == channel.id and m.content != str(right_num):
                 self.bot.guess_number[m.channel.id]['guess_num'] += 1
             
         try:
-            print("Starting event loop")
-            win_message = await self.bot.wait_for('message', check=check, timeout=60)
-            print("Event loop ended")
+            win_message = await self.bot.wait_for('message', check=check, timeout=3600)
             await win_message.reply(f"{win_message.author.mention} You Guessed The Right Number")
             await channel.edit(name="Game Has Ended",archived=True, locked=True)
 
