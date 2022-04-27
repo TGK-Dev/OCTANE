@@ -20,17 +20,19 @@ class AFK(commands.Cog, name="AFK", description="Member Afk Module"):
         if message.author.id in self.bot.current_afk:
 
             try:
-                self.bot.current_afk.pop(message.author.id)
-            except KeyError:
-                pass
-
-            try:
                 await message.author.edit(nick=self.bot.current_afk[message.author.id]['last_name'])
             except:
                 pass
+            
+            
 
             await message.reply(f"{message.author.mention} Your AFK status has been removed.")
             await self.bot.afk.delete(message.author.id)
+
+            try:
+                self.bot.current_afk.pop(message.author.id)
+            except KeyError:
+                pass
             return
         
         if message.reference:
