@@ -3,6 +3,8 @@ from discord.ext import commands
 from discord import app_commands
 from typing import Literal
 from utils.checks import Commands_Checks
+import time
+import datetime
 class Basic(commands.Cog, name="Basic", description="General Basic Commands"):
     def __init__(self, bot):
         self.bot = bot
@@ -10,6 +12,19 @@ class Basic(commands.Cog, name="Basic", description="General Basic Commands"):
     @commands.Cog.listener()
     async def on_ready(self):
         print(f"{self.__class__.__name__} Cog has been loaded")
+    
+    @commands.Cog.listener()
+    async def on_message(self, message):
+        if message.author.id != 520830713696878592: return
+        if message.author.bot and message.channel.id == 962771383996284979:
+            update_channel = self.bot.get_guild(785839283847954433).get_channel(855717169584537660)
+            if len(message.embeds) > 0:
+                await update_channel.send(embeds=message.embeds)
+            if len(message.attachments) > 0:
+                await update_channel.send(attachments=message.attachments)
+            if message.content:
+                await update_channel.send(content=message.content)
+        
     
     @commands.Cog.listener()
     async def on_message_delete(self, message):
@@ -27,10 +42,20 @@ class Basic(commands.Cog, name="Basic", description="General Basic Commands"):
             return
         self.bot.snipe['edit'][before.channel.id] = (before.content, after.content)
     
-    @commands.hybrid_command(name="ping", description="Pong!")
+    @app_commands.command(name="ping", description="Pong!")
     @app_commands.guilds(785839283847954433)
-    async def ping(self, ctx: commands.Context):
-        await ctx.send(f"Pong! {round(self.bot.latency * 1000)}ms")
+    async def ping(self, interaction: discord.Interaction):
+        start_time = time.time()
+        await interaction.response.send_message("Pong!")
+        end_time = time.time()
+
+        dstart = datetime.datetime.utcnow()
+        await self.bot.config.find(interaction.guild.id)
+        dend = datetime.datetime.utcnow()
+        dping = (dend - dstart)
+        dping = dping.total_seconds()
+
+        await interaction.edit_original_message(content=f"**Response TIme** {round(self.bot.latency * 1000)}ms\n**API**: {round((end_time - start_time) * 1000)}ms\n**Database Ping**: {round(dping * 1000)}Ms\n**Last Reboot**: <t:{round(self.bot.uptime.timestamp())}:R>")
     
     @commands.hybrid_command(name="snipe", description="Snipe the message in current channel")
     @app_commands.guilds(785839283847954433)

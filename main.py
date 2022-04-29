@@ -7,6 +7,8 @@ import os
 import motor.motor_asyncio
 import asyncio
 import logging
+import datetime
+
 logging.basicConfig(level=logging.INFO)
 
 bot = commands.Bot(
@@ -36,6 +38,10 @@ bot.bot_temp_star = {}
 bot.auto_mod_cache = {}
 bot.perm = {}
 bot.config_cache = {}
+bot.cross_chat_cache = {}
+bot.ban_event = {}
+bot.uptime = datetime.datetime.utcnow()
+
 tree = bot.tree
 @bot.event
 async def on_ready():
@@ -65,6 +71,10 @@ async def on_ready():
     current_config = await bot.config.get_all()
     for config in current_config:
         bot.config_cache[config['_id']] = config
+    
+    current_ban_backup = await bot.ban_backup.get_all()
+    for ban_backup in current_ban_backup:
+        bot.ban_event[ban_backup['_id']] = ban_backup
     
     await bot.tree.sync(guild=discord.Object(785839283847954433))
     print('Bot is ready')
@@ -99,9 +109,12 @@ async def run_bot():
     bot.ticket = Document(bot.db, 'ticket')
     bot.warns = Document(bot.db, 'warns')
     bot.perms = Document(bot.db, 'perms')
+    bot.cross_chat = Document(bot.db, 'cross_chat')
+    bot.ban_backup = Document(bot.db, 'ban_backup')
+    bot.invites = Document(bot.db, 'invites')
 
     for file in os.listdir('./cogs'):
-        if file.endswith('.py') and not file.startswith("_"):
+        if file.endswith('.py') and not file.startswith("_") and not file.startswith('crosschat'):
             await bot.load_extension(f'cogs.{file[:-3]}')
     
     await bot.start(bot.token)
