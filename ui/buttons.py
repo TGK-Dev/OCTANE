@@ -54,3 +54,22 @@ class Start_Gn(discord.ui.View):
             return True
         else:
             await interaction.response.send_message("You can't start the game, you are not the host", ephemeral=True)
+
+class Invite_Panel(discord.ui.View):
+    def __init__(self, staff_invite: discord.Invite, public_invite: discord.Invite):
+        super().__init__(timeout=3600)
+        self.staff_invite = staff_invite
+        self.public_invite = public_invite
+    
+    @discord.ui.button(label="Public Invite", style=discord.ButtonStyle.green, custom_id="public-invite")
+    async def public_invite(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_message(self.public_invite, ephemeral=True)
+
+    @discord.ui.button(label="Staff-invite", style=discord.ButtonStyle.red, custom_id="staff-invite")
+    async def staff_invite(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if interaction.user.guild_permissions.manage_messages:
+            await interaction.response.send_message(self.staff_invite,ephemeral=True)
+        else:
+            await interaction.response.send_message("You don't have permission to use this button.", ephemeral=True)
+    
+    

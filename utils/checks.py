@@ -80,6 +80,15 @@ class Commands_Checks():
             
         return app_commands.check(predicate)
 
+    def is_ban_server():
+        async def predicate(ctx):
+            if ctx.guild.name == "Ban Battle":
+                return True
+            else:
+                return False
+                
+        return commands.check(predicate)
+
 class Dynamic_cooldown():
 
     def is_me(interaction: discord.Interaction):
