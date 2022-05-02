@@ -22,7 +22,7 @@ bot = commands.Bot(
 
 #bot envs 
 load_dotenv()
-bot.token = os.environ['TEST_BOT']
+bot.token = os.environ['TOKEN']
 bot.mongo_connection = os.environ['MONGO']
 bot.Amari_token = os.environ['AMRI']
 bot.connection_money = os.environ['MONGOMONEY']

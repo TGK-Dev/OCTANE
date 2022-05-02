@@ -33,13 +33,13 @@ class CorssChat(commands.Cog, name="Cross Chat"):
         if self.bot.cross_chat_toggle == False or message.content.startswith("-") or message.author.bot:
             return
 
-        if message.channel.id == 969247308938108940:
-            place2 = self.bot.get_channel(969247329532145726)
+        if message.channel.id == 970681327374467082:
+            place2 = self.bot.get_channel(970681794242420736)
 
             send_msg = await self.Send_web_Message(place2, message)
 
-        if message.channel.id == 969247329532145726:
-            place1 = self.bot.get_channel(969247308938108940)
+        if message.channel.id == 970681794242420736:
+            place1 = self.bot.get_channel(970681327374467082)
 
             send_msg = await self.Send_web_Message(place1, message)
 
