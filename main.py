@@ -2,6 +2,7 @@ from discord.ext import commands
 from dotenv import load_dotenv
 from utils.db import Document
 from utils.help import EmbedHelpCommand
+from discord import app_commands
 import discord
 import os
 import motor.motor_asyncio
@@ -24,7 +25,8 @@ load_dotenv()
 bot.token = os.environ['TOKEN']
 bot.mongo_connection = os.environ['MONGO']
 bot.Amari_token = os.environ['AMRI']
-bot.connection_money = os.getenv('MONGOMONEY')
+bot.connection_money = os.environ['MONGOMONEY']
+bot.nuke_webhook = os.environ['NUKE_WEBHOOK']
 
 #global bot atributes
 bot.blacklist_users = []
@@ -88,8 +90,6 @@ async def on_message(message):
         return
     
     await bot.process_commands(message)
-
-
 
 async def run_bot():
 

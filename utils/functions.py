@@ -1,3 +1,5 @@
+import string
+import random
 
 def make_db_temp(id):
         return {'_id': id, 'blacklist': [], 'welcome': None, 'mod_log': None, 'case': 1, 'starboard': {'channel': None, 'threshold': 5, 'self_star': False, 'toggle': False}, 'suggestion': None, 'join_roles': [],
@@ -9,3 +11,7 @@ def clean_code(content):
         return "\n".join(content.split("\n")[1:])[:-3]
     else:
         return content
+
+def Make_Verify_Code():
+    lenth = 6
+    return ''.join(random.choices(string.ascii_lowercase + string.digits + string.ascii_uppercase, k = lenth))

@@ -19,7 +19,6 @@ class Starboard(commands.Cog, name="Starboard", description="Starboard Module"):
 
         if payload.message_id in self.bot.bot_temp_star: return
         
-        
         guild = self.bot.get_guild(payload.guild_id)
         channel = self.bot.get_channel(payload.channel_id)
         try:

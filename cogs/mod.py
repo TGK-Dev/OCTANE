@@ -3,7 +3,7 @@ import discord
 import re
 from discord import Webhook
 import aiohttp
-
+import asyncio
 from humanfriendly import format_timespan
 from copy import deepcopy
 from dateutil.relativedelta import relativedelta
@@ -143,8 +143,6 @@ class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
 
     @commands.hybrid_command(name="slowmode", aliases=["sm"], description="Set slowmode for a channel", usage="<time>")
     @app_commands.describe(time="Slowmod Time")
-    @Commands_Checks.slash_check()
-    @commands.check_any(Commands_Checks.can_use(), Commands_Checks.is_me())
     @app_commands.guilds(785839283847954433)
     async def slowmode(self, ctx, time: TimeConverter=None):
 
@@ -166,7 +164,6 @@ class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
     @app_commands.describe(member="User to ban")
     @app_commands.describe(reason="Reason for ban")
     @app_commands.describe(time="Duration of ban")
-    @Commands_Checks.slash_check()
     @commands.check_any(Commands_Checks.can_use(), Commands_Checks.is_me())
     async def ban(self, interaction: discord.Interaction, member: discord.Member, time: str=None, reason: str="No reason given"):
         await interaction.response.defer()
@@ -211,7 +208,6 @@ class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
     @app_commands.command(name="unban", description="Unban a user")
     @app_commands.guilds(785839283847954433)
     @app_commands.describe(member="User to unban")
-    @Commands_Checks.slash_check()
     @commands.check_any(Commands_Checks.can_use(), Commands_Checks.is_me())
     async def unban(self, interaction: discord.Interaction, member: discord.User, reason: str="No reason given"):
         await interaction.response.defer()
@@ -247,7 +243,6 @@ class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
     @app_commands.guilds(785839283847954433)
     @app_commands.describe(member="User to kick")
     @app_commands.describe(reason="Reason for kick")
-    @Commands_Checks.slash_check()
     @commands.check_any(Commands_Checks.can_use(), Commands_Checks.is_me())
     async def kick(self, interaction: discord.Interaction, member: discord.Member, reason: str="No reason given"):
         await interaction.response.defer()
@@ -294,7 +289,6 @@ class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
     @app_commands.describe(member="User to mute")
     @app_commands.describe(time="Time to mute")
     @app_commands.describe(reason="Reason for mute")
-    @Commands_Checks.slash_check()
     @commands.check_any(Commands_Checks.can_use(), Commands_Checks.is_me())
     async def mute(self, interaction: discord.Interaction, member: discord.Member, time: str=None, reason: str="No reason given"):
         await interaction.response.defer(thinking=True)
@@ -359,7 +353,6 @@ class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
     @app_commands.command(name="role", description="add/remove a role to a user")
     @app_commands.guilds(785839283847954433)
     @app_commands.describe(member="User to add/remove a role", role="Role to add/remove")
-    @Commands_Checks.can_use()
     async def role(self, interaction: discord.Interaction, member: discord.Member, role: discord.Role):
         if role.permissions.administrator or role.permissions.manage_guild or role.permissions.manage_roles or role.permissions.manage_channels or role.permissions.ban_members or role.permissions.kick_members:
             return await interaction.response.send_message("You can't add/remove this role due to security reasons, contact the owner if you think this is a mistake", ephemeral=True)
@@ -372,6 +365,33 @@ class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
             await member.add_roles(role)
             response_embed = discord.Embed(description=f"<:allow:819194696874197004> | Added {role.name} to {member.mention}", color=0x32CD32)
         await interaction.followup.send(embed=response_embed)
+
+    @app_commands.command(name="whois", description="Get info about a user")
+    @app_commands.describe(member="User to get info about")
+    @app_commands.guilds(785839283847954433)
+    async def userinfo(self, interaction: discord.Interaction, member: discord.Member):
+        embed = discord.Embed(title=f'{member.name}', color=member.color)
+
+        if member.avatar != None:
+            embed.set_thumbnail(url=member.avatar.url)
+            embed.set_footer(name=f"{member.name} | {member.id}", icon_url=member.avatar.url)
+        
+        else:
+
+            embed.set_thumbnail(url=member.default_avatar)
+            embed.set_footer(name=f"{member.name} | {member.id}", icon_url=member.default_avatar)
+        
+        embed.add_field(name='Account Name:', value=f'{member.name}', inline=False)
+        embed.add_field(name="Created At:", value=f"<t:{round(member.created_at.timestamp())}:R>", inline=False)
+        embed.add_field(name="Joined At:", value=f"<t:{round(member.joined_at.timestamp())}:R>", inline=False)
+        Member = self.bot.fetch_user(member.id)
+
+        if Member.banner:
+            embed.set_image(url=Member.banner)
+        
+        await interaction.response.send_message(embed=embed)
+        await asyncio.sleep(30)
+        await interaction.delete_original_message()
 
 async def setup(bot):
     await bot.add_cog(Mod(bot))

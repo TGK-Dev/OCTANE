@@ -48,7 +48,6 @@ class Ticket_slash(app_commands.Group, name="ticket", description="ticket system
     @app_commands.guilds(785839283847954433)
     @app_commands.describe(option="Select Option")
     @app_commands.describe(target="User/Role")
-    @Commands_Checks.slash_check()
     @app_commands.choices(option=[
         Choice(name="Add", value=1),
         Choice(name="Remove", value=2),

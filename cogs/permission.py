@@ -65,7 +65,7 @@ class Permission_slash(app_commands.Group, name="permission", description="Bot C
 
         roles,users = [], []
 
-        for role in cmd_data['allowed_roles']: 
+        for role in cmd_data['allowed_roles']:
             roles.append(f"<@&{role}>")
         for user in cmd_data['allowed_users']:
             users.append(f"<@{user}>")

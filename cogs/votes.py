@@ -44,7 +44,7 @@ class Votes(commands.Cog, name="Votes",description="Server Vote counter with Top
         if member is None:
             return await self.bot.votes.delete(vote['_id'])
 
-        #await member.remove_roles(guild.get_role(786884615192313866))
+        await member.remove_roles(guild.get_role(786884615192313866))
 
         vote['reminded'] = True
         await self.bot.votes.update(vote)

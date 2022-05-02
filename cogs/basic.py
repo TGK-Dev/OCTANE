@@ -57,32 +57,36 @@ class Basic(commands.Cog, name="Basic", description="General Basic Commands"):
 
         await interaction.edit_original_message(content=f"**Response TIme** {round(self.bot.latency * 1000)}ms\n**API**: {round((end_time - start_time) * 1000)}ms\n**Database Ping**: {round(dping * 1000)}Ms\n**Last Reboot**: <t:{round(self.bot.uptime.timestamp())}:R>")
     
-    @commands.hybrid_command(name="snipe", description="Snipe the message in current channel")
+    @app_commands.command(name="snipe", description="Snipe the message in current channel")
     @app_commands.guilds(785839283847954433)
     @app_commands.describe(type="Select a type of snipe")
-    async def snipe(self, ctx: commands.Context, type: Literal['delete', 'edit'], hidden: bool):
+    async def snipe(self, interaction: discord.Interaction, type: Literal['delete', 'edit'], hidden: bool):
         if type == 'delete':
-            message_data = self.bot.snipe['delete'].get(ctx.channel.id)
+
+            message_data = self.bot.snipe['delete'].get(interaction.channel.id)
             if message_data is None:
-                await ctx.send("No message to snipe")
+                await interaction.response.send_message("No message to snipe", ephemeral=True)
                 return
+
             message_author = self.bot.get_user(message_data['author'])
-            embed = discord.Embed(color=ctx.author.color)
+
+            embed = discord.Embed(color=interaction.user.color)
             embed.set_author(name=message_author.name, icon_url=message_author.avatar.url)
             embed.description = message_data['content']
-            embed.set_footer(text=f"Sniped by {ctx.author}", icon_url=ctx.author.avatar.url)
-            await ctx.send(embed=embed, ephemeral=hidden)
+            embed.set_footer(text=f"Sniped by {interaction.user.name}")
+
+            await interaction.response.send_message(embed=embed, ephemeral=hidden)
         
         elif type == 'edit':
-            message_data = self.bot.snipe['edit'].get(ctx.channel.id)
+            message_data = self.bot.snipe['edit'].get(interaction.channel.id)
             if message_data is None:
-                await ctx.send("No message to snipe")
+                await interaction.response.send_message("No message to snipe", ephemeral=hidden)
                 return
-            embed = discord.Embed(color=ctx.author.color)
-            embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar.url)
+            embed = discord.Embed(color=interaction.user.color)
+            embed.set_author(name=interaction.user.name, icon_url=interaction.user.avatar.url)
             embed.description = f"**Before:** {message_data[0]}\n**After:** {message_data[1]}"
-            embed.set_footer(text=f"Sniped by {ctx.author}", icon_url=ctx.author.avatar.url)
-            await ctx.send(embed=embed, ephemeral=hidden)
+            embed.set_footer(text=f"Sniped by {interaction.user.name}")
+            await interaction.response.send_message(embed=embed, ephemeral=hidden)
 
             
 

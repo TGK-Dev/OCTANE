@@ -3,7 +3,8 @@ import datetime
 import discord
 import os
 from discord.ext import commands
-from utils.checks import Commands_Checks
+from utils.checks import Commands_Checks, Dynamic_cooldown
+from discord import app_commands
 
 def fomat_time(time):
     return time.strftime('%d-%B-%Y %I:%m %p')
@@ -66,24 +67,26 @@ class Invites(commands.Cog, name="Invites",description=description):
                          icon_url=member.guild.icon.url)
         await channel.send(embed=embed)
 
-    @commands.command(name="invites", description="Show user total Invites", usage="[Member]")
-    async def invites(self, ctx, member: discord.Member = None):
-        member = member if member else ctx.author
-
+    @app_commands.command(name="invites", description="Show the invites of a user")
+    @app_commands.guilds(785839283847954433)
+    @app_commands.checks.dynamic_cooldown(Dynamic_cooldown.is_me)   
+    @app_commands.describe(member="The member you want to check the invites of")
+    async def invites(self, interaction: discord.Interaction, member: discord.Member=None):
+        member = member if member else interaction.author
+        await interaction.response.defer(thinking=True)
         invites_filter = {"_id": member.id}
 
-        invites = await self.bot.invites.find_many_by_custom(invites_filter)
+        invites = await self.bot.invites.find(invites_filter)
 
-        if not bool(invites):
-            return await ctx.send(f"There is no Invites for the {member.name}")
+        if not invites:
+            return await interaction.followup.send(f"There is no Invites for the {member.name}")
 
-        for invite in invites:
-            count = (invite['count'])
-            mcolor = member.color
-            embed = discord.Embed(
-                description=f"The User {member.name} Has `{count}` Invites", color=mcolor, timestamp=datetime.datetime.now())
+        count = (invites['count'])
+        mcolor = member.color
+        embed = discord.Embed(
+            description=f"The User {member.name} Has `{count}` Invites", color=mcolor, timestamp=datetime.datetime.now())
 
-            await ctx.send(embed=embed)
+        await interaction.followup.send(embed=embed)
 
     @commands.command(name="inviter", description="Find out who invited who")
     @commands.check_any(Commands_Checks.is_me(), Commands_Checks.is_owner(), Commands_Checks.can_use())

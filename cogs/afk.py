@@ -22,9 +22,7 @@ class AFK(commands.Cog, name="AFK", description="Member Afk Module"):
             try:
                 await message.author.edit(nick=self.bot.current_afk[message.author.id]['last_name'])
             except:
-                pass
-            
-            
+                pass            
 
             await message.reply(f"{message.author.mention} Your AFK status has been removed.")
             await self.bot.afk.delete(message.author.id)
@@ -36,7 +34,10 @@ class AFK(commands.Cog, name="AFK", description="Member Afk Module"):
             return
         
         if message.reference:
-            reply_message = await message.channel.fetch_message(message.reference.message_id)
+            try:
+                reply_message = await message.channel.fetch_message(message.reference.message_id)
+            except discord.NotFound:
+                return
             for key, value in current_afk.items():
                 if reply_message.author.id == key:
                     user = message.guild.get_member(key)
@@ -48,26 +49,25 @@ class AFK(commands.Cog, name="AFK", description="Member Afk Module"):
                     user = message.guild.get_member(key)
                     return await message.reply(f"{user.display_name} is afk {value['message']} -<t:{value['time']}:R> <t:{value['time']}:f>", mention_author=False, delete_after=30, allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))        
 
-    @commands.hybrid_command(name="afk", description="Set your AFK status", brief="afk [status]")
+    @app_commands.command(name="afk", description="Set your AFK status")
     @app_commands.guilds(785839283847954433)
     @app_commands.describe(status="Your AFK reason")
     @app_commands.checks.dynamic_cooldown(Dynamic_cooldown.is_me)
-    @commands.check_any(Commands_Checks.is_me(), Commands_Checks.is_owner(), Commands_Checks.can_use())
-    async def afk(self, ctx, status: str = None):
-        afk_data = await self.bot.afk.find(ctx.author.id)
+    async def afk(self, interaction: discord.Interaction, status: str = None):
+        afk_data = await self.bot.afk.find(interaction.user.id)
         if afk_data:
-            await ctx.send("You are already afk", ephemeral=True)
+            await interaction.response.send_message("You are already afk", ephemeral=True)
             return
 
-        afk_data = {'_id': ctx.author.id, 'message': status, 'last_name': ctx.author.display_name,'time': round(discord.utils.utcnow().timestamp())}
+        afk_data = {'_id':interaction.user.id, 'message': status, 'last_name': interaction.user.display_name,'time': round(discord.utils.utcnow().timestamp())}
         await self.bot.afk.insert(afk_data)
-        await ctx.send("You are now afk", ephemeral=True)
+        await interaction.response.send_message("You are now afk", ephemeral=True)
         try:
-            await ctx.author.edit(nick=f"{ctx.author.display_name} AFK")
+            await interaction.user.edit(nick=f"{interaction.user.display_name} AFK")
         except:
             pass
         
-        self.bot.current_afk[ctx.author.id] = afk_data
+        self.bot.current_afk[interaction.user.id] = afk_data
     
 async def setup(bot):
     await bot.add_cog(AFK(bot))

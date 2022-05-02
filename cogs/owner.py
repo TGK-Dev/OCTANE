@@ -10,8 +10,6 @@ import discord
 import io
 import contextlib
 import textwrap
-
-
 class Owner(commands.Cog, name="Owner", description="Owner/admin commands."):
     def __init__(self, bot):
         self.bot = bot
