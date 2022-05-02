@@ -77,9 +77,6 @@ class Warn(commands.Cog, name="Warning System", description="Server Warning logg
 
         else:
             await interaction.response.send_message("<:deny:819194696874197004> | This user has no warnings", ephemeral=True)
-        
-
-
     
     @app_commands.command(name="delwarn", description="Delete a warning")
     @app_commands.describe(warn="The warning ID to delete")

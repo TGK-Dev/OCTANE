@@ -38,8 +38,7 @@ class Ban_battle_Slash(app_commands.Group, name="bb", description="ban Battle Mo
     @app_commands.command(name="clean", description="Clean the ban battle servers")
     @app_commands.guilds(785839283847954433)
     async def clean(self, interaction: Interaction):
-        await interaction.response.defer()
-        await interaction.followup.send("Deletion in progress")
+        await interaction.response.send_message("Cleaning Ban Battle Servers", ephemeral=True)
         battles = await self.bot.ban_backup.get_all()
         for battle in battles:
             try:
@@ -49,7 +48,7 @@ class Ban_battle_Slash(app_commands.Group, name="bb", description="ban Battle Mo
             except:
                 await interaction.channel.send(f"Error: chould not delete the guild with id {battle['guildID']}")
         
-        await interaction.followup.edit(content="Deletion complete")
+        await interaction.edit_original_message(content="Ban Battle Servers have been cleaned")
 
 
 class Ban_Battle(commands.Cog, name="Ban Battle", description="Ban Battle Module"):
