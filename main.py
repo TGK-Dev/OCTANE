@@ -22,7 +22,7 @@ bot = commands.Bot(
 
 #bot envs 
 load_dotenv()
-bot.token = os.environ['TOKEN']
+bot.token = os.environ['TEST_BOT']
 bot.mongo_connection = os.environ['MONGO']
 bot.Amari_token = os.environ['AMRI']
 bot.connection_money = os.environ['MONGOMONEY']
@@ -43,7 +43,7 @@ bot.config_cache = {}
 bot.cross_chat_cache = {}
 bot.ban_event = {}
 bot.uptime = datetime.datetime.utcnow()
-bot.cross_chat_toggle = False
+bot.cross_chat_toggle = True
 tree = bot.tree
 @bot.event
 async def on_ready():
@@ -78,7 +78,7 @@ async def on_ready():
     for ban_backup in current_ban_backup:
         bot.ban_event[ban_backup['_id']] = ban_backup
     
-    await bot.tree.sync(guild=discord.Object(785839283847954433))
+    #await bot.tree.sync(guild=discord.Object(785839283847954433))
     print('Bot is ready')
 
 @bot.event

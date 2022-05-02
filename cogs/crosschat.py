@@ -27,29 +27,19 @@ class CorssChat(commands.Cog, name="Cross Chat"):
     @commands.Cog.listener()
     async def on_ready(self):
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
-
     
     @commands.Cog.listener()
     async def on_message(self, message):
-        if self.bot.cross_chat_toggle == False:
+        if self.bot.cross_chat_toggle == False or message.content.startswith("-") or message.author.bot:
             return
-        
-        if message.content.startswith("-"):
-            return
-            
-        if message.author.bot:
-            return
-        
-        if message.author.id in self.bot.blacklist_users:
-            return 
 
-        if message.channel.id == 970681327374467082:
-            place2 = self.bot.get_channel(970681794242420736)
+        if message.channel.id == 969247308938108940:
+            place2 = self.bot.get_channel(969247329532145726)
 
             send_msg = await self.Send_web_Message(place2, message)
-        
-        if message.channel.id == 970681794242420736:
-            place1 = self.bot.get_channel(970681327374467082)
+
+        if message.channel.id == 969247329532145726:
+            place1 = self.bot.get_channel(969247308938108940)
 
             send_msg = await self.Send_web_Message(place1, message)
 
@@ -63,7 +53,7 @@ class CorssChat(commands.Cog, name="Cross Chat"):
             self.bot.cross_chat_toggle = False
             await ctx.send("CrossChat is now off")
         else:
-            await ctx.send("Please use `on` or `off` or `true` or `false`")
+            await ctx.send("CrossChat is currently: " + str(self.bot.cross_chat_toggle))
 
 
 async def setup(bot):
