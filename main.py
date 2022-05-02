@@ -43,7 +43,7 @@ bot.config_cache = {}
 bot.cross_chat_cache = {}
 bot.ban_event = {}
 bot.uptime = datetime.datetime.utcnow()
-
+bot.cross_chat_toggle = False
 tree = bot.tree
 @bot.event
 async def on_ready():

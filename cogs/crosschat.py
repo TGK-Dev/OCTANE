@@ -31,6 +31,12 @@ class CorssChat(commands.Cog, name="Cross Chat"):
     
     @commands.Cog.listener()
     async def on_message(self, message):
+        if self.bot.cross_chat_toggle == False:
+            return
+        
+        if message.content.startswith("-"):
+            return
+            
         if message.author.bot:
             return
         
@@ -46,6 +52,19 @@ class CorssChat(commands.Cog, name="Cross Chat"):
             place1 = self.bot.get_channel(970681327374467082)
 
             send_msg = await self.Send_web_Message(place1, message)
+
+    @commands.command(name="crosschat", description="Toggle CrossChat")
+    @commands.has_permissions(administrator=True)
+    async def crosschat(self, ctx, toggle: str):
+        if toggle.lower() == "on" or toggle.lower() == "true":
+            self.bot.cross_chat_toggle = True
+            await ctx.send("CrossChat is now on")
+        elif toggle.lower() == "off" or toggle.lower() == "false":
+            self.bot.cross_chat_toggle = False
+            await ctx.send("CrossChat is now off")
+        else:
+            await ctx.send("Please use `on` or `off` or `true` or `false`")
+
 
 async def setup(bot):
     await bot.add_cog(CorssChat(bot))
