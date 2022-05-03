@@ -36,9 +36,9 @@ class Ban_battle_Slash(app_commands.Group, name="bb", description="ban Battle Mo
         await interaction.followup.send(f"{interaction.user.mention} created a new ban battle server", ephemeral=True)
 
         embed = discord.Embed(title="Event", description="Ban Battle", color=0x0af4f1)
-        description = "》Every player will have perms to use the `ban` command\n》When the game starts, the event channel will be unlocked and players can Ban other players using `-eliminate @user`\》Last player standing wins!"
+        description = "》Every player will have perms to use the `ban` command\n》When the game starts, the event channel will be unlocked and players can Ban other players using `-eliminate @user`\n》Last player standing wins!"
         embed.add_field(name="**How to play**", value=description, inline=False)
-        embed.add_field(name="Note", value="Members with the role `@GK Staff` cannot be banned. They'll be present to moderate, not participate.", inline=False)
+        embed.add_field(name="Note", value="Members with the role `@TGK Event Staff` cannot be banned. They'll be present to moderate, not participate.", inline=False)
 
         ping_msg = await public_channel.send(embed=embed)
         await ping_msg.pin()
