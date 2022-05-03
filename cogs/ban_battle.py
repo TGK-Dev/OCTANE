@@ -45,18 +45,17 @@ class Ban_battle_Slash(app_commands.Group, name="bb", description="ban Battle Mo
 
     @app_commands.command(name="clean", description="Clean the ban battle servers")
     @app_commands.guilds(785839283847954433)
-    async def clean(self, interaction: Interaction):
+    async def clean(self, interaction: Interaction, guild: int):
         await interaction.response.send_message("Cleaning Ban Battle Servers", ephemeral=True)
-        battles = await self.bot.ban_backup.get_all()
-        for battle in battles:
-            try:
-                guild = await self.bot.fetch_guild(battle['guildID'])
-                await  guild.delete()
-                await self.bot.ban_backup.delete(battle['_id'])
-            except:
-                await interaction.channel.send(f"Error: chould not delete the guild with id {battle['guildID']}")
+        guild = await self.bot.get_guild(guild)
+        if guild:
+            if guild.owner.id == self.bot.user.id:
+                await guild.delete()
+                await interaction.response.send_message("Ban Battle Servers hav been cleaned", ephemeral=True)
+                await self.bot.ban_backup.delete(guild.id)
         
-        await interaction.edit_original_message(content="Ban Battle Servers have been cleaned")
+        else:
+            await interaction.response.send_message("Enter a valid guild id", ephemeral=True)
 
 
 class Ban_Battle(commands.Cog, name="Ban Battle", description="Ban Battle Module"):
@@ -68,6 +67,7 @@ class Ban_Battle(commands.Cog, name="Ban Battle", description="Ban Battle Module
         print(self.bot.user.name)
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
         self.bot.tree.add_command(Ban_battle_Slash(self.bot), guild=discord.Object(785839283847954433))
+        self.bot.tree.add_command(Ban_battle_Slash(self.bot), guild=discord.Object(811037093715116072))
 
     @commands.group(invoke_without_command=True)
     @commands.check_any(Commands_Checks.can_use())
@@ -75,9 +75,9 @@ class Ban_Battle(commands.Cog, name="Ban Battle", description="Ban Battle Module
         await ctx.send("add Subcommand")
     
     @bb.group(name="start", description="Start Ban battle server")
-    @commands.check_any(Commands_Checks.can_use())
+    #@commands.check_any(Commands_Checks.can_use())
     async def start(self, ctx):
-        if ctx.guild.name == "Ban Battle":
+        if ctx.guild.name == "Ban Battle" and ctx.author.guild_permissions.administrator:
             for invites in await ctx.guild.invites():
                 await invites.delete()
 
@@ -96,7 +96,8 @@ class Ban_Battle(commands.Cog, name="Ban Battle", description="Ban Battle Module
     @commands.command(name="eliminate", description="Eliminate a user from ban battle", aliases=["el"])
     @commands.check_any(Commands_Checks.is_ban_server())
     async def Eliminate(self, ctx, member: discord.Member):
-        if ctx.guild.name == "Ban Battle":
+        if ctx.guild.name == "Ban Battle" and ctx.author.guild_permissions.administrator:
+
             role = discord.utils.get(ctx.guild.roles, name="TGK Event Staff")
 
             if role in member.roles:
@@ -134,7 +135,7 @@ class Ban_Battle(commands.Cog, name="Ban Battle", description="Ban Battle Module
 
             role = discord.utils.get(member.guild.roles, name="TGK Event Staff")
             public = discord.utils.get(member.guild.roles, name="Alive")
-            if member.id in [488614633670967307, 301657045248114690, 651711446081601545, 562738920031256576, 413651113485533194, 457839031909351425]:
+            if member.id in [488614633670967307, 301657045248114690, 651711446081601545, 562738920031256576, 413651113485533194, 457839031909351425, 680183321829179444, 766792610059780118]:
                 await member.add_roles(role)
             else:
                 await member.add_roles(public)
