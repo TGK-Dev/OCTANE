@@ -136,4 +136,12 @@ async def setup(bot):
 
 
 
-    
+""" 
+#make an info embed about how to play ban battle
+embed = discord.Embed()
+description = "How to Play Guide\nWhat is ban Battle it's and event where everyon has ban command permmison"
+embed.add_field(name="What is ban Battle", value="Battle it's and event where everyon has ban command permmison", inline=False)
+embed.add_field(name="How to play", value="When the game starts channel will be unlocked and you can ban people with command `-eliminate @user`", inline=False)
+embed.add_field(name="How to win", value="Last person left alive will win the game", inline=False)
+embed.add_field(name="Note", value="You can't ban user who has `@GK Staff` Role", inline=False)
+"""

@@ -5,6 +5,7 @@ import asyncio
 import chat_exporter
 import io
 from discord import Interaction
+from .models import RenameTicket
 
 class Ticket_Control(discord.ui.View):
     def __init__(self, bot):
@@ -248,6 +249,10 @@ class Ticket_Control(discord.ui.View):
             log_embed.add_field(name="Action", value=f"Deleted {interaction.channel.name}")
             await log_channel.send(embed=log_embed)
 
+    @discord.ui.button(label="Rename Ticket", custom_id="Control:Rename", style=discord.ButtonStyle.green, emoji="📝")
+    async def Rename(self, interaction: discord.Interaction ,button: discord.Button):
+        await interaction.response.send_modal(RenameTicket(self.bot, interaction))
+
     @discord.ui.button(label="Add Shero", custom_id="Control:shero", style=discord.ButtonStyle.gray, emoji="🤖")
     async def add_shero(self, interaction: discord.Interaction ,button: discord.Button) -> None:
 
@@ -350,8 +355,6 @@ class Support_model(discord.ui.Modal, title="Support Ticket Form"):
     
     async def on_error(self, error: Exception, interaction: discord.Interaction) -> None:
         await interaction.response.send_message(f"An Error Occured. {error}\nContact Admin/Owner", ephemeral=True)
-
-
 class Partnership_model(discord.ui.Modal, title="Partnership Ticket Form"):
     def __init__(self, bot):
         self.bot = bot

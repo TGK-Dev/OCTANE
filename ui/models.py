@@ -51,3 +51,21 @@ class Embed_Modal(discord.ui.Modal, title="Embed Modal"):
         embed['type'] = 'rich'        
 
         await interaction.followup.send(embed=discord.Embed.from_dict(embed))
+
+class RenameTicket(discord.ui.Modal, title="New Name"):
+    def __init__(self, bot, interaction):
+        super().__init__(timeout=None)
+        self.bot = bot
+        self.interaction = interaction
+    
+    new_name = ui.TextInput(label="New Name", placeholder="Enter name of ticket", style=discord.TextStyle.short, custom_id="NEW:NAME", required=True)
+
+    async def on_submit(self, interaction: Interaction):
+        if interaction.user.id != self.interaction.user.id:
+            return await interaction.response.send_message("You do not have permission to use this command/modal.", ephemeral=True)
+        
+        await interaction.response.send_message(f"Renaming ticket to {self.new_name.value}")
+
+        await interaction.channel.edit(name=self.new_name.value)
+
+        await interaction.edit_original_message(content=f"Renamed to {self.new_name.value}")

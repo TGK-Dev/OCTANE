@@ -40,11 +40,12 @@ bot.bot_temp_star = {}
 bot.auto_mod_cache = {}
 bot.perm = {}
 bot.config_cache = {}
-bot.cross_chat_cache = {}
+bot.cross_chat_blacklist = []
 bot.ban_event = {}
 bot.uptime = datetime.datetime.utcnow()
 bot.cross_chat_toggle = True
 tree = bot.tree
+
 @bot.event
 async def on_ready():
     print(f"Logged in as {bot.user} | {bot.user.id}")
@@ -78,7 +79,12 @@ async def on_ready():
     for ban_backup in current_ban_backup:
         bot.ban_event[ban_backup['_id']] = ban_backup
     
-    #await bot.tree.sync(guild=discord.Object(785839283847954433))
+    current_crosschat_blacklist = await bot.crosschat_blacklist.get_all()
+    for crosschat_blacklist in current_crosschat_blacklist:
+        bot.cross_chat_blacklist.append(crosschat_blacklist['_id'])
+    
+    await bot.tree.sync(guild=discord.Object(id=785839283847954433))
+    await bot.tree.sync(guild=discord.Object(id=811037093715116072))
     print('Bot is ready')
 
 @bot.event
@@ -112,6 +118,7 @@ async def run_bot():
     bot.cross_chat = Document(bot.db, 'cross_chat')
     bot.ban_backup = Document(bot.db, 'ban_backup')
     bot.invites = Document(bot.db, 'invites')
+    bot.crosschat_blacklist = Document(bot.db, 'crosschat_blacklist')
 
     for file in os.listdir('./cogs'):
         if file.endswith('.py') and not file.startswith("_"):
