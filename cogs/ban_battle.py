@@ -23,7 +23,7 @@ class Ban_battle_Slash(app_commands.Group, name="bb", description="ban Battle Mo
         public_channel = await guild.create_text_channel(name="Ban-everyone", overwrites=update)
         Staff_invite = await staff_channel.create_invite(max_uses=0, max_age=0)
         public_invite = await public_channel.create_invite(max_uses=100, max_age=0)
-
+        
         embed = discord.Embed(title="Ban Battle", description=f"ban battle server has been created by {interaction.user.mention}\nThere are two invite links ones", color=0x0af4f1)
         embed.add_field(name="Staff-invite", value="Total Usage: unlimited", inline=False)
         embed.add_field(name="Public-invite", value="Total Usage: 100", inline=False)
@@ -34,7 +34,15 @@ class Ban_battle_Slash(app_commands.Group, name="bb", description="ban Battle Mo
         await self.bot.ban_backup.insert(data)
         self.bot.ban_event[guild.id] = data
         await interaction.followup.send(f"{interaction.user.mention} created a new ban battle server", ephemeral=True)
-    
+
+        embed = discord.Embed(title="Event", description="Ban Battle", color=0x0af4f1)
+        description = "》Every player will have perms to use the `ban` command\n》When the game starts, the event channel will be unlocked and players can Ban other players using `-eliminate @user`\》Last player standing wins!"
+        embed.add_field(name="**How to play**", value=description, inline=False)
+        embed.add_field(name="Note", value="Members with the role `@GK Staff` cannot be banned. They'll be present to moderate, not participate.", inline=False)
+
+        ping_msg = await public_channel.send(embed=embed)
+        await ping_msg.pin()
+
     @app_commands.command(name="clean", description="Clean the ban battle servers")
     @app_commands.guilds(785839283847954433)
     async def clean(self, interaction: Interaction):
@@ -77,7 +85,7 @@ class Ban_Battle(commands.Cog, name="Ban Battle", description="Ban Battle Module
             overwrite = channel.overwrites_for(ctx.guild.default_role)
             overwrite.send_messages = True
 
-            embed = discord.Embed(description=f"Ban battle game has started by {ctx.author.mention}\n You can start banning people with command `-eliminame`\nYou can't ban user who has `@GK Staff` Role", color=0x0af4f1)
+            embed = discord.Embed(description=f"Ban battle game has started by {ctx.author.mention}\n You can start banning people with command `-eliminame`\nYou can't ban user who has `@TGK Event Staff` Role", color=0x0af4f1)
             await channel.send(content="@everyone Game Starting in 5s", embed=embed)
             await asyncio.sleep(3)
             await channel.send("unlocking the channel")
@@ -89,7 +97,7 @@ class Ban_Battle(commands.Cog, name="Ban Battle", description="Ban Battle Module
     @commands.check_any(Commands_Checks.is_ban_server())
     async def Eliminate(self, ctx, member: discord.Member):
         if ctx.guild.name == "Ban Battle":
-            role = discord.utils.get(ctx.guild.roles, name="GK Staff")
+            role = discord.utils.get(ctx.guild.roles, name="TGK Event Staff")
 
             if role in member.roles:
                 return await ctx.send("You can't eliminat this user")
@@ -124,7 +132,7 @@ class Ban_Battle(commands.Cog, name="Ban Battle", description="Ban Battle Module
                     pass
                 await member.kick(reason="No in Main Server")
 
-            role = discord.utils.get(member.guild.roles, name="GK Staff")
+            role = discord.utils.get(member.guild.roles, name="TGK Event Staff")
             public = discord.utils.get(member.guild.roles, name="Alive")
             if member.id in [488614633670967307, 301657045248114690, 651711446081601545, 562738920031256576, 413651113485533194, 457839031909351425]:
                 await member.add_roles(role)
@@ -136,12 +144,7 @@ async def setup(bot):
 
 
 
-""" 
+
 #make an info embed about how to play ban battle
-embed = discord.Embed()
-description = "How to Play Guide\nWhat is ban Battle it's and event where everyon has ban command permmison"
-embed.add_field(name="What is ban Battle", value="Battle it's and event where everyon has ban command permmison", inline=False)
-embed.add_field(name="How to play", value="When the game starts channel will be unlocked and you can ban people with command `-eliminate @user`", inline=False)
-embed.add_field(name="How to win", value="Last person left alive will win the game", inline=False)
-embed.add_field(name="Note", value="You can't ban user who has `@GK Staff` Role", inline=False)
-"""
+
+
