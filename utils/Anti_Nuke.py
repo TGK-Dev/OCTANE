@@ -18,16 +18,17 @@ class Anti_Nuke():
         embed.timestamp = discord.utils.utcnow()
         embed.set_thumbnail(url=user.avatar.url)
         embed.timestamp = discord.utils.utcnow()
-        
+        data = {'_id': target.id, 'removed_roles': [], 'reason': "Role Quarantined"}
         with open("Nuke_role_remove_log.txt", "w") as file:
             for role in user.roles:
                 try:
                     await user.remove_roles(role, reason="Quarantined")        
                     file.write(f"Removed: {int(role.id)}\n")
+                    data['removed_roles'].append(role.id)
                 except:
                     file.write(f"Failed to remove: {int(role.id)}\n")
             file.close()
-
+        bot.quarantined.insert(data)
         quarantine_role = discord.utils.get(user.guild.roles, name="Quarantined")
         if not quarantine_role:
             quarantine_role = await user.guild.create_role(name="Quarantined")

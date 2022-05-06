@@ -165,7 +165,7 @@ class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
     @app_commands.describe(reason="Reason for ban")
     @app_commands.describe(time="Duration of ban")
     @commands.check_any(Commands_Checks.can_use(), Commands_Checks.is_me())
-    async def ban(self, interaction: discord.Interaction, member: discord.Member, time: str=None, reason: str="No reason given"):
+    async def ban(self, interaction: discord.Interaction, member: Union[discord.Member, discord.User], time: str=None, reason: str="No reason given"):
         await interaction.response.defer()
         time = await TimeConverter().convert(interaction, time)
         
@@ -374,17 +374,17 @@ class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
 
         if member.avatar != None:
             embed.set_thumbnail(url=member.avatar.url)
-            embed.set_footer(name=f"{member.name} | {member.id}", icon_url=member.avatar.url)
+            embed.set_footer(text=f"{member.name} | {member.id}", icon_url=member.avatar.url)
         
         else:
 
             embed.set_thumbnail(url=member.default_avatar)
-            embed.set_footer(name=f"{member.name} | {member.id}", icon_url=member.default_avatar)
+            embed.set_footer(text=f"{member.name} | {member.id}", icon_url=member.default_avatar)
         
         embed.add_field(name='Account Name:', value=f'{member.name}', inline=False)
         embed.add_field(name="Created At:", value=f"<t:{round(member.created_at.timestamp())}:R>", inline=False)
         embed.add_field(name="Joined At:", value=f"<t:{round(member.joined_at.timestamp())}:R>", inline=False)
-        Member = self.bot.fetch_user(member.id)
+        Member = await self.bot.fetch_user(member.id)
 
         if Member.banner:
             embed.set_image(url=Member.banner)

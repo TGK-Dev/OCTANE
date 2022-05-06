@@ -119,11 +119,14 @@ async def run_bot():
     bot.ban_backup = Document(bot.db, 'ban_backup')
     bot.invites = Document(bot.db, 'invites')
     bot.crosschat_blacklist = Document(bot.db, 'crosschat_blacklist')
+    bot.quarantine = Document(bot.db, 'quarantine')
 
     for file in os.listdir('./cogs'):
         if file.endswith('.py') and not file.startswith("_"):
-            await bot.load_extension(f'cogs.{file[:-3]}')
-    
+            try:
+                await bot.load_extension(f'cogs.{file[:-3]}')
+            except:
+                pass
     await bot.start(bot.token)
 
 loop = asyncio.new_event_loop()

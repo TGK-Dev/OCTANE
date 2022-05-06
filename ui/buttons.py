@@ -1,5 +1,9 @@
 from discord import Interaction
 from discord.ext import commands
+from utils.functions import Make_Verify_Code
+from captcha.image import ImageCaptcha
+from io import BytesIO
+import os
 import random
 import discord
 import asyncio
@@ -73,3 +77,27 @@ class Invite_Panel(discord.ui.View):
             await interaction.response.send_message("You don't have permission to use this button.", ephemeral=True)
     
     
+class Req_veriy_code(discord.ui.View):
+    def __init__(self, bot):
+        self.bot= bot
+        super().__init__(timeout=None)
+    
+    @discord.ui.button(label="Request Code", style=discord.ButtonStyle.green, custom_id="request", emoji="🧾")
+    async def request(self, interaction: discord.Interaction, button: discord.ui.Button):
+        verify_code  = Make_Verify_Code()
+
+        image = ImageCaptcha().create_captcha_image(verify_code, color="white", background="black")
+        file  = discord.File("./captcha.png", filename="captcha.png")
+
+        embed = discord.Embed(title="Captcha", description="Please type the captcha below", color=discord.Color.blue())
+        embed.set_image(url=f"attachment://captcha.png")
+        try:
+            await interaction.user.send(embed=embed)
+            await interaction.response.send_message("Please check your DM", ephemeral=True)
+        except discord.HTTPException:
+            await interaction.response.send_message("open your DM's to send the captcha", ephemeral=True)
+        
+        
+        os.remove('captcha.png')
+
+        
