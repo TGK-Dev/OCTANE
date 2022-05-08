@@ -131,7 +131,7 @@ class CorssChat(commands.Cog, name="Cross Chat"):
             return
 
         if message.channel.id == 970681327374467082:
-            place2 = self.bot.get_channel(970681794242420736)
+            place2 = self.bot.get_channel(972433560327827466)
             reply_message = None
             if message.reference:
                 try:
@@ -141,7 +141,7 @@ class CorssChat(commands.Cog, name="Cross Chat"):
 
             send_msg = await self.Send_web_Message(place2, message, reply_message)
 
-        if message.channel.id == 970681794242420736:
+        if message.channel.id == 972433560327827466:
             place1 = self.bot.get_channel(970681327374467082)
 
             reply_message = None
