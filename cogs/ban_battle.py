@@ -92,6 +92,8 @@ class Ban_Battle(commands.Cog, name="Ban Battle", description="Ban Battle Module
             await channel.set_permissions(ctx.guild.default_role, overwrite=overwrite)
             await channel.send("Game has started")
             await ctx.message.add_reaction("✅")
+        else:
+            await ctx.send("You can't use this command here")
     
     @commands.command(name="eliminate", description="Eliminate a user from ban battle", aliases=["el"])
     @commands.check_any(Commands_Checks.is_ban_server())
@@ -126,12 +128,12 @@ class Ban_Battle(commands.Cog, name="Ban Battle", description="Ban Battle Module
     async def on_member_join(self, member):
         main_guild = self.bot.get_guild(785839283847954433)
         if member.guild.name == "Ban Battle":
-            if member not in main_guild.members:                
-                try:
-                    await member.send("Your not in Main Server Pls join it")
-                except discord.HTTPException:
-                    pass
-                await member.kick(reason="No in Main Server")
+            # if member not in main_guild.members:                
+            #     try:
+            #         await member.send("Your not in Main Server Pls join it")
+            #     except discord.HTTPException:
+            #         pass
+            #     await member.kick(reason="No in Main Server")
 
             role = discord.utils.get(member.guild.roles, name="TGK Event Staff")
             public = discord.utils.get(member.guild.roles, name="Alive")
