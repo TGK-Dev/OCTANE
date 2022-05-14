@@ -141,7 +141,7 @@ class Docs(commands.Cog, name="Documentation"):
             return
 
         if not hasattr(self, "_rtfm_cache"):
-            await ctx.trigger_typing()
+            await ctx.typing()
             await self.build_rtfm_lookup_table(page_types)
 
         cache = list(self._rtfm_cache[key].items())

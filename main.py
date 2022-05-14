@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 from utils.db import Document
 from utils.help import EmbedHelpCommand
 from discord import app_commands
+from amari import AmariClient
 import discord
 import os
 import motor.motor_asyncio
@@ -107,7 +108,7 @@ async def run_bot():
     bot.config = Document(bot.db, 'config')
     bot.blacklist = Document(bot.db, 'blacklist')
     bot.suggestions = Document(bot.db, 'suggestions')
-    bot.votes = Document(bot.db, 'votes')
+    bot.votes = Document(bot.db, 'Votes')
     bot.bans = Document(bot.db, 'bans')
     bot.afk = Document(bot.db, 'afk')
     bot.mutes = Document(bot.db, 'mutes')
@@ -120,13 +121,11 @@ async def run_bot():
     bot.invites = Document(bot.db, 'invites')
     bot.crosschat_blacklist = Document(bot.db, 'crosschat_blacklist')
     bot.quarantine = Document(bot.db, 'quarantine')
-
+    bot.Amari_api = AmariClient(bot.Amari_token)
+    
     for file in os.listdir('./cogs'):
         if file.endswith('.py') and not file.startswith("_"):
-            try:
-                await bot.load_extension(f'cogs.{file[:-3]}')
-            except:
-                pass
+            await bot.load_extension(f'cogs.{file[:-3]}')
     await bot.start(bot.token)
 
 loop = asyncio.new_event_loop()

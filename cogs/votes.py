@@ -61,7 +61,7 @@ class Votes(commands.Cog, name="Votes",description="Server Vote counter with Top
         if not vote_data:
             view = discord.ui.View()
             view.add_item(discord.ui.Button(label=f'Vote for us here!', url="https://top.gg/servers/785839283847954433/vote"))
-            await ctx.message(content=f"{user.mention}, you have 0 votes!", view=view)
+            await ctx.send(content=f"{user.mention}, you have 0 votes!", view=view)
             return
         
         embed = discord.Embed(title=f"{user.name}'s votes", description=f"Total Votes: {vote_data['total_vote']}\nVote Streak: {vote_data['streak']}\nLast Vote: <t:{round(vote_data['last_vote'].timestamp())}:R>", color=user.color)

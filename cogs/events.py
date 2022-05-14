@@ -64,7 +64,7 @@ class Events(commands.Cog):
             return await ctx.send(f"You don't have permission to use this command")
         
         elif isinstance(error, commands.CommandInvokeError):
-            return await ctx.send(f"An error occured while executing this command")
+            return await ctx.send(f"An error occured while executing this command\n```\n{error}\n```")
 
         else:
             embed = discord.Embed(color=0xE74C3C,description=f"<:dnd:840490624670892063> | Error: `{error}`")
@@ -81,20 +81,25 @@ class Events(commands.Cog):
             role = discord.utils.get(member.guild.roles, id=role)
             if role:
                 await member.add_roles(role)
-
-        embed = discord.Embed(title=f'**WELCOME TO TGK, {member.display_name}!**',
-                        description=f"\n\nGet your favorite roles from [self-roles](https://discord.gg/58bc5QWE4q),\nand say _Hello_ to everyone in [chat](https://discord.gg/yEPYYDZ3dD)!\n\nAlso check out other fun game bots on the server:\n✦ [Casino](https://discord.gg/DJycdCqnqt) ✦ [Mudae](https://discord.gg/ujCHVRctHY) ✦ [Akinator](https://discord.gg/fzDTdGZFh6) ✦ [Pokemon](https://discord.gg/DpJ4mAUC9m)\n\nMake sure you follow the [rules](https://discord.gg/NmD4JGCaNc) of the house for a good time here. Also, check out rules and instructions of game bots in respective channels.\n\n:love_letter: To get in touch with staff, simply raise a ticket from [support](https://discord.gg/T8VWyvDfeB).\n\nHave fun!\n\n__Server Member Count:__ {guild.member_count - len([m for m in guild.members if m.bot])}",
-                        color=0x000000)
         
+        embed = discord.Embed()
+
         if member.avatar != None:
             embed.set_thumbnail(url=member.avatar.url or None)
+            embed.set_author(name=f"{member.name}#{member.discriminator}", icon_url=member.avatar.url or None)
         else:
             embed.set_thumbnail(url=member.default_avatar)
+            embed.set_author(name=f"{member.name}#{member.discriminator}", icon_url=member.default_avatar_url)
+
+        
+        embed.description = f"Welcome {member.mention} to {guild.name}!"
+        embed.timestamp = discord.utils.utcnow()
+        embed.set_footer(text=member.id)
 
         if guild_data['welcome'] is not None:
             channel = guild.get_channel(guild_data['welcome'])
             if channel:
-                await channel.send(embed=embed)
+                await channel.send(member.mention, embed=embed)
         try:
             await member.send(embed=embed)
         except discord.HTTPException:
@@ -165,6 +170,19 @@ class Events(commands.Cog):
 
         data["case"] += 1
         await self.bot.config.update(data)
+
+    @commands.Cog.listener()
+    async def on_voice_state_update(self, member, before, after):
+        channel = self.bot.get_channel(947687941105414184)
+        if member.guild.id != 811037093715116072: return
+        if before.channel is None and after.channel is not None and after.channel.id == 966499840324431933:
+            embed = discord.Embed(description=f"{member.mention} joined the voice {after.channel.mention}!", color=member.color)
+            embed.set_footer(text=f"ID: {member.id}", icon_url=self.bot.user.avatar.url)
+            await channel.send(embed=embed)
+        elif after.channel is None and before.channel is not None and before.channel.id == 966499840324431933:
+            embed = discord.Embed(description=f"{member.mention} left the voice {before.channel.mention}!", color=member.color)
+            embed.set_footer(text=f"ID: {member.id}", icon_url=self.bot.user.avatar.url)
+            await channel.send(embed=embed)
 
 async def setup(bot):
     await bot.add_cog(Events(bot))
