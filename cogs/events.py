@@ -8,7 +8,7 @@ class Events(commands.Cog):
         self.bot = bot
         self.update_task = self.check_update_task.start()
     
-    @tasks.loop(seconds=900)
+    @tasks.loop(seconds=300)
     async def check_update_task(self):
 
         current_vote = await self.bot.votes.get_all()
