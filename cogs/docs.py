@@ -49,7 +49,7 @@ class Docs(commands.Cog, name="Documentation"):
         self.logger = logging.getLogger(__name__)
 
         self.page_types = {
-            "discord.py": "https://discordpy.readthedocs.io/en/master/",
+            "discord.py": "https://discordpy.readthedocs.io/en/latest/",
             "levelling": "https://discord-ext-levelling.readthedocs.io/en/latest/",
         }
 
