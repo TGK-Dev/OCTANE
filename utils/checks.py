@@ -94,4 +94,4 @@ class Dynamic_cooldown():
     def is_me(interaction: discord.Interaction):
         if interaction.user.id in [488614633670967307, 301657045248114690]:
             return None
-        return app_commands.Cooldown(1, 300, type=commands.BucketType.user)
+        return app_commands.Cooldown(1, 300)
