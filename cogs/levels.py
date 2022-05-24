@@ -14,8 +14,7 @@ class level_check(discord.ui.View):
     def __init__(self, bot):
         self.bot = bot
         super().__init__(timeout=None)
-        self.cd = commands.CooldownMapping.from_cooldown(1.0, 300, key)
-        
+        self.cd = commands.CooldownMapping.from_cooldown(1.0, 300, key)    
     
     async def interaction_check(self, interaction: discord.Interaction):
         retry_after = self.cd.update_rate_limit(interaction)
