@@ -91,8 +91,6 @@ class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
 
     @commands.Cog.listener()
     async def on_ban_expired(self, guild: discord.Guild, user: discord.User, moderator: discord.Member):
-        if await guild.fetch_ban(user) == None:
-            return
         try:
             await guild.unban(user, reason="Automatic ban expired")
         except discord.NotFound:
