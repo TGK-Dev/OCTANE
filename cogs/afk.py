@@ -18,13 +18,16 @@ class AFK(commands.Cog, name="AFK", description="Member Afk Module"):
         current_afk = deepcopy(self.bot.current_afk)
 
         if message.author.id in self.bot.current_afk:
-
+            value  = self.bot.current_afk[message.author.id]
             try:
-                await message.author.edit(nick=self.bot.current_afk[message.author.id]['last_name'])
+                await message.author.edit(nick=value['last_name'])
             except:
                 pass            
+            
 
-            await message.reply(f"{message.author.mention} Your AFK status has been removed.")
+            embed = discord.Embed(description=f"{message.author.mention} is no longer AFK\nAFK Started: <t:{value['time']}:R> ago", color=0x00ff00)
+
+            await message.reply(embed=embed)
             await self.bot.afk.delete(message.author.id)
 
             try:
@@ -41,13 +44,17 @@ class AFK(commands.Cog, name="AFK", description="Member Afk Module"):
             for key, value in current_afk.items():
                 if reply_message.author.id == key:
                     user = message.guild.get_member(key)
-                    return await message.reply(f"{user.display_name} is afk {value['message']} -<t:{value['time']}:R> <t:{value['time']}:f>", mention_author=False, delete_after=30, allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
+                    embed = discord.Embed(description=f"Reason: {value['message']}\nAFK Started: <t:{value['time']}:R>", color=user.color)
+                    embed.set_author(name=f"{user.display_name} is AFK", icon_url=user.avatar.url if user.avatar else user.default_avatar)
+                    return await message.reply(embed=embed)
 
         if len(message.mentions) > 0:
             for key, value in current_afk.items():
                 if key in [_id.id for _id in message.mentions]:
                     user = message.guild.get_member(key)
-                    return await message.reply(f"{user.display_name} is afk {value['message']} -<t:{value['time']}:R> <t:{value['time']}:f>", mention_author=False, delete_after=30, allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))        
+                    embed = discord.Embed(description=f"Reason: {value['message']}\nAFK Started: <t:{value['time']}:R>", color=user.color)
+                    embed.set_author(name=f"{user.display_name} is AFK", icon_url=user.avatar.url if user.avatar else user.default_avatar)
+                    return await message.reply(embed=embed)
 
     @app_commands.command(name="afk", description="Set your AFK status")
     @app_commands.guilds(785839283847954433)
@@ -61,13 +68,22 @@ class AFK(commands.Cog, name="AFK", description="Member Afk Module"):
 
         afk_data = {'_id':interaction.user.id, 'message': status, 'last_name': interaction.user.display_name,'time': round(discord.utils.utcnow().timestamp())}
         await self.bot.afk.insert(afk_data)
-        await interaction.response.send_message("You are now afk", ephemeral=True)
+        embed = discord.Embed(description=f"{interaction.user.mention} You are now afk\nReason: {status}", color=0x00ff00)
+        embed.set_author(name=f"{interaction.user.display_name} is now afk", icon_url=interaction.user.avatar.url if interaction.user.avatar else interaction.user.default_avatar)
+
+        await interaction.response.send_message(embed=embed)
         try:
-            await interaction.user.edit(nick=f"{interaction.user.display_name} AFK")
+            await interaction.user.edit(nick=f"{interaction.user.display_name} [AFK]")
         except:
             pass
         
         self.bot.current_afk[interaction.user.id] = afk_data
+
+    @afk.error
+    async def afk_error(self, interaction: discord.Interaction, error):
+        print(error)
+        if isinstance(error, app_commands.CommandOnCooldown):
+            await interaction.response.send_message(f"Please wait {round(int(error.retry_after))} seconds before using this command again", ephemeral=True)
     
 async def setup(bot):
     await bot.add_cog(AFK(bot))
