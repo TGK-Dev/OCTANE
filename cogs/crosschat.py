@@ -24,7 +24,7 @@ class CrossChat_slash(app_commands.Group, name="crosschat", description="utils c
             tgk_chat = self.bot.get_channel(970681327374467082)
             await tgk_chat.set_permissions(tgk_chat.guild.default_role, overwrite=overwrite)
 
-            tmm_chat = self.bot.get_channel(970681794242420736)
+            tmm_chat = self.bot.get_channel(972433560327827466)
             await tmm_chat.set_permissions(tmm_chat.guild.default_role, overwrite=overwrite)
             
             if option == True:
