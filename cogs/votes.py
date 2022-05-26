@@ -26,7 +26,7 @@ class Votes(commands.Cog, name="Votes",description="Server Vote counter with Top
                 
             expired_time = value['last_vote'] + datetime.timedelta(hours=12)
 
-            if currentTime >= expired_time:
+            if currentTime >= expired_time and value['reminded'] == False:
                 self.bot.dispatch("vote_reminder", value)
     
     @commands.Cog.listener()
@@ -47,10 +47,16 @@ class Votes(commands.Cog, name="Votes",description="Server Vote counter with Top
         await member.remove_roles(guild.get_role(786884615192313866))
 
         vote['reminded'] = True
-        await self.bot.votes.update(vote)
+        await self.bot.votes.upsert(vote)
+
         try:
             await member.send(embed=embed, view=view)
         except discord.HTTPException:
+            pass
+
+        try:
+            self.bot.current_votes.pop(vote['_id'])
+        except KeyError:
             pass
 
     @commands.command(name="votes", description="Shows the your/other votes count", brife="votes <mention user>")
@@ -64,7 +70,7 @@ class Votes(commands.Cog, name="Votes",description="Server Vote counter with Top
             await ctx.send(content=f"{user.mention}, you have 0 votes!", view=view)
             return
         
-        embed = discord.Embed(title=f"{user.name}'s votes", description=f"Total Votes: {vote_data['total_vote']}\nVote Streak: {vote_data['streak']}\nLast Vote: <t:{round(vote_data['last_vote'].timestamp())}:R>", color=user.color)
+        embed = discord.Embed(title=f"{user.name}'s votes", description=f"Total Votes: {vote_data['votes']}\nVote Streak: {vote_data['streak']}\nLast Vote: <t:{round(vote_data['last_vote'].timestamp())}:R>", color=user.color)
         embed.set_thumbnail(url="https://cdn.discordapp.com/emojis/830519601384128523.gif?v=1")
         embed.timestamp =datetime.datetime.utcnow()
         embed.set_footer(text=f"Requested by {ctx.author.name}", icon_url=ctx.author.avatar.url)

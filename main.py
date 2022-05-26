@@ -45,7 +45,7 @@ class Bot(commands.Bot):
         bot.tags = Document(bot.db, 'tags')
         bot.Amari_api = AmariClient(bot.Amari_token)
         for file in os.listdir('./cogs'):
-            if file.endswith('.py') and not file.startswith("_") and not file.startswith("votes"):
+            if file.endswith('.py') and not file.startswith("_"):
                 await bot.load_extension(f'cogs.{file[:-3]}')
 
         await self.tree.sync(guild=discord.Object(main_guilds[0]))
@@ -85,7 +85,8 @@ async def on_ready():
 
     current_vote = await bot.votes.get_all()
     for votes in current_vote:
-        bot.current_votes[votes['_id']] = votes
+        if votes['reminded'] == False:
+            bot.current_votes[votes['_id']] = votes
     
     current_ban = await bot.bans.get_all()
     for bans in current_ban:
