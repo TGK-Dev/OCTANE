@@ -39,7 +39,7 @@ class TagSlash(app_commands.Group, name="tag", description="Tag commands module"
                 command = commnads
                 self.bot.tree.remove_command(command)
                 await interaction.edit_original_message(content=f"Tag {name} deleted, remeber to use /tag sync to update the bot")
-                self.bot.active_tag.remove(name)
+                self.bot.active_tag.pop(name)
                 return
         
         await interaction.edit_original_message(content=f"Error: Tag {name} not found")        
@@ -64,8 +64,11 @@ class TagSlash(app_commands.Group, name="tag", description="Tag commands module"
                     description=data['description'],
                     callback=Normal_CallBack if data['type'] == 'Normal Tag' else Argument_CallBack
                 )
-                self.bot.tree.add_command(command)
-                self.bot.active_tags[data['_id']] = data
+                try:
+                    self.bot.tree.add_command(command)
+                except app_commands.CommandAlreadyRegistered:
+                    await interaction.edit_original_message(content=f"Error: Tag {name} already registered")
+                self.bot.active_tag[data['_id']] = data
                 await interaction.edit_original_message(content=f"Synced tag {name}", ephemeral=True)
             else:
                 await interaction.edit_original_message(content=f"Error: Tag Data not found", ephemeral=True)
