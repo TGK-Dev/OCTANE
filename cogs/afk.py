@@ -15,6 +15,8 @@ class AFK(commands.Cog, name="AFK", description="Member Afk Module"):
     async def on_message(self, message):
         if message.author.bot:
             return
+        
+        if message.guild.id != 785839283847954433: return
         current_afk = deepcopy(self.bot.current_afk)
 
         if message.author.id in self.bot.current_afk:
