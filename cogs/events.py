@@ -104,7 +104,12 @@ class Events(commands.Cog):
             await member.send(embed=embed)
         except discord.HTTPException:
             pass
-    
+        
+        if guild_data['qurantine'] == True:
+            role = discord.utils.get(member.guild.roles, id=953006119436030054)
+            await member.add_roles(role, reason="Verification Enabled")
+
+
     @commands.Cog.listener()
     async def on_member_ban(self, guild, member):
         if guild.id != 785839283847954433: return

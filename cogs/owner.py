@@ -106,14 +106,47 @@ class Owner(commands.Cog, name="Owner", description="Owner/admin commands."):
     @commands.has_guild_permissions(administrator=True)
     async def joinr(self, ctx, role: discord.Role):
         guild_data = await self.bot.config.find(ctx.guild.id)
+
+        if any(role.permissions.administrator, role.permissions.manage_guild, role.permissions.manage_channels, role.permissions.manage_roles, role.permissions.ban_members, role.permissions.kick_members, role.permissions.manage_messages):
+            await ctx.send(f"{role.mention} is an staff role, please use a different role.")
+            return
+
         if not guild_data:
             guild_data = make_db_temp(ctx.guild.id)
             await self.bot.config.insert(guild_data)
 
-        guild_data['join_roles'].append(role.id)
-        await self.bot.config.update(guild_data)
-        await ctx.send(f"{role.mention} is now the join role.", allowed_mentions=discord.AllowedMentions(roles=False))
+        if role.id not in guild_data['join_roles']:
+            guild_data['join_roles'].append(role.id)
+            await self.bot.config.update(guild_data)
+            await ctx.send(f"{role.mention} is now the join role.", allowed_mentions=discord.AllowedMentions(roles=False))
+        elif role.id in guild_data['join_roles']:
+            guild_data['join_roles'].remove(role.id)
+            await self.bot.config.update(guild_data)
+            await ctx.send(f"{role.mention} is no longer the join role.", allowed_mentions=discord.AllowedMentions(roles=False))
     
+    @config.command(name="qurantine", aliases=["q"], description="Toggle Verification system", brief="config qurantine [on/off]")
+    @commands.has_guild_permissions(administrator=True)
+    async def qurantine(self, ctx, state: str):
+        if state.lower() not in ['on', 'off', 'true', 'false', 'enable', 'disable', 'yes', 'no', '1', '0', 'y', 'n']:
+            await ctx.send("Please use `on` or `off`.")
+            return
+
+        data = await self.bot.config.find(ctx.guild.id)
+        if not data:
+            data = make_db_temp(ctx.guild.id)
+            await self.bot.config.insert(data)
+        
+        if state.lower() in ['on', 'true', 'enable', 'yes', '1', 'y']:
+            data['qurantine'] = True
+            await self.bot.config.update(data)
+            await ctx.send("Verification is now enabled.")
+        elif state.lower() in ['off', 'false', 'disable', 'no', '0', 'n']:
+            data['qurantine'] = False
+            await self.bot.config.update(data)
+            await ctx.send("Verification is now disabled.")
+        else:
+            await ctx.send("Please Enter Valid Input.")
+
     @commands.command(name="eval", description="Evaluate a code", brief="eval [code]", hidden=True)
     @commands.check_any(Commands_Checks.is_me())
     async def _eval(self, ctx, *,code):
