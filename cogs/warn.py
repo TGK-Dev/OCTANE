@@ -2,6 +2,7 @@ from discord import app_commands
 from discord.ext import commands
 from paginator import Paginator
 from bson.objectid import ObjectId
+from utils.checks import Commands_Checks
 import discord
 import datetime
 
@@ -16,6 +17,7 @@ class Warn(commands.Cog, name="Warning System", description="Server Warning logg
     @commands.hybrid_command(name="warn", description="Warn a user", brife="warning <user> <reason>")
     @app_commands.describe(user="The user to warn", reason="The reason for the warning")
     @app_commands.guilds(785839283847954433)
+    @commands.check_any(Commands_Checks.can_use(), Commands_Checks.is_me())
     async def warn(self, ctx , user: discord.Member, *, reason:str):
         warn_data = {"user":user.id, "reason":reason, "mod":ctx.author.id, 'time': datetime.datetime.utcnow(), "guild":ctx.guild.id}
         guild_data = await self.bot.config.find(ctx.guild.id)
