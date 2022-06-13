@@ -1,4 +1,3 @@
-
 import discord
 from discord.ext import commands
 import aiohttp
@@ -77,7 +76,6 @@ def is_me(interaction: discord.Interaction):
 class ImageCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.Amari_api = AmariClient(self.bot.Amri_token)
 
     async def on_ready(self):
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
@@ -98,7 +96,7 @@ class ImageCog(commands.Cog):
         else:
             nick = f"AKA - {member.display_name[:16]}.." if len(member.display_name) > 16 else f"{member.display_name}"
 
-        leveldata = await self.Amari_api.fetch_user(interaction.guild.id, member.id)
+        leveldata = await self.bot.Amari_api.fetch_user(interaction.guild.id, member.id)
         level = str(leveldata.level)
         moneydata = await self.bot.money.find(member.id)
 

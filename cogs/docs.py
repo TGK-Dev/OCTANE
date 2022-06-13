@@ -7,7 +7,7 @@ import logging
 import aiohttp
 import discord
 from discord.ext import commands
-
+from utils.checks import Commands_Checks
 
 
 class SphinxObjectFileReader:
@@ -49,7 +49,7 @@ class Docs(commands.Cog, name="Documentation"):
         self.logger = logging.getLogger(__name__)
 
         self.page_types = {
-            "discord.py": "https://discordpy.readthedocs.io/en/master/",
+            "discord.py": "https://discordpy.readthedocs.io/en/latest/",
             "levelling": "https://discord-ext-levelling.readthedocs.io/en/latest/",
         }
 
@@ -141,7 +141,7 @@ class Docs(commands.Cog, name="Documentation"):
             return
 
         if not hasattr(self, "_rtfm_cache"):
-            await ctx.trigger_typing()
+            await ctx.typing()
             await self.build_rtfm_lookup_table(page_types)
 
         cache = list(self._rtfm_cache[key].items())
@@ -170,7 +170,7 @@ class Docs(commands.Cog, name="Documentation"):
         description="Gives you a documentation link for a d.py entity.",
         aliases=["doc"],
     )
-    @commands.check_any(is_me())
+    @commands.check_any(Commands_Checks.is_me())
     async def rtfm(self, ctx, key: str = None, *, query: str = None):
         if not key or key.lower() not in self.page_types.keys():
             query = query or ""

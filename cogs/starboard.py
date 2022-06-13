@@ -1,236 +1,176 @@
-import re
-import discord
-import asyncio
-import datetime
-from discord import channel
+from discord import Interaction
 from discord.ext import commands
-from discord.ext.commands.core import command
-from utils.exceptions import IdNotFound
-from utils.checks import checks
+from discord import app_commands
+import discord
+import datetime
 
-class starboard(commands.Cog):
+class Starboard(commands.Cog, name="Starboard", description="Starboard Module"):
     def __init__(self, bot):
         self.bot = bot
-
+    
     @commands.Cog.listener()
-    async def on_read(self):
+    async def on_ready(self):
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
     
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):
         if not payload.guild_id:
             return
-        entries = await self.bot.config.get_all()
-        guilds = list(map(lambda e: e["_id"], entries))
-        if payload.guild_id in guilds:
-            guild = list(filter(lambda e: e["_id"] == payload.guild_id, entries))
-            guild = guild[0]
-            emoji = "⭐"
-        if not guild.get("starboard_channel"): return    
-        if not guild.get("starboard_toggle", True): return
-        if not str(payload.emoji) == "⭐": return
+
+        if payload.message_id in self.bot.bot_temp_star: return
+        
+        guild = self.bot.get_guild(payload.guild_id)
         channel = self.bot.get_channel(payload.channel_id)
         try:
-            msg = await channel.fetch_message(payload.message_id)
-            reacts = msg.reactions
-            reacts = list(filter(lambda r: str(r.emoji) == "⭐", reacts))
-        except discord.HTTPException:
-            pass
+            message = await channel.fetch_message(payload.message_id)
+            reacts = list(filter(lambda r: str(r.emoji) == "⭐", message.reactions))
+        except discord.NotFound:
+            return
+        
+        self.bot.bot_temp_star[message.id] = {'message': message.id, 'channel': channel.id, 'guild': guild.id}
 
-        if reacts:
-            react = [user async for user in reacts[0].users()]
-            
-            if msg.author.id in react:
-                del react[react.index(msg.author.id)]
-            
-            thresh = guild.get("emoji_threshold") or 7
-            if len(react) >= thresh:
-                starboard_channel = self.bot.get_channel(guild["starboard_channel"])
-                try:
-                    existing_star = await self.bot.starboard.find_by_custom(
-                                    {
-                                        "_id": payload.message_id,
-                                        "guildId": payload.guild_id,
-                                        "channelId": payload.channel_id,
-                                    }
-                                )
-                except IdNotFound:
+        if not reacts: return
+        guild_data = await self.bot.config.find(guild.id)
+        reacts = [user async for user in reacts[0].users()]
+
+        if message.author.id in reacts and guild_data['starboard']['self_star'] == False:
+            del reacts[reacts.index(message.author.id)]
+        
+        if len(reacts) >= int(guild_data['starboard']['threshold']):
+            starboard_channel = guild.get_channel(int(guild_data['starboard']['channel']))
+            if channel.id == starboard_channel.id: return
+            try:
+                existing_star = await self.bot.starboard.find_by_custom(
+                    {
+                        '_id': message.id, "guildId": guild.id, "channelId": channel.id
+                    })
+            except:
+                pass
+
+            else:
+                if not existing_star:
                     pass
-                
                 else:
-                    if not existing_star:
-                        pass
-                    else:
-                        existing_message = await starboard_channel.fetch_message(existing_star["starboard_message_id"])
-                        return await existing_message.edit(content=f":dizzy: {len(react)} | {channel.mention}",embed=existing_message.embeds[0])
-                                            
-                if channel == starboard_channel: return
+                    existing_star_messae = await starboard_channel.fetch_message(existing_star['starboard_message_id'])
+                    return await existing_star_messae.edit(content=f":dizzy: {len(reacts)} | {channel.mention}")
 
-                embed = discord.Embed(color=0x9e3bff, timestamp=datetime.datetime.now())
-                embed.set_author(name=f"{msg.author.display_name}",icon_url=msg.author.avatar.url)
-                embed.set_footer(text=f"ID: {msg.id}")
-                embed.add_field(name="Message", value=msg.content, inline=False)
-                embed.add_field(name="Original", value=f"[Jump!]({msg.jump_url})", inline=False)
-                if msg.reference:
-                    reply_to = await channel.fetch_message(msg.reference.message_id)
-                    if not reply_to:
-                        pass
-                    else:
-                        embed.add_field(name="Replying to...", value=f"[{reply_to.content}]({reply_to.jump_url})", inline=False)
-                
-                attach = msg.attachments[0] if msg.attachments else None
-                if attach:
-                    embed.set_image(url=attach.url)
-                
-                starboard_message =  await starboard_channel.send(content=f":dizzy: {len(react)} | {channel.mention}",embed=embed)
-                await starboard_message.add_reaction("⭐")
-                await self.bot.starboard.upsert(
-                    {"_id": payload.message_id,
-                    "guildId": payload.guild_id,
-                    "authorId": payload.user_id,
-                    "channelId": payload.channel_id,
-                    "starboard_message_id": starboard_message.id,}
-                )
+            star_message_embed = discord.Embed(color=0x9e3bff, timestamp=discord.utils.utcnow())
+            try:
+                star_message_embed.set_author(name=f"{message.author}", icon_url=message.author.avatar.url)
+            except AttributeError:
+                star_message_embed.set_author(name=f"{message.author}", icon_url=message.author.default_avatar)
+            star_message_embed.set_footer(text=f"{message.id}")
+            if message.content:
+                star_message_embed.add_field(name="Message", value=message.content, inline=False)
+            star_message_embed.add_field(name="Original", value=f"[Jump!]({message.jump_url})", inline=False)
+            if message.reference:
+                reply_to = await channel.fetch_message(message.reference.message_id)
+                if reply_to:
+                    star_message_embed.add_field(name="Replying to ...", value=f"[{reply_to.content}]({reply_to.jump_url})", inline=False)
+                else:
+                    pass
+            extra_embed = [star_message_embed]
+            if len(message.attachments) > 0:                
+                for attachment in message.attachments:
+                    image_embed = discord.Embed(color=0x9e3bff).set_image(url=attachment.url)
+                    extra_embed.append(image_embed)
+            starborad_sent_message = await starboard_channel.send(content=f":dizzy:{len(reacts)} | {channel.mention}", embeds=extra_embed)
+            await starborad_sent_message.add_reaction("⭐")
 
+            await self.bot.starboard.insert({
+                '_id': message.id,
+                'guildId': guild.id,
+                'authorId': message.author.id,
+                'channelId': channel.id,
+                'starboard_message_id': starborad_sent_message.id,
+            })
+            try:
+                self.bot.bot_temp_star.pop(message.id)
+            except KeyError:
+                pass
+    
     @commands.Cog.listener()
     async def on_raw_reaction_remove(self, payload):
         if not payload.guild_id: return
-        entries = await self.bot.config.get_all()
-        guilds = list(map(lambda e: e["_id"], entries))
-        if payload.guild_id in guilds:
-            guild = list(filter(lambda e: e["_id"] == payload.guild_id, entries))
-            guild = guild[0]
-            emoji = "⭐"
+        guild = await self.bot.config.find(payload.guild_id)
+        emoji = "⭐"
         
-        if not guild.get("starboard_channel"): return
+        if not guild['starboard']['channel']: return
 
-        if not guild.get("starboard_toggle", True): return
+        if not guild['starboard']['toggle'] != True: return
 
-        if str(payload.emoji) == emoji:
-            channel = self.bot.get_channel(payload.channel_id)
+        channel = self.bot.get_channel(payload.channel_id)
+
+        try:
+            message = await channel.fetch_message(payload.message_id)
+            reacts = message.reactions
+            reacts = list(filter(lambda r: str(r.emoji) == "⭐", message.reactions))
+        except discord.HTTPException:
+            return
+        
+        if reacts:
+            react = [user async for user in reacts[0].users()]
+            if message.author.id in react and guild['starboard']['self_star'] == False:
+                del react[react.index(message.author.id)]
+
+            starboard = self.bot.get_channel(guild['starboard']['channel'])
             try:
-                msg = await channel.fetch_message(payload.message_id)
-                reacts = msg.reactions
-                reacts = list(filter(lambda r: str(r.emoji) == emoji, reacts))
-            except discord.HTTPException:
-                pass
-            
-            if reacts:
-                react = [user async for user in reacts[0].users()]
-                if msg.author.id in react:
-                    del react[react.index(msg.author.id)]
+                existing_star = await self.bot.starboard.find_by_custom(
+                    {
+                        "_id": payload.message_id,
+                        "guildId": payload.guild_id,
+                        "channelId": payload.channel_id,
+                    }
+                )
+            except:
+                return
+            else:
+                if not existing_star.get("starboard_message_id"):
+                    return
+                existing_message = await starboard.fetch_message(existing_star["starboard_message_id"])
+                return await existing_message.edit(content=f":dizzy: {len(react)} | {channel.mention}")
 
-                thresh = guild.get("emoji_threshold") or 7
-                if len(react) >= thresh:
-                    starboard = self.bot.get_channel(guild["starboard_channel"])
-                    try:
-                        existing_star = await self.bot.starboard.find_by_custom(
-                            {
-                                "_id": payload.message_id,
-                                "guildId": payload.guild_id,
-                                "channelId": payload.channel_id,
-                            }
-                        )
-                    except IdNotFound:
-                        return
-                    else:
-                        if not existing_star.get("starboard_message_id"):
-                            return
-                        existing_message = await starboard.fetch_message(existing_star["starboard_message_id"])
-                        return await existing_message.edit(content=f":dizzy: {len(react)} | {channel.mention}",embed=existing_message.embeds[0])
-
-    @commands.group(invoke_without_command=True,description="Config command for startbord module")
-    @commands.check_any(checks.can_use())
+    @commands.group(invoke_without_command=True, description="Config command for startbord module", brife="config")
+    #@commands.check_any(checks.can_use())
     async def starboard(self, ctx):
-        data = await self.bot.config.find(ctx.guild.id)
-        embed = discord.Embed(title=f"{ctx.guild.name}'s Startbord Config",color=0x9e3bff,
-        description=f"\nStartbord Toggle: {data['starboard_toggle']}\nStarbord Channel: <#{data['starboard_channel']}>\nStartboard Threshold: {data['emoji_threshold']}")
+        guild_data = await self.bot.config.find(ctx.guild.id)
+        embed = discord.Embed(title=f"{ctx.guild.name}'s Startbord Config",color=0x9e3bff)
+        data = guild_data['starboard']
+        embed.description=f"\nStartbord Toggle: {data['toggle']}\nStarbord Channel: <#{data['channel']}>\nStartboard Threshold: {data['threshold']}\nStarboard Self Star: {data['self_star']}"
         embed.timestamp = datetime.datetime.utcnow()
         embed.set_footer(text=ctx.guild.name, icon_url=ctx.guild.icon.url)
         await ctx.send(embed=embed)
     
-    @starboard.group(invoke_without_command=True, name="threshold")
-    @commands.check_any(checks.can_use())
-    async def threshold(self, ctx, threshold: int=None):
-        data = await self.bot.config.find(ctx.guild.id)
-        if not data: return await ctx.send("No config found")
-        if threshold:
-            data['emoji_threshold'] = threshold
-            await ctx.send(f"New Threshhold is {threshold}")
-            await self.bot.config.upsert(data)
-        if not threshold:
-            await ctx.send(f"Current Threshhold is {data['emoji_threshold']}")
-
-    @starboard.group(invoke_without_command=True, name="toggle")
-    @commands.check_any(checks.can_use())
-    async def toggle(self, ctx, toggle: bool=False):
-        data = await self.bot.config.find(ctx.guild.id)
-        if not data: return await ctx.send("No config found")
-        if toggle:
-            data['starboard_toggle'] = toggle
-            await ctx.send(f"Starboard is {toggle}")
-            await self.bot.config.upsert(data)
-        if not toggle:
-            await ctx.send(f"Current status is {data['starboard_toggle']}")
-
-    @starboard.group(invoke_without_command=True, name="channel")
-    @commands.check_any(checks.can_use())
-    async def channel(self, ctx, channel: discord.TextChannel=None):
-        data = await self.bot.config.find(ctx.guild.id)
-        if not data: return await ctx.send("No config found")
-        if channel:
-            data['starboard_channel'] = channel.id
-            await ctx.send(f"New starboard is {channel.mention}")
-            await self.bot.config.upsert(data)
-        if not channel:
-            await ctx.send(f"Current starboard channel is <#{data['starboard_channel']}>")
+    @starboard.command(name="toggle", description="Toggle starboard on/off", brief="toggle [True/False]")
+    #@commands.check_any(checks.can_use(), checks.is_owner())
+    async def starboard_toggle(self, ctx, toggle: bool=True):
+        guild_data = await self.bot.config.find(ctx.guild.id)
+        guild_data['starboard']['toggle'] = toggle
+        await self.bot.config.update(ctx.guild.id, guild_data)
+        await ctx.send(f"Starboard toggle set to {toggle}")
     
-    @starboard.group(invoke_without_command=True, name="force")
-    @commands.check_any(checks.can_use())
-    async def force(self, ctx, message_id: int):
-        data = await self.bot.config.find(ctx.guild.id)
-        if not data: return await ctx.send("No config found")
-        try:
-            msg = await ctx.channel.fetch_message(message_id)
-        except discord.HTTPException:
-            return await ctx.send("Message not found")
-        if msg.author.id == ctx.author.id:
-            return await ctx.send("You can't force star yours message")
-        if not data['starboard_channel']:
-            return await ctx.send("You can't force star a message when there is no starboard")
-        
-        sdata = await self.bot.starboard.find(msg.id)
-        if sdata:
-            return await ctx.send("Message already starred")
-
-
-        embed = discord.Embed(color=0x9e3bff, timestamp=datetime.datetime.now())
-        embed.set_author(name=f"{msg.author.display_name}",icon_url=msg.author.avatar.url)
-        embed.set_footer(text=f"ID: {msg.id}")
-        embed.add_field(name="Message", value=msg.content, inline=False)
-        embed.add_field(name="Original", value=f"[Jump!]({msg.jump_url})", inline=False)
-        if msg.reference:
-            reply_to = await channel.fetch_message(msg.reference.message_id)
-            if not reply_to:
-                pass
-            else:
-                embed.add_field(name="Replying to...", value=f"[{reply_to.content}]({reply_to.jump_url})", inline=False)
-        
-        attach = msg.attachments[0] if msg.attachments else None
-        if attach:
-            embed.set_image(url=attach.url)
-        
-        starboard_message = await self.bot.get_channel(data['starboard_channel']).send(content=f":dizzy: 1 | <#{data['starboard_channel']}>",embed=embed)
-        await msg.add_reaction("⭐")
-        sdata = {"_id": msg.id,
-                "guildId": ctx.guild.id,
-                "authorId": ctx.author.id,
-                "channelId": ctx.channel.id,
-                "starboard_message_id": starboard_message.id}
-
-        await ctx.send(f"Message {msg.id} has been force starred")
+    @starboard.command(name="channel", description="Set starboard channel", brief="channel [channel]")
+    #@commands.check_any(checks.can_use(), checks.is_owner())
+    async def starboard_channel(self, ctx, channel: discord.TextChannel):
+        guild_data = await self.bot.config.find(ctx.guild.id)
+        guild_data['starboard']['channel'] = channel.id
+        await self.bot.config.update(ctx.guild.id, guild_data)
+        await ctx.send(f"Starboard channel set to <#{channel.id}>")
+    
+    @starboard.command(name="threshold", description="Set starboard threshold", brief="threshold [threshold]")
+    #@commands.check_any(checks.can_use(), checks.is_owner())
+    async def starboard_threshold(self, ctx, threshold: int=5):
+        guild_data = await self.bot.config.find(ctx.guild.id)
+        guild_data['starboard']['threshold'] = threshold
+        await self.bot.config.update(ctx.guild.id, guild_data)
+        await ctx.send(f"Starboard threshold set to {threshold}")
+    
+    @starboard.command(name="selfstar", description="Toggle starboard self star", brief="selfstar [True/False]")
+    async def starboard_selfstar(self, ctx, toggle: bool=False):
+        guild_data = await self.bot.config.find(ctx.guild.id)
+        guild_data['starboard']['self_star'] = toggle
+        await self.bot.config.update(ctx.guild.id, guild_data)
+        await ctx.send(f"Starboard self star set to {toggle}")
 
 async def setup(bot):
-    await bot.add_cog(starboard(bot))
-
-            
+    await bot.add_cog(Starboard(bot))

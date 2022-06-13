@@ -1,1 +1,1 @@
-worker: python TGK.py
+worker: python main.py

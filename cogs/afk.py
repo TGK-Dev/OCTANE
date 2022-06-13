@@ -1,101 +1,93 @@
 import discord
-import datetime
-from copy import deepcopy
 from discord.ext import commands
-import re
-from utils.checks import checks
-
-pc_mention_regex = re.compile("(@)(!|&)(\d\d\d)")
-mo_mention_regex = re.compile("<(@)")
-class Afk(commands.Cog, description="An Afk commands"):
+from discord import app_commands
+from copy import deepcopy
+from utils.checks import Commands_Checks, Dynamic_cooldown
+class AFK(commands.Cog, name="AFK", description="Member Afk Module"):
     def __init__(self, bot):
         self.bot = bot
     
     @commands.Cog.listener()
     async def on_ready(self):
-        print(f"{self.__class__.__name__} is ready")
-
+        print(f"{self.__class__.__name__} Cog has been loaded\n-----")
+    
     @commands.Cog.listener()
     async def on_message(self, message):
         if message.author.bot:
             return
-        afks = deepcopy(self.bot.afk_user)
+        
+        if message.guild.id != 785839283847954433: return
+        current_afk = deepcopy(self.bot.current_afk)
 
-        if message.author.id in afks:
-
+        if message.author.id in self.bot.current_afk:
+            value  = self.bot.current_afk[message.author.id]
             try:
-                self.bot.afk_user.pop(message.author.id)
-            except KeyError:
-                pass
-
-            await message.reply("your AFK status has been Removed", mention_author=False, delete_after=30)
-            data = await self.bot.afk.find(message.author.id)
-            try:
-                await message.author.edit(nick=f"{data['last_name']}")
+                await message.author.edit(nick=value['last_name'])
             except:
-                pass
+                pass            
+            
 
+            embed = discord.Embed(description=f"{message.author.mention} is no longer AFK\nAFK Started: <t:{value['time']}:R> ago", color=0x00ff00)
+
+            await message.reply(embed=embed)
             await self.bot.afk.delete(message.author.id)
 
             try:
-                self.bot.afk_user.pop(message.author.id)
+                self.bot.current_afk.pop(message.author.id)
             except KeyError:
-                return
-
-        if type(message.reference) == None:
-            pass
-        else:
-            try:
-                msg = await message.channel.fetch_message(int(message.reference.message_id))
-                for key, value in afks.items():
-                    user = await message.guild.fetch_member(value['_id'])
-                    if msg.author.id == user.id:
-                        time = round(value['time'].timestamp())
-                        return await message.reply(f"{user.display_name} is afk {value['message']} -<t:{time}:R> <t:{time}:f>", mention_author=False, delete_after=30, allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
-            except:
                 pass
-        if len(message.mentions) == 0:
             return
-        else:
-            for key, value in afks.items():
-                user = await message.guild.fetch_member(value['_id'])
-                if user in message.mentions:
-                    time = round(value['time'].timestamp())
-                    await message.reply(f"**{user.display_name}** is currently afk: {value['message']} - <t:{time}:R> <t:{time}:f>", mention_author=False, delete_after=30, allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
+        
+        if message.reference:
+            try:
+                reply_message = await message.channel.fetch_message(message.reference.message_id)
+            except discord.NotFound:
+                return
+            for key, value in current_afk.items():
+                if reply_message.author.id == key:
+                    user = message.guild.get_member(key)
+                    embed = discord.Embed(description=f"Reason: {value['message']}\nAFK Started: <t:{value['time']}:R>", color=user.color)
+                    embed.set_author(name=f"{user.display_name} is AFK", icon_url=user.avatar.url if user.avatar else user.default_avatar)
+                    return await message.reply(embed=embed)
 
-    @commands.command(name="afk", description="set your status afk with this command")
-    @commands.check_any(checks.can_use())
-    @commands.cooldown(1, 30, commands.BucketType.user)
-    async def afk(self, ctx, *, message="Afk"):
-        message = message if message else ""
+        if len(message.mentions) > 0:
+            for key, value in current_afk.items():
+                if key in [_id.id for _id in message.mentions]:
+                    user = message.guild.get_member(key)
+                    embed = discord.Embed(description=f"Reason: {value['message']}\nAFK Started: <t:{value['time']}:R>", color=user.color)
+                    embed.set_author(name=f"{user.display_name} is AFK", icon_url=user.avatar.url if user.avatar else user.default_avatar)
+                    return await message.reply(embed=embed)
 
-        data = {'_id': ctx.author.id,
-                'message': message,
-                'last_name': ctx.author.display_name,
-                'time': datetime.datetime.now()}
+    @app_commands.command(name="afk", description="Set your AFK status")
+    @app_commands.guilds(785839283847954433)
+    @app_commands.describe(status="Your AFK reason")
+    @app_commands.checks.dynamic_cooldown(Dynamic_cooldown.is_me)
+    async def afk(self, interaction: discord.Interaction, status: str = None):
+        afk_data = await self.bot.afk.find(interaction.user.id)
+        if afk_data:
+            await interaction.response.send_message("You are already afk", ephemeral=True)
+            return
+
+        afk_data = {'_id':interaction.user.id, 'message': status, 'last_name': interaction.user.display_name,'time': round(discord.utils.utcnow().timestamp())}
+        await self.bot.afk.insert(afk_data)
+        embed = discord.Embed(description=f"{interaction.user.mention} You are now afk\nReason: {status}", color=0x00ff00)
+        embed.set_author(name=f"{interaction.user.display_name} is now afk", icon_url=interaction.user.avatar.url if interaction.user.avatar else interaction.user.default_avatar)
+
+        await interaction.response.send_message(embed=embed)
         try:
-            await ctx.author.edit(nick=f"[AFK] {ctx.author.display_name}")
+            await interaction.user.edit(nick=f"{interaction.user.display_name} [AFK]")
         except:
             pass
-        await ctx.send(f"{ctx.author.mention}, **I set your afk:** {message}", allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
-        await self.bot.afk.upsert(data)
-        self.bot.afk_user[ctx.author.id] = data
+        
+        self.bot.current_afk[interaction.user.id] = afk_data
 
-    @commands.command(name="afkreset", description="Remove any user afk message")
-    @commands.check_any(checks.can_use())
-    async def afkreset(self, ctx, user: discord.Member):
-        data = await self.bot.afk.find(user.id)
-        if data is None:
-            return await ctx.send("No data Found, check your id")
-        data['message'] = "⠀"
-        await self.bot.afk.upsert(data)
-        try:
-            self.bot.afk_user.pop(user.id)
-        except KeyError:
-            pass
-        self.bot.afk_user[user.id] = data
-        await ctx.send("User Afk message has been reset")
-
-
+    @afk.error
+    async def afk_error(self, interaction: discord.Interaction, error):
+        print(error)
+        if isinstance(error, app_commands.CommandOnCooldown):
+            await interaction.response.send_message(f"Please wait {round(int(error.retry_after))} seconds before using this command again", ephemeral=True)
+    
 async def setup(bot):
-    await bot.add_cog(Afk(bot))
+    await bot.add_cog(AFK(bot))
+    
+
