@@ -6,7 +6,7 @@ import chat_exporter
 import io
 from discord import Interaction
 from .models import RenameTicket
-
+import re
 class Ticket_Control(discord.ui.View):
     def __init__(self, bot):
         self.bot = bot
@@ -427,6 +427,26 @@ class Partnership_model(discord.ui.Modal, title="Partnership Ticket Form"):
 
         await interaction.followup.send(f"Your Partnership Ticket has been created.{channel.mention}")
 
+class Nickname_model(discord.ui.Modal, title="Nickname Ticket Form"):
+    def __init__(self, bot):
+        self.bot = bot
+        super().__init__(timeout=None)
+    
+    nickname = discord.ui.TextInput(label="Nickname", placeholder="Enter Nickname", custom_id="nickname", style=discord.TextStyle.short, required=True, max_length=32)
+
+    async def on_submit(self, interaction: discord.Interaction):
+        new_name = self.nickname.value
+        #check if name has anything other than space a-z and 0-9 using re
+        if re.search(r'[^a-zA-Z0-9 ]', new_name):
+            await interaction.response.send_message(f"Nickname can only contain a-z, A-Z, 0-9 and spaces.", ephemeral=True)
+        else:
+            await interaction.response.send_message("Please wait while we process your request.", ephemeral=True)
+            try:
+                await interaction.user.edit(nick=new_name)
+                await interaction.edit_original_message(content=f"applied nickname {new_name}")
+            except discord.HTTPException:
+                await interaction.edit_original_message(content="Failure to change nickname. Please try again later. or contact a staff member.")
+
 class Ticket_main(discord.ui.View):
     def __init__(self, bot):
         self.bot = bot
@@ -441,6 +461,10 @@ class Ticket_main(discord.ui.View):
     @discord.ui.button(label='Partnership ', style=discord.ButtonStyle.green, custom_id='persistent_view:partner_ship', emoji="<:partner:837272392472330250>")
     async def partnership(self, interaction: discord.Interaction ,button: discord.Button):
         await interaction.response.send_modal(Partnership_model(self.bot))
+
+    @discord.ui.button(label="Change Nickname", style=discord.ButtonStyle.blurple, custom_id='persistent_view:nickname', emoji="<:TGK_POGGIES:942065551092641853>")
+    async def nickname(self, interaction: discord.Interaction ,button: discord.Button):
+        await interaction.response.send_modal(Nickname_model(self.bot))
 
     async def interaction_check(self, interaction):
         data = self.bot.blacklist_users
