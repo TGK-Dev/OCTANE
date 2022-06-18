@@ -165,13 +165,15 @@ class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
     @commands.check_any(Commands_Checks.can_use(), Commands_Checks.is_me())
     async def ban(self, interaction: discord.Interaction, member: Union[discord.Member, discord.User], time: str=None, reason: str="No reason given"):
         await interaction.response.defer()
-        time = await TimeConverter().convert(interaction, time)
+        if time:
+            time = await TimeConverter().convert(interaction, time)
         
         if member.id in [self.bot.owner_id, self.bot.user.id]:
             return await interaction.followup.sen("You can't ban me and my owner")
-        
-        if member.top_role >= interaction.user.top_role:
-            return await interaction.followup.send("You can't ban someone with a higher/Equal role than you", ephemeral=True)
+
+        if type(member) is discord.Member:
+            if member.top_role >= interaction.user.top_role:
+                return await interaction.followup.send("You can't ban someone with a higher/Equal role than you", ephemeral=True)
         
         if member.id == interaction.user.id:
             return await interaction.followup.send("You can't ban yourself", ephemeral=True)
@@ -182,20 +184,26 @@ class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
             guild_data = make_db_temp(interaction.guild.id)
             
         embed = discord.Embed(title=f"🔨 Ban | Case ID: {guild_data['case']}",
-                                    description=f" **Offender**: {member.name} | {member.mention}\n**Duration**: {format_timespan(time)} \n**Reason**: {reason}\n **Moderator**: {interaction.user.name} {interaction.user.mention}", color=0xE74C3C)
+                                    description=f" **Offender**: {member.name} | {member.mention}", color=0xE74C3C)
+        if time !=None:
+            embed.description += f"\n**Duration**: {format_timespan(time)}"
+        else:
+            embed.description += f"\n**Duration**: Permanent"
+        embed.description += f"\n**Reason**: {reason}"
         embed.timestamp = datetime.datetime.utcnow()
         embed.set_footer(text=f"ID: {member.id}")
         guild_data["case"] += 1
         await self.bot.config.upsert(guild_data)
 
         try:
-            await member.send(f"You have been banned from {interaction.guild.name} for {format_timespan(time)}s\nReason: {reason}")
+
+            await member.send(f"You have been banned from {interaction.guild.name}\nReason: {reason}")
         except discord.HTTPException:
             pass
         await interaction.guild.ban(member, reason=reason, delete_message_days=0)
         log_channel = interaction.guild.get_channel(guild_data['mod_log'])
         await log_channel.send(embed=embed)
-        response_embed = discord.Embed(description=f"<:allow:819194696874197004> | Banned {member.mention} has been banned for {format_timespan(time)}", color=0x32CD32)
+        response_embed = discord.Embed(description=f"<:allow:819194696874197004> | Banned {member.mention} has been banned for {reason}", color=0x32CD32)
         await interaction.followup.send(embed=response_embed)
         if time:
             await self.bot.bans.insert(data)
