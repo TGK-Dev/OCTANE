@@ -44,6 +44,7 @@ class Bot(commands.Bot):
         bot.quarantine = Document(bot.db, 'quarantine')
         bot.tags = Document(bot.db, 'tags')
         bot.Amari_api = AmariClient(bot.Amari_token)
+        
         for file in os.listdir('./cogs'):
             if file.endswith('.py') and not file.startswith("_"):
                 await bot.load_extension(f'cogs.{file[:-3]}')
