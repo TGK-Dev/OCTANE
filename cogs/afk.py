@@ -27,7 +27,7 @@ class AFK(commands.Cog, name="AFK", description="Member Afk Module"):
                 pass            
             
 
-            embed = discord.Embed(description=f"{message.author.mention} is no longer AFK\nAFK Started: <t:{value['time']}:R> ago", color=0x00ff00)
+            embed = discord.Embed(description=f"{message.author.mention} is no longer AFK\nAFK Started: <t:{value['time']}:R>", color=0x00ff00)
 
             await message.reply(embed=embed)
             await self.bot.afk.delete(message.author.id)
@@ -46,7 +46,7 @@ class AFK(commands.Cog, name="AFK", description="Member Afk Module"):
             for key, value in current_afk.items():
                 if reply_message.author.id == key:
                     user = message.guild.get_member(key)
-                    embed = discord.Embed(description=f"Reason: {value['message']}\nAFK Started: <t:{value['time']}:R>", color=user.color)
+                    embed = discord.Embed(description=f"Reason: {value['message']}\nAFK Since : <t:{value['time']}:R>", color=user.color)
                     embed.set_author(name=f"{user.display_name} is AFK", icon_url=user.avatar.url if user.avatar else user.default_avatar)
                     return await message.reply(embed=embed)
 
@@ -54,7 +54,7 @@ class AFK(commands.Cog, name="AFK", description="Member Afk Module"):
             for key, value in current_afk.items():
                 if key in [_id.id for _id in message.mentions]:
                     user = message.guild.get_member(key)
-                    embed = discord.Embed(description=f"Reason: {value['message']}\nAFK Started: <t:{value['time']}:R>", color=user.color)
+                    embed = discord.Embed(description=f"Reason: {value['message']}\nAFK Since: <t:{value['time']}:R>", color=user.color)
                     embed.set_author(name=f"{user.display_name} is AFK", icon_url=user.avatar.url if user.avatar else user.default_avatar)
                     return await message.reply(embed=embed)
 
