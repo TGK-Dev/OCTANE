@@ -27,7 +27,7 @@ class Owner(commands.Cog, name="Owner", description="Owner/admin commands."):
         
         if user.id in guild_data['blacklist']:
             await ctx.send(f"{user.mention} is already blacklisted.")
-        elif user.id == self.bot.user.id or ctx.guild.owner.id == user.id or user.id == ctx.author.id or user.id == self.bot.owner_id:
+        elif user.id in [self.bot.user.id ,ctx.guild.owner.id, ctx.author.id ,self.bot.owner_id]:
             await ctx.send(f"You can't blacklist that user.")
         else:
             guild_data['blacklist'].append(user.id)
