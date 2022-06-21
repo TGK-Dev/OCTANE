@@ -51,6 +51,7 @@ class Bot(commands.Bot):
 
         await self.tree.sync(guild=discord.Object(main_guilds[0]))
         await self.tree.sync(guild=discord.Object(main_guilds[1]))
+        await self.tree.sync(guild=discord.Object(988761284956799038))
 
 bot = Bot()
 
