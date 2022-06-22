@@ -61,33 +61,33 @@ class BanAppeal(commands.Cog, name="Ban Appeal", description="Easy way to add Ba
         self.bot.add_view(Support())
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
     
-    # @commands.Cog.listener()
-    # async def on_member_join(self, member):
-    #     main_guild = self.bot.get_guild(785839283847954433)
-    #     if member.guild.id != 988761284956799038: return
-    #     if member.bot: return
+     @commands.Cog.listener()
+     async def on_member_join(self, member):
+         main_guild = self.bot.get_guild(785839283847954433)
+         if member.guild.id != 988761284956799038: return
+         if member.bot: return
         
-    #     if member.id in [main_member.id for main_member in main_guild.members]:
-    #         main_guild_member = main_guild.get_member(member.id)
-    #         if main_guild_member.guild_permissions.administrator:
-    #             return
-    #         else:
-    #             try:
-    #                 await member.send("Your account has not banned in main server.")
-    #             except discord.HTTPException:
-    #                 pass
+         if member.id in [main_member.id for main_member in main_guild.members]:
+             main_guild_member = main_guild.get_member(member.id)
+             if main_guild_member.guild_permissions.administrator:
+                 return
+             else:
+                 try:
+                     await member.send("Your account has not banned in main server.")
+                 except discord.HTTPException:
+                     pass
                 
-    #             await member.kick(reason="Your account has not banned in main server.")
-    #     try:
-    #         user = await self.bot.fetch_user(member.id)
-    #         banned = await main_guild.fetch_ban(user)
-    #     except discord.NotFound:
-    #         try:
-    #             await member.send("Your account has not banned in main server.")
-    #         except discord.HTTPException:
-    #             pass
+                 await member.kick(reason="Your account has not banned in main server.")
+         try:
+             user = await self.bot.fetch_user(member.id)
+             banned = await main_guild.fetch_ban(user)
+         except discord.NotFound:
+             try:
+                 await member.send("Your account has not banned in main server.")
+             except discord.HTTPException:
+                 pass
             
-    #         await member.kick(reason="Your account has not banned in main server.")
+             await member.kick(reason="Your account has not banned in main server.")
 
     @app_commands.command(name="approve", description="Approve a ban appeal")
     @app_commands.guild_only()
