@@ -47,8 +47,10 @@ class Support(discord.ui.View):
 
         #await interaction.client.ticket.insert(data)
         await interaction.edit_original_message(content=f"Your ticket has been created, you can view it here: {channel.mention}")
-        embed = discord.Embed(description="```\nPlease wait for a moderator to review your ticket\nPlease Send Answers of Following Qestions\n\n1. Why did you get banned?\n\n2. Why do you think your appeal should be accepted?\n\n3. Is there anything else you would like for us to know?\n\n```", color=0x00FF00)
+        #embed = discord.Embed(description="```\nPlease wait for a moderator to review your ticket\nPlease Send Answers of Following Qestions\n\n1. Why did you get banned?\n\n2. Why do you think your appeal should be accepted?\n\n3. Is there anything else you would like for us to know?\n\n```", color=0x00FF00)
+        embed = discord.Embed(description="Please wait for a staff to review your ticket.\n\n> Do let us know why do you think your appeal should be accepted?", color=0x00FF00)
         await channel.send(embed=embed, content=interaction.user.mention)
+        
 
 class BanAppeal(commands.Cog, name="Ban Appeal", description="Easy way to add Ban Appeal"):
     def __init__(self, bot):
