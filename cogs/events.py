@@ -75,6 +75,7 @@ class Events(commands.Cog):
         guild_data = self.bot.config_cache.get(member.guild.id)
         guild = member.guild
         if not guild_data: return
+        if guild.id != 785839283847954433: return
         
         roles = []
         for role in guild_data['join_roles']:
