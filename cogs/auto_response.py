@@ -10,7 +10,6 @@ class Ar(commands.Cog, name="Auto Responce", description="Easy way to add Auto R
     def __init__(self, bot):
         self.bot = bot
         self.heist_ar = {}
-        self.heist_ar_active = False
         self.ar_check = self.heist_ar_check.start()
     
     def cog_unload(self):
@@ -22,7 +21,7 @@ class Ar(commands.Cog, name="Auto Responce", description="Easy way to add Auto R
 
     @tasks.loop(seconds=10)
     async def heist_ar_check(self):
-        if self.heist_ar_active == False:
+        if self.heist_ar == {}:
             return
         if (self.heist_ar['time'] + datetime.timedelta(seconds=600)) < datetime.datetime.now():
             self.heist_ar = {}
@@ -35,14 +34,14 @@ class Ar(commands.Cog, name="Auto Responce", description="Easy way to add Auto R
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        if message.author.bot or self.heist_ar_active == False or message.guild.id != 785839283847954433:
+        if message.author.bot or message.guild.id != 785839283847954433:
             return
         
         if message.channel.id not in [785847439579676672, 799364834927968336,799378297855279125]: return
         # if message.author.guild_permissions.manage_messages:
         #     return
         
-        if "heist" in message.content.lower():
+        if "heist" in message.content.lower() and self.heist_ar != {}:
             embed = discord.Embed(description=f"> **{self.heist_ar['ammount']} Heist** **begins** <t:{round(self.heist_ar['time'].timestamp())}:R>")
             if self.heist_ar['role'] != None:
                 embed.description += "\n> **Required Role:** <@&{}>".format(self.heist_ar['role'])
@@ -50,6 +49,8 @@ class Ar(commands.Cog, name="Auto Responce", description="Easy way to add Auto R
                 embed.description += "\n> **Bypass Role:** <@&{}>".format(self.heist_ar['bypass_role'])
             embed.color = discord.Color.random()
             await message.reply(f"Heist will take place in <#{self.heist_ar['channel']}>!!",embed=embed, delete_after=10)
+        elif "heist" in message.content.lower() and self.heist_ar == {}:
+            await message.reply("There is currently no heist in progress take Heist ping from <#944670050252648468>", delete_after=10)
 
     @app_commands.command(name="set-heist-ar", description="Set Auto Responce for Heist")
     @app_commands.guild_only()
@@ -68,7 +69,6 @@ class Ar(commands.Cog, name="Auto Responce", description="Easy way to add Auto R
         time = datetime.datetime.now() + datetime.timedelta(seconds=times)
         self.heist_ar = {'_id': interaction.user.id, 'time': time, 'channel': channel.id, 'ammount': amount, 'role': role.id if role else None, "expir": times, "bypass_role": bypass_role.id if bypass_role else None}
         await interaction.response.send_message("Auto Responce has been set", ephemeral=True)
-        self.heist_ar_active = True
         print(self.heist_ar)
 
 async def setup(bot):
