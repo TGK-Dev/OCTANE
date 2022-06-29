@@ -18,7 +18,7 @@ main_guilds = [785839283847954433, 811037093715116072]
 
 class Bot(commands.Bot):
     def __init__(self):
-        super().__init__(command_prefix='-', description='GK Bot', case_insensitive=True, help_command=EmbedHelpCommand(), owner_id=488614633670967307, intents=discord.Intents.all(), application_id=816699167824281621)
+        super().__init__(command_prefix='-', description='GK Bot', case_insensitive=True, help_command=EmbedHelpCommand(), owner_ids=[488614633670967307, 301657045248114690], intents=discord.Intents.all(), application_id=816699167824281621)
     
     async def setup_hook(self):
         bot.mongo = motor.motor_asyncio.AsyncIOMotorClient(bot.mongo_connection)
