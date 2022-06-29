@@ -101,6 +101,8 @@ class CorssChat(commands.Cog, name="Cross Chat"):
         for attachment in message.attachments:
             content += f"\n{attachment.url}"
 
+        embed_list = []
+
         if reply_message is not None:
 
             if reply_message.author.avatar.url != None:
@@ -112,12 +114,18 @@ class CorssChat(commands.Cog, name="Cross Chat"):
             embed.description = reply_message.content
             embed.color = 0xADD8E6
             embed.timestamp = reply_message.created_at
-            for attachment in reply_message.attachments:
-                embed.set_image(url=attachment.url)
-                break
-        else:
-            embed = None
-        return await webhook.send(content=content,embed=embed,username=message.author.display_name, avatar_url=avatar, allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
+            if len(message.attachments) > 0:
+                embed.set_image(url=message.attachments[0].url)
+        
+        if len(message.stickers) > 0:
+            if message.stickers[0].url.endswith(".json"):
+                pass
+            else:
+                sticker_embed = discord.Embed(color=message.author.color)
+            sticker_embed.set_image(url=message.stickers[0].url)
+            embed_list.append(sticker_embed)
+
+        return await webhook.send(content=content,embeds=embed_list,username=message.author.display_name, avatar_url=avatar, allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
 
     @commands.Cog.listener()
     async def on_ready(self):
