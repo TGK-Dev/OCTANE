@@ -14,8 +14,16 @@ from typing import Union
 from utils.converter import TimeConverter
 from utils.functions import make_db_temp
 from utils.checks import Commands_Checks
+from utils.checks import Dynamic_cooldown
 import ui.models as models
+import math
+def millify(n):
+    n = float(n)
+    millnames = ['',' Thousand',' Million',' Billion',' Trillion']
+    millidx = max(0,min(len(millnames)-1,
+                        int(math.floor(0 if n == 0 else math.log10(abs(n))/3))))
 
+    return '{:.0f}{}'.format(n / 10**(3 * millidx), millnames[millidx])
 
 class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
     def __init__(self, bot):
@@ -375,29 +383,44 @@ class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
     @app_commands.command(name="whois", description="Get info about a user")
     @app_commands.describe(member="User to get info about")
     @app_commands.guilds(785839283847954433)
+    @app_commands.checks.dynamic_cooldown(Dynamic_cooldown.is_me)
     async def userinfo(self, interaction: discord.Interaction, member: discord.Member):
-        embed = discord.Embed(title=f'{member.name}', color=member.color)
+        await interaction.response.defer(thinking=True)
+        embed = discord.Embed(title=f"User Info - {member.name}#{member.discriminator}")
+        embed.set_thumbnail(url=member.avatar.url if member.avatar else member.default_avatar.url)
+        embed.add_field(name="<:authorized:991735095587254364> ID:", value=member.id, inline=True)
+        bages = ""
+        if member.id in self.bot.owner_ids:
+            bages += "<:developer:991737828859981984>"
+            bages += "<:owner:991737821289250827>"
+        if member.guild_permissions.administrator:
+            bages += "<:admin:991737826804777030>"
+        if member.guild_permissions.manage_messages:
+            bages += "<:mod:991737819104026674>"
+        if discord.utils.get(member.guild.roles, id=818129661325869058) in member.roles:
+            bages += "<:staff:991737823776481340>"
+        if member.premium_since is not None:
+            bages += "<:booster:991740169537454252>"
+        embed.add_field(name="<:displayname:991733326857654312> Display Name:", value=member.display_name, inline=True)
 
-        if member.avatar != None:
-            embed.set_thumbnail(url=member.avatar.url)
-            embed.set_footer(text=f"{member.name} | {member.id}", icon_url=member.avatar.url)
-        
-        else:
+        if len(bages) > 0:
+            embed.add_field(name="<:bage:991740849664819332> Badges:", value=bages, inline=True)
 
-            embed.set_thumbnail(url=member.default_avatar)
-            embed.set_footer(text=f"{member.name} | {member.id}", icon_url=member.default_avatar)
+        embed.add_field(name="<:bot:991733628935610388> Bot Account:", value=member.bot)
+        embed.add_field(name="<:settings:991733871118917683> Created Account on:", value=member.created_at.strftime('%d/%m/%Y %H:%M:%S'), inline=True)
+        embed.add_field(name="<:join:991733999477203054> Joined Server on:", value=member.joined_at.strftime('%d/%m/%Y %H:%M:%S'), inline=True)
+        embed.add_field(name="<:mention:991734732188553337> Highest Role:", value=f"> {member.roles[-1].mention}\n> {member.roles[-2].mention}", inline=True)
+        moneydata = await self.bot.money.find(member.id)
         
-        embed.add_field(name='Account Name:', value=f'{member.name}', inline=False)
-        embed.add_field(name="Created At:", value=f"<t:{round(member.created_at.timestamp())}:R>", inline=False)
-        embed.add_field(name="Joined At:", value=f"<t:{round(member.joined_at.timestamp())}:R>", inline=False)
-        Member = await self.bot.fetch_user(member.id)
+        if moneydata is not None:
+            embed.add_field(name="💰 Donated:", value=millify(moneydata['bal']), inline=True)
+        
+        leveldata = await self.bot.Amari_api.fetch_user(interaction.guild.id, member.id)
 
-        if Member.banner:
-            embed.set_image(url=Member.banner)
+        embed.add_field(name="Amari:", value=f"> Level: {leveldata.level}\n> Weekly: {leveldata.weeklyexp}", inline=True)
+
+        await interaction.followup.send(embed=embed)
         
-        await interaction.response.send_message(embed=embed)
-        await asyncio.sleep(30)
-        await interaction.delete_original_message()
 
 async def setup(bot):
     await bot.add_cog(Mod(bot))
