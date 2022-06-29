@@ -46,7 +46,7 @@ class Bot(commands.Bot):
         bot.Amari_api = AmariClient(bot.Amari_token)
         
         for file in os.listdir('./cogs'):
-            if file.endswith('.py') and not file.startswith("_"):
+            if file.endswith('.py') and not file.startswith("_") and not file.startswith("eco"):
                 await bot.load_extension(f'cogs.{file[:-3]}')
 
         await self.tree.sync(guild=discord.Object(main_guilds[0]))

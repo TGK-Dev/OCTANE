@@ -402,13 +402,12 @@ class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
         if member.premium_since is not None:
             bages += "<:booster:991740169537454252>"
         embed.add_field(name="<:displayname:991733326857654312> Display Name:", value=member.display_name, inline=True)
-
         if len(bages) > 0:
             embed.add_field(name="<:bage:991740849664819332> Badges:", value=bages, inline=True)
 
         embed.add_field(name="<:bot:991733628935610388> Bot Account:", value=member.bot)
-        embed.add_field(name="<:settings:991733871118917683> Created Account on:", value=member.created_at.strftime('%d/%m/%Y %H:%M:%S'), inline=True)
-        embed.add_field(name="<:join:991733999477203054> Joined Server on:", value=member.joined_at.strftime('%d/%m/%Y %H:%M:%S'), inline=True)
+        embed.add_field(name="<:settings:991733871118917683> Account creation:", value=member.created_at.strftime('%d/%m/%Y %H:%M:%S'), inline=True)
+        embed.add_field(name="<:join:991733999477203054> Server join:", value=member.joined_at.strftime('%d/%m/%Y %H:%M:%S'), inline=True)
         embed.add_field(name="<:mention:991734732188553337> Highest Role:", value=f"> {member.roles[-1].mention}\n> {member.roles[-2].mention}", inline=True)
         moneydata = await self.bot.money.find(member.id)
         
@@ -418,8 +417,13 @@ class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
         leveldata = await self.bot.Amari_api.fetch_user(interaction.guild.id, member.id)
 
         embed.add_field(name="Amari:", value=f"> Level: {leveldata.level}\n> Weekly: {leveldata.weeklyexp}", inline=True)
-
         await interaction.followup.send(embed=embed)
+    
+    @userinfo.error
+    async def afk_error(self, interaction: discord.Interaction, error):
+        print(error)
+        if isinstance(error, app_commands.CommandOnCooldown):
+            await interaction.response.send_message(f"Please wait {round(int(error.retry_after))} seconds before using this command again", ephemeral=True)
         
 
 async def setup(bot):
