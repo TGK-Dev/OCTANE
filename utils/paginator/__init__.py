@@ -91,6 +91,7 @@ class _view(View):
 
 	@button(label="Quit", style=ButtonStyle.red, row=1)
 	async def quit(self, interaction: Interaction, button: Button):
+		await interaction.message.delete()
 		self.stop()
 
 
