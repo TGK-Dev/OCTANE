@@ -377,7 +377,7 @@ class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
     @app_commands.command(name="whois", description="Get info about a user")
     @app_commands.describe(member="User to get info about")
     @app_commands.guilds(785839283847954433)
-    @app_commands.checks.dynamic_cooldown(Dynamic_cooldown.is_me)
+    @app_commands.checks.dynamic_cooldown(Dynamic_cooldown.low_dc)
     async def userinfo(self, interaction: discord.Interaction, member: discord.Member=None):
         member = member if member else interaction.user
 
