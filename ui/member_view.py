@@ -50,12 +50,15 @@ class Member_view(discord.ui.View):
                 if self.member.premium_since is not None:
                     badge += "Booster <a:booster:992039182442704966>\n"                    
                 moneydata = await self.bot.money.find(self.member.id)
-                print(moneydata)
+                
                 if moneydata is not None:
                     if moneydata['bal'] > 500000000:
                         badge += "500Mil Donor<a:500dono:992046271923765361>\n"
                 if discord.utils.get(self.member.guild.roles, id=931072410365607946) in self.member.roles:
                     badge += "Frist 50 Members <a:real_og:992048421974315051>\n"
+                
+                if discord.utils.get(self.member.guild.roles, id=786884615192313866) in self.member.roles:
+                    badge += "Voted <:TGK_vote:942521024476487741>"
                 if len(badge) > 0:
                     embed.description = badge
                 else:
@@ -77,7 +80,9 @@ class Member_view(discord.ui.View):
                         for event in data['event']:
                             if event['bal'] > 0:
                                 event_dono += f"**{event['name']}:** ⏣`{millify(event['bal'])}`\n"
-                        embed.add_field(name="Event Donations", value=event_dono)
+                            if len(event_dono) > 0:
+                                embed.add_field(name="Event Donations", value=event_dono)
+                            
                     await interaction.response.edit_message(embed=embed)
 
             case "roles":
@@ -126,3 +131,9 @@ class Member_view(discord.ui.View):
             return True
         else:
             await interaction.response.send_message(f"Use /whois from {self.bot.user.mention} to view your own profile", ephemeral=True)
+        
+        def make_check():
+            guild = interaction.guild
+            member = guild.member
+            #sort member by member.joined_at oldest to newest
+            list_member = sorted(guild.members, key=lambda m: m.joined_at)

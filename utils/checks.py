@@ -95,3 +95,8 @@ class Dynamic_cooldown():
         if interaction.user.id in [488614633670967307, 301657045248114690]:
             return None
         return app_commands.Cooldown(1, 300)
+    
+    def low_dc(interaction: discord.Interaction):
+        if interaction.user.id in [488614633670967307, 301657045248114690]:
+            return None
+        return app_commands.Cooldown(1, 30)
