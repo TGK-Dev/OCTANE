@@ -83,7 +83,7 @@ bot.cross_chat_toggle = True
 @bot.event
 async def on_ready():
     print(f"Logged in as {bot.user} | {bot.user.id}")
-    await bot.change_presence(status=discord.Status.dnd, activity=discord.Activity(type=discord.ActivityType.watching, name="Server Security"))
+    await bot.change_presence(status=discord.Status.idle, activity=discord.Activity(type=discord.ActivityType.playing, name="Startup..."))
 
     current_vote = await bot.votes.get_all()
     for votes in current_vote:
@@ -135,6 +135,7 @@ async def on_ready():
     await bot.tree.sync(guild=discord.Object(id=785839283847954433))
     await bot.tree.sync(guild=discord.Object(id=811037093715116072))
     print('Bot is ready')
+    await bot.change_presence(status=discord.Status.dnd, activity=discord.Activity(type=discord.ActivityType.watching, name="Server Security"))
 
 @bot.event
 async def on_message(message):
