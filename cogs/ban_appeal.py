@@ -50,7 +50,17 @@ class Support(discord.ui.View):
         #embed = discord.Embed(description="```\nPlease wait for a moderator to review your ticket\nPlease Send Answers of Following Qestions\n\n1. Why did you get banned?\n\n2. Why do you think your appeal should be accepted?\n\n3. Is there anything else you would like for us to know?\n\n```", color=0x00FF00)
         embed = discord.Embed(description="**Please wait for a staff to review your ticket.**\n\n> Do let us know why do you think your appeal should be accepted?", color=0x00FF00)
         await channel.send(embed=embed, content=interaction.user.mention)
-        
+
+    async def interaction_check(self, interaction: Interaction):
+        if interaction.user.guild_permissions.administrator:
+            return True
+        else:
+            main_guild = self.bot.get_guild(785839283847954433)
+            is_banned = await main_guild.bans.get(interaction.user.id)
+            if is_banned:
+                return True
+            else:
+                await interaction.response.send_message("Your Not Banned in Main Server: https://discord.gg/uJeHDqpCVw")
 
 class BanAppeal(commands.Cog, name="Ban Appeal", description="Easy way to add Ban Appeal"):
     def __init__(self, bot):
