@@ -59,23 +59,6 @@ class Votes(commands.Cog, name="Votes",description="Server Vote counter with Top
         except KeyError:
             pass
 
-    @commands.command(name="votes", description="Shows the your/other votes count", brife="votes <mention user>")
-    async def votes(self, ctx, user: discord.Member=None):
-        user = user if user else ctx.author
-
-        vote_data = await self.bot.votes.find({"_id": user.id})
-        if not vote_data:
-            view = discord.ui.View()
-            view.add_item(discord.ui.Button(label=f'Vote for us here!', url="https://top.gg/servers/785839283847954433/vote"))
-            await ctx.send(content=f"{user.mention}, you have 0 votes!", view=view)
-            return
-        
-        embed = discord.Embed(title=f"{user.name}'s votes", description=f"Total Votes: {vote_data['votes']}\nVote Streak: {vote_data['streak']}\nLast Vote: <t:{round(vote_data['last_vote'].timestamp())}:R>", color=user.color)
-        embed.set_thumbnail(url="https://cdn.discordapp.com/emojis/830519601384128523.gif?v=1")
-        embed.timestamp =datetime.datetime.utcnow()
-        embed.set_footer(text=f"Requested by {ctx.author.name}", icon_url=ctx.author.avatar.url)
-        await ctx.send(embed=embed)
-
     @commands.command(name="vote", description="Vote for a server", brife="vote")
     async def vote(self, ctx):
         await ctx.message.delete()
