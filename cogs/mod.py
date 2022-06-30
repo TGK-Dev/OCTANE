@@ -16,14 +16,8 @@ from utils.functions import make_db_temp
 from utils.checks import Commands_Checks
 from utils.checks import Dynamic_cooldown
 import ui.models as models
+import ui.member_view 
 import math
-def millify(n):
-    n = float(n)
-    millnames = ['',' Thousand',' Million',' Billion',' Trillion']
-    millidx = max(0,min(len(millnames)-1,
-                        int(math.floor(0 if n == 0 else math.log10(abs(n))/3))))
-
-    return '{:.0f}{}'.format(n / 10**(3 * millidx), millnames[millidx])
 
 class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
     def __init__(self, bot):
@@ -384,46 +378,31 @@ class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
     @app_commands.describe(member="User to get info about")
     @app_commands.guilds(785839283847954433)
     @app_commands.checks.dynamic_cooldown(Dynamic_cooldown.is_me)
-    async def userinfo(self, interaction: discord.Interaction, member: discord.Member):
-        await interaction.response.defer(thinking=True)
+    async def userinfo(self, interaction: discord.Interaction, member: discord.Member=None):
+        member = member if member else interaction.user
+
         embed = discord.Embed(title=f"User Info - {member.name}#{member.discriminator}")
         embed.set_thumbnail(url=member.avatar.url if member.avatar else member.default_avatar.url)
-        embed.add_field(name="<:authorized:991735095587254364> ID:", value=member.id, inline=True)
-        bages = ""
-        if member.id in self.bot.owner_ids:
-            bages += "<:developer:991737828859981984>"
-            bages += "<:owner:991737821289250827>"
-        if member.guild_permissions.administrator:
-            bages += "<:admin:991737826804777030>"
-        if member.guild_permissions.manage_messages:
-            bages += "<:mod:991737819104026674>"
-        if discord.utils.get(member.guild.roles, id=818129661325869058) in member.roles:
-            bages += "<:staff:991737823776481340>"
-        if member.premium_since is not None:
-            bages += "<:booster:991740169537454252>"
-        embed.add_field(name="<:displayname:991733326857654312> Display Name:", value=member.display_name, inline=True)
-        if len(bages) > 0:
-            embed.add_field(name="<:bage:991740849664819332> Badges:", value=bages, inline=True)
+
+        embed.add_field(name="<:authorized:991735095587254364> ID:", value=member.id)
+        embed.add_field(name="<:displayname:991733326857654312> Display Name:", value=member.display_name)
 
         embed.add_field(name="<:bot:991733628935610388> Bot Account:", value=member.bot)
-        embed.add_field(name="<:settings:991733871118917683> Account creation:", value=member.created_at.strftime('%d/%m/%Y %H:%M:%S'), inline=True)
-        embed.add_field(name="<:join:991733999477203054> Server join:", value=member.joined_at.strftime('%d/%m/%Y %H:%M:%S'), inline=True)
-        embed.add_field(name="<:mention:991734732188553337> Highest Role:", value=f"> {member.roles[-1].mention}\n> {member.roles[-2].mention}", inline=True)
-        moneydata = await self.bot.money.find(member.id)
-        
-        if moneydata is not None:
-            embed.add_field(name="💰 Donated:", value=millify(moneydata['bal']), inline=True)
-        
-        leveldata = await self.bot.Amari_api.fetch_user(interaction.guild.id, member.id)
 
-        embed.add_field(name="Amari:", value=f"> Level: {leveldata.level}\n> Weekly: {leveldata.weeklyexp}", inline=True)
-        await interaction.followup.send(embed=embed)
+        embed.add_field(name="<:settings:991733871118917683> Account creation:", value=member.created_at.strftime('%d/%m/%Y %H:%M:%S'))
+        embed.add_field(name="<:join:991733999477203054> Server join:", value=member.joined_at.strftime('%d/%m/%Y %H:%M:%S'))
+
+        if not member.bot:
+            view = ui.member_view.Member_view(self.bot, member, interaction)
+            await interaction.response.send_message(embed=embed,view=view)
+            view.message = await interaction.original_message()
+        else:
+            await interaction.response.send_message(embed=embed)
     
     @userinfo.error
     async def afk_error(self, interaction: discord.Interaction, error):
-        print(error)
-        if isinstance(error, app_commands.CommandOnCooldown):
-            await interaction.response.send_message(f"Please wait {round(int(error.retry_after))} seconds before using this command again", ephemeral=True)
+        embed = discord.Embed(description=f"Error | {error}",color=discord.Color.red())
+        await interaction.response.send_message(embed=embed,ephemeral=True)
         
 
 async def setup(bot):
