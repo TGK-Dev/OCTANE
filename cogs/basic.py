@@ -14,6 +14,32 @@ class Basic(commands.Cog, name="Basic", description="General Basic Commands"):
         print(f"{self.__class__.__name__} Cog has been loaded")
     
     @commands.Cog.listener()
+    async def on_presence_update(self, before, after):
+        if before.guild.id != 785839283847954433: return
+        if len(after.activities) <= 0: 
+            role = discord.utils.get(after.guild.roles, id=992108093271965856)
+            if role in after.roles:
+                await self.bot.get_channel(992126546766737488).send(f"{after.mention} has remove .gg/tgk from their activity", allowed_mentions=discord.AllowedMentions(users=False, roles=False))
+                await after.remove_roles(role)
+            return
+        for activity in after.activities:
+            try:
+                if activity.type == discord.ActivityType.custom:
+                    if ".gg/tgk" in activity.name.lower():
+                        role = discord.utils.get(after.guild.roles, id=992108093271965856)
+                        await after.add_roles(role)
+                        await self.bot.get_channel(992126546766737488).send(f"{after.mention} has added .gg/tgk to their activity", allowed_mentions=discord.AllowedMentions(users=False, roles=False))
+                        return
+                    elif not ".gg/tgk" in activity.name.lower():
+                        role = discord.utils.get(after.guild.roles, id=992108093271965856)
+                        if role in after.roles:
+                            await after.remove_roles(role)
+                            await self.bot.get_channel(992126546766737488).send(f"{after.mention} has remove .gg/tgk from their activity", allowed_mentions=discord.AllowedMentions(users=False, roles=False))                        
+                        return
+            except:
+                pass
+
+    @commands.Cog.listener()
     async def on_message(self, message):
         if message.author.id != 520830713696878592: return
         if message.author.bot and message.channel.id == 962771383996284979:
