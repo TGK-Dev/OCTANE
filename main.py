@@ -42,7 +42,6 @@ class Bot(commands.Bot):
         bot.invites = Document(bot.db, 'invites')
         bot.crosschat_blacklist = Document(bot.db, 'crosschat_blacklist')
         bot.quarantine = Document(bot.db, 'quarantine')
-        bot.tags = Document(bot.db, 'tags')
         bot.Amari_api = AmariClient(bot.Amari_token)
         
         for file in os.listdir('./cogs'):
@@ -76,7 +75,6 @@ bot.perm = {}
 bot.config_cache = {}
 bot.cross_chat_blacklist = []
 bot.ban_event = {}
-bot.active_tag = {}
 bot.uptime = datetime.datetime.utcnow()
 bot.cross_chat_toggle = True
 
@@ -118,23 +116,8 @@ async def on_ready():
     for crosschat_blacklist in current_crosschat_blacklist:
         bot.cross_chat_blacklist.append(crosschat_blacklist['_id'])
     
-    current_tags = await bot.tags.get_all()
-    for tag in current_tags:
-        if tag['type'] == 'normal':
-            commands = app_commands.Command(name=tag['_id'],description=tag['description'],callback=Normal_CallBack,guild_ids=[tag['guildID']])
-            bot.active_tag[tag['_id']] = tag
-            bot.tree.add_command(commands)
-        
-        elif tag['type'] == 'argument':
-            commands = app_commands.Command(name=tag['_id'],description=tag['description'],callback=Argument_CallBack,guild_ids=[tag['guildID']])
-            bot.active_tag[tag['_id']] = tag
-            bot.tree.add_command(commands)
-
-        print(f"added {commands.name}")
-    
     await bot.tree.sync(guild=discord.Object(id=785839283847954433))
     await bot.tree.sync(guild=discord.Object(id=811037093715116072))
-    print('Bot is ready')
     await bot.change_presence(status=discord.Status.dnd, activity=discord.Activity(type=discord.ActivityType.watching, name="Server Security"))
 
 @bot.event
