@@ -49,11 +49,11 @@ class Bot(commands.Bot):
         bot.eco_api = eco_client(bot.eco_toekn)
         
         for file in os.listdir('./cogs'):
-            if file.endswith('.py') and not file.startswith("_"):
+            if file.endswith('.py') and not file.startswith("_") and not file.startswith("eco"):
                 await bot.load_extension(f'cogs.{file[:-3]}')
 
-        # await self.tree.sync(guild=discord.Object(main_guilds[0]))
-        # await self.tree.sync(guild=discord.Object(main_guilds[1]))
+        await self.tree.sync(guild=discord.Object(main_guilds[0]))
+        await self.tree.sync(guild=discord.Object(main_guilds[1]))
         await self.tree.sync(guild=discord.Object(988761284956799038))
 
 bot = Bot()
