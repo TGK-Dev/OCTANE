@@ -5,6 +5,7 @@ from utils.help import EmbedHelpCommand
 from discord import app_commands
 from amari import AmariClient
 from utils.callbacks import Argument_CallBack, Normal_CallBack
+from utils.unbelievaboat.unbelievaboat import client as eco_client
 import discord
 import os
 import motor.motor_asyncio
@@ -42,14 +43,17 @@ class Bot(commands.Bot):
         bot.invites = Document(bot.db, 'invites')
         bot.crosschat_blacklist = Document(bot.db, 'crosschat_blacklist')
         bot.quarantine = Document(bot.db, 'quarantine')
+        bot.inv = Document(bot.db, 'inv')
+        bot.booster = Document(bot.db, 'booster')
         bot.Amari_api = AmariClient(bot.Amari_token)
+        bot.eco_api = eco_client(bot.eco_toekn)
         
         for file in os.listdir('./cogs'):
-            if file.endswith('.py') and not file.startswith("_") and not file.startswith("eco"):
+            if file.endswith('.py') and not file.startswith("_"):
                 await bot.load_extension(f'cogs.{file[:-3]}')
 
-        await self.tree.sync(guild=discord.Object(main_guilds[0]))
-        await self.tree.sync(guild=discord.Object(main_guilds[1]))
+        # await self.tree.sync(guild=discord.Object(main_guilds[0]))
+        # await self.tree.sync(guild=discord.Object(main_guilds[1]))
         await self.tree.sync(guild=discord.Object(988761284956799038))
 
 bot = Bot()
@@ -60,6 +64,7 @@ bot.mongo_connection = os.environ['MONGO']
 bot.Amari_token = os.environ['AMRI']
 bot.connection_money = os.environ['MONGOMONEY']
 bot.nuke_webhook = os.environ['NUKE_WEBHOOK']
+bot.eco_toekn = os.environ['ECO_API']
 
 #global bot atributes
 bot.blacklist_users = []
@@ -77,6 +82,7 @@ bot.cross_chat_blacklist = []
 bot.ban_event = {}
 bot.uptime = datetime.datetime.utcnow()
 bot.cross_chat_toggle = True
+bot.active_booster = {}
 
 @bot.event
 async def on_ready():
@@ -116,8 +122,12 @@ async def on_ready():
     for crosschat_blacklist in current_crosschat_blacklist:
         bot.cross_chat_blacklist.append(crosschat_blacklist['_id'])
     
-    await bot.tree.sync(guild=discord.Object(id=785839283847954433))
-    await bot.tree.sync(guild=discord.Object(id=811037093715116072))
+    current_active_booster = await bot.booster.get_all()
+    for active_booster in current_active_booster:
+        bot.active_booster[active_booster['_id']] = active_booster
+    
+    #await bot.tree.sync(guild=discord.Object(id=785839283847954433))
+    #await bot.tree.sync(guild=discord.Object(id=811037093715116072))
     await bot.change_presence(status=discord.Status.dnd, activity=discord.Activity(type=discord.ActivityType.watching, name="Server Security"))
 
 @bot.event

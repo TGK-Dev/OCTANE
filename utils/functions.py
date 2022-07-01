@@ -15,3 +15,6 @@ def clean_code(content):
 def Make_Verify_Code():
     lenth = 6
     return ''.join(random.choices(string.ascii_lowercase + string.digits + string.ascii_uppercase, k = lenth))
+
+def make_inv(id):
+    return {'_id': id, 'onex':[{'name': '12 Hour', 'quantity': 0}, {'name': '24 Hour', 'quantity': 0}, {'name': '48 Hour', 'quantity': 0}, {'name': '72 Hour', 'quantity': 0}], 'twox':[{'name': '12 Hour', 'quantity': 0}, {'name': '24 Hour', 'quantity': 0}, {'name': '48 Hour', 'quantity': 0}, {'name': '72 Hour', 'quantity': 0}]}
