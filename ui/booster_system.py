@@ -12,14 +12,17 @@ class Booster_main(discord.ui.View):
 
     @discord.ui.button(label="1x Booster", custom_id="1x", style=discord.ButtonStyle.green)
     async def onex(self, interaction: discord.Interaction, button: discord.ui.Button):
-        bal = self.bot.eco_api.get_user_bal(interaction.guild.id, self.interaction.user.id)
-        self.add_item(onexbooster(self.bot, self.interaction, self.message, bal))        
+
+        bal = await self.bot.eco_api.get_user_bal(interaction.guild.id, self.interaction.user.id)
+        self.add_item(onexbooster(self.bot, self.interaction, self.message, bal))    
+
         embed = discord.Embed(title="Select Exp booster",color=discord.Color.random())
         embed.add_field(name="Bank Info", value=f"Cash: `{millify(bal['cash'])}`\nBank: `{millify(bal['bank'])}`\nTotal: `{millify(bal['total'])}`", inline=False)
         embed.add_field(name="Duration: 12h", value="**Price** 14k", inline=True)
         embed.add_field(name="Duration: 24h", value="**Price** 26k", inline=True)
         embed.add_field(name="Duration: 48h", value="**Price** 50k", inline=True)
         embed.add_field(name="Duration: 72h", value="**Price** 74k", inline=True)
+
         await interaction.response.edit_message(view=self, embed=embed)
     
     @discord.ui.button(label="2x Booster", custom_id="2x", style=discord.ButtonStyle.blurple, disabled=True)
@@ -59,7 +62,7 @@ class onexbooster(discord.ui.Select):
                 if self.bal['cash'] < 14000:
                     await interaction.response.send_message(f"You don't have enough cash to buy this booster", ephemeral=True)
                     return
-                elif self.bal['cash'] > 14000:
+                elif self.bal['cash'] >= 14000:
 
                     data = await self.bot.inv.find(interaction.user.id)
                     if not data:
@@ -73,7 +76,7 @@ class onexbooster(discord.ui.Select):
                                 return
                             i['quantity'] += 1
                             await self.bot.inv.update(data)
-                            self.bot.eco_api.set_user_bal(interaction.guild.id, interaction.user.id, (self.bal['cash'] - 14000))
+                            await self.bot.eco_api.patch_user_bal(interaction.guild.id, interaction.user.id, -14000, 0, reason="bought onex booster for 12 hours")
                             break
                     await interaction.response.send_message(f"You have bought a booster for 12 hours", ephemeral=True)
 
@@ -81,7 +84,7 @@ class onexbooster(discord.ui.Select):
                 if self.bal['cash'] < 26000:
                     await interaction.response.send_message(f"You don't have enough cash to buy this booster", ephemeral=True)
                     return
-                elif self.bal['cash'] > 26000:                    
+                elif self.bal['cash'] >= 26000:                    
                     data = await self.bot.inv.find(interaction.user.id)
                     if not data:
                         data = make_inv(interaction.user.id)
@@ -94,7 +97,7 @@ class onexbooster(discord.ui.Select):
                                 return
                             i['quantity'] += 1
                             await self.bot.inv.update(data)
-                            self.bot.eco_api.set_user_bal(interaction.guild.id, self.interaction.user.id, (self.bal['cash'] - 26000))
+                            await self.bot.eco_api.patch_user_bal(interaction.guild.id, interaction.user.id, -26000, 0, reason="bought onex booster for 24 hours")
                             break
                     await interaction.response.send_message(f"You have bought a booster for 24 hours", ephemeral=True)
 
@@ -102,7 +105,7 @@ class onexbooster(discord.ui.Select):
                 if self.bal['cash'] < 50000:
                     await interaction.response.send_message(f"You don't have enough cash to buy this booster", ephemeral=True)
                     return
-                elif self.bal['cash'] > 50000:
+                elif self.bal['cash'] >= 50000:
                     data = await self.bot.inv.find(interaction.user.id)
                     if not data:
                         data = make_inv(interaction.user.id)
@@ -115,7 +118,7 @@ class onexbooster(discord.ui.Select):
                                 return
                             i['quantity'] += 1
                             await self.bot.inv.update(data)
-                            self.bot.eco_api.set_user_bal(interaction.guild.id, self.interaction.user.id, (self.bal['cash']-50000))
+                            await self.bot.eco_api.patch_user_bal(interaction.guild.id, interaction.user.id, -50000, 0, reason="bought onex booster for 48 hours")
                             break
                     await interaction.response.send_message(f"You have bought a booster for 48 hours", ephemeral=True)
 
@@ -124,7 +127,7 @@ class onexbooster(discord.ui.Select):
                 if self.bal['cash'] < 74000:
                     await interaction.response.send_message(f"You don't have enough cash to buy this booster", ephemeral=True)
                     return
-                elif self.bal['cash'] > 74000:
+                elif self.bal['cash'] >= 74000:
                     data = await self.bot.inv.find(interaction.user.id)
                     if not data:
                         data = make_inv(interaction.user.id)
@@ -137,5 +140,6 @@ class onexbooster(discord.ui.Select):
                                 return
                             i['quantity'] += 1
                             await self.bot.inv.update(data)
-                            self.bot.eco_api.set_user_bal(interaction.guild.id, interaction.user.id, (self.bal['cash'] - 74000))
+                            print(self.bal['cash'] - 74000)
+                            await self.bot.eco_api.patch_user_bal(interaction.guild.id, interaction.user.id, -74000, 0, reason="bought a booster onex 72h")
                     await interaction.response.send_message(f"You have bought a booster for 72 hours", ephemeral=True)

@@ -1,7 +1,6 @@
 from discord import Interaction
 from discord.ext import commands
 from discord import app_commands
-from utils.callbacks import Normal_CallBack, Argument_CallBack
 import discord.ui as ui
 import discord
 import json
@@ -31,7 +30,6 @@ class Mass_ban(ui.Modal, title="Mass Ban Modal"):
     async def on_timeout(self, error: Exception, interaction: Interaction):
         embed = discord.Embed(description="Error: " + str(error), color=0xFF0000)
         await interaction.response.send_message(embed=embed)
-
 
     async def interaction_check(self, interaction: Interaction):
         if interaction.user.id == self.ctx.user.id and interaction.user.guild_permissions.administrator:

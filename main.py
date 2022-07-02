@@ -2,10 +2,8 @@ from discord.ext import commands
 from dotenv import load_dotenv
 from utils.db import Document
 from utils.help import EmbedHelpCommand
-from discord import app_commands
 from amari import AmariClient
-from utils.callbacks import Argument_CallBack, Normal_CallBack
-from utils.unbelievaboat.unbelievaboat import client as eco_client
+from utils.unbelievaboat import Client as eco_client
 import discord
 import os
 import motor.motor_asyncio
@@ -49,7 +47,7 @@ class Bot(commands.Bot):
         bot.eco_api = eco_client(bot.eco_toekn)
         
         for file in os.listdir('./cogs'):
-            if file.endswith('.py') and not file.startswith("_") and not file.startswith("eco"):
+            if file.endswith('.py') and not file.startswith("_"):
                 await bot.load_extension(f'cogs.{file[:-3]}')
 
         await self.tree.sync(guild=discord.Object(main_guilds[0]))
