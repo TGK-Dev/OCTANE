@@ -55,7 +55,7 @@ class Member_view(discord.ui.View):
                     if moneydata['bal'] > 500000000:
                         badge += "500Mil Donor <a:500dono:992309134517092432>\n"
                 if discord.utils.get(self.member.guild.roles, id=931072410365607946) in self.member.roles:
-                    badge += "Frist 50 Members <a:real_og:992048421974315051>\n"
+                    badge += "First 50 Members <a:real_og:992048421974315051>\n"
                 
                 if discord.utils.get(self.member.guild.roles, id=786884615192313866) in self.member.roles:
                     badge += "Voted <:TGK_vote:942521024476487741>"
