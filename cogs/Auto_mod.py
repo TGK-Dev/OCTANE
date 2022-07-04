@@ -1,5 +1,7 @@
 from time import time
 from discord.ext import commands
+from discord import app_commands
+import typing
 import re
 import requests
 import json
@@ -20,6 +22,48 @@ def is_link_bad(link: str):
     r = requests.post(url, data=json.dumps(payload)).json()
     return r
 
+class Auto_mod_slash(app_commands.Group):
+    def __init__(self):
+        super().__init__(name="automod")
+
+    async def rule_auto(self, interaction: discord.Interaction, current: str) -> typing.List[app_commands.Choice[str]]:
+        current_rules = [rule for rule in await interaction.guild.fetch_automod_rules()]
+        choice = [
+            app_commands.Choice(name=rule.name, value=str(rule.id))
+            for rule in current_rules if current.lower() in rule.name.lower()
+        ]
+        return(list(choice[:24]))
+
+    @app_commands.command(name="addword", description="add word new word in block list")
+    @app_commands.default_permissions(administrator=True)
+    @app_commands.autocomplete(rule_name=rule_auto)
+    @app_commands.describe(word='the word to add', rule_name="the rule to add the word to")
+    @app_commands.rename(rule_name="rule")
+    async def add_word(self, interaction: discord.Interaction, rule_name: str, word: str):
+        rule = await interaction.guild.fetch_automod_rule(int(rule_name))
+        block_list = rule.trigger.keyword_filter
+        if word in block_list:
+            await interaction.response.send_message("Word already in block list", ephemeral=True)
+            return
+        block_list.append(word)
+        await rule.edit(trigger=discord.AutoModTrigger(keyword_filter=block_list))
+        await interaction.response.send_message("Word added to block list", ephemeral=True)
+    
+    @app_commands.command(name="removeword", description="remove word from block list")
+    @app_commands.default_permissions(administrator=True)
+    @app_commands.autocomplete(rule_name=rule_auto)
+    @app_commands.describe(word='the word to remove', rule_name="the rule to remove the word from")
+    @app_commands.rename(rule_name="rule")
+    async def remove_word(self, interaction: discord.Interaction, rule_name: str, word: str):
+        rule = await interaction.guild.fetch_automod_rule(int(rule_name))
+        block_list = rule.trigger.keyword_filter
+        if word not in block_list:
+            await interaction.response.send_message("Word not in block list", ephemeral=True)
+            return
+        block_list.remove(word)
+        await rule.edit(trigger=discord.AutoModTrigger(keyword_filter=block_list))
+        await interaction.response.send_message("Word removed from block list", ephemeral=True)
+
 class AutoMod(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -28,6 +72,7 @@ class AutoMod(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         print(f'{self.__class__.__name__} Cog has been loaded\n-----')
+        self.bot.tree.add_command(Auto_mod_slash(), guild=discord.Object(785839283847954433))
         self.log_channel = self.bot.get_channel(803687195599962162)
 
     @commands.Cog.listener()
