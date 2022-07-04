@@ -22,7 +22,7 @@ class Booster_main(discord.ui.View):
         embed.add_field(name="Duration: 24h", value="**Price** 26k", inline=True)
         embed.add_field(name="Duration: 48h", value="**Price** 50k", inline=True)
         embed.add_field(name="Duration: 72h", value="**Price** 74k", inline=True)
-
+        button.disabled = True
         await interaction.response.edit_message(view=self, embed=embed)
     
     @discord.ui.button(label="2x Booster", custom_id="2x", style=discord.ButtonStyle.blurple, disabled=True)
