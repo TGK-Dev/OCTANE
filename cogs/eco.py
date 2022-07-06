@@ -137,6 +137,7 @@ class Eco(commands.Cog):
     @app_commands.choices(booster=[Choice(name="1x Booster", value="onex"), Choice(name="2x Booster", value="twox")])
     @app_commands.choices(duration=[Choice(name="12 Hour", value=0), Choice(name="24 Hour", value=1), Choice(name="48 Hour", value=2), Choice(name="72 Hour", value=3)])
     async def gboost(self, interaction: discord.Interaction, user: discord.Member, booster: Choice[str], duration: Choice[int], quantity: int = 1):
+        await interaction.response.defer(thinking=True)
         data = await self.bot.inv.find(user.id)
         if not data:
             await interaction.followup.send("user don't have any boosters")
@@ -147,7 +148,7 @@ class Eco(commands.Cog):
 
         embed = discord.Embed(description=f"you have given {quantity} {booster.name} booster to {user.name}", color=discord.Color.green())
         embed.timestamp = datetime.datetime.utcnow()
-        await interaction.response.send_message(embed=embed)
+        await interaction.followup.send(embed=embed)
 
 
 
