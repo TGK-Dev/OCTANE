@@ -43,6 +43,7 @@ class Bot(commands.Bot):
         bot.quarantine = Document(bot.db, 'quarantine')
         bot.inv = Document(bot.db, 'inv')
         bot.booster = Document(bot.db, 'booster')
+        bot.crole = Document(bot.db, 'crole')
         bot.Amari_api = AmariClient(bot.Amari_token)
         bot.eco_api = eco_client(bot.eco_toekn)
         
