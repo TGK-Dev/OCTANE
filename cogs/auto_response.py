@@ -50,7 +50,7 @@ class Ar(commands.Cog, name="Auto Responce", description="Easy way to add Auto R
             embed.color = discord.Color.random()
             await message.reply(f"Heist will take place in <#{self.heist_ar['channel']}>!!",embed=embed, delete_after=10)
         elif "heist" in message.content.lower() and self.heist_ar == {}:
-            await message.reply("There is currently no heist in progress take Heist ping from <#944670050252648468>", delete_after=10)
+            await message.reply("There is currently no heist in progress take Heist ping from <#944670050252648468>", delete_after=10, allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
 
     @app_commands.command(name="set-heist-ar", description="Set Auto Responce for Heist")
     @app_commands.guild_only()
