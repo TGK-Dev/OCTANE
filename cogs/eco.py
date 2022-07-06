@@ -56,7 +56,7 @@ class Eco(commands.Cog):
     async def on_ready(self):
         print(f"{self.__class__.__name__} Cog is ready!")
 
-    @app_commands.command(name="buy", description="Buy booster")
+    @app_commands.command(name="buy", description="Buy Exp booster")
     @app_commands.guild_only()
     @app_commands.guilds(785839283847954433)
     async def buy(self, interaction: discord.Interaction):
@@ -84,12 +84,12 @@ class Eco(commands.Cog):
             for i in towx:
                 towx_booster += f"**Duration: {i['name']}**\n> Quantity: {i['quantity']}\n"
             
-            embed.add_field(name="1x Booster", value=onex_booster, inline=True)
-            embed.add_field(name="2x Booster", value=towx_booster, inline=True)
+            embed.add_field(name="1x Exp Booster", value=onex_booster, inline=True)
+            embed.add_field(name="2x Exp Booster", value=towx_booster, inline=True)
 
             await interaction.response.send_message(embed=embed)
                 
-    @app_commands.command(name="use", description="Use booster")
+    @app_commands.command(name="use", description="Use Exp Booster")
     @app_commands.guild_only()
     @app_commands.guilds(785839283847954433)
     @app_commands.choices(booster=[Choice(name="1x Booster", value="onex"), Choice(name="2x Booster", value="twox")])
