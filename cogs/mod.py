@@ -24,11 +24,14 @@ class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
         self.bot = bot
         self.ban_task = self.check_current_bans.start()
         self.mute_task = self.check_current_mutes.start()
+        self.whoisapp_cmd = app_commands.ContextMenu(name="Whois", callback=self.whois_context)
+        self.bot.tree.add_command(self.whoisapp_cmd)
     
     def cog_unload(self):
         self.ban_task.cancel()
+        self.bot.tree.remove_command(self.whoisapp_cmd, type=self.whois_context.type)
         self.mute_task.cancel()
-    
+
     @tasks.loop(seconds=30)
     async def check_current_mutes(self):
         currentTime = datetime.datetime.utcnow()
@@ -403,7 +406,27 @@ class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
     async def afk_error(self, interaction: discord.Interaction, error):
         embed = discord.Embed(description=f"Error | {error}",color=discord.Color.red())
         await interaction.response.send_message(embed=embed,ephemeral=True)
-        
+
+    @app_commands.guilds(785839283847954433)
+    async def whois_context(self, interaction: discord.Interaction, member: discord.Member):
+
+        embed = discord.Embed(title=f"User Info - {member.name}#{member.discriminator}")
+        embed.set_thumbnail(url=member.avatar.url if member.avatar else member.default_avatar.url)
+
+        embed.add_field(name="<:authorized:991735095587254364> ID:", value=member.id)
+        embed.add_field(name="<:displayname:991733326857654312> Display Name:", value=member.display_name)
+
+        embed.add_field(name="<:bot:991733628935610388> Bot Account:", value=member.bot)
+
+        embed.add_field(name="<:settings:991733871118917683> Account creation:", value=member.created_at.strftime('%d/%m/%Y %H:%M:%S'))
+        embed.add_field(name="<:join:991733999477203054> Server join:", value=member.joined_at.strftime('%d/%m/%Y %H:%M:%S'))
+
+        if not member.bot:
+            view = ui.member_view.Member_view(self.bot, member, interaction)
+            await interaction.response.send_message(embed=embed,view=view)
+            view.message = await interaction.original_message()
+        else:
+            await interaction.response.send_message(embed=embed)
 
 async def setup(bot):
     await bot.add_cog(Mod(bot))

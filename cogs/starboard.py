@@ -95,9 +95,11 @@ class Starboard(commands.Cog, name="Starboard", description="Starboard Module"):
         guild = self.bot.get_guild(payload.guild_id)
         guild = await self.bot.config.find(guild.id)
         emoji = "⭐"
-
-        if not guild['starboard']['channel']: return
-        channel = self.bot.get_channel(payload.channel_id)
+        try:
+            if not guild['starboard']['channel']: return
+            channel = self.bot.get_channel(payload.channel_id)
+        except:
+            return
 
         try:
             message = await channel.fetch_message(payload.message_id)

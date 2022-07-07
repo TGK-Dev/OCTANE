@@ -1,6 +1,6 @@
 from discord.ext import commands
 from discord import app_commands
-from typing import Union
+from typing import Union, List
 from utils.functions import make_db_temp
 from utils.checks import Commands_Checks
 from utils.functions import clean_code
@@ -10,9 +10,22 @@ import discord
 import io
 import contextlib
 import textwrap
+import os
+
 class Owner(commands.Cog, name="Owner", description="Owner/admin commands."):
     def __init__(self, bot):
         self.bot = bot
+
+    async def cog_autocomplete(self, interaction: discord.Interaction, current: str) -> List[app_commands.Choice[str]]:
+        current_cogs = []
+        for file in os.listdir("./cogs"):
+            if file.endswith(".py") and not file.startswith("_"):
+                current_cogs.append(file[:-3])
+        new_options = [app_commands.Choice(name="reload all cogs", value="*")]
+        for cog in current_cogs:
+            new_options.append(app_commands.Choice(name=cog, value=cog))
+        return new_options[:24]
+
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -181,6 +194,37 @@ class Owner(commands.Cog, name="Owner", description="Owner/admin commands."):
             page.append(discord.Embed(description=f'```py\n{result[i:i + 2000]}\n```', color=ctx.author.color))
         
         await Contex_Paginator(ctx, page).start(embeded=True, quick_navigation=False)
+
+    @app_commands.command(name="reload", description="Reload a cog")
+    @app_commands.default_permissions(administrator=True)
+    @app_commands.autocomplete(cog=cog_autocomplete)
+    @app_commands.guilds(785839283847954433)
+    async def reload(self, interaction: discord.Interaction, cog: str):
+        if cog != "*":
+            try:
+                await self.bot.unload_extension(f"cogs.{cog}")
+                await self.bot.load_extension(f"cogs.{cog}")
+                embed = discord.Embed(description=f"{cog} has been reloaded.", color=discord.Color.green())
+                await interaction.response.send_message(embed=embed)
+            except Exception as e:
+                embed = discord.Embed(description="Error | {}".format(e), color=0xFF0000)
+                await interaction.response.send_message(embed=embed)
+                return
+        elif cog == "*":
+            await interaction.response.defer(thinking=True)
+            embed = discord.Embed(description="Reloading all cogs...", color=discord.Color.green())
+            for module in os.listdir("./cogs"):
+                if module.endswith(".py") and not module.startswith("_"):
+                    try:
+                        await self.bot.unload_extension(f"cogs.{module[:-3]}")
+                        await self.bot.load_extension(f"cogs.{module[:-3]}")
+                        embed.add_field(name=module, value="Reloaded", inline=False)
+                    except Exception as e:
+                        error = "".join(format_exception(e,e,e.__traceback__))
+                        embed.add_field(name=f"{module}", value=f"Failure | {error[:100]}", inline=False)
+            await interaction.followup.send(embed=embed)
+
+
 
 
 async def setup(bot):
