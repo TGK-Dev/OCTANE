@@ -64,14 +64,14 @@ class Custom_Roles_slash(app_commands.Group):
             await interaction.response.send_message("You have currently no custom role liked to you", ephemeral=True)
         else:
             embed = discord.Embed(description="")
-            if interaction.user.id == data["linked_by"] or interaction.user.id == data["_id"] or interaction.user.guild_permissions.administrator:
+            if interaction.user.id == data['_id']:
                 role = discord.utils.get(interaction.guild.roles, id=data["role"])
                 if name:
                     embed.description += "New Name: " + name + "\n"
                     await role.edit(name=name)
                 if color:
                     embed.description += "New Color: " + color + "\n"
-                    await role.edit(color=discord.Color(int(color, 16)))                
+                    await role.edit(color=discord.Color(int(color, 16)))          #࿔･ﾟ♡ jay's friends ♡ ࿔･ﾟ♡       
                 if icon:
                     if icon.filename.endswith(".png") or icon.filename.endswith(".jpg"):
                         #convert icon to bytes-like object
@@ -81,7 +81,7 @@ class Custom_Roles_slash(app_commands.Group):
                     else:
                         await interaction.response.send_message(content="Please upload a valid Format: .png or .jpg")
                         
-                embed = discord.Embed(color=role.color)
+                embed.color=role.color
                 await interaction.response.send_message(content=None,embed=embed)
 
     @app_commands.command(name="manage", description="Add member to custom role")
@@ -94,7 +94,7 @@ class Custom_Roles_slash(app_commands.Group):
             await interaction.response.send_message("You have currently no custom role liked to you", ephemeral=True)
         else:
 
-            if interaction.user.id == data["linked_by"] or interaction.user.id == data["_id"] or interaction.user.guild_permissions.administrator:
+            if interaction.user.id == data['_id']:
                 role = discord.utils.get(interaction.guild.roles, id=data["role"])
 
                 if option == "add":
@@ -124,6 +124,11 @@ class Custom_Roles_slash(app_commands.Group):
             else:
                 await interaction.response.send_message("You do not have permission to do this", ephemeral=True)
 
+    async def on_error(self, interaction: discord.Interaction, error: Exception):
+        try:
+            await interaction.response.send_message(f"An error has occured {str(error)[:2000]}", ephemeral=True)
+        except:
+            await interaction.followup.send_message(f"An error has occured {str(error)[:2000]}")
 class Custom_Roles(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
