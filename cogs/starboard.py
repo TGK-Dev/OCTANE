@@ -3,7 +3,7 @@ from discord.ext import commands
 from discord import app_commands
 import discord
 import datetime
-
+from utils.checks import Commands_Checks
 class Starboard(commands.Cog, name="Starboard", description="Starboard Module"):
     def __init__(self, bot):
         self.bot = bot
@@ -31,7 +31,7 @@ class Starboard(commands.Cog, name="Starboard", description="Starboard Module"):
 
         if not reacts: return
         guild_data = await self.bot.config.find(guild.id)
-        reacts = [user async for user in reacts[0].users()]
+        reacts = [user.id async for user in reacts[0].users()]
 
         if message.author.id in reacts and guild_data['starboard']['self_star'] == False:
             del reacts[reacts.index(message.author.id)]
@@ -92,26 +92,25 @@ class Starboard(commands.Cog, name="Starboard", description="Starboard Module"):
     @commands.Cog.listener()
     async def on_raw_reaction_remove(self, payload):
         if not payload.guild_id: return
-        guild = await self.bot.config.find(payload.guild_id)
+        guild = self.bot.get_guild(payload.guild_id)
+        guild = await self.bot.config.find(guild.id)
         emoji = "⭐"
-        
+
         if not guild['starboard']['channel']: return
-
-        if not guild['starboard']['toggle'] != True: return
-
         channel = self.bot.get_channel(payload.channel_id)
 
         try:
             message = await channel.fetch_message(payload.message_id)
             reacts = message.reactions
             reacts = list(filter(lambda r: str(r.emoji) == "⭐", message.reactions))
+
         except discord.HTTPException:
             return
         
         if reacts:
             react = [user async for user in reacts[0].users()]
-            if message.author.id in react and guild['starboard']['self_star'] == False:
-                del react[react.index(message.author.id)]
+            if message.author in react and guild['starboard']['self_star'] == False:
+                del react[react.index(message.author)]
 
             starboard = self.bot.get_channel(guild['starboard']['channel'])
             try:
@@ -131,7 +130,7 @@ class Starboard(commands.Cog, name="Starboard", description="Starboard Module"):
                 return await existing_message.edit(content=f":dizzy: {len(react)} | {channel.mention}")
 
     @commands.group(invoke_without_command=True, description="Config command for startbord module", brife="config")
-    #@commands.check_any(checks.can_use())
+    @commands.check_any(Commands_Checks.can_use())
     async def starboard(self, ctx):
         guild_data = await self.bot.config.find(ctx.guild.id)
         embed = discord.Embed(title=f"{ctx.guild.name}'s Startbord Config",color=0x9e3bff)
@@ -142,7 +141,7 @@ class Starboard(commands.Cog, name="Starboard", description="Starboard Module"):
         await ctx.send(embed=embed)
     
     @starboard.command(name="toggle", description="Toggle starboard on/off", brief="toggle [True/False]")
-    #@commands.check_any(checks.can_use(), checks.is_owner())
+    @commands.check_any(Commands_Checks.can_use(), Commands_Checks.is_owner())
     async def starboard_toggle(self, ctx, toggle: bool=True):
         guild_data = await self.bot.config.find(ctx.guild.id)
         guild_data['starboard']['toggle'] = toggle
@@ -150,7 +149,7 @@ class Starboard(commands.Cog, name="Starboard", description="Starboard Module"):
         await ctx.send(f"Starboard toggle set to {toggle}")
     
     @starboard.command(name="channel", description="Set starboard channel", brief="channel [channel]")
-    #@commands.check_any(checks.can_use(), checks.is_owner())
+    @commands.check_any(Commands_Checks.can_use(), Commands_Checks.is_owner())
     async def starboard_channel(self, ctx, channel: discord.TextChannel):
         guild_data = await self.bot.config.find(ctx.guild.id)
         guild_data['starboard']['channel'] = channel.id
@@ -158,7 +157,7 @@ class Starboard(commands.Cog, name="Starboard", description="Starboard Module"):
         await ctx.send(f"Starboard channel set to <#{channel.id}>")
     
     @starboard.command(name="threshold", description="Set starboard threshold", brief="threshold [threshold]")
-    #@commands.check_any(checks.can_use(), checks.is_owner())
+    @commands.check_any(Commands_Checks.can_use(), Commands_Checks.is_owner())
     async def starboard_threshold(self, ctx, threshold: int=5):
         guild_data = await self.bot.config.find(ctx.guild.id)
         guild_data['starboard']['threshold'] = threshold
