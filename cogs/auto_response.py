@@ -19,11 +19,11 @@ class Ar(commands.Cog, name="Auto Responce", description="Easy way to add Auto R
     async def on_ready(self):
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
 
-    @tasks.loop(seconds=10)
+    @tasks.loop(seconds=60)
     async def heist_ar_check(self):
         if self.heist_ar == {}:
             return
-        if (self.heist_ar['time'] + datetime.timedelta(seconds=600)) < datetime.datetime.now():
+        if (self.heist_ar['time'] + datetime.timedelta(seconds=300)) < datetime.datetime.now():
             self.heist_ar = {}
             self.heist_ar_active = False
             return
@@ -49,8 +49,8 @@ class Ar(commands.Cog, name="Auto Responce", description="Easy way to add Auto R
                 embed.description += "\n> **Bypass Role:** <@&{}>".format(self.heist_ar['bypass_role'])
             embed.color = discord.Color.random()
             await message.reply(f"Heist will take place in <#{self.heist_ar['channel']}>!!",embed=embed, delete_after=10)
-        elif "heist" in message.content.lower() and self.heist_ar == {}:
-            await message.reply("There is currently no heist in progress take Heist ping from <#944670050252648468>", delete_after=10, allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
+        # elif "heist" in message.content.lower() and self.heist_ar == {}:
+        #     await message.reply("There is currently no heist in progress take Heist ping from <#944670050252648468>", delete_after=10, allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
 
     @app_commands.command(name="set-heist-ar", description="Set Auto Responce for Heist")
     @app_commands.guild_only()
