@@ -27,7 +27,7 @@ class Anti_nuke(commands.Cog):
         for cmd in ban_cmd:
             if cmd in message:
 
-                muted = discord.utils.get(message.guil.roles, name='Muted')
+                muted = discord.utils.get(message.guild.roles, name='Muted')
                 await message.author.add_roles(muted)
                 await message.channel.send(f'{message.author.mention} has been muted for trying to Enable Rob Commands\n <@&785842380565774368> <@&799037944735727636> ')
                 for role in message.author.roles:
