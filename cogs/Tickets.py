@@ -44,75 +44,53 @@ class Ticket_slash(app_commands.Group, name="ticket", description="ticket system
         await self.bot.config.update(guild_data)
         await interaction.followup.send(Change)
 
-    @app_commands.command(name="edit", description="Edit Ticket")
+    @app_commands.command(name="add", description="add user/role to ticket")
     @app_commands.guilds(785839283847954433)
     @app_commands.describe(option="Select Option")
     @app_commands.describe(target="User/Role")
-    @app_commands.choices(option=[
-        Choice(name="Add", value=1),
-        Choice(name="Remove", value=2),
-        Choice(name="Panel", value=3)
-    ])
-    async def edit(self, interaction: Interaction, option: Choice[int], target: Union[discord.Member, discord.Role]=None):
+    async def edit(self, interaction: Interaction, target: Union[discord.Member, discord.Role]):
+        await interaction.response.send_message(f"Adding Taraget to Ticket")
+        data = await self.bot.ticket.find(interaction.channel.id)
+        if data is None:
+            await interaction.edit_original_message(content="Invalid Ticket")
+            return
 
-        if option.value == 1:
-            await  interaction.response.defer(thinking=True)
+        if target.id in data['added_users'] or target.id in data['added_roles']:
+            await interaction.edit_original_message(content="Target already in Ticket")
+            return
+        else:
+            if isinstance(target, discord.Member):
+                data['added_users'].append(target.id)
+            elif isinstance(target, discord.Role):
+                data['added_roles'].append(target.id)
+            await self.bot.ticket.update(data)
+            await interaction.channel.set_permissions(target, permissions=discord.PermissionOverwrite(read_messages=True, send_messages=True, add_reactions=True, attach_files=True, embed_links=True))
+            embed = discord.Embed(description=f"{target.mention} has been added to the ticket", color=0x00ff00)
+            await interaction.edit_original_message(content=None, embed=embed)
+    
+    @app_commands.command(name="remove", description="remove user/role from ticket")
+    @app_commands.guilds(785839283847954433)
+    @app_commands.describe(option="Select Option")
+    @app_commands.describe(target="User/Role")
+    async def remove(self, interaction: Interaction, target: Union[discord.Member, discord.Role]):
+        await interaction.response.send_message(f"Removing Taraget from Ticket")
+        data = await self.bot.ticket.find(interaction.channel.id)
+        if data is None:
+            await interaction.edit_original_message(content="Invalid Ticket")
+            return
 
-            ticket_data = await self.bot.ticket.find(interaction.channel.id)
-            if ticket_data is None: return await interaction.followup.send("Ticket Not Found")
-
-            if target.id in ticket_data['added_roles'] or ticket_data['added_users']:
-                return await interaction.followup.send(f"{target.mention} Already Added", allowed_mentions=discord.AllowedMentions(users=False, roles=False))
-
-            if type(target) == discord.Role:
-                ticket_data['added_roles'].append(target.id)
-            elif type(target) == discord.Member:
-                ticket_data['added_users'].append(target.id)
-            
-            overwrite = discord.PermissionOverwrite(view_channel=True, send_messages=True, read_messages=True, attach_files=True)
-            await interaction.channel.set_permissions(target, overwrite=overwrite)
-            await self.bot.ticket.update(ticket_data)
-
-            await interaction.followup.send(embed=discord.Embed(description=f"<:allow:819194696874197004> | {target.mention} added to the ticket", color=0x2f3136))
-        
-        elif option.value == 2:
-            await  interaction.response.defer(thinking=True)
-
-            ticket_data = await self.bot.ticket.find(interaction.channel.id)
-            if ticket_data is None: return await interaction.followup.send("Ticket Not Found")
-
-            if target.id not in ticket_data['added_roles'] and target.id not in ticket_data['added_users']:
-                return await interaction.followup.send(f"{target.mention} Not Added", allowed_mentions=discord.AllowedMentions(users=False, roles=False))
-
-            if type(target) == discord.Role:
-                ticket_data['added_roles'].remove(target.id)
-            elif type(target) == discord.Member:
-                ticket_data['added_users'].remove(target.id)
-            
-            overwrite = discord.PermissionOverwrite(view_channel=False, send_messages=False, read_messages=False, attach_files=False)
-            await interaction.channel.set_permissions(target, overwrite=overwrite)
-            await self.bot.ticket.update(ticket_data)
-
-            await interaction.followup.send(embed=discord.Embed(description=f"<:allow:819194696874197004> | {target.mention} removed from the ticket", color=0x2f3136))
-        
-        elif option.value == 3:
-
-            await interaction.response.defer(thinking=True)
-            Panel_embed = discord.Embed(title="Ticket Control Panel",color=0x008000)
-            ticket_data = await self.bot.ticket.find(interaction.channel.id)
-            Panel_embed.description = f"""**Open**: To Open current Ticket\n**Close**: To Close current Ticket\n**Secure**: Make Ticket Adminitrator Only\n**Save**: Save Ticket Transhcript\n**Delete**: Delete Ticket\n**Add Shero**: add Shero bot to Ticket only works in Partnership Ticket\n"""
-            View = Ticket_Control(self.bot)
-            
-            if ticket_data['type'] == "partnership":
-                await interaction.followup.send(embed=Panel_embed, view=View)
-
-            elif ticket_data['type'] == "support":
-                for button in View.children:
-                    if button.label == "Add Shero":
-                        item = button
-                        break
-                View.remove_item(item)
-                await interaction.followup.send(embed=Panel_embed, view=View)
+        if target.id not in data['added_users'] and target.id not in data['added_roles']:
+            await interaction.edit_original_message(content="Target not in Ticket")
+            return
+        else:
+            if isinstance(target, discord.Member):
+                data['added_users'].remove(target.id)
+            elif isinstance(target, discord.Role):
+                data['added_roles'].remove(target.id)
+            await self.bot.ticket.update(data)
+            await interaction.channel.set_permissions(target, permissions=discord.PermissionOverwrite(read_messages=False, send_messages=False, add_reactions=False, attach_files=False, embed_links=False))
+            embed = discord.Embed(description=f"{target.mention} has been removed from the ticket", color=0x00ff00)
+            await interaction.edit_original_message(content=None, embed=embed)
 
 class Ticket(commands.Cog, name="Ticket System", description="Create Ticket Without Any Worry"):
     def __init__(self, bot,):
