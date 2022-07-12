@@ -46,7 +46,6 @@ class Ticket_slash(app_commands.Group, name="ticket", description="ticket system
 
     @app_commands.command(name="add", description="add user/role to ticket")
     @app_commands.guilds(785839283847954433)
-    @app_commands.describe(option="Select Option")
     @app_commands.describe(target="User/Role")
     async def edit(self, interaction: Interaction, target: Union[discord.Member, discord.Role]):
         await interaction.response.send_message(f"Adding Taraget to Ticket")
@@ -64,13 +63,12 @@ class Ticket_slash(app_commands.Group, name="ticket", description="ticket system
             elif isinstance(target, discord.Role):
                 data['added_roles'].append(target.id)
             await self.bot.ticket.update(data)
-            await interaction.channel.set_permissions(target, permissions=discord.PermissionOverwrite(read_messages=True, send_messages=True, add_reactions=True, attach_files=True, embed_links=True))
+            await interaction.channel.set_permissions(target, read_messages=True, send_messages=True, add_reactions=True, attach_files=True, embed_links=True)
             embed = discord.Embed(description=f"{target.mention} has been added to the ticket", color=0x00ff00)
             await interaction.edit_original_message(content=None, embed=embed)
     
     @app_commands.command(name="remove", description="remove user/role from ticket")
     @app_commands.guilds(785839283847954433)
-    @app_commands.describe(option="Select Option")
     @app_commands.describe(target="User/Role")
     async def remove(self, interaction: Interaction, target: Union[discord.Member, discord.Role]):
         await interaction.response.send_message(f"Removing Taraget from Ticket")
@@ -88,7 +86,7 @@ class Ticket_slash(app_commands.Group, name="ticket", description="ticket system
             elif isinstance(target, discord.Role):
                 data['added_roles'].remove(target.id)
             await self.bot.ticket.update(data)
-            await interaction.channel.set_permissions(target, permissions=discord.PermissionOverwrite(read_messages=False, send_messages=False, add_reactions=False, attach_files=False, embed_links=False))
+            await interaction.channel.set_permissions(target, read_messages=False, send_messages=False, add_reactions=False, attach_files=False, embed_links=False)
             embed = discord.Embed(description=f"{target.mention} has been removed from the ticket", color=0x00ff00)
             await interaction.edit_original_message(content=None, embed=embed)
 
