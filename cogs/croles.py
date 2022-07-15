@@ -120,7 +120,7 @@ class Custom_Roles_slash(app_commands.Group):
                     await interaction.client.crole.update(data)
 
                     embed = discord.Embed(description=f"{member.mention} has been removed from {role.name}", color=role.color)
-                    await interaction.edit_original_message(content=None,embed=embed, ephemeral=False)
+                    await interaction.edit_original_message(content=None,embed=embed)
             else:
                 await interaction.response.send_message("You do not have permission to do this", ephemeral=True)
 
