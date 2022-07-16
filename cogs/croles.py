@@ -89,40 +89,28 @@ class Custom_Roles_slash(app_commands.Group):
     @app_commands.guilds(785839283847954433)
     async def add_member(self, interaction: discord.Interaction, member: discord.Member, option: typing.Literal['add', 'remove']):
         data = await interaction.client.crole.find(interaction.user.id)
-        
         if data is None:
-            await interaction.response.send_message("You have currently no custom role liked to you", ephemeral=True)
-        else:
+            return await interaction.response.send_message("You have currently no custom role liked to you", ephemeral=True)
+        
+        role = discord.utils.get(interaction.guild.roles, id=data["role"])
 
-            if interaction.user.id == data['_id']:
-                role = discord.utils.get(interaction.guild.roles, id=data["role"])
-
-                if option == "add":
-
-                    if len(data["members"]) >= 5:
-                        await interaction.response.send_message("You have reached the max amount of members for this role", ephemeral=True)
-                        return
-
-                    await member.add_roles(role)
-                    data["members"].append(member.id)
-                    await interaction.client.crole.update(data)
-
-                    embed = discord.Embed(description=f"{member.mention} has been added to {role.name}", color=role.color)
-                    await interaction.response.send_message(content=None,embed=embed, ephemeral=False)
-
-                elif option == "remove":
-
-                    if role not in member.roles:
-                        await interaction.response.send_message("Member is not in this role", ephemeral=True)
-                        return
-                    await member.remove_roles(role)
-                    data["members"].remove(member.id)
-                    await interaction.client.crole.update(data)
-
-                    embed = discord.Embed(description=f"{member.mention} has been removed from {role.name}", color=role.color)
-                    await interaction.edit_original_message(content=None,embed=embed)
+        if option == 'add':
+            if member.id in data['members']:
+                await interaction.response.send_message("Member is already in role", ephemeral=True)
             else:
-                await interaction.response.send_message("You do not have permission to do this", ephemeral=True)
+                data['members'].append(member.id)
+                await interaction.client.crole.update(data)
+                await member.add_roles(role)
+                await interaction.response.send_message(f"{member.mention} has been added to {role.name}", ephemeral=True)
+
+        elif option == 'remove':
+            if member.id not in data['members']:
+                await interaction.response.send_message("Member is not in role", ephemeral=True)
+            else:
+                data['members'].remove(member.id)
+                await interaction.client.crole.update(data)
+                await member.remove_roles(role)
+                await interaction.response.send_message(f"{member.mention} has been removed from {role.name}", ephemeral=True)
 
     async def on_error(self, interaction: discord.Interaction, error: Exception):
         try:
