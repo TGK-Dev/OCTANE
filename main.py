@@ -44,6 +44,7 @@ class Bot(commands.Bot):
         bot.inv = Document(bot.db, 'inv')
         bot.booster = Document(bot.db, 'booster')
         bot.crole = Document(bot.db, 'crole')
+        bot.poll = Document(self.db, 'poll')
         bot.Amari_api = AmariClient(bot.Amari_token)
         bot.eco_api = eco_client(bot.eco_toekn)
         
@@ -51,9 +52,6 @@ class Bot(commands.Bot):
             if file.endswith('.py') and not file.startswith("_"):
                 await bot.load_extension(f'cogs.{file[:-3]}')
 
-        await self.tree.sync(guild=discord.Object(main_guilds[0]))
-        await self.tree.sync(guild=discord.Object(main_guilds[1]))
-        await self.tree.sync(guild=discord.Object(988761284956799038))
 
 bot = Bot()
 
@@ -82,6 +80,7 @@ bot.ban_event = {}
 bot.uptime = datetime.datetime.utcnow()
 bot.cross_chat_toggle = True
 bot.active_booster = {}
+bot.polls = {}
 
 @bot.event
 async def on_ready():
@@ -125,8 +124,10 @@ async def on_ready():
     for active_booster in current_active_booster:
         bot.active_booster[active_booster['_id']] = active_booster
     
-    await bot.tree.sync(guild=discord.Object(id=785839283847954433))
-    await bot.tree.sync(guild=discord.Object(id=811037093715116072))
+    await bot.tree.sync(guild=discord.Object(main_guilds[0]))
+    await bot.tree.sync(guild=discord.Object(main_guilds[1]))
+    await bot.tree.sync(guild=discord.Object(988761284956799038))
+
     await bot.change_presence(status=discord.Status.dnd, activity=discord.Activity(type=discord.ActivityType.watching, name="Server Security"))
 
 @bot.event
