@@ -35,18 +35,6 @@ class Basic(commands.Cog, name="Basic", description="General Basic Commands"):
                         return
             except:
                 pass
-
-    @commands.Cog.listener()
-    async def on_message(self, message):
-        if message.author.id != 520830713696878592: return
-        if message.author.bot and message.channel.id == 962771383996284979:
-            update_channel = self.bot.get_guild(785839283847954433).get_channel(855717169584537660)
-            if len(message.embeds) > 0:
-                await update_channel.send(embeds=message.embeds)
-            if len(message.attachments) > 0:
-                await update_channel.send(attachments=message.attachments)
-            if message.content:
-                await update_channel.send(content=message.content)
         
     
     @commands.Cog.listener()
