@@ -38,13 +38,14 @@ async def make_poll(interaction: discord.Interaction, title:str, options:str, du
     for i in range(len(options)):
         poll_data['options'][str(i)] = {'name': options[i], 'votes': 0, 'users': []}
         embed.add_field(name=f"{default_emoji[i]} {options[i]}", value=bar(), inline=inline)
-    embed.set_footer(text=f"Asked by {interaction.user.name}#{interaction.user.discriminator}")
+    embed.set_footer(text=f"Asked by {interaction.user.name}#{interaction.user.discriminator}", icon_url=interaction.user.avatar.url)
     embed.description = "• 0 votes\n"
     if one_vote == False:
         embed.description += "• Multiple votes\n"
     else:
         embed.description += "• One vote per user\n"
-    embed.description += f"• Duration: <t:{durationSTAMP}:R>" 
+    embed.description += f"• Duration: <t:{durationSTAMP}:R>"
+    embed.color = discord.Color.random()
     await interaction.followup.send(embed=embed, view=PollView(embed))
 
     msg = await interaction.original_message()
@@ -56,7 +57,7 @@ async def make_poll(interaction: discord.Interaction, title:str, options:str, du
     poll_data['end_time'] = duration
     poll_data['one_vote'] = one_vote
     interaction.client.polls[msg.id] = poll_data
-    print(poll_data)
+
     await interaction.client.poll.insert(poll_data)
 
     if thread:
@@ -71,15 +72,25 @@ class PollButton(discord.ui.Button):
         
         data = interaction.client.polls[interaction.message.id]
         index = default_emoji.index(self.emoji.name)
+
         if str(index) not in data['options']:
             await interaction.followup.send("This option does not exist.")
             return
 
-        # for option in data['options']:
-        #     if interaction.user.id in option['users']:
-        #         option['users'].remove(interaction.user.id)
-        #         data['total_votes'] -= 1
-        #         break
+        #check if user has already voted
+        if interaction.user.id in data['options'][str(index)]['users']:
+            await interaction.followup.send("You have already voted for this option.")
+            return
+        
+        #check if user has voted for another option
+        if data['one_vote'] == True:
+            for i in data['options']:
+                if interaction.user.id in data['options'][i]['users']:
+                    data['options'][i]['users'].remove(interaction.user.id)
+                    data['options'][i]['votes'] -= 1
+                    data['total_votes'] -= 1
+                    break
+
         
         option = data['options'][str(index)]
         option['users'].append(interaction.user.id)

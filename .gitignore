@@ -6,3 +6,4 @@ cogs/moderation.txt
 .env
 .venv
 cogs/test.py
+test.py

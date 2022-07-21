@@ -14,7 +14,6 @@ class Dump(app_commands.Group, name="dump", description="dump data"):
         super().__init__(name="dump", description="Dump data from discord Objectes")
 
     @app_commands.command(name="role", description="Dump role data")
-    @app_commands.guilds(785839283847954433)
     async def dump_user(self, interaction: Interaction, role: discord.Role):
         if len(role.members) <= 10:
             msg = f"{role.name} has {len(role.members)} members:\n"
@@ -26,7 +25,6 @@ class Dump(app_commands.Group, name="dump", description="dump data"):
 
         elif len(role.members) > 10:
             await interaction.response.send_message("Role has too many members making file to send.")
-                #make file in BytesIO
             members = ""
             for member in role.members:
                 members += f"{member.name} | `{member.id}`\n"
@@ -38,7 +36,6 @@ class Dump(app_commands.Group, name="dump", description="dump data"):
 
 
     @app_commands.command(name="invite", description="Dumps invite data of user")
-    @app_commands.guilds(785839283847954433)
     async def invite(self, interaction: Interaction, user: discord.Member):
         data = await self.bot.invites.find_by_custom({'_id': user.id})
         if not data: return await interaction.response.send_message("No Data to Dump")
@@ -68,7 +65,6 @@ class Poll(app_commands.Group):
         super().__init__(name="poll", description="Poll commands")
     
     @app_commands.command(name='create')
-    @app_commands.guilds(785839283847954433)
     @app_commands.describe(title="title of the poll", options="options of the poll spearated by !", duration="duration of the poll ex: 1h30m", thread="Create poll with thread", one_vote="only one vote per user")
     @app_commands.rename(one_vote="single_vote")
     @app_commands.default_permissions(manage_messages=True)
@@ -126,8 +122,8 @@ class Serverutils(commands.Cog, description="Contains commands that are useful f
             channel = self.bot.get_channel(poll['channel'])
             msg = await channel.fetch_message(poll['_id'])
             self.bot.add_view(PollView(msg.embeds[0]))
-            self.bot.polls[msg.id] = poll
-        
+            self.bot.polls[poll['_id']] = poll
+
         self.bot.tree.add_command(Dump(self.bot), guild=discord.Object(785839283847954433))
         self.bot.tree.add_command(Poll(), guild=discord.Object(785839283847954433))
         print(f"{self.__class__.__name__} Cog has been loaded.")
