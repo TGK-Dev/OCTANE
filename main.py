@@ -9,11 +9,10 @@ import os
 import motor.motor_asyncio
 import asyncio
 import logging
+import logging.handlers
 import datetime
 
 logger = logging.getLogger('discord')
-logger.setLevel(logging.INFO)
-
 handler = logging.handlers.RotatingFileHandler(
     filename='discord.log',
     encoding='utf-8',
