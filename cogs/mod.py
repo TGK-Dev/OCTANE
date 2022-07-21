@@ -420,6 +420,10 @@ class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
 
         embed.add_field(name="<:settings:991733871118917683> Account creation:", value=member.created_at.strftime('%d/%m/%Y %H:%M:%S'))
         embed.add_field(name="<:join:991733999477203054> Server join:", value=member.joined_at.strftime('%d/%m/%Y %H:%M:%S'))
+        user = await self.bot.fetch_user(member.id)
+        
+        if user.banner.url is not None:
+            embed.set_image(url=user.banner.url)
 
         if not member.bot:
             view = ui.member_view.Member_view(self.bot, member, interaction)

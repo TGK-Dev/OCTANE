@@ -11,6 +11,7 @@ import io
 import contextlib
 import textwrap
 import os
+from io import BytesIO
 
 class Owner(commands.Cog, name="Owner", description="Owner/admin commands."):
     def __init__(self, bot):
@@ -223,6 +224,20 @@ class Owner(commands.Cog, name="Owner", description="Owner/admin commands."):
                         error = "".join(format_exception(e,e,e.__traceback__))
                         embed.add_field(name=f"{module}", value=f"Failure | {error[:100]}", inline=False)
             await interaction.followup.send(embed=embed)
+
+
+    @app_commands.command(name="get-logs", description="Get Logs of bot console")
+    @app_commands.default_permissions(administrator=True)
+    @app_commands.guilds(785839283847954433, 999551299286732871)
+    async def get_logs(self, interaction: discord.Interaction):
+        if interaction.user.id not in self.bot.owner_ids:
+            await interaction.response.send_message("This Commands is only for the bot owner.", ephemeral=True)
+            return
+            
+        await interaction.response.send_message(file=discord.File("./discord.log", filename="discord.log"))
+        
+        
+
 
 
 
