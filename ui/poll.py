@@ -113,7 +113,7 @@ class PollButton(discord.ui.Button):
 
         await interaction.message.edit(embed=embed)
 
-        await interaction.followup.send(f"You have successfully voted for `{option['name']}`.")
+        await interaction.followup.send(f"You have successfully voted for {option['name']}.")
         await interaction.client.poll.update(data)    
 
 class PollView(discord.ui.View):
