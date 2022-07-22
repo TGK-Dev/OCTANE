@@ -146,6 +146,7 @@ async def on_message(message):
     if message.author.bot:
         return
     
+    
     if message.author.id in bot.blacklist_users:
         return
     
