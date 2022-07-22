@@ -90,7 +90,7 @@ class Events(commands.Cog):
             embed.set_author(name=f"{member.name}#{member.discriminator}", icon_url=member.avatar.url or None)
         else:
             embed.set_thumbnail(url=member.default_avatar)
-            embed.set_author(name=f"{member.name}#{member.discriminator}", icon_url=member.default_avatar_url)
+            embed.set_author(name=f"{member.name}#{member.discriminator}", icon_url=member.default_avatar.url)
 
         
         embed.description = f"Welcome {member.mention} to {guild.name}!"
@@ -176,19 +176,6 @@ class Events(commands.Cog):
 
         data["case"] += 1
         await self.bot.config.update(data)
-
-    @commands.Cog.listener()
-    async def on_voice_state_update(self, member, before, after):
-        channel = self.bot.get_channel(947687941105414184)
-        if member.guild.id != 811037093715116072: return
-        if before.channel is None and after.channel is not None and after.channel.id == 966499840324431933:
-            embed = discord.Embed(description=f"{member.mention} joined the voice {after.channel.mention}!", color=member.color)
-            embed.set_footer(text=f"ID: {member.id}", icon_url=self.bot.user.avatar.url)
-            await channel.send(embed=embed)
-        elif after.channel is None and before.channel is not None and before.channel.id == 966499840324431933:
-            embed = discord.Embed(description=f"{member.mention} left the voice {before.channel.mention}!", color=member.color)
-            embed.set_footer(text=f"ID: {member.id}", icon_url=self.bot.user.avatar.url)
-            await channel.send(embed=embed)
 
 async def setup(bot):
     await bot.add_cog(Events(bot))
