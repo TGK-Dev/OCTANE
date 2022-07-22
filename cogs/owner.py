@@ -212,19 +212,19 @@ class Owner(commands.Cog, name="Owner", description="Owner/admin commands."):
                 await interaction.response.send_message(embed=embed)
                 return
         elif cog == "*":
-            await interaction.response.defer(thinking=True)
-            embed = discord.Embed(description="Reloading all cogs...", color=discord.Color.green())
+            embed = discord.Embed(description="Relading Cogs..", color=discord.Color.green())
+            await interaction.response.send_message(embed=embed)
             for module in os.listdir("./cogs"):
                 if module.endswith(".py") and not module.startswith("_"):
                     try:
                         await self.bot.unload_extension(f"cogs.{module[:-3]}")
                         await self.bot.load_extension(f"cogs.{module[:-3]}")
-                        embed.add_field(name=module, value="Reloaded", inline=False)
+                        embed.add_field(name=f"{module[:-3]}", value="Reloaded", inline=True)
+                        await interaction.edit_original_message(embed=embed)
                     except Exception as e:
                         error = "".join(format_exception(e,e,e.__traceback__))
-                        embed.add_field(name=f"{module}", value=f"Failure | {error[:100]}", inline=False)
-            await interaction.followup.send(embed=embed)
-
+                        embed.add_field(name=f"{module}", value=f"Failure | {error[:100]}", inline=True)
+                        await interaction.edit_original_message(embed=embed)
 
     @app_commands.command(name="get-logs", description="Get Logs of bot console")
     @app_commands.default_permissions(administrator=True)
