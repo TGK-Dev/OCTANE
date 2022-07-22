@@ -64,6 +64,7 @@ class Starboard(commands.Cog, name="Starboard", description="Starboard Module"):
                 
                 await starboard_message.edit(content=f"{message.channel.mention} | ⭐ {len(reaction)}")
                 self.bot.temp_star.remove(message.id)
+                return
 
             try:
                 self.bot.temp_star.append(message.id)
