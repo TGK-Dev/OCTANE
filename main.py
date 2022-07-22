@@ -82,7 +82,7 @@ bot.snipe = {'delete': {}, 'edit': {}}
 bot.current_afk = {}
 bot.current_mutes = {}
 bot.guess_number = {}
-bot.bot_temp_star = {}
+bot.temp_star = []
 bot.auto_mod_cache = {}
 bot.perm = {}
 bot.config_cache = {}
@@ -138,6 +138,7 @@ async def on_ready():
     await bot.tree.sync(guild=discord.Object(main_guilds[0]))
     await bot.tree.sync(guild=discord.Object(main_guilds[1]))
     await bot.tree.sync(guild=discord.Object(988761284956799038))
+    await bot.tree.sync()
 
     await bot.change_presence(status=discord.Status.dnd, activity=discord.Activity(type=discord.ActivityType.watching, name="Server Security"))
 

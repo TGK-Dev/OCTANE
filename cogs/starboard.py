@@ -4,6 +4,7 @@ from discord import app_commands
 import discord
 import datetime
 from utils.checks import Commands_Checks
+from ui.poll import make_poll
 class Starboard(commands.Cog, name="Starboard", description="Starboard Module"):
     def __init__(self, bot):
         self.bot = bot
@@ -16,120 +17,138 @@ class Starboard(commands.Cog, name="Starboard", description="Starboard Module"):
     async def on_raw_reaction_add(self, payload):
         if not payload.guild_id:
             return
-
-        if payload.message_id in self.bot.bot_temp_star: return
+        if payload.message_id in self.bot.temp_star:
+            return        
+        config = await self.bot.config.find(payload.guild_id)
+        if not config:
+            return
+        if config['starboard']['toggle'] == False:
+            return
         
-        guild = self.bot.get_guild(payload.guild_id)
-        channel = self.bot.get_channel(payload.channel_id)
         try:
+            channel = self.bot.get_channel(payload.channel_id)
             message = await channel.fetch_message(payload.message_id)
-            reacts = list(filter(lambda r: str(r.emoji) == "⭐", message.reactions))
         except discord.NotFound:
             return
         
-        self.bot.bot_temp_star[message.id] = {'message': message.id, 'channel': channel.id, 'guild': guild.id}
+        reaction = []
+        for reactions in message.reactions:
+            if reactions.emoji == "⭐":
+                reaction = [user.id async for user in reactions.users()]
+                break
+        if len (reaction) == 0:
+            return
 
-        if not reacts: return
-        guild_data = await self.bot.config.find(guild.id)
-        reacts = [user.id async for user in reacts[0].users()]
-
-        if message.author.id in reacts and guild_data['starboard']['self_star'] == False:
-            del reacts[reacts.index(message.author.id)]
-        
-        if len(reacts) >= int(guild_data['starboard']['threshold']):
-            starboard_channel = guild.get_channel(int(guild_data['starboard']['channel']))
-            if channel.id == starboard_channel.id: return
+        if config['starboard']['self_star'] == True:
+            pass
+        elif config['starboard']['self_star'] == False:
             try:
-                existing_star = await self.bot.starboard.find_by_custom(
-                    {
-                        '_id': message.id, "guildId": guild.id, "channelId": channel.id
-                    })
+                del reaction[reaction.index(message.author.id)]
+            except ValueError:
+                pass
+        
+        if len(reaction) > config['starboard']['threshold']:
+            data = {'_id': payload.message_id, 'channel': payload.channel_id, 'guild': payload.guild_id, 'author': message.author.id, 'message': message.content}
+            starboard_channel = self.bot.get_channel(config['starboard']['channel'])
+            if not starboard_channel:
+                return
+
+            already_starred = await self.bot.starboard.find(message.id)
+            if already_starred:
+                self.bot.temp_star.append(message.id)
+                try:
+                    starboard_message = await starboard_channel.fetch_message(already_starred['starboard_message'])
+                except discord.NotFound:
+                    await self.bot.starboard.delete(message.id)
+                
+                await starboard_message.edit(content=f"{message.channel.mention} | ⭐ {len(reaction)}")
+                self.bot.temp_star.remove(message.id)
+
+            try:
+                self.bot.temp_star.append(message.id)
+                embed = discord.Embed()
+                embed.color = discord.Color.random()
+                if message.content:
+                    embed.description = message.content
+                embed.set_author(name=message.author.name, icon_url=message.author.avatar.url if message.author.avatar else message.author.default_avatar.url)
+                embed.set_footer(text=f"Message ID: {message.id}")
+                embed.timestamp = message.created_at
+                if message.reference:
+                    reference = await message.channel.fetch_message(message.reference.id)
+                    if reference.content:
+                        embed.add_field(name="Reply", value=reference.content)
+                extra = []
+                if len(message.embeds) > 0:
+                    for membed in message.embeds:
+                        extra.append(membed)
+                        
+                view = discord.ui.View()
+                view.add_item(discord.ui.Button(label="View Message", url=message.jump_url, style=discord.ButtonStyle.url))
+                extra.append(embed)
+
+                if message.attachments:
+                    iembed = discord.Embed()
+                    iembed.set_image(url=message.attachments[0].url)
+                    extra.append(iembed)
+
+                starboard_message = await starboard_channel.send(content=f"{message.channel.mention} | ⭐ {len(reaction)}",embeds=extra, view=view)
+                data['starboard_message'] = starboard_message.id
+                await self.bot.starboard.insert(data)
+                self.bot.temp_star.remove(message.id)
             except:
                 pass
-
-            else:
-                if not existing_star:
-                    pass
-                else:
-                    existing_star_messae = await starboard_channel.fetch_message(existing_star['starboard_message_id'])
-                    return await existing_star_messae.edit(content=f":dizzy: {len(reacts)} | {channel.mention}")
-
-            star_message_embed = discord.Embed(color=0x9e3bff, timestamp=discord.utils.utcnow())
-            try:
-                star_message_embed.set_author(name=f"{message.author}", icon_url=message.author.avatar.url)
-            except AttributeError:
-                star_message_embed.set_author(name=f"{message.author}", icon_url=message.author.default_avatar)
-            star_message_embed.set_footer(text=f"{message.id}")
-            if message.content:
-                star_message_embed.add_field(name="Message", value=message.content, inline=False)
-            star_message_embed.add_field(name="Original", value=f"[Jump!]({message.jump_url})", inline=False)
-            if message.reference:
-                reply_to = await channel.fetch_message(message.reference.message_id)
-                if reply_to:
-                    star_message_embed.add_field(name="Replying to ...", value=f"[{reply_to.content}]({reply_to.jump_url})", inline=False)
-                else:
-                    pass
-            extra_embed = [star_message_embed]
-            if len(message.attachments) > 0:                
-                for attachment in message.attachments:
-                    image_embed = discord.Embed(color=0x9e3bff).set_image(url=attachment.url)
-                    extra_embed.append(image_embed)
-            starborad_sent_message = await starboard_channel.send(content=f":dizzy:{len(reacts)} | {channel.mention}", embeds=extra_embed)
-            await starborad_sent_message.add_reaction("⭐")
-
-            await self.bot.starboard.insert({
-                '_id': message.id,
-                'guildId': guild.id,
-                'authorId': message.author.id,
-                'channelId': channel.id,
-                'starboard_message_id': starborad_sent_message.id,
-            })
-            try:
-                self.bot.bot_temp_star.pop(message.id)
-            except KeyError:
-                pass
-    
+        
     @commands.Cog.listener()
     async def on_raw_reaction_remove(self, payload):
-        if not payload.guild_id: return
-        guild = self.bot.get_guild(payload.guild_id)
-        guild = await self.bot.config.find(guild.id)
-        emoji = "⭐"
-        try:
-            if not guild['starboard']['channel']: return
-            channel = self.bot.get_channel(payload.channel_id)
-        except:
+        if not payload.guild_id:
             return
-
-        try:
-            message = await channel.fetch_message(payload.message_id)
-            reacts = message.reactions
-            reacts = list(filter(lambda r: str(r.emoji) == "⭐", message.reactions))
-
-        except discord.HTTPException:
+        if payload.message_id in self.bot.temp_star:
+            return        
+        config = await self.bot.config.find(payload.guild_id)
+        if not config:
+            return
+        if config['starboard']['toggle'] == False:
             return
         
-        if reacts:
-            react = [user async for user in reacts[0].users()]
-            if message.author in react and guild['starboard']['self_star'] == False:
-                del react[react.index(message.author)]
+        try:
+            channel = self.bot.get_channel(payload.channel_id)
+            message = await channel.fetch_message(payload.message_id)
+        except discord.NotFound:
+            return
+        
+        reaction = []
+        for reactions in message.reactions:
+            if reactions.emoji == "⭐":
+                reaction = [user.id async for user in reactions.users()]
+                break
+        if len (reaction) == 0:
+            return
 
-            starboard = self.bot.get_channel(guild['starboard']['channel'])
+        if config['starboard']['self_star'] == True:
+            pass
+        elif config['starboard']['self_star'] == False:
             try:
-                existing_star = await self.bot.starboard.find_by_custom(
-                    {
-                        "_id": payload.message_id,
-                        "guildId": payload.guild_id,
-                        "channelId": payload.channel_id,
-                    }
-                )
-            except:
+                del reaction[reaction.index(message.author.id)]
+            except ValueError:
+                pass
+        
+        if len(reaction) > config['starboard']['threshold']:
+            data = {'_id': payload.message_id, 'channel': payload.channel_id, 'guild': payload.guild_id, 'author': message.author.id, 'message': message.content}
+            starboard_channel = self.bot.get_channel(config['starboard']['channel'])
+            if not starboard_channel:
                 return
-            else:
-                if not existing_star.get("starboard_message_id"):
-                    return
-                existing_message = await starboard.fetch_message(existing_star["starboard_message_id"])
-                return await existing_message.edit(content=f":dizzy: {len(react)} | {channel.mention}")
+
+            already_starred = await self.bot.starboard.find(message.id)
+            if already_starred:
+                self.bot.temp_star.append(message.id)
+                try:
+                    starboard_message = await starboard_channel.fetch_message(already_starred['starboard_message'])
+                except discord.NotFound:
+                    await self.bot.starboard.delete(message.id)
+                
+                await starboard_message.edit(content=f"{message.channel.mention} | ⭐ {len(reaction)}")
+                self.bot.temp_star.remove(message.id)    
+
 
     @commands.group(invoke_without_command=True, description="Config command for startbord module", brife="config")
     @commands.check_any(Commands_Checks.can_use())
@@ -175,3 +194,11 @@ class Starboard(commands.Cog, name="Starboard", description="Starboard Module"):
 
 async def setup(bot):
     await bot.add_cog(Starboard(bot))
+
+            # await self.bot.starboard.insert({
+            #     '_id': message.id,
+            #     'guildId': guild.id,
+            #     'authorId': message.author.id,
+            #     'channelId': channel.id,
+            #     'starboard_message_id': starborad_sent_message.id,
+            # })
