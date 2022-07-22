@@ -68,7 +68,7 @@ class Poll(app_commands.Group):
     @app_commands.describe(title="title of the poll", options="options of the poll spearated by !", duration="duration of the poll ex: 1h30m", thread="Create poll with thread", one_vote="only one vote per user")
     @app_commands.rename(one_vote="single_vote")
     @app_commands.default_permissions(manage_messages=True)
-    async def create(self, interaction: Interaction, title: str, options: str,duration: str, thread: bool=None, one_vote: bool=None):
+    async def create(self, interaction: Interaction, title: str, options: str,duration: str, thread: bool=None, one_vote: bool=False):
         await make_poll(interaction, title, options, duration, thread, one_vote)
 
 class Serverutils(commands.Cog, description="Contains commands that are useful for the server."):
