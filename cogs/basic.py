@@ -53,8 +53,7 @@ class Basic(commands.Cog, name="Basic", description="General Basic Commands"):
             return
         self.bot.snipe['edit'][before.channel.id] = (before.content, after.content)
     
-    @app_commands.command(name="ping", description="Pong!")
-    @app_commands.guilds(785839283847954433)
+    @app_commands.command(name="ping", description="Pong!")    
     async def ping(self, interaction: discord.Interaction):
         start_time = time.time()
         await interaction.response.send_message("Pong!")
