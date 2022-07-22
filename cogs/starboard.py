@@ -24,7 +24,8 @@ class Starboard(commands.Cog, name="Starboard", description="Starboard Module"):
             return
         if config['starboard']['toggle'] == False:
             return
-        
+        if payload.channel_id == config['starboard']['channel']:
+            return
         try:
             channel = self.bot.get_channel(payload.channel_id)
             message = await channel.fetch_message(payload.message_id)
@@ -81,7 +82,7 @@ class Starboard(commands.Cog, name="Starboard", description="Starboard Module"):
                 if len(message.embeds) > 0:
                     for membed in message.embeds:
                         extra.append(membed)
-                        
+
                 view = discord.ui.View()
                 view.add_item(discord.ui.Button(label="View Message", url=message.jump_url, style=discord.ButtonStyle.url))
                 extra.append(embed)
@@ -109,7 +110,8 @@ class Starboard(commands.Cog, name="Starboard", description="Starboard Module"):
             return
         if config['starboard']['toggle'] == False:
             return
-        
+        if payload.channel_id == config['starboard']['channel']:
+            return
         try:
             channel = self.bot.get_channel(payload.channel_id)
             message = await channel.fetch_message(payload.message_id)
