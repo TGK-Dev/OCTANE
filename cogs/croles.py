@@ -59,30 +59,48 @@ class Custom_Roles_slash(app_commands.Group):
     @app_commands.guilds(785839283847954433)
     @app_commands.describe(name="New name of role", color="Hex color of role", icon="File of role icon")
     async def edit_role(self, interaction: discord.Interaction, name: str=None, color: str=None, icon: discord.Attachment=None):        
-        data = await interaction.client.crole.find(interaction.user.id)
+        data = await interaction.client.crole.find(interaction.message.author.id)
         if data is None:
-            await interaction.response.send_message("You have currently no custom role liked to you", ephemeral=True)
-        else:
-            embed = discord.Embed(description="")
-            if interaction.user.id == data['_id']:
-                role = discord.utils.get(interaction.guild.roles, id=data["role"])
-                if name:
-                    embed.description += "New Name: " + name + "\n"
-                    await role.edit(name=name)
-                if color:
-                    embed.description += "New Color: " + color + "\n"
-                    await role.edit(color=discord.Color(int(color, 16)))          #࿔･ﾟ♡ jay's friends ♡ ࿔･ﾟ♡       
-                if icon:
-                    if icon.filename.endswith(".png") or icon.filename.endswith(".jpg"):
-                        #convert icon to bytes-like object
-                        icon_bytes = await icon.read()
-                        embed.description += "New Icon: " + icon.filename + "\n"
-                        await role.edit(display_icon=icon_bytes)                   
-                    else:
-                        await interaction.response.send_message(content="Please upload a valid Format: .png or .jpg")
-                        
-                embed.color=role.color
-                await interaction.response.send_message(content=None,embed=embed)
+            await interaction.response.send_message("You don't have an avctive custom role linked\nIf you think this is a mistake, contact a moderator", ephemeral=True)
+            return
+        await interaction.response.send_message("Please wait while we edit your role", ephemeral=False)
+        role = discord.utils.get(interaction.guild.roles, id=data["role"])
+        embed = discord.Embed(title="Result of Editing", color=role.color)
+        if name is not None:
+            try:
+                old_name = role.name
+                await role.edit(name=name)
+                embed.add_field(name="Name", value=f"{old_name} -> {role.name}")
+            except Exception as e:
+                embed.add_field(name="Error in name", value=str(e)[:100])
+        
+        if color is not None:
+            try:
+                old_color = role.color
+                await role.edit(color=discord.Color(int(color, 16)))
+                embed.add_field(name="Color", value=f"{old_color} -> {role.color}")
+            except Exception as e:
+                embed.add_field(name="Error in color", value=str(e)[:100])
+        
+        if icon is not None:
+            if icon.filename.endswith(".png") or icon.filename.endswith(".jpg")):
+                try:
+                    old_icon = role.icon_url
+                    await role.edit(icon=icon)
+                    embed.add_field(name="Icon", value=f"{old_icon} -> {role.icon_url}")
+                except Exception as e:
+                    embed.add_field(name="Error in icon", value=str(e)[:100])
+
+            
+        if color is not None:
+            embed.add_field(name="Color", value=f"`{role.color}` -> {color}")
+            await role.edit(color=discord.Color(int(color, 16)))
+        if icon is not None:
+            embed.add_field(name="Icon", value=f"`[Old Icon]{role.icon.url}` -> {icon.url}")
+            await role.edit(icon=icon)
+
+
+
 
     @app_commands.command(name="manage", description="Add member to custom role")
     @app_commands.describe(option="chose to add/remove members", member="Member to add to role")
@@ -90,27 +108,37 @@ class Custom_Roles_slash(app_commands.Group):
     async def add_member(self, interaction: discord.Interaction, member: discord.Member, option: typing.Literal['add', 'remove']):
         data = await interaction.client.crole.find(interaction.user.id)
         if data is None:
-            return await interaction.response.send_message("You have currently no custom role liked to you", ephemeral=True)
-        
-        role = discord.utils.get(interaction.guild.roles, id=data["role"])
-
+            await interaction.response.send_message("You have currently no custom role liked to you", ephemeral=True)
+            return
         if option == 'add':
+
             if member.id in data['members']:
-                await interaction.response.send_message("Member is already in role", ephemeral=True)
-            else:
-                data['members'].append(member.id)
-                await interaction.client.crole.update(data)
-                await member.add_roles(role)
-                await interaction.response.send_message(f"{member.mention} has been added to {role.name}", ephemeral=True)
+                await interaction.response.send_message("Member is already in the role", ephemeral=True)
+                return
+
+            if len(data['members']) >= 5:
+                await interaction.response.send_message("You have reached the maximum amount of members in the role", ephemeral=True)
+                return
+
+            data['members'].append(member.id)
+            await interaction.client.crole.update(data)
+            await member.add_roles(discord.utils.get(interaction.guild.roles, id=data["role"]))
+            await interaction.response.send_message(f"{member.mention} has been added to the role", ephemeral=True)
 
         elif option == 'remove':
+            if member.id == interaction.user.id:
+                await interaction.response.send_message("You can't remove yourself from the role", ephemeral=True)
+                return
+
             if member.id not in data['members']:
-                await interaction.response.send_message("Member is not in role", ephemeral=True)
-            else:
-                data['members'].remove(member.id)
-                await interaction.client.crole.update(data)
-                await member.remove_roles(role)
-                await interaction.response.send_message(f"{member.mention} has been removed from {role.name}", ephemeral=True)
+                await interaction.response.send_message("Member is not in the role", ephemeral=True)
+                return
+
+            data['members'].remove(member.id)
+            await interaction.client.crole.update(data)
+            await member.remove_roles(discord.utils.get(interaction.guild.roles, id=data["role"]))
+            await interaction.response.send_message(f"{member.mention} has been removed from the role", ephemeral=True)
+
 
     async def on_error(self, interaction: discord.Interaction, error: Exception):
         try:
@@ -128,3 +156,26 @@ class Custom_Roles(commands.Cog):
 
 async def setup(bot):
     await bot.add_cog(Custom_Roles(bot))
+
+
+        # data = await interaction.client.crole.find(interaction.user.id)
+        # if data is None:
+        #     await interaction.response.send_message("You have currently no custom role liked to you", ephemeral=True)
+        # else:
+        #     embed = discord.Embed(description="")
+        #     if interaction.user.id == data['_id']:
+        #         role = discord.utils.get(interaction.guild.roles, id=data["role"])
+        #         if name:
+        #             embed.description += "New Name: " + name + "\n"
+        #             await role.edit(name=name)
+        #         if color:
+        #             embed.description += "New Color: " + color + "\n"
+        #             await role.edit(color=discord.Color(int(color, 16)))          #࿔･ﾟ♡ jay's friends ♡ ࿔･ﾟ♡       
+        #         if icon:
+        #             if icon.filename.endswith(".png") or icon.filename.endswith(".jpg"):
+        #                 #convert icon to bytes-like object
+        #                 icon_bytes = await icon.read()
+        #                 embed.description += "New Icon: " + icon.filename + "\n"
+        #                 await role.edit(display_icon=icon_bytes)                   
+        #             else:
+        #                 await interaction.response.send_message(content="Please upload a valid Format: .png or .jpg")
