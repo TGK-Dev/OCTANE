@@ -192,7 +192,10 @@ class General_Qestions(discord.ui.Modal):
         embed = discord.Embed(title=f"{interaction.user.display_name} Welcome to {panel['key']}",description="Kindly wait patiently. A staff member will assist you shortly.\nIf you're looking to approach a specific staff member, ping the member once. Do not spam ping any member or role.\n\nThank you.")
         embed.set_footer(text="Developed by: JAY#0138 & utki007#0007", icon_url=interaction.guild.icon.url if interaction.guild.icon else None)
         embed.add_field(name="Qestion", value=self.gen_qestions.value)
-        msg = await channel.send(content=f"{interaction.user.mention} | "+interaction.guild.get_role(panel['ping_role']).mention,embed=embed, view=Ticket_Control_Panel(interaction.client))
+        content = f"{interaction.user.mention}",
+        if panel['ping_role'] is not None:
+            content += f"@{interaction.guild.get_role(panel['ping_role']).mention}"
+        msg = await channel.send(content=content,embed=embed, view=Ticket_Control_Panel(interaction.client))
         await msg.pin()
         
         ticket_data = {'_id': channel.id, 'user': interaction.user.id, 'add_roles': [], 'add_users': [], 'panel': self.panel, 'logging_message': None, 'status': 'open', 'logging': None, 'question': self.gen_qestions.value}
