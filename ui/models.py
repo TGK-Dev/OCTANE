@@ -52,3 +52,27 @@ class Ticket_Panel_edit(discord.ui.Modal):
                 await interaction.edit_original_message(content=f"{self.name} description: {child.value}")
                 await interaction.client.ticket_system.update(self.data)
                 break
+
+class Ticket_Panel_edit_Other(discord.ui.Modal):
+    def __init__(self, interaction: Interaction, name: str, data: dict):
+        super().__init__(timeout=None, title=f"Editing {name} Extra Info")
+        self.data = data
+        self.interaction = interaction
+        self.name = name
+    
+    async def on_submit(self, interaction: Interaction):
+        for child in self.children:
+            if child.label == "Emoji":
+                self.data['panels'][self.name]['emoji'] = child.value
+            if child.label == "Color":
+                if child.value == "":
+                    self.data['panels'][self.name]['color'] = None
+                if child.value in ['red', 'green', 'blue', 'grey']:
+                    self.data['panels'][self.name]['color'] = child.value
+            
+            
+        embed = discord.Embed(title=f"Editing {self.name} Extra Info", description=f"{self.name} Extra Info", color=0xFF0000)
+        embed.add_field(name="Emoji", value=self.data['panels'][self.name]['emoji'])
+        embed.add_field(name="Color", value=self.data['panels'][self.name]['color'])
+        await interaction.response.send_message(embed=embed)
+        await interaction.client.ticket_system.update(self.data)

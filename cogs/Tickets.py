@@ -6,7 +6,7 @@ from typing import Union, List, Literal
 from utils.checks import Commands_Checks
 from utils.functions import make_db_temp
 from utils.paginator import Paginator
-from ui.models import Ticket_Panel_edit
+from ui.models import Ticket_Panel_edit, Ticket_Panel_edit_Other
 from ui.Ticket_system import Ticket_Control
 import discord
 import os
@@ -146,7 +146,7 @@ class Panel(app_commands.Group):
         
         choice = [
             app_commands.Choice(name=name, value=name)
-            for name in current_panel['panels'].keys()
+            for name in current_panel['panels'].keys() if current.lower() in name.lower()
         ]
         return choice
 
@@ -221,9 +221,8 @@ class Panel(app_commands.Group):
     @app_commands.command(name="edit", description="edit a ticket panel")
     @app_commands.default_permissions(administrator=True)
     @app_commands.autocomplete(name=panel_auto)
-    @app_commands.choices(button=[Choice(name="Blue", value="blurple"), Choice(name="Green", value="green"), Choice(name="Red", value="red"), Choice(name="Gray", value="gray")])
     @app_commands.describe(name="panel name", option="option to edit", target="target to edit not required if options is description")
-    async def panel_edit(self, interaction: discord.Interaction, name:str ,option: Literal['Support Roles', 'Ping Role', 'Description', 'Other'], target: discord.Role = None, emoji: str=None, button: Choice[str]=None):
+    async def panel_edit(self, interaction: discord.Interaction, name:str ,option: Literal['Support Roles', 'Ping Role', 'Description', 'Other'], target: discord.Role = None):
         data = await self.bot.ticket_system.find(interaction.guild.id)
         if not data:
             await interaction.response.send_message("No ticket system found")
@@ -244,16 +243,10 @@ class Panel(app_commands.Group):
             return await interaction.response.send_modal(modal)
 
         if option == 'Other':
-            if option == 'Ping Role':
-                data['panels'][name]['ping_role'] = target.id
-                update = f"Set {target.name} as ping role"
-
-            if emoji:
-                data['panels'][name]['emoji'] = emoji
-                update = f"Set {emoji} as emoji"
-            if button:
-                data['panels'][name]['color'] = button.value
-                update = f"Set {button.name} as color"
+            modal = Ticket_Panel_edit_Other(interaction, name, data)
+            modal.add_item(discord.ui.TextInput(label="Emoji", default=data['panels'][name]['emoji'] if data['panels'][name]['emoji'] else None, custom_id="emoji", style=discord.TextStyle.short, max_length=50, required=False))
+            modal.add_item(discord.ui.TextInput(label="Color", default=data['panels'][name]['color'] if data['panels'][name]['color'] else None, custom_id="color", style=discord.TextStyle.short, required=False))
+            return await interaction.response.send_modal(modal)
         
         await interaction.response.send_message(embed=discord.Embed(description=update, color=discord.Color.green()))
 
@@ -300,7 +293,7 @@ class Ticket(commands.Cog, name="Ticket System", description="Create Ticket With
         self.bot.add_view(Ticket_Control_Panel(self.bot))
         self.bot.tree.add_command(Ticket_slash(self.bot), guild=discord.Object(999551299286732871))
         self.bot.tree.add_command(Panel(self.bot), guild=discord.Object(999551299286732871))
-        await self.bot.tree.sync(guild=discord.Object(999551299286732871))
+        #await self.bot.tree.sync(guild=discord.Object(999551299286732871))
 
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
         self.bot.dispatch("load_panels")

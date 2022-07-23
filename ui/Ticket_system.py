@@ -14,6 +14,7 @@ class Ticket_Control_Panel(discord.ui.View):
     @discord.ui.button(label="Open", style=discord.ButtonStyle.primary, custom_id="OPEN:TICKET", emoji="🔓")
     async def open_ticket(self, interaction: Interaction, button: discord.Button):
         data = await self.bot.tickets.find(interaction.channel.id)
+        ticket_config = await self.bot.ticket_system.find(interaction.guild.id)
         if data is None:
             return await interaction.response.send_message("This channel is not a ticket channel.", ephemeral=True)
         if data['status'] == "open":
@@ -39,7 +40,7 @@ class Ticket_Control_Panel(discord.ui.View):
             await interaction.edit_original_message(embed=embed)
             await interaction.message.edit(view=self)
 
-            log_channel = interaction.guild.get_channel(data['logging'])
+            log_channel = interaction.guild.get_channel(ticket_config['logging'])
             log_embed = discord.Embed(title="Ticket opened", description=f"{interaction.channel.mention} opened by {interaction.user.mention}",)
             log_embed.timestamp = datetime.datetime.utcnow()
             log_embed.color = discord.Color.blurple()
@@ -49,6 +50,7 @@ class Ticket_Control_Panel(discord.ui.View):
     @discord.ui.button(label="Close", style=discord.ButtonStyle.primary, custom_id="CLOSE:TICKET", emoji="🔒")
     async def close_ticket(self, interaction: Interaction, button: discord.Button):
         data = await self.bot.tickets.find(interaction.channel.id)
+        ticket_config = await self.bot.ticket_system.find(interaction.guild.id)
         if data is None:
             return await interaction.response.send_message("This channel is not a ticket channel.", ephemeral=True)
         if data['status'] == "closed":
@@ -57,6 +59,7 @@ class Ticket_Control_Panel(discord.ui.View):
             return await interaction.response.edit_message(view=self)
 
         if data['status'] == "open":
+
             embed = discord.Embed(description="<a:loading:998834454292344842> | Closing ticket...", color=discord.Color.blurple())
             await interaction.response.send_message(embed=embed, ephemeral=False)
             ticket_owner = interaction.guild.get_member(data['user'])
@@ -74,7 +77,7 @@ class Ticket_Control_Panel(discord.ui.View):
             await interaction.edit_original_message(embed=embed)
             await interaction.message.edit(view=self)
 
-            log_channel = interaction.guild.get_channel(data['logging'])
+            log_channel = interaction.guild.get_channel(ticket_config['logging'])
             log_embed = discord.Embed(title="Ticket closed", description=f"{interaction.channel.mention} Ticket closed by {interaction.user.mention}")
             log_embed.timestamp = datetime.datetime.utcnow()
             log_embed.color = discord.Color.red()
@@ -153,7 +156,7 @@ class Ticket_Control(discord.ui.View):
                    style = discord.ButtonStyle.green
                 elif value['color'] == 'red':
                     style = discord.ButtonStyle.red
-                elif value['color'] == 'blurple':
+                elif value['color'] == 'blurple' or 'blue':
                     style = discord.ButtonStyle.blurple
             btn = Panel_Button(label=i, style=style, custom_id="persistent_view:{}".format(i), emoji=str(value['emoji']) if value['emoji'] is not None else None)
             self.add_item(btn)
@@ -192,9 +195,10 @@ class General_Qestions(discord.ui.Modal):
         embed = discord.Embed(title=f"{interaction.user.display_name} Welcome to {panel['key']}",description="Kindly wait patiently. A staff member will assist you shortly.\nIf you're looking to approach a specific staff member, ping the member once. Do not spam ping any member or role.\n\nThank you.")
         embed.set_footer(text="Developed by: JAY#0138 & utki007#0007", icon_url=interaction.guild.icon.url if interaction.guild.icon else None)
         embed.add_field(name="Qestion", value=self.gen_qestions.value)
-        content = f"{interaction.user.mention}",
+        content = f"{interaction.user.mention}"
         if panel['ping_role'] is not None:
-            content += f"@{interaction.guild.get_role(panel['ping_role']).mention}"
+            content += f"<@&{panel['ping_role']}>"
+        print(content)
         msg = await channel.send(content=content,embed=embed, view=Ticket_Control_Panel(interaction.client))
         await msg.pin()
         
