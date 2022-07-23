@@ -143,6 +143,8 @@ class Ticket_Control_Panel(discord.ui.View):
             if log_channel is not None:
                 await log_channel.send(embed=log_embed)
 
+            await self.bot.tickets.delete(interaction.channel.id)
+
 #=============================== New Ticket System =====================================================
 
 class Ticket_Control(discord.ui.View):
