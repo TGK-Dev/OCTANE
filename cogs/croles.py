@@ -83,23 +83,15 @@ class Custom_Roles_slash(app_commands.Group):
                 embed.add_field(name="Error in color", value=str(e)[:100])
         
         if icon is not None:
-            if icon.filename.endswith(".png") or icon.filename.endswith(".jpg")):
+            if icon.filename.endswith(".png") or icon.filename.endswith(".jpg"):
                 try:
-                    old_icon = role.icon_url
-                    await role.edit(icon=icon)
-                    embed.add_field(name="Icon", value=f"{old_icon} -> {role.icon_url}")
+                    icon = await icon.read()
+                    await role.edit(display_icon=icon)
+                    embed.add_field(name="Icon", value=f"updated")
                 except Exception as e:
                     embed.add_field(name="Error in icon", value=str(e)[:100])
-
-            
-        if color is not None:
-            embed.add_field(name="Color", value=f"`{role.color}` -> {color}")
-            await role.edit(color=discord.Color(int(color, 16)))
-        if icon is not None:
-            embed.add_field(name="Icon", value=f"`[Old Icon]{role.icon.url}` -> {icon.url}")
-            await role.edit(icon=icon)
-
-
+        
+        await interaction.response.send_message(embed=embed, ephemeral=False)
 
 
     @app_commands.command(name="manage", description="Add member to custom role")
