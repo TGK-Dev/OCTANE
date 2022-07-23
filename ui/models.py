@@ -1,9 +1,7 @@
 from discord import Interaction
 from discord.ext import commands
-from discord import app_commands
 import discord.ui as ui
 import discord
-import json
 
 class Mass_ban(ui.Modal, title="Mass Ban Modal"):
     def __init__(self, bot: commands.Bot, interaction: Interaction, reason: str):
@@ -38,34 +36,19 @@ class Mass_ban(ui.Modal, title="Mass Ban Modal"):
             await interaction.response.send_message("You do not have permission to use this command/modal.", ephemeral=True)
             return False
 
-class Embed_Modal(discord.ui.Modal, title="Embed Modal"):
-    def __init__(self, bot):
-        super().__init__(timeout=None)
-        self.bot = bot
-    
-    embed_code = ui.TextInput(label="Embed Code", placeholder="Enter the embed code", style=discord.TextStyle.paragraph, custom_id="EMBED:CODE", required=True)
-
-    async def on_submit(self, interaction: Interaction):
-        await interaction.response.defer(thinking=True)
-        embed = json.loads(self.embed_code.value)
-        embed['type'] = 'rich'        
-
-        await interaction.followup.send(embed=discord.Embed.from_dict(embed))
-
-class RenameTicket(discord.ui.Modal, title="New Name"):
-    def __init__(self, bot, interaction):
-        super().__init__(timeout=None)
-        self.bot = bot
+class Ticket_Panel_edit(discord.ui.Modal):
+    def __init__(self, interaction: Interaction, name: str, data: dict):
+        super().__init__(timeout=None, title=f"Editing {name} description")
+        self.data = data
         self.interaction = interaction
+        self.name = name
     
-    new_name = ui.TextInput(label="New Name", placeholder="Enter name of ticket", style=discord.TextStyle.short, custom_id="NEW:NAME", required=True)
-
     async def on_submit(self, interaction: Interaction):
-        if interaction.user.id != self.interaction.user.id:
-            return await interaction.response.send_message("You do not have permission to use this command/modal.", ephemeral=True)
-        
-        await interaction.response.send_message(f"Renaming ticket to {self.new_name.value}")
-
-        await interaction.channel.edit(name=self.new_name.value)
-
-        await interaction.edit_original_message(content=f"Renamed to {self.new_name.value}")
+        await interaction.response.send_message(f"Editing {self.name} description")
+        print(self.children)
+        for child in self.children:
+            if child.label == "Description":
+                self.data['panels'][self.name]['description'] = child.value
+                await interaction.edit_original_message(content=f"{self.name} description: {child.value}")
+                await interaction.client.ticket_system.update(self.data)
+                break
