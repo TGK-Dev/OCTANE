@@ -1,7 +1,6 @@
 from discord.ext import commands, tasks
 from discord import app_commands
 from discord import Interaction
-from ui.models import Embed_Modal
 from utils.converter import TimeConverter
 import discord
 import datetime
