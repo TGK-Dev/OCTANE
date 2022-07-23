@@ -7,3 +7,4 @@ cogs/moderation.txt
 .venv
 cogs/test.py
 test.py
+discord.log
