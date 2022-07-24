@@ -2,11 +2,17 @@ from discord.ext import commands, tasks
 from ui.buttons import verify
 import datetime
 import discord
+from copy import deepcopy
 
 class Events(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.update_task = self.check_update_task.start()
+        self.vote_remider_task = self.check_remiders.start()
+    
+    def cog_unload(self):
+        self.check_remiders.cancel()
+        self.check_update_task.cancel()
     
     @tasks.loop(seconds=300)
     async def check_update_task(self):
@@ -72,6 +78,7 @@ class Events(commands.Cog):
     
     @commands.Cog.listener()
     async def on_member_join(self, member):
+        if member.bot: return
         guild_data = self.bot.config_cache.get(member.guild.id)
         guild = member.guild
         if not guild_data: return
@@ -176,6 +183,58 @@ class Events(commands.Cog):
 
         data["case"] += 1
         await self.bot.config.update(data)
+    
+    @commands.Cog.listener()
+    async def on_ready(self):
+        print(f"{self.__class__.__name__} Cog has been loaded\n-----")
+    
+    @tasks.loop(seconds=60)
+    async def check_remiders(self):
+        currentTime = datetime.datetime.utcnow()
+        currentVotes = deepcopy(self.bot.current_votes)
+        for key, value in currentVotes.items():
+            
+            if value['reminded'] == True:
+                continue
+                
+            expired_time = value['last_vote'] + datetime.timedelta(hours=12)
+
+            if currentTime >= expired_time and value['reminded'] == False:
+                self.bot.dispatch("vote_reminder", value)
+    
+    @check_remiders.before_loop
+    async def before_check_check_remiders(self):
+        await self.bot.wait_until_ready()
+    
+    @commands.Cog.listener()
+    async def on_vote_reminder(self, vote):
+        if vote['reminded'] == True:
+            return
+        
+        embed = discord.Embed(title="You are able to vote again!",description="Your vote is ready at top.gg:", color=0xE74C3C)
+        view = discord.ui.View()
+        view.add_item(discord.ui.Button(label='Top.gg', url="https://top.gg/servers/785839283847954433/vote"))
+
+        guild = self.bot.get_guild(785839283847954433)
+        member = guild.get_member(vote['_id'])
+
+        if member is None:
+            return await self.bot.votes.delete(vote['_id'])
+
+        await member.remove_roles(guild.get_role(786884615192313866))
+
+        vote['reminded'] = True
+        await self.bot.votes.upsert(vote)
+
+        try:
+            await member.send(embed=embed, view=view)
+        except discord.HTTPException:
+            pass
+
+        try:
+            self.bot.current_votes.pop(vote['_id'])
+        except KeyError:
+            pass
 
 async def setup(bot):
     await bot.add_cog(Events(bot))
