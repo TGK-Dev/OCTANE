@@ -30,7 +30,7 @@ class Starboard(commands.Cog, name="Starboard", description="Starboard Module"):
             return
         try:
             channel = self.bot.get_channel(payload.channel_id)
-            
+            message = await channel.fetch_message(payload.message_id)
         except discord.NotFound:
             return
         
