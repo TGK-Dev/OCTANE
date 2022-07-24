@@ -261,11 +261,11 @@ class Panel(app_commands.Group):
 
         await Paginator(interaction, pages).start(quick_navigation=False, embeded=True)
 
-    # async def on_error(self, interaction: Interaction, error):
-    #     try:
-    #         await interaction.response.send_message(f"Error: {error}")
-    #     except discord.InteractionResponded:
-    #         await interaction.followup.send(f"Error: {error}", ephemeral=True)
+    async def on_error(self, interaction: Interaction, error):
+        try:
+            await interaction.response.send_message(f"Error: {error}")
+        except discord.InteractionResponded:
+            await interaction.followup.send(f"Error: {error}", ephemeral=True)
 
 
 class Ticket(commands.Cog, name="Ticket System", description="Create Ticket Without Any Worry"):
@@ -285,11 +285,11 @@ class Ticket(commands.Cog, name="Ticket System", description="Create Ticket With
     @commands.Cog.listener()
     async def on_ready(self):
         self.bot.add_view(Ticket_Control_Panel(self.bot))
-        #self.bot.tree.add_command(Ticket_slash(self.bot), guild=discord.Object(785839283847954433)) #main server
-        #self.bot.tree.add_command(Panel(self.bot), guild=discord.Object(785839283847954433)) #main server
-        self.bot.tree.add_command(Ticket_slash(self.bot), guild=discord.Object(999551299286732871)) #appeal server
-        self.bot.tree.add_command(Panel(self.bot), guild=discord.Object(999551299286732871)) #appeal server
-        await self.bot.tree.sync(guild=discord.Object(999551299286732871))
+        self.bot.tree.add_command(Ticket_slash(self.bot), guild=discord.Object(785839283847954433)) #main server
+        self.bot.tree.add_command(Panel(self.bot), guild=discord.Object(785839283847954433)) #main server
+        self.bot.tree.add_command(Ticket_slash(self.bot), guild=discord.Object(988761284956799038)) #appeal server
+        self.bot.tree.add_command(Panel(self.bot), guild=discord.Object(988761284956799038)) #appeal server
+        #await self.bot.tree.sync(guild=discord.Object(999551299286732871))
 
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
         self.bot.dispatch("load_panels")
