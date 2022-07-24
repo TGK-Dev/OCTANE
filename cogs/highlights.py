@@ -187,10 +187,6 @@ class Highlight(commands.Cog, name="Votes",description="Server Vote counter with
             await user.send(content=f"In **{message.guild.name}** {trigger_message.channel.mention}, you where mentioned with highlight word {trigger_key}",embed=embed)
         except discord.HTTPException:
             pass            
-    
-    @commands.command(name="hl")
-    async def hl(self, ctx):
-        await ctx.send(f"```py\n{self.bot.hl_chache}\n```")
 
 async def setup(bot):
     await bot.add_cog(Highlight(bot))
