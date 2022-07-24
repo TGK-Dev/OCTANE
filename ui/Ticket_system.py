@@ -144,9 +144,6 @@ class Ticket_Control_Panel(discord.ui.View):
                 await log_channel.send(embed=log_embed)
 
             await self.bot.tickets.delete(interaction.channel.id)
-
-#=============================== New Ticket System =====================================================
-
 class Ticket_Control(discord.ui.View):
     def __init__(self, data: dict):
         super().__init__(timeout=None)
@@ -199,7 +196,7 @@ class General_Qestions(discord.ui.Modal):
         embed.add_field(name="Qestion", value=self.gen_qestions.value)
         content = f"{interaction.user.mention}"
         if panel['ping_role'] is not None:
-            content += f"<@&{panel['ping_role']}>"
+            content += f" | <@&{panel['ping_role']}>"
         print(content)
         msg = await channel.send(content=content,embed=embed, view=Ticket_Control_Panel(interaction.client))
         await msg.pin()
@@ -211,7 +208,7 @@ class General_Qestions(discord.ui.Modal):
         log_embed.set_author(name=f"{interaction.user.display_name}", icon_url=interaction.user.avatar.url if interaction.user.avatar else interaction.user.default_avatar.url)
         log_embed.add_field(name="Ticket Owner", value=interaction.user.mention)
         log_embed.add_field(name="Ticket Panel", value=panel['key'])
-        log_embed.add_field(name="Ticket Question", value=self.gen_qestions.value)
+        log_embed.add_field(name="Ticket Qestions", value=self.gen_qestions.value)
         log_embed.add_field(name="Ticket Channel", value=f"{channel.mention} | {channel.name} | {channel.id}")
         log_embed.timestamp = datetime.datetime.utcnow()
 
