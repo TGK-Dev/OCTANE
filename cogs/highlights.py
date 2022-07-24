@@ -130,7 +130,6 @@ class Highlight(commands.Cog, name="Votes",description="Server Vote counter with
     @commands.Cog.listener()
     async def on_ready(self):
         self.bot.tree.add_command(Highlight_Slash(), guild=discord.Object(785839283847954433))
-        await self.bot.tree.sync(guild=discord.Object(785839283847954433))
         all_hl = await self.bot.hightlights.get_all()
         for hl in all_hl:
             self.bot.hl_chache[hl['_id']] = hl
