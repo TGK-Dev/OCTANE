@@ -17,6 +17,8 @@ class Starboard(commands.Cog, name="Starboard", description="Starboard Module"):
     async def on_raw_reaction_add(self, payload):
         if not payload.guild_id:
             return
+        if payload.guild_id != 785839283847954433:
+            return
         if payload.message_id in self.bot.temp_star:
             return        
         config = await self.bot.config.find(payload.guild_id)
@@ -28,7 +30,7 @@ class Starboard(commands.Cog, name="Starboard", description="Starboard Module"):
             return
         try:
             channel = self.bot.get_channel(payload.channel_id)
-            message = await channel.fetch_message(payload.message_id)
+            
         except discord.NotFound:
             return
         
