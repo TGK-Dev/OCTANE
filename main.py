@@ -57,6 +57,7 @@ class Bot(commands.Bot):
         bot.ticket_system = Document(bot.db, 'ticket_system')
         bot.crole = Document(bot.db, 'crole')
         bot.poll = Document(bot.db, 'poll')
+        bot.hightlights = Document(bot.db, 'hightlights')
         bot.Amari_api = AmariClient(bot.Amari_token)
         bot.eco_api = eco_client(bot.eco_toekn)
         
