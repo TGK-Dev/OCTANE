@@ -6,7 +6,7 @@ from typing import Union, List, Literal
 from utils.checks import Commands_Checks
 from utils.functions import make_db_temp
 from utils.paginator import Paginator
-from ui.models import Ticket_Panel_edit, Ticket_Panel_edit_Other
+from ui.models import Ticket_Panel_edit, Ticket_Panel_edit_Other, Ticket_Panel_Roles
 from ui.Ticket_system import Ticket_Control
 import discord
 import os
@@ -221,21 +221,17 @@ class Panel(app_commands.Group):
     @app_commands.command(name="edit", description="edit a ticket panel")
     @app_commands.default_permissions(administrator=True)
     @app_commands.autocomplete(name=panel_auto)
-    @app_commands.describe(name="panel name", option="option to edit", target="target to edit not required if options is description")
-    async def panel_edit(self, interaction: discord.Interaction, name:str ,option: Literal['Support Roles', 'Ping Role', 'Description', 'Other'], target: discord.Role = None):
+    @app_commands.describe(name="panel name", option="option to edit")
+    async def panel_edit(self, interaction: discord.Interaction, name:str ,option: Literal['Panel Roles', 'Description', 'Other']):
         data = await self.bot.ticket_system.find(interaction.guild.id)
         if not data:
             await interaction.response.send_message("No ticket system found")
             return
-        update = ""
-        if option == 'Support Roles':
-            if target.id in data['panels'][name]['support_role']:
-                data['panels'][name]['support_role'].remove(target.id)
-                update = f"Removed {target.name} from support roles"
-            else:
-                data['panels'][name]['support_role'].append(target.id)                
-                update = f"Added {target.name} to support roles"
-
+        if option == 'Panel Roles':
+            modal = Ticket_Panel_Roles(interaction, name, data)
+            modal.add_item(discord.ui.TextInput(label="Support Roles", default=data['panels'][name]['support_role'], placeholder="Ids of roles spearated by comma", style=discord.TextStyle.paragraph))
+            modal.add_item(discord.ui.TextInput(label="Ping Role", default=data['panels'][name]['ping_role'], placeholder="Id of role", max_length=18))
+            await interaction.response.send_modal(modal)
         
         if option == 'Description':
             modal = Ticket_Panel_edit(interaction, name, data)
@@ -247,8 +243,6 @@ class Panel(app_commands.Group):
             modal.add_item(discord.ui.TextInput(label="Emoji", default=data['panels'][name]['emoji'] if data['panels'][name]['emoji'] else None, custom_id="emoji", style=discord.TextStyle.short, max_length=50, required=False))
             modal.add_item(discord.ui.TextInput(label="Color", default=data['panels'][name]['color'] if data['panels'][name]['color'] else None, custom_id="color", style=discord.TextStyle.short, required=False))
             return await interaction.response.send_modal(modal)
-        
-        await interaction.response.send_message(embed=discord.Embed(description=update, color=discord.Color.green()))
 
     @app_commands.command(name="list", description="list all ticket panels")
     @app_commands.default_permissions(administrator=True)
@@ -258,7 +252,7 @@ class Panel(app_commands.Group):
         for panel in data['panels'].keys():
             embed = discord.Embed(title=panel, color=0x00ff00)
             embed.add_field(name="Support Roles", value=", ".join([interaction.guild.get_role(int(role)).mention for role in data['panels'][panel]['support_role']]) if len(data['panels'][panel]['support_role']) > 0 else "None", inline=False)
-            embed.add_field(name="Ping Role", value=interaction.guild.get_role(data['panels'][panel]['ping_role']).mention if data['panels'][panel]['ping_role'] else "None", inline=False)
+            embed.add_field(name="Ping Role", value=interaction.guild.get_role(int(data['panels'][panel]['ping_role'])).mention if data['panels'][panel]['ping_role'] else "None", inline=False)
             embed.add_field(name="Description", value=data['panels'][panel]['description'] if data['panels'][panel]['description'] else "None", inline=False)
             embed.add_field(name="Emoji", value=data['panels'][panel]['emoji'] if data['panels'][panel]['emoji'] else "None", inline=False)
             embed.add_field(name="Button Color", value=data['panels'][panel]['color'] if data['panels'][panel]['color'] else "None", inline=False)
@@ -267,11 +261,11 @@ class Panel(app_commands.Group):
 
         await Paginator(interaction, pages).start(quick_navigation=False, embeded=True)
 
-    async def on_error(self, interaction: Interaction, error):
-        try:
-            await interaction.response.send_message(f"Error: {error}")
-        except discord.InteractionResponded:
-            await interaction.followup.send(f"Error: {error}", ephemeral=True)
+    # async def on_error(self, interaction: Interaction, error):
+    #     try:
+    #         await interaction.response.send_message(f"Error: {error}")
+    #     except discord.InteractionResponded:
+    #         await interaction.followup.send(f"Error: {error}", ephemeral=True)
 
 
 class Ticket(commands.Cog, name="Ticket System", description="Create Ticket Without Any Worry"):
@@ -291,11 +285,11 @@ class Ticket(commands.Cog, name="Ticket System", description="Create Ticket With
     @commands.Cog.listener()
     async def on_ready(self):
         self.bot.add_view(Ticket_Control_Panel(self.bot))
-        self.bot.tree.add_command(Ticket_slash(self.bot), guild=discord.Object(785839283847954433)) #main server
-        self.bot.tree.add_command(Panel(self.bot), guild=discord.Object(785839283847954433)) #main server
-        self.bot.tree.add_command(Ticket_slash(self.bot), guild=discord.Object(988761284956799038)) #appeal server
-        self.bot.tree.add_command(Panel(self.bot), guild=discord.Object(988761284956799038)) #appeal server
-        #await self.bot.tree.sync(guild=discord.Object(999551299286732871))
+        #self.bot.tree.add_command(Ticket_slash(self.bot), guild=discord.Object(785839283847954433)) #main server
+        #self.bot.tree.add_command(Panel(self.bot), guild=discord.Object(785839283847954433)) #main server
+        self.bot.tree.add_command(Ticket_slash(self.bot), guild=discord.Object(999551299286732871)) #appeal server
+        self.bot.tree.add_command(Panel(self.bot), guild=discord.Object(999551299286732871)) #appeal server
+        await self.bot.tree.sync(guild=discord.Object(999551299286732871))
 
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
         self.bot.dispatch("load_panels")
