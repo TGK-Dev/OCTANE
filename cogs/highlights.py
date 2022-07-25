@@ -127,22 +127,11 @@ class Highlight(commands.Cog, name="Votes",description="Server Vote counter with
         self.bot = bot
         self.bot.hl_chache = {}
     
-    @commands.Cog.listener()
-    async def on_ready(self):
-        self.bot.tree.add_command(Highlight_Slash(), guild=discord.Object(785839283847954433))
-        all_hl = await self.bot.hightlights.get_all()
-        for hl in all_hl:
-            self.bot.hl_chache[hl['_id']] = hl
-
-        print(f"{self.__class__.__name__} Cog has been loaded")
-    
-    @commands.Cog.listener()
-    async def on_message(self, message: discord.Message):
-        if message.guild is None: return
+    async def highlight(self, message: discord.Message):
         if message.guild.id != 785839283847954433:
             return
+        
         message_content = message.content.lower().split(" ")
-
         for key in self.bot.hl_chache.keys():
             data = self.bot.hl_chache[key]
             for msg in message_content:
@@ -156,6 +145,31 @@ class Highlight(commands.Cog, name="Votes",description="Server Vote counter with
                             return
                     self.bot.dispatch("hl_trigger", message, data, msg)                    
                     return
+    
+    async def autoreactions(self, message: discord.Message):
+        if len(message.mentions) == 0:
+            return
+        for user in message.mentions:
+            if user.id in self.bot.hl_chache.keys():
+                data = self.bot.hl_chache[user.id]
+                await message.add_reaction(str(data['autoreact']))
+
+    @commands.Cog.listener()
+    async def on_ready(self):
+        self.bot.tree.add_command(Highlight_Slash(), guild=discord.Object(785839283847954433))
+        await self.bot.tree.sync(guild=discord.Object(785839283847954433))
+        all_hl = await self.bot.hightlights.get_all()
+        for hl in all_hl:
+            self.bot.hl_chache[hl['_id']] = hl
+
+        print(f"{self.__class__.__name__} Cog has been loaded")
+    
+    @commands.Cog.listener()
+    async def on_message(self, message: discord.Message):
+        if message.guild is None: return
+        await self.highlight(message)
+        await self.autoreactions(message)
+
     
     @commands.Cog.listener()
     async def on_hl_trigger(self, trigger_message: discord.Message, data: dict, trigger_key: str):
@@ -186,7 +200,27 @@ class Highlight(commands.Cog, name="Votes",description="Server Vote counter with
         try:
             await user.send(content=f"In **{message.guild.name}** {trigger_message.channel.mention}, you where mentioned with highlight word {trigger_key}",embed=embed)
         except discord.HTTPException:
-            pass            
+            pass
+    
+    @app_commands.command(name="autoreact", description="Add a Reaction for user")
+    @app_commands.describe(user="user to add reaction to")
+    @app_commands.guilds(785839283847954433)
+    @app_commands.default_permissions(administrator=True)
+    @app_commands.describe(reaction="reaction to add")
+    async def autoreact(self, interaction: discord.Interaction, user: discord.User, reaction: str):
+        data = await interaction.client.hightlights.find(user.id)
+        embed = discord.Embed(description="<a:loading:998834454292344842> | **Loading...**", color=discord.Color.blue())
+        if data is None:
+            data = {'_id': interaction.user.id, 'tigger': [], 'ignore_channel': [], 'autoreact': None}
+            await interaction.client.hightlights.insert(data)
+        await interaction.response.send_message(embed=embed)
+
+        data['autoreact'] = reaction
+        await interaction.client.hightlights.update(data)
+        
+        embed.description = "<:dynosuccess:1000349098240647188> | Sussessfully added reaction"
+        await interaction.edit_original_message(embed=embed)
+        self.bot.hl_chache[user.id] = data
 
 async def setup(bot):
     await bot.add_cog(Highlight(bot))
