@@ -72,7 +72,9 @@ class Ticket_slash(app_commands.Group, name="ticket", description="ticket system
                 data['add_roles'].append(target.id)
                 embed.description = f"<:dynosuccess:1000349098240647188> | Added {target.mention} to the Ticket"
                 embed.color = discord.Color.green()
+                await interaction.channel.set_permissions(target, read_messages=True, send_messages=True, read_message_history=True, attach_files=True)
                 await interaction.edit_original_message(embed=embed)
+
         if isinstance(target, discord.Member):
             if target.id in data['add_users']:
                 embed.description = "<:dynoError:1000351802702692442> | This member is already in the Ticket"
@@ -83,7 +85,9 @@ class Ticket_slash(app_commands.Group, name="ticket", description="ticket system
                 data['add_users'].append(target.id)
                 embed.description = f"<:dynosuccess:1000349098240647188> | Added {target.mention} to the Ticket"
                 embed.color = discord.Color.green()
+                await interaction.channel.set_permissions(target, read_messages=True, send_messages=True, read_message_history=True, attach_files=True)
                 await interaction.edit_original_message(embed=embed)
+
         await interaction.client.tickets.update(data)
         ticket_config = await self.bot.ticket_system.find(interaction.guild.id)
         if not ticket_config:
@@ -112,7 +116,9 @@ class Ticket_slash(app_commands.Group, name="ticket", description="ticket system
                 data['add_roles'].remove(target.id)
                 embed.description = f"<:dynosuccess:1000349098240647188> | Removed {target.mention} from the Ticket"
                 embed.color = discord.Color.green()
+                await interaction.channel.set_permissions(target, read_messages=False)
                 await interaction.edit_original_message(embed=embed)
+                
         if isinstance(target, discord.Member):
             if target.id not in data['add_users']:
                 embed.description = "<:dynoError:1000351802702692442> | This member is not in the Ticket"
@@ -123,6 +129,7 @@ class Ticket_slash(app_commands.Group, name="ticket", description="ticket system
                 data['add_users'].remove(target.id)
                 embed.description = f"<:dynosuccess:1000349098240647188> | Removed {target.mention} from the Ticket"
                 embed.color = discord.Color.green()
+                await interaction.channel.set_permissions(target, read_messages=False)
                 await interaction.edit_original_message(embed=embed)
 
         await interaction.client.tickets.update(data)
