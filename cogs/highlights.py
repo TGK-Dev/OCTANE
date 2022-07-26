@@ -43,9 +43,9 @@ class Highlight_Slash(app_commands.Group, name="highlight"):
             else:
                 data['tigger'].append(tigger)
                 await interaction.client.hightlights.update(data)
-                embed = discord.Embed(description=f"<:dynosuccess:1000349098240647188> | Added {tigger} to the Highlight List", color=discord.Color.green())
-                await interaction.response.send_message(embed=embed)
                 interaction.client.hl_chache['_id'] = data
+                embed = discord.Embed(description=f"<:dynosuccess:1000349098240647188> | Added {tigger} to the Highlight List", color=discord.Color.green())
+                await interaction.response.send_message(embed=embed)                
                 return
     
     @app_commands.command(name="remove", description="Remove an Trigger from the Highlight List")
@@ -83,6 +83,7 @@ class Highlight_Slash(app_commands.Group, name="highlight"):
 
         for channel in data['ignore_channel']:
             channels.append(f"<#{channel}>")
+        
         embed.add_field(name="Ignore Channels", value=",".join(channels))
         embed.set_footer(text=f"Made by JAY#0138 & utki007#0007")
         embed.timestamp = datetime.datetime.utcnow()
@@ -157,7 +158,6 @@ class Highlight(commands.Cog, name="Votes",description="Server Vote counter with
     @commands.Cog.listener()
     async def on_ready(self):
         self.bot.tree.add_command(Highlight_Slash(), guild=discord.Object(785839283847954433))
-        await self.bot.tree.sync(guild=discord.Object(785839283847954433))
         all_hl = await self.bot.hightlights.get_all()
         for hl in all_hl:
             self.bot.hl_chache[hl['_id']] = hl
@@ -183,14 +183,14 @@ class Highlight(commands.Cog, name="Votes",description="Server Vote counter with
 
         for message in after_message:
             formattime = str(message.created_at.strftime("%H:%M:%S"))
-            embed.description += f"**[{formattime}] {message.author.display_name}:** {message.content if len(message.content) < 20 else message.content[:10]}\n"
+            embed.description += f"**[{formattime}] {message.author.display_name}:** {message.content if len(message.content) < 20 else message.content[:20]}\n"
 
-        embed.description += f"<:pin:1000719163851018340> **[{trigger_message.created_at.strftime('%H:%M:%S')}] {trigger_message.author.display_name}:** {trigger_message.content if len(trigger_message.content) < 20 else trigger_message.content[:10]}\n"
+        embed.description += f"<:pin:1000719163851018340> **[{trigger_message.created_at.strftime('%H:%M:%S')}] {trigger_message.author.display_name}:** {trigger_message.content if len(trigger_message.content) < 20 else trigger_message.content[:20]}\n"
 
         for message in before_message:
             formattime = str(message.created_at.strftime("%H:%M:%S"))
-            embed.description += f"**[{formattime}] {message.author.display_name}:** {message.content if len(message.content) < 20 else message.content[:10]}\n"
-        print("before message done")        
+            embed.description += f"**[{formattime}] {message.author.display_name}:** {message.content if len(message.content) < 20 else message.content[:20]}\n"
+      
         embed.add_field(name="Source", value=f"[Jump to Message]({trigger_message.jump_url})", inline=False)
         
         user = trigger_message.guild.get_member(data['_id'])

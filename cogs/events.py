@@ -3,6 +3,7 @@ from ui.buttons import verify
 import datetime
 import discord
 from copy import deepcopy
+import asyncio
 
 class Events(commands.Cog):
     def __init__(self, bot):
@@ -89,6 +90,7 @@ class Events(commands.Cog):
             role = discord.utils.get(member.guild.roles, id=role)
             if role:
                 await member.add_roles(role)
+                await asyncio.sleep(0.5)
         
         embed = discord.Embed()
 

@@ -24,7 +24,8 @@ class Owner(commands.Cog, name="Owner", description="Owner/admin commands."):
                 current_cogs.append(file[:-3])
         new_options = [app_commands.Choice(name="reload all cogs", value="*")]
         for cog in current_cogs:
-            new_options.append(app_commands.Choice(name=cog, value=cog))
+            if current.lower() in cog.lower():
+                new_options.append(app_commands.Choice(name=cog, value=cog))                
         return new_options[:24]
 
 

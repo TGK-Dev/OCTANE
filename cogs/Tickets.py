@@ -236,8 +236,8 @@ class Panel(app_commands.Group):
             return
         if option == 'Panel Roles':
             modal = Ticket_Panel_Roles(interaction, name, data)
-            modal.add_item(discord.ui.TextInput(label="Support Roles", default=",".join(data['panels'][name]['support_role']), placeholder="Ids of roles spearated by comma", style=discord.TextStyle.paragraph))
-            modal.add_item(discord.ui.TextInput(label="Ping Role", default=data['panels'][name]['ping_role'], placeholder="Id of role", max_length=18))
+            modal.add_item(discord.ui.TextInput(label="Support Roles", default=",".join(data['panels'][name]['support_role']), placeholder="Ids of roles spearated by comma", style=discord.TextStyle.paragraph, required=False))
+            modal.add_item(discord.ui.TextInput(label="Ping Role", default=data['panels'][name]['ping_role'], placeholder="Id of role", max_length=18, required=False))
             await interaction.response.send_modal(modal)
         
         if option == 'Description':
