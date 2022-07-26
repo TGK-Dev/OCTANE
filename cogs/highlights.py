@@ -167,6 +167,7 @@ class Highlight(commands.Cog, name="Votes",description="Server Vote counter with
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
         if message.guild is None: return
+        if message.guild.id != 785839283847954433: return
         await self.highlight(message)
         await self.autoreactions(message)
 
