@@ -90,7 +90,7 @@ class Events(commands.Cog):
             role = discord.utils.get(member.guild.roles, id=role)
             if role:
                 await member.add_roles(role)
-                await asyncio.sleep(0.5)
+                await asyncio.sleep(2)
         
         embed = discord.Embed()
 
