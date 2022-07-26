@@ -19,6 +19,8 @@ class Starboard(commands.Cog, name="Starboard", description="Starboard Module"):
             return
         if payload.guild_id != 785839283847954433:
             return
+        if payload.emoji.name != "⭐":
+            return
         if payload.message_id in self.bot.temp_star:
             return        
         config = await self.bot.config.find(payload.guild_id)
@@ -36,6 +38,7 @@ class Starboard(commands.Cog, name="Starboard", description="Starboard Module"):
         
         reaction = []
         for reactions in message.reactions:
+
             if reactions.emoji == "⭐":
                 reaction = [user.id async for user in reactions.users()]
                 break
@@ -49,7 +52,7 @@ class Starboard(commands.Cog, name="Starboard", description="Starboard Module"):
                 del reaction[reaction.index(message.author.id)]
             except ValueError:
                 pass
-        
+
         if len(reaction) > config['starboard']['threshold']:
             data = {'_id': payload.message_id, 'channel': payload.channel_id, 'guild': payload.guild_id, 'author': message.author.id, 'message': message.content}
             starboard_channel = self.bot.get_channel(config['starboard']['channel'])
@@ -69,6 +72,7 @@ class Starboard(commands.Cog, name="Starboard", description="Starboard Module"):
                 return
 
             try:
+                
                 self.bot.temp_star.append(message.id)
                 embed = discord.Embed()
                 embed.color = discord.Color.random()
@@ -77,15 +81,16 @@ class Starboard(commands.Cog, name="Starboard", description="Starboard Module"):
                 embed.set_author(name=message.author.name, icon_url=message.author.avatar.url if message.author.avatar else message.author.default_avatar.url)
                 embed.set_footer(text=f"Message ID: {message.id}")
                 embed.timestamp = message.created_at
+                
                 if message.reference:
-                    reference = await message.channel.fetch_message(message.reference.id)
+                    reference = await message.channel.fetch_message(message.reference.message_id)
                     if reference.content:
                         embed.add_field(name="Reply", value=reference.content)
                 extra = []
                 if len(message.embeds) > 0:
                     for membed in message.embeds:
                         extra.append(membed)
-
+                
                 view = discord.ui.View()
                 view.add_item(discord.ui.Button(label="View Message", url=message.jump_url, style=discord.ButtonStyle.url))
                 extra.append(embed)
@@ -94,13 +99,13 @@ class Starboard(commands.Cog, name="Starboard", description="Starboard Module"):
                     iembed = discord.Embed()
                     iembed.set_image(url=message.attachments[0].url)
                     extra.append(iembed)
-
+                
                 starboard_message = await starboard_channel.send(content=f"{message.channel.mention} | ⭐ {len(reaction)}",embeds=extra, view=view)
                 data['starboard_message'] = starboard_message.id
                 await self.bot.starboard.insert(data)
                 self.bot.temp_star.remove(message.id)
-            except:
-                pass
+            except Exception as e:
+                print(e)
         
     @commands.Cog.listener()
     async def on_raw_reaction_remove(self, payload):
