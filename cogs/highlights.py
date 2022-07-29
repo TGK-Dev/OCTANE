@@ -214,12 +214,15 @@ class Highlight(commands.Cog, name="Votes",description="Server Vote counter with
     async def autoreact(self, interaction: discord.Interaction, user: discord.User, reaction: str):
         data = await interaction.client.hightlights.find(user.id)
         embed = discord.Embed(description="<a:loading:998834454292344842> | **Loading...**", color=discord.Color.blue())
+
         if data is None:
-            data = {'_id': interaction.user.id, 'tigger': [], 'ignore_channel': [], 'autoreact': None}
+            data = {'_id': user.id, 'tigger': [], 'ignore_channel': [], 'autoreact': None}
+            await interaction.client.hightlights.insert(data)
+
         await interaction.response.send_message(embed=embed)
 
         data['autoreact'] = reaction
-        await interaction.client.hightlights.upsert(data)
+        await interaction.client.hightlights.update(data)
         
         embed.description = "<:dynosuccess:1000349098240647188> | Sussessfully added reaction"
         await interaction.edit_original_message(embed=embed)
