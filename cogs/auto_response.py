@@ -33,8 +33,10 @@ class Ar(commands.Cog, name="Auto Responce", description="Easy way to add Auto R
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        if message.author.bot or message.guild.id != 785839283847954433:
+        if message.author.bot or message.guild is None:
             return
+        if message.guild.id != 785839283847954433: return
+           
         
         if message.channel.id not in [785847439579676672, 799364834927968336,799378297855279125]: return
         # if message.author.guild_permissions.manage_messages:
