@@ -213,7 +213,7 @@ class Events(commands.Cog):
         if vote['reminded'] == True:
             return
         
-        embed = discord.Embed(title="You are able to vote again!",description="Your vote is ready at top.gg:", color=0xE74C3C)
+        embed = discord.Embed(title="You can vote again!",description="You can now vote for [The Gambler's Kingdom](https://discord.gg/tgk) !", color=discord.Color.random())
         view = discord.ui.View()
         view.add_item(discord.ui.Button(label='Top.gg', url="https://top.gg/servers/785839283847954433/vote"))
 
