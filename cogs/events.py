@@ -213,9 +213,8 @@ class Events(commands.Cog):
         if vote['reminded'] == True:
             return
         
-        embed = discord.Embed(title="You can vote again!",description="You can now vote for [The Gambler's Kingdom](https://discord.gg/tgk) !", color=discord.Color.random())
         view = discord.ui.View()
-        view.add_item(discord.ui.Button(label='Top.gg', url="https://top.gg/servers/785839283847954433/vote"))
+        view.add_item(discord.ui.Button(label="Vote for TGK at Top.gg", emoji="<a:tgk_icon:1002504426172448828>",url="https://top.gg/servers/785839283847954433/vote"))
 
         guild = self.bot.get_guild(785839283847954433)
         member = guild.get_member(vote['_id'])
@@ -229,7 +228,7 @@ class Events(commands.Cog):
         await self.bot.votes.upsert(vote)
 
         try:
-            await member.send(embed=embed, view=view)
+            await member.send("You can now vote for The Gambler's Kingdom again!", view=view)
         except discord.HTTPException:
             pass
 
