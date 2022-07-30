@@ -53,20 +53,6 @@ class Invites(commands.Cog, name="Invites",description=description):
         data["userInvited"].append(member.id)
         await self.bot.invites.upsert(data)
 
-        channel = self.bot.get_channel(829008100555489301)
-        embed = discord.Embed(timestamp=member.joined_at)
-        embed.add_field(name=f"Member Information:",
-                        value=f"Name: {member.name}\n Member ID:\n {member.id}\nCreated at:\n{fomat_time(member.created_at)}")
-        embed.add_field(name=f"Invited Information",
-                        value=f"Name: {inviter.name}\nInviter ID:{inviter.id}\nInviter account created at\n{fomat_time(inviter.created_at)}\nInvites: {data['count']}", inline=False)
-        if member.avatar != None:
-            embed.set_thumbnail(url=member.avatar.url or None)
-        else:
-            embed.set_thumbnail(url=member.default_avatar)
-        embed.set_footer(text=member.guild.name,
-                         icon_url=member.guild.icon.url)
-        await channel.send(embed=embed)
-
     @app_commands.command(name="invites", description="Show the invites of a user")
     @app_commands.guilds(785839283847954433)
     @app_commands.checks.dynamic_cooldown(Dynamic_cooldown.is_me)   
