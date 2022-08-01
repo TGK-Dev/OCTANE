@@ -55,6 +55,7 @@ class Bot(commands.Bot):
         bot.inv = Document(bot.db, 'inv')
         bot.booster = Document(bot.db, 'booster')
         bot.ticket_system = Document(bot.db, 'ticket_system')
+        bot.staff = Document(bot.db, 'staff')
         bot.crole = Document(bot.db, 'crole')
         bot.poll = Document(bot.db, 'poll')
         bot.hightlights = Document(bot.db, 'hightlights')
@@ -62,7 +63,7 @@ class Bot(commands.Bot):
         bot.eco_api = eco_client(bot.eco_toekn)
         
         for file in os.listdir('./cogs'):
-            if file.endswith('.py') and not file.startswith("_"):
+            if file.endswith('.py') and not file.startswith("_") and not file.startswith("valorant"):
                 await bot.load_extension(f'cogs.{file[:-3]}')
 
 
@@ -137,10 +138,10 @@ async def on_ready():
     for active_booster in current_active_booster:
         bot.active_booster[active_booster['_id']] = active_booster
     
-    await bot.tree.sync(guild=discord.Object(main_guilds[0]))
-    await bot.tree.sync(guild=discord.Object(main_guilds[1]))
-    await bot.tree.sync(guild=discord.Object(988761284956799038))
-    await bot.tree.sync()
+    # await bot.tree.sync(guild=discord.Object(main_guilds[0]))
+    # await bot.tree.sync(guild=discord.Object(main_guilds[1]))
+    # await bot.tree.sync(guild=discord.Object(988761284956799038))
+    # await bot.tree.sync()
 
     await bot.change_presence(status=discord.Status.dnd, activity=discord.Activity(type=discord.ActivityType.watching, name="Server Security"))
 
