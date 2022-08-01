@@ -6,14 +6,14 @@ import random
 import string
 class Staff(app_commands.Group):
     def __init__(self):
-        super().__init__(name='staff', default_permissions=discord.Permissions(8))
+        super().__init__(name='staff')
     
 
     @app_commands.command(name="add", description="Add a user to the staff list")
     @app_commands.choices(post=[app_commands.Choice(name="Head Admin", value="799037944735727636"), app_commands.Choice(name="Admin", value="785845265118265376"), app_commands.Choice(name="Moderator", value="787259553225637889"), app_commands.Choice(name="Trial Moderator", value="843775369470672916"),app_commands.Choice(name="Partnership Manager", value="831405039830564875"), app_commands.Choice(name="Giveaway Manager", value="803230347575820289"), app_commands.Choice(name="Event Manager", value="852125566802198528")])
     async def add(self, interaction: discord.Interaction, member: discord.Member, post: app_commands.Choice[str]):
         if interaction.user.id not in [488614633670967307, 301657045248114690,651711446081601545,413651113485533194,562738920031256576]:
-            await interaction.edit_original_message(content=None, embed=discord.Embed(description=f"<:dynoError:1000351802702692442> | You do not have permission to use this command", color=discord.Color.red()))
+            await interaction.response.send_message(content=None, embed=discord.Embed(description=f"<:dynoError:1000351802702692442> | You do not have permission to use this command", color=discord.Color.red()))
             return
         await interaction.response.send_message("Adding user to staff list...")
         data = await interaction.client.staff.find(member.id)
@@ -36,7 +36,7 @@ class Staff(app_commands.Group):
     @app_commands.choices(post=[app_commands.Choice(name="Head Admin", value="799037944735727636"), app_commands.Choice(name="Admin", value="785845265118265376"), app_commands.Choice(name="Moderator", value="787259553225637889"), app_commands.Choice(name="Trial Moderator", value="785845265118265376"), app_commands.Choice(name="Partnership Manager", value="831405039830564875"), app_commands.Choice(name="Giveaway Manager", value="803230347575820289"), app_commands.Choice(name="Event Manager", value="852125566802198528")])
     async def remove(self, interaction: discord.Interaction, member: discord.Member, post:str):
         if interaction.user.id not in [488614633670967307, 301657045248114690,651711446081601545,413651113485533194,562738920031256576]:
-            await interaction.edit_original_message(content=None, embed=discord.Embed(description=f"<:dynoError:1000351802702692442> | You do not have permission to use this command", color=discord.Color.red()))
+            await interaction.response.send_message(content=None, embed=discord.Embed(description=f"<:dynoError:1000351802702692442> | You do not have permission to use this command", color=discord.Color.red()))
             return
         await interaction.response.send_message("Removing user from staff list...")
         data = await interaction.client.staff.find(member.id)
@@ -94,7 +94,7 @@ class Staff(app_commands.Group):
     @app_commands.command(name="recovery", description="Set a recovery code for a user")
     async def recovery(self, interaction: discord.Interaction, member: discord.Member):
         if interaction.user.id not in [488614633670967307, 301657045248114690,651711446081601545,413651113485533194,562738920031256576]:
-            await interaction.edit_original_message(content=None, embed=discord.Embed(description=f"<:dynoError:1000351802702692442> | You do not have permission to use this command", color=discord.Color.red()))
+            await interaction.response.send_message(content=None, embed=discord.Embed(description=f"<:dynoError:1000351802702692442> | You do not have permission to use this command", color=discord.Color.red()))
             return
 
         data = await interaction.client.staff.find(member.id)
@@ -106,7 +106,7 @@ class Staff(app_commands.Group):
         #create randonm code 
         code = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(6))
         data['recovery_code'] = code
-        embed = discord.Embed(description="<:dynosuccess:1000349098240647188> | Successfully set a recovery code for {member.mention}", color=discord.Color.green())
+        embed = discord.Embed(description=f"<:dynosuccess:1000349098240647188> | Successfully set a recovery code for {member.mention}", color=discord.Color.green())
         dm_embed = discord.Embed(description=f"You have received a recovery code incase you lost your current account password.\nNever share this code with anyone.\nHigher staff will never ask you for your recovery code.\nTo use your recovery code, type `-recovery {code}` in the DM with the bot.\nIf you did not request a recovery code, please ignore this message.", color=discord.Color.green())
         dm_embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/999553621895155723/1003581466950783026/tgk.gif")
         await interaction.client.staff.update(data)
@@ -115,15 +115,16 @@ class Staff(app_commands.Group):
         await interaction.edit_original_message(content=None, embed=embed)
     
     @app_commands.command(name="set-timezone", description="Set Timezone of a user")
-    async def set_timezone(self, interaction: discord.Interaction, member: discord.Member, timezone:str):
-        data = await interaction.client.staff.find(member.id)
+    @app_commands.describe(timezone="Your Timezone")
+    async def set_timezone(self, interaction: discord.Interaction, timezone:str):
+        data = await interaction.client.staff.find(interaction.user.id)
         await interaction.response.send_message("Setting timezone...")
         if not data:
-            await interaction.edit_original_message(content=None, embed=discord.Embed(description=f"<:dynoError:1000351802702692442> | {member.mention} is not in the staff list", color=discord.Color.red()))
+            await interaction.edit_original_message(content=None, embed=discord.Embed(description=f"<:dynoError:1000351802702692442> | {interaction.user.mention} is not in the staff list", color=discord.Color.red()))
             return
         data['timezone'] = timezone
         await interaction.client.staff.update(data)
-        await interaction.edit_original_message(content=None, embed=discord.Embed(description=f"<:dynosuccess:1000349098240647188> | Successfully set {member.mention}'s timezone to {timezone}", color=discord.Color.green()))
+        await interaction.edit_original_message(content=None, embed=discord.Embed(description=f"<:dynosuccess:1000349098240647188> | Successfully set {interaction.user.mention}'s timezone to {timezone}", color=discord.Color.green()))
 
 class Staff_mamagement(commands.Cog):
     def __init__(self, bot):
