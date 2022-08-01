@@ -162,8 +162,70 @@ class Ticket_Control(discord.ui.View):
 
 class Panel_Button(discord.ui.Button):
     async def callback(self, interaction: Interaction):
+        if self.label == "Partnership":
+            await interaction.response.send_modal(Partnership_Qestion(interaction))
+            return
         await interaction.response.send_modal(General_Qestions(interaction, self.label))
 
+class Partnership_Qestion(discord.ui.Modal):
+    def __init__(self, interaction: discord.Interaction):
+        self.interaction = interaction
+        super().__init__(timeout=None, title="Server Info")
+
+    server_name = discord.ui.TextInput(label="Server Name", placeholder="Enter Server Name your representing", custom_id="server:name")
+    server_invite = discord.ui.TextInput(label="Server Invite", placeholder="Enter Server Invite Link,", custom_id="server:link")
+    partership_type = discord.ui.TextInput(label="Partnership Type", placeholder="Enter Partnership Type (heist, event, etc)", custom_id="server:type:partnership")
+
+    async def on_submit(self, interaction: Interaction):
+
+        embed = discord.Embed(description="Please wait while we process your question", color=discord.Color.green())
+        await interaction.response.send_message(embed=embed, ephemeral=True)
+        data = await self.interaction.client.ticket_system.find(interaction.guild.id)
+        panel = data['panels']["Partnership"]
+        try:
+            invite = self.server_invite.value.split("/")[:-1]
+            invite = f"https://discord.gg/{invite}"
+            invite = await interaction.client.fetch_invite(invite)
+            info_data = f"**Server Invite:** {invite.url}\n**Server Name:** {self.server_name.value}\n**Server ID:** {invite.guild.id}\n**Partnership Type:** {self.partership_type.value}"
+        except:
+            info_data = f"**Server Invite:** {self.server_invite.value}\n**Server Name:** {self.server_name.value}\n**Server ID:** Didn't Get Done\n**Partnership Type:** {self.partership_type.value}"
+            pass
+        
+        permissons = {
+            interaction.user : discord.PermissionOverwrite(read_messages=True, send_messages=True, read_message_history=True, attach_files=True),
+            interaction.guild.default_role : discord.PermissionOverwrite(read_messages=False, send_messages=False, read_message_history=False, attach_files=False),
+            interaction.guild.me: discord.PermissionOverwrite(read_messages=True, send_messages=True, read_message_history=True, attach_files=True, manage_channels=True,)
+        }
+        for i in panel['support_role']:
+            permissons[interaction.guild.get_role(i)] = discord.PermissionOverwrite(read_messages=True, send_messages=True, read_message_history=True, attach_files=True)
+        
+        channel = await interaction.guild.create_text_channel(name=f"{interaction.user.display_name}-ticket", category=interaction.client.get_channel(data['catogory']) if data['catogory'] else interaction.channel.category, overwrites=permissons)
+        embed = discord.Embed(title=f"{interaction.user.display_name} Welcome to {panel['key']}",description="Kindly wait patiently. A staff member will assist you shortly.\nIf you're looking to approach a specific staff member, ping the member once. Do not spam ping any member or role.\n\nThank you.")
+        embed.set_footer(text="Developed by: JAY#0138 & utki007#0007", icon_url=interaction.guild.icon.url if interaction.guild.icon else None)
+        content = f"{interaction.user.mention}"
+        if panel['ping_role'] is not None:
+            content += f" | <@&{panel['ping_role']}>"
+        msg = await channel.send(content=content,embed=embed, view=Ticket_Control_Panel(interaction.client))
+        server_info_msg = await channel.send(content=info_data)
+        await msg.pin()
+        await server_info_msg.pin()
+
+        ticket_data = {'_id': channel.id, 'user': interaction.user.id, 'add_roles': [], 'add_users': [], 'panel': panel['key'], 'logging_message': None, 'status': 'open', 'logging': None, 'question': info_data}
+        
+        log_channel = interaction.guild.get_channel(data['logging'])
+        log_embed = discord.Embed()
+        log_embed.set_author(name=f"{interaction.user.display_name}", icon_url=interaction.user.avatar.url if interaction.user.avatar else interaction.user.default_avatar.url)
+        log_embed.add_field(name="Ticket Owner", value=interaction.user.mention)
+        log_embed.add_field(name="Ticket Panel", value=panel['key'])
+        log_embed.add_field(name="Ticket Channel", value=f"{channel.mention} | {channel.name} | {channel.id}")
+        log_embed.timestamp = datetime.datetime.utcnow()
+
+        if log_channel:
+            msg = await log_channel.send(embed=log_embed)
+            ticket_data['logging_message'] = msg.id
+            
+        await self.interaction.client.tickets.insert(ticket_data)
+        await interaction.edit_original_message(content=f"Your ticket has been created. You can view it here: {channel.mention}")
 
 class General_Qestions(discord.ui.Modal):
     def __init__(self, interaction: discord.Interaction, panel: str):
@@ -189,7 +251,7 @@ class General_Qestions(discord.ui.Modal):
             permissons[interaction.guild.get_role(i)] = discord.PermissionOverwrite(read_messages=True, send_messages=True, read_message_history=True, attach_files=True)
     
 
-        channel = await interaction.guild.create_text_channel(name=f"{panel['key']}-{interaction.user.display_name}", category=interaction.client.get_channel(data['catogory']) if data['catogory'] else interaction.channel.category, overwrites=permissons)
+        channel = await interaction.guild.create_text_channel(name=f"{interaction.user.display_name}-ticket", category=interaction.client.get_channel(data['catogory']) if data['catogory'] else interaction.channel.category, overwrites=permissons)
 
         embed = discord.Embed(title=f"{interaction.user.display_name} Welcome to {panel['key']}",description="Kindly wait patiently. A staff member will assist you shortly.\nIf you're looking to approach a specific staff member, ping the member once. Do not spam ping any member or role.\n\nThank you.")
         embed.set_footer(text="Developed by: JAY#0138 & utki007#0007", icon_url=interaction.guild.icon.url if interaction.guild.icon else None)
