@@ -78,7 +78,7 @@ class BanAppeal(commands.Cog, name="Ban Appeal", description="Easy way to add Ba
         user = await self.bot.fetch_user(member.id)
         main_guild = self.bot.get_guild(785839283847954433)
         try:
-            await main_guild.bans.get(user)            
+            await main_guild.fetch_ban(user.id)
             return
         except discord.NotFound:
             try:
