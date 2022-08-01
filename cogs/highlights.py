@@ -153,10 +153,13 @@ class Highlight(commands.Cog, name="Votes",description="Server Vote counter with
         for user in message.mentions:
             if user.id in self.bot.hl_chache.keys():
                 data = self.bot.hl_chache[user.id]
-                try:
-                    await message.add_reaction(str(data['autoreact']))
-                except KeyError:
-                    pass
+
+                if data['last_react'] is None or (datetime.datetime.utcnow() - data['last_react']).total_seconds() > 10:
+                    try:
+                        await message.add_reaction(str(data['autoreact']))
+                        data['last_react'] = datetime.datetime.utcnow()
+                    except KeyError:
+                        pass
 
     @commands.Cog.listener()
     async def on_ready(self):
