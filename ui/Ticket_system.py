@@ -259,7 +259,6 @@ class General_Qestions(discord.ui.Modal):
         content = f"{interaction.user.mention}"
         if panel['ping_role'] is not None:
             content += f" | <@&{panel['ping_role']}>"
-        print(content)
         msg = await channel.send(content=content,embed=embed, view=Ticket_Control_Panel(interaction.client))
         await msg.pin()
         
