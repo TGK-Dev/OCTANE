@@ -138,10 +138,10 @@ async def on_ready():
     for active_booster in current_active_booster:
         bot.active_booster[active_booster['_id']] = active_booster
     
-    # await bot.tree.sync(guild=discord.Object(main_guilds[0]))
-    # await bot.tree.sync(guild=discord.Object(main_guilds[1]))
-    # await bot.tree.sync(guild=discord.Object(988761284956799038))
-    # await bot.tree.sync()
+    await bot.tree.sync(guild=discord.Object(main_guilds[0]))
+    await bot.tree.sync(guild=discord.Object(main_guilds[1]))
+    await bot.tree.sync(guild=discord.Object(988761284956799038))
+    await bot.tree.sync()
 
     await bot.change_presence(status=discord.Status.dnd, activity=discord.Activity(type=discord.ActivityType.watching, name="Server Security"))
 
