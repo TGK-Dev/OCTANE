@@ -13,7 +13,7 @@ class AFK(commands.Cog, name="AFK", description="Member Afk Module"):
     
     @commands.Cog.listener()
     async def on_message(self, message):
-        if message.author.bot:
+        if message.author.bot or message.guild is None:
             return
         
         if message.guild.id != 785839283847954433: return
