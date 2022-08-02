@@ -28,7 +28,8 @@ class Highlight_Slash(app_commands.Group, name="highlight"):
             data = {
                 '_id': interaction.user.id,
                 'tigger': [],
-                'ignore_channel':[]
+                'ignore_channel':[],
+                'last_react': None
             }
             await interaction.client.hightlights.insert(data)
             interaction.client.hl_chache['_id'] = data
@@ -219,7 +220,7 @@ class Highlight(commands.Cog, name="Votes",description="Server Vote counter with
         embed = discord.Embed(description="<a:loading:998834454292344842> | **Loading...**", color=discord.Color.blue())
 
         if data is None:
-            data = {'_id': user.id, 'tigger': [], 'ignore_channel': [], 'autoreact': None}
+            data = {'_id': user.id, 'tigger': [], 'ignore_channel': [], 'autoreact': None, 'last_react': None}
             await interaction.client.hightlights.insert(data)
 
         await interaction.response.send_message(embed=embed)

@@ -87,16 +87,17 @@ class Ticket_Panel_Roles(discord.ui.Modal):
     async def on_submit(self, interaction: Interaction):
         await interaction.response.defer(thinking=True)
         embed = discord.Embed(title=f"Editing {self.name} Roles",color=discord.Color.blurple())
-
         for child in self.children:
+            
             if child.label == "Support Roles":
                 add_roles = ""
                 rolesids = child.value.split(",")
-                self.data['panels'][self.name]['support_roles'] = []
+                self.data['panels'][self.name]['support_role'] = []
                 for roleid in rolesids:
                     role = interaction.guild.get_role(int(roleid))
                     if role:
-                        self.data['panels'][self.name]['support_roles'].append(role.id)
+                        print(role)
+                        self.data['panels'][self.name]['support_role'].append(role.id)
                         add_roles += f"{role.mention}\n"
 
                 embed.add_field(name="Support Roles", value=add_roles)
