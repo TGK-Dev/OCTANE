@@ -300,7 +300,6 @@ class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
     @app_commands.describe(member="User to mute")
     @app_commands.describe(time="Time to mute")
     @app_commands.describe(reason="Reason for mute")
-    @commands.check_any(Commands_Checks.can_use(), Commands_Checks.is_me())
     async def mute(self, interaction: discord.Interaction, member: discord.Member, time: str=None, reason: str="No reason given"):
         await interaction.response.defer(thinking=True)
         time = await TimeConverter().convert(interaction, time)
@@ -330,18 +329,18 @@ class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
             return await interaction.followup.send("This user is already muted")
         
         data = {'_id': member.id, 'guildId': interaction.guild.id, 'MutedBy': interaction.user.id, 'MutedAt': datetime.datetime.utcnow(), 'MutedDuration': time,'old_roles': []}
+        await member.add_roles(Muted_role)
+
         for role in member.roles:
             try:
-                await member.remove_roles(role)
-                data['old_roles'].append(role.id)
+                if role.id == Muted_role.id:
+                    continue
+                else:
+                    await member.remove_roles(role)
+                    data['old_roles'].append(role.id)                
             except:
-                continue
-        
-        await member.add_roles(Muted_role, reason="Muted")
-        if time:
-            await self.bot.mutes.insert(data)
-            self.bot.current_mutes[member.id] = data
-        
+                pass
+
         log_channel = interaction.guild.get_channel(guild_data['mod_log'])
         
         embed = discord.Embed(title=f"🔇 Mute | Case ID: {guild_data['case']}",
@@ -360,6 +359,39 @@ class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
             await member.send(f"You have been muted from {interaction.guild.name} for {reason}\n Unmute in <t:{remove_time}:R>")
         except discord.HTTPException:
             pass
+    
+    @app_commands.command(name="unmute", description="Unmute a user")
+    @app_commands.guilds(785839283847954433)
+    @app_commands.describe(member="User to unmute", reason="Reason for unmute")
+    @app_commands.checks.has_permissions(administrator=True)
+    async def unmute(self, interaction: discord.Interaction, member: discord.Member, reason: str="No reason given"):
+        await interaction.response.defer(thinking=True)
+        guild_data = await self.bot.config.find(interaction.guild.id)
+        Muted_role = discord.utils.get(interaction.guild.roles, name="Muted")
+        if not Muted_role:
+            return await interaction.followup.send("No Muted role found in server")
+        if Muted_role not in member.roles:
+            return await interaction.followup.send("This user is not muted")
+        await member.remove_roles(Muted_role)
+        mute_data = await self.bot.mutes.find(member.id)
+        if mute_data is not None:
+            for role in mute_data['old_roles']:
+                try:
+                    await member.add_roles(discord.utils.get(interaction.guild.roles, id=role))
+                except:
+                    pass
+            await self.bot.mutes.delete(member.id)
+        
+        log_channel = interaction.guild.get_channel(guild_data['mod_log'])
+        embed = discord.Embed(title=f"🔈 Unmute | Case ID: {guild_data['case']}",
+            description=f" **Offender**: {member.name} | {member.mention}\n**Reason**: {reason}\n **Moderator**: {interaction.user.name} {interaction.user.mention}", color=0xE74C3C)
+        embed.timestamp = datetime.datetime.utcnow()
+        embed.set_footer(text=f"ID: {member.id}")
+        await log_channel.send(embed=embed)
+        guild_data['case'] += 1
+        await self.bot.config.update(guild_data)
+        response_embed = discord.Embed(description=f"<:allow:819194696874197004> | {member.mention} has been unmuted", color=0x32CD32)
+        await interaction.followup.send(embed=response_embed)
     
     @app_commands.command(name="role", description="add/remove a role to a user")
     @app_commands.guilds(785839283847954433)
