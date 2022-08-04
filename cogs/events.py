@@ -126,7 +126,7 @@ class Events(commands.Cog):
         logs = [log async for log in guild.audit_logs(limit=1, action=discord.AuditLogAction.ban)]
         logs = logs[0]
 
-        if logs.user.id == 816699167824281621:
+        if logs.user.id in [816699167824281621 ,235148962103951360]:
             return
         if logs.target != member: return
 
