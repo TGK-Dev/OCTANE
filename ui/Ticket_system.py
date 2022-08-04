@@ -183,9 +183,10 @@ class Partnership_Qestion(discord.ui.Modal):
         data = await self.interaction.client.ticket_system.find(interaction.guild.id)
         panel = data['panels']["Partnership"]
         try:
-            invite = self.server_invite.value.split("/")[:-1]
-            invite = f"https://discord.gg/{invite}"
-            invite = await interaction.client.fetch_invite(invite)
+            inv = self.server_invite.value
+            invite = inv.split("/")
+            code = invite[len(invite)-1]
+            invite = await interaction.client.fetch_invite(code)
             info_data = f"**Server Invite:** {invite.url}\n**Server Name:** {self.server_name.value}\n**Server ID:** {invite.guild.id}\n**Partnership Type:** {self.partership_type.value}"
         except:
             info_data = f"**Server Invite:** {self.server_invite.value}\n**Server Name:** {self.server_name.value}\n**Server ID:** Didn't Get Done\n**Partnership Type:** {self.partership_type.value}"
