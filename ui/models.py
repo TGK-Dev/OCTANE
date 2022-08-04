@@ -107,8 +107,13 @@ class Ticket_Panel_Roles(discord.ui.Modal):
                     self.data['panels'][self.name]['ping_role'] = None
                     embed.add_field(name="Ping Role", value="None")
                 else:
-                    self.data['panels'][self.name]['ping_role'] = child.value
-                    embed.add_field(name="Ping Role", value=child.value)
+                    role = interaction.guild.get_role(int(child.value))
+                    if role:
+                        self.data['panels'][self.name]['ping_role'] = role.id
+                        embed.add_field(name="Ping Role", value=role.mention)
+                    else:
+                        self.data['panels'][self.name]['ping_role'] = None
+                        embed.add_field(name="Ping Role", value="Invalid Role")
 
         await interaction.client.ticket_system.update(self.data)
         await interaction.followup.send(embed=embed)
