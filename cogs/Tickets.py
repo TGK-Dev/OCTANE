@@ -277,7 +277,9 @@ class Panel(app_commands.Group):
         else:
             embed.add_field(name="Other Settings", value="```\nNone\n```", inline=False)
         
-        await interaction.response.send_message(embed=embed)
+        view = Panel_edit(interaction, data, name)
+        await interaction.response.send_message(embed=embed, view=view)
+        view.message = await interaction.original_message()
             
 
 
