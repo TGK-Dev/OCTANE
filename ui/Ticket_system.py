@@ -186,7 +186,7 @@ class Ticket_Control(discord.ui.View):
     def __init__(self, data: dict):
         super().__init__(timeout=None)
         self.data = data
-        style = discord.ButtonStyle.gray
+        style = discord.ButtonStyle.secondary
         for i, value in data.items():
             if value['color']:
                 if value['color'] == 'green':
@@ -195,8 +195,8 @@ class Ticket_Control(discord.ui.View):
                     style = discord.ButtonStyle.red
                 elif value['color'] == 'blurple' or 'blue':
                     style = discord.ButtonStyle.blurple
-                elif value['color'] == 'gray':
-                    style = discord.ButtonStyle.gray
+                elif value['color'] == 'grey':
+                    style = discord.ButtonStyle.secondary
                     
             btn = Panel_Button(label=i, style=style, custom_id="persistent_view:{}".format(i), emoji=str(value['emoji']) if value['emoji'] is not None else None)
             self.add_item(btn)
