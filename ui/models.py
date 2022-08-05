@@ -77,43 +77,6 @@ class Ticket_Panel_edit_Other(discord.ui.Modal):
         await interaction.response.send_message(embed=embed)
         await interaction.client.ticket_system.update(self.data)
 
-class Ticket_Panel_Roles(discord.ui.Modal):
-    def __init__(self, interaction: Interaction, name: str, data: dict):
-        super().__init__(timeout=None, title=f"Editing {name} Roles")
-        self.data = data
-        self.interaction = interaction
-        self.name = name
-    
-    async def on_submit(self, interaction: Interaction):
-        await interaction.response.defer(thinking=True)
-        embed = discord.Embed(title=f"Editing {self.name} Roles",color=discord.Color.blurple())
-        for child in self.children:
-            
-            if child.label == "Support Roles":
-                add_roles = ""
-                rolesids = child.value.split(",")
-                self.data['panels'][self.name]['support_role'] = []
-                for roleid in rolesids:
-                    role = interaction.guild.get_role(int(roleid))
-                    if role:
-                        print(role)
-                        self.data['panels'][self.name]['support_role'].append(role.id)
-                        add_roles += f"{role.mention}\n"
 
-                embed.add_field(name="Support Roles", value=add_roles)
 
-            if child.label == "Ping Role":
-                if child.value == "" or child.value == "None":
-                    self.data['panels'][self.name]['ping_role'] = None
-                    embed.add_field(name="Ping Role", value="None")
-                else:
-                    role = interaction.guild.get_role(int(child.value))
-                    if role:
-                        self.data['panels'][self.name]['ping_role'] = role.id
-                        embed.add_field(name="Ping Role", value=role.mention)
-                    else:
-                        self.data['panels'][self.name]['ping_role'] = None
-                        embed.add_field(name="Ping Role", value="Invalid Role")
 
-        await interaction.client.ticket_system.update(self.data)
-        await interaction.followup.send(embed=embed)

@@ -6,6 +6,44 @@ import chat_exporter
 import io
 from discord import Interaction
 
+async def update_embed(interaction: Interaction, data: dict, name:str):
+    panel = data['panels'][name]
+    embed = discord.Embed(title=f"{name} Settings", color=discord.Color.blurple())
+    Support_roles = ""
+    if len(panel['support_role']) > 0:
+        for role in panel['support_role']:
+            role = interaction.guild.get_role(int(role))
+            if role:
+                Support_roles += f"{role.name} | {role.id}\n"
+    else:
+        Support_roles = "None"
+
+    Ping_role = ""
+    if panel['ping_role']:
+        role = interaction.guild.get_role(int(panel['ping_role']))
+        if role:
+            Ping_role = f"{role.name} | {role.id}"
+    else:
+        Ping_role = "None"
+    embed.add_field(name="Role Settings", value=f"> **Support Roles:**\n```\n{Support_roles}\n```\n> **Ping Role:**\n```\n{Ping_role}\n```", inline=False)
+    embed.add_field(name="Info Settings", value=f"> **Description**\n```\n{panel['description']}\n```", inline=False)
+    Modal_Settings = ""
+    if panel['modal']:
+        Modal_Settings += f"Question: {panel['modal']['question']}\nAnswer Type: {panel['modal']['type']}"
+    else:
+        Modal_Settings = "None"
+    embed.add_field(name="Modal Settings", value=f"```\n{Modal_Settings}\n```", inline=False)
+    Other = ""
+    if panel['emoji']:
+        Other += f"Emoji: {panel['emoji']}\n"
+    if panel['color']:
+        Other += f"Color: {panel['color']}"
+    if Other:
+        embed.add_field(name="Other Settings", value=f"```\n{Other}\n```", inline=False)
+    else:
+        embed.add_field(name="Other Settings", value="```\nNone\n```", inline=False)
+    await interaction.followup.send("Panel Roles Updated", ephemeral=True)
+
 class Ticket_Control_Panel(discord.ui.View):
     def __init__(self, bot):
         self.bot = bot
@@ -165,7 +203,12 @@ class Panel_Button(discord.ui.Button):
         if self.label == "Partnership":
             await interaction.response.send_modal(Partnership_Qestion(interaction))
             return
-        await interaction.response.send_modal(General_Qestions(interaction, self.label))
+        data = await interaction.client.ticket_system.find(interaction.guild.id)
+        panel = data['panels'][self.label]
+        modal = General_Qestions(interaction, self.label)
+        style = discord.TextStyle.paragraph if panel['modal']['type'] == "long" or "paragraph" else discord.TextStyle.short
+        modal.add_item(discord.ui.TextInput(label=panel['modal']['question'], style=style, custom_id="GEN:QUESTIONS", required=True,max_length=1000))
+        await interaction.response.send_modal(modal)
 
 class Partnership_Qestion(discord.ui.Modal):
     def __init__(self, interaction: discord.Interaction):
@@ -233,52 +276,216 @@ class General_Qestions(discord.ui.Modal):
         super().__init__(timeout=None, title="General Questions")
         self.interaction = interaction
         self.panel = panel
-    
-    gen_qestions = discord.ui.TextInput(label="Please State Your Question", style=discord.TextStyle.paragraph, custom_id="GEN:QUESTIONS", required=True, max_length=1000)
 
     async def on_submit(self, interaction: discord.Interaction):
-        embed = discord.Embed(description="Please wait while we process your question", color=discord.Color.green())
-        embed.add_field(name="Your Question", value=self.gen_qestions.value)
-        await interaction.response.send_message(embed=embed, ephemeral=True)
-        data = await self.interaction.client.ticket_system.find(interaction.guild.id)
-        panel = data['panels'][self.panel]
-
-        permissons = {
-            interaction.user : discord.PermissionOverwrite(read_messages=True, send_messages=True, read_message_history=True, attach_files=True),
-            interaction.guild.default_role : discord.PermissionOverwrite(read_messages=False, send_messages=False, read_message_history=False, attach_files=False),
-            interaction.guild.me: discord.PermissionOverwrite(read_messages=True, send_messages=True, read_message_history=True, attach_files=True, manage_channels=True,)
-        }
-        for i in panel['support_role']:
-            permissons[interaction.guild.get_role(i)] = discord.PermissionOverwrite(read_messages=True, send_messages=True, read_message_history=True, attach_files=True)
-    
-
-        channel = await interaction.guild.create_text_channel(name=f"{interaction.user.display_name}-ticket", category=interaction.client.get_channel(data['catogory']) if data['catogory'] else interaction.channel.category, overwrites=permissons)
-
-        embed = discord.Embed(title=f"{interaction.user.display_name} Welcome to {panel['key']}",description="Kindly wait patiently. A staff member will assist you shortly.\nIf you're looking to approach a specific staff member, ping the member once. Do not spam ping any member or role.\n\nThank you.")
-        embed.set_footer(text="Developed by: JAY#0138 & utki007#0007", icon_url=interaction.guild.icon.url if interaction.guild.icon else None)
-        embed.add_field(name="Question", value=self.gen_qestions.value)
-        content = f"{interaction.user.mention}"
-        if panel['ping_role'] is not None:
-            content += f" | <@&{panel['ping_role']}>"
-        msg = await channel.send(content=content,embed=embed, view=Ticket_Control_Panel(interaction.client))
-        await msg.pin()
-        
-        ticket_data = {'_id': channel.id, 'user': interaction.user.id, 'add_roles': [], 'add_users': [], 'panel': self.panel, 'logging_message': None, 'status': 'open', 'logging': None, 'question': self.gen_qestions.value}
-        
-        log_channel = interaction.guild.get_channel(data['logging'])
-        log_embed = discord.Embed()
-        log_embed.set_author(name=f"{interaction.user.display_name}", icon_url=interaction.user.avatar.url if interaction.user.avatar else interaction.user.default_avatar.url)
-        log_embed.add_field(name="Ticket Owner", value=interaction.user.mention)
-        log_embed.add_field(name="Ticket Panel", value=panel['key'])
-        log_embed.add_field(name="Ticket Qestions", value=self.gen_qestions.value)
-        log_embed.add_field(name="Ticket Channel", value=f"{channel.mention} | {channel.name} | {channel.id}")
-        log_embed.timestamp = datetime.datetime.utcnow()
-
-        if log_channel:
-            msg = await log_channel.send(embed=log_embed)
-            ticket_data['logging_message'] = msg.id
+        for child in self.children:
             
-        await self.interaction.client.tickets.insert(ticket_data)
-        await interaction.edit_original_message(content=f"Your ticket has been created. You can view it here: {channel.mention}")
+            if child.custom_id == "GEN:QUESTIONS":
+                embed = discord.Embed(description="Please wait while we process your question", color=discord.Color.green())
+                embed.add_field(name="Your Reason", value=child.value)
+                await interaction.response.send_message(embed=embed, ephemeral=True)
+                data = await self.interaction.client.ticket_system.find(interaction.guild.id)
+                panel = data['panels'][self.panel]
+
+                permissons = {
+                    interaction.user : discord.PermissionOverwrite(read_messages=True, send_messages=True, read_message_history=True, attach_files=True),
+                    interaction.guild.default_role : discord.PermissionOverwrite(read_messages=False, send_messages=False, read_message_history=False, attach_files=False),
+                    interaction.guild.me: discord.PermissionOverwrite(read_messages=True, send_messages=True, read_message_history=True, attach_files=True, manage_channels=True,)
+                }
+                for i in panel['support_role']:
+                    permissons[interaction.guild.get_role(i)] = discord.PermissionOverwrite(read_messages=True, send_messages=True, read_message_history=True, attach_files=True)
+            
+
+                channel = await interaction.guild.create_text_channel(name=f"{interaction.user.display_name}-ticket", category=interaction.client.get_channel(data['catogory']) if data['catogory'] else interaction.channel.category, overwrites=permissons)
+
+                embed = discord.Embed(title=f"{interaction.user.display_name} Welcome to {panel['key']}",description="Kindly wait patiently. A staff member will assist you shortly.\nIf you're looking to approach a specific staff member, ping the member once. Do not spam ping any member or role.\n\nThank you.")
+                embed.set_footer(text="Developed by: JAY#0138 & utki007#0007", icon_url=interaction.guild.icon.url if interaction.guild.icon else None)
+                embed.add_field(name=panel['modal']['question'], value=child.value)
+                content = f"{interaction.user.mention}"
+                if panel['ping_role'] is not None:
+                    content += f" | <@&{panel['ping_role']}>"
+                msg = await channel.send(content=content,embed=embed, view=Ticket_Control_Panel(interaction.client))
+                await msg.pin()
+                
+                ticket_data = {'_id': channel.id, 'user': interaction.user.id, 'add_roles': [], 'add_users': [], 'panel': self.panel, 'logging_message': None, 'status': 'open', 'logging': None, 'question': child.value}
+                
+                log_channel = interaction.guild.get_channel(data['logging'])
+                log_embed = discord.Embed()
+                log_embed.set_author(name=f"{interaction.user.display_name}", icon_url=interaction.user.avatar.url if interaction.user.avatar else interaction.user.default_avatar.url)
+                log_embed.add_field(name="Ticket Owner", value=interaction.user.mention)
+                log_embed.add_field(name="Ticket Panel", value=panel['key'])
+                log_embed.add_field(name="Ticket Qestions", value=child.value)
+                log_embed.add_field(name="Ticket Channel", value=f"{channel.mention} | {channel.name} | {channel.id}")
+                log_embed.timestamp = datetime.datetime.utcnow()
+
+                if log_channel:
+                    msg = await log_channel.send(embed=log_embed)
+                    ticket_data['logging_message'] = msg.id
+                    
+                await self.interaction.client.tickets.insert(ticket_data)
+                await interaction.edit_original_message(content=f"Your ticket has been created. You can view it here: {channel.mention}")
 
 
+class Panel_edit(discord.ui.View):
+    def __init__(self, interaction: discord.Interaction, data: dict, name: str ,message: discord.Message=None):
+        super().__init__(timeout=120)
+        self.interaction = interaction
+        self.data = data
+        self.message = message
+        self.name = name
+    
+    @discord.ui.button(label="Roles Settings", style=discord.ButtonStyle.gray, emoji="<:mention:991734732188553337>", custom_id="EDIT:PANEL:ROLES")
+    async def edit_panel_roles(self, interaction: discord.Interaction, button: discord.ui.Button):
+        modal = Ticket_Panel_Roles(interaction,self.name, self.data)
+        default = [str(role) for role in self.data['panels'][self.name]['support_role']]
+
+        modal.add_item(discord.ui.TextInput(label="Support Role", style=discord.TextStyle.paragraph, custom_id="PANEL:ROLES:QUESTIONS", 
+            max_length=1000, default=",".join(default) if len(default) > 0 else None, placeholder="Please state the roles you want to be able to support, seperated by a comma."))
+        modal.add_item(discord.ui.TextInput(label="Ping Roles", style=discord.TextStyle.short, custom_id="PANEL:ROLES:PING", default=self.data['panels'][self.name]['ping_role'] if self.data['panels'][self.name]['ping_role'] is not None else None, placeholder="Please state the role you want to ping on ticket creation."))
+
+        await interaction.response.send_modal(modal)
+    
+    @discord.ui.button(label="Info Settings", style=discord.ButtonStyle.gray, emoji="<:IconInsights:751160378800472186>", custom_id="EDIT:PANEL:INFO")
+    async def edit_panel_info(self, interaction: discord.Interaction, button: discord.ui.Button):
+        modal = Ticket_Panel_Info(interaction, self.name,self.data)
+        modal.add_item(discord.ui.TextInput(label="Description", style=discord.TextStyle.paragraph, custom_id="PANEL:INFO:DESCRIPTION", default=self.data['panels'][self.name]['description'] if self.data['panels'][self.name]['description'] is not None else None, placeholder="Please state the description of the panel."))
+        await interaction.response.send_modal(modal)
+    
+    @discord.ui.button(label="Questions Settings", style=discord.ButtonStyle.gray, emoji="<:StageIconRequests:1005075865564106812>", custom_id="EDIT:PANEL:QUESTIONS")
+    async def edit_panel_questions(self, interaction: discord.Interaction, button: discord.ui.Button):
+        modal = Ticket_Panel_Questions(interaction, self.data, self.name)
+        modal.add_item(discord.ui.TextInput(label="Questions", style=discord.TextStyle.paragraph, custom_id="PANEL:QUESTIONS:QUESTIONS", default=self.data['panels'][self.name]['modal']['question'] if self.data['panels'][self.name]['modal']['question'] is not None else None, placeholder="Please state the questions you want to ask the user, seperated by a comma."))
+        modal.add_item(discord.ui.TextInput(label="Answers type", style=discord.TextStyle.short, custom_id="PANEL:QUESTIONS:ANSWERS", placeholder="select from [short, paragraph]", default=self.data['panels'][self.name]['modal']['type']))
+        await interaction.response.send_modal(modal)        
+
+    @discord.ui.button(label="Other Settings", style=discord.ButtonStyle.gray, emoji="<:ServerVerifiedSchoolHub:1005081309598711849>", custom_id="EDIT:PANEL:SETTINGS")
+    async def edit_panel_settings(self, interaction: discord.Interaction, button: discord.ui.Button):
+        modal = Ticket_Panel_edit_Other(interaction, self.name, self.data)
+        modal.add_item(discord.ui.TextInput(label="Emoji", style=discord.TextStyle.paragraph, custom_id="PANEL:SETTINGS:NAME", default=self.data['panels'][self.name]['emoji'] if self.data['panels'][self.name]['emoji'] is not None else None, placeholder="Please state the emoji you want to use for the panel."))
+        modal.add_item(discord.ui.TextInput(label="Color", style=discord.TextStyle.short, custom_id="PANEL:SETTINGS:COLOR", default=self.data['panels'][self.name]['color'] if self.data['panels'][self.name]['color'] is not None else None, placeholder="Please state the color of the panel."))
+        await interaction.response.send_modal(modal)
+
+
+
+
+class Ticket_Panel_edit_Other(discord.ui.Modal):
+    def __init__(self, interaction: Interaction, name: str, data: dict):
+        super().__init__(timeout=None, title=f"Editing {name} Extra Info")
+        self.data = data
+        self.interaction = interaction
+        self.name = name
+    
+    async def on_submit(self, interaction: Interaction):
+        for child in self.children:
+            if child.label == "Emoji":
+                self.data['panels'][self.name]['emoji'] = child.value
+            if child.label == "Color":
+                if child.value == "":
+                    self.data['panels'][self.name]['color'] = None
+                if child.value in ['red', 'green', 'blue', 'grey']:
+                    self.data['panels'][self.name]['color'] = child.value
+                else:
+                    await interaction.response.send(f"{child.value} is not a valid color choice from [red, green, blue, grey]", ephemeral=True)
+                    return
+            
+        await self.interaction.client.tickets.update(self.data)
+        await interaction.response.defer(thinking=True, ephemeral=True)
+        await update_embed(interaction, self.data)
+
+
+class Ticket_Panel_edit_Other(discord.ui.Modal):
+    def __init__(self, interaction: Interaction, name: str, data: dict):
+        super().__init__(timeout=None, title=f"Editing {name} Extra Info")
+        self.data = data
+        self.interaction = interaction
+        self.name = name
+    
+    async def on_submit(self, interaction: Interaction):
+        for child in self.children:
+            if child.label == "Emoji":
+                self.data['panels'][self.name]['emoji'] = child.value
+            if child.label == "Color":
+                if child.value == "":
+                    self.data['panels'][self.name]['color'] = None
+                if child.value in ['red', 'green', 'blue', 'grey']:
+                    self.data['panels'][self.name]['color'] = child.value
+            
+        await interaction.response.defer(thinking=True, ephemeral=True)
+        await interaction.client.ticket_system.update(self.data)
+
+        await update_embed(interaction, self.data, self.name)
+
+class Ticket_Panel_Questions(discord.ui.Modal):
+    def __init__(self, interaction: discord.Interaction, data: dict, name: str):
+        super().__init__(timeout=None, title=f"Edit {name} Questions")
+        self.interaction = interaction
+        self.data = data
+        self.name = name
+    
+    async def on_submit(self, interaction: discord.Interaction):
+        for child in self.children:
+            if child.label == "Questions":                
+                self.data['panels'][self.name]['modal']['question'] = child.value
+        
+            if child.label == "Answers type":
+                if child.value not in ['short', 'paragraph', 'long']:
+                    await interaction.response.send_message(f"Please select from [short, paragraph, long]")
+                    return
+        
+        await interaction.response.defer(thinking=True, ephemeral=True)
+        await interaction.client.ticket_system.update(self.data)
+        await update_embed(interaction, self.data, self.name)
+
+
+class Ticket_Panel_Info(discord.ui.Modal):
+    def __init__(self, interaction: Interaction, name: str, data: dict):
+        super().__init__(timeout=None, title=f"Editing {name} description")
+        self.data = data
+        self.interaction = interaction
+        self.name = name
+    
+    async def on_submit(self, interaction: Interaction):
+        for child in self.children:
+            if child.label == "Description":
+                self.data['panels'][self.name]['description'] = child.value
+                await interaction.client.ticket_system.update(self.data)
+                await interaction.response.defer(thinking=True, ephemeral=True)
+                await update_embed(interaction, self.data, self.name)
+                break
+
+
+class Ticket_Panel_Roles(discord.ui.Modal):
+    def __init__(self, interaction: Interaction, name: str, data: dict):
+        super().__init__(timeout=None, title=f"Editing {name} Roles")
+        self.data = data
+        self.interaction = interaction
+        self.name = name
+    
+    async def on_submit(self, interaction: Interaction):
+        await interaction.response.defer(thinking=True, ephemeral=True)
+        for child in self.children:
+            
+            if child.label == "Support Role":
+                new_support_role = []
+                new_role = child.value.split(",")
+
+                for role in new_role:
+                    role = interaction.guild.get_role(int(role))
+                    if role is not None:
+                        new_support_role.append(role.id)
+
+                self.data['panels'][self.name]['support_role'] = new_support_role
+            
+            if child.label == "Ping Roles":
+
+                try:
+                    role = interaction.guild.get_role(int(child.value))
+                    if role is not None:
+                        self.data['panels'][self.name]['ping_role'] = role.id
+                    else:
+                        await interaction.followup.send("Invalid Role ID for Ping Roles")
+                except ValueError:
+                    pass
+            
+        await interaction.client.ticket_system.update(self.data)
+        await update_embed(interaction, self.data, self.name)

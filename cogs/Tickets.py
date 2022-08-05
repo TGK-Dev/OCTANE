@@ -6,8 +6,7 @@ from typing import Union, List, Literal
 from utils.checks import Commands_Checks
 from utils.functions import make_db_temp
 from utils.paginator import Paginator
-from ui.models import Ticket_Panel_edit, Ticket_Panel_edit_Other, Ticket_Panel_Roles
-from ui.Ticket_system import Ticket_Control
+from ui.Ticket_system import Ticket_Control, Panel_edit
 import discord
 import os
 import logging
@@ -204,7 +203,7 @@ class Panel(app_commands.Group):
         data = await self.bot.ticket_system.find(interaction.guild.id)
         if not data:
             data = {"_id": interaction.guild.id, "panels": {}, 'channel': None, 'catogory': None, 'logging': None, 'transcripts': None, 'last_plane_messaeg': None}
-        panel_data = {"key": name, "support_role": [], "ping_role": None, 'creator': interaction.user.id, 'description': None, 'emoji': None, 'color': None}
+        panel_data = {"key": name, "support_role": [], "ping_role": None, 'creator': interaction.user.id, 'description': None, 'emoji': None, 'color': None, 'modal': {'type': 'long', 'question': 'state your reason for opening the ticket'}}
         data['panels'][name] = panel_data
 
         await self.bot.ticket_system.upsert(data)
@@ -228,29 +227,60 @@ class Panel(app_commands.Group):
     @app_commands.command(name="edit", description="edit a ticket panel")
     @app_commands.default_permissions(administrator=True)
     @app_commands.autocomplete(name=panel_auto)
-    @app_commands.describe(name="panel name", option="option to edit")
-    async def panel_edit(self, interaction: discord.Interaction, name:str ,option: Literal['Panel Roles', 'Description', 'Other']):
+    @app_commands.describe(name="panel name")
+    async def panel_edit(self, interaction: discord.Interaction, name:str):
         data = await self.bot.ticket_system.find(interaction.guild.id)
         if not data:
             await interaction.response.send_message("No ticket system found")
             return
-        if option == 'Panel Roles':
-            modal = Ticket_Panel_Roles(interaction, name, data)
-            suport_roles = [str(ids) for ids in data['panels'][name]['support_role']]
-            modal.add_item(discord.ui.TextInput(label="Support Roles", default=",".join(suport_roles), placeholder="Ids of roles spearated by comma", style=discord.TextStyle.paragraph, required=False))
-            modal.add_item(discord.ui.TextInput(label="Ping Role", default=str(data['panels'][name]['ping_role']), placeholder="Id of role", max_length=18, required=False))
-            await interaction.response.send_modal(modal)
-        
-        if option == 'Description':
-            modal = Ticket_Panel_edit(interaction, name, data)
-            modal.add_item(discord.ui.TextInput(label="Description", default=data['panels'][name]['description'] if data['panels'][name]['description'] else None, custom_id="description", style=discord.TextStyle.paragraph, max_length=200))
-            return await interaction.response.send_modal(modal)
+        if name not in data['panels'].keys():
+            await interaction.response.send_message("Panel not found")
+            return
+        try:
+            panel = data['panels'][name]
+        except KeyError:
+            await interaction.response.send_message("Panel not found")
+            return
 
-        if option == 'Other':
-            modal = Ticket_Panel_edit_Other(interaction, name, data)
-            modal.add_item(discord.ui.TextInput(label="Emoji", default=data['panels'][name]['emoji'] if data['panels'][name]['emoji'] else None, custom_id="emoji", style=discord.TextStyle.short, max_length=50, required=False))
-            modal.add_item(discord.ui.TextInput(label="Color", default=data['panels'][name]['color'] if data['panels'][name]['color'] else None, custom_id="color", style=discord.TextStyle.short, required=False))
-            return await interaction.response.send_modal(modal)
+        embed = discord.Embed(title=f"{name} Settings", color=discord.Color.blurple())
+        Support_roles = ""
+        if len(panel['support_role']) > 0:
+            for role in panel['support_role']:
+                role = interaction.guild.get_role(int(role))
+                if role:
+                    Support_roles += f"{role.name} | {role.id}\n"
+        else:
+            Support_roles = "None"
+
+        Ping_role = ""
+        if panel['ping_role']:
+            role = interaction.guild.get_role(int(panel['ping_role']))
+            if role:
+                Ping_role = f"{role.name} | {role.id}"
+        else:
+            Ping_role = "None"
+        embed.add_field(name="Role Settings", value=f"> **Support Roles:**\n```\n{Support_roles}\n```\n> **Ping Role:**\n```\n{Ping_role}\n```", inline=False)
+        embed.add_field(name="Info Settings", value=f"> **Description**\n```\n{panel['description']}\n```", inline=False)
+        Modal_Settings = ""
+        if panel['modal']:
+            Modal_Settings += f"Question: {panel['modal']['question']}\nAnswer Type: {panel['modal']['type']}"
+        else:
+            Modal_Settings = "None"
+        embed.add_field(name="Modal Settings", value=f"```\n{Modal_Settings}\n```", inline=False)
+        Other = ""
+        if panel['emoji']:
+            Other += f"Emoji: {panel['emoji']}\n"
+        if panel['color']:
+            Other += f"Color: {panel['color']}"
+        if Other:
+            embed.add_field(name="Other Settings", value=f"```\n{Other}\n```", inline=False)
+        else:
+            embed.add_field(name="Other Settings", value="```\nNone\n```", inline=False)
+        
+        await interaction.response.send_message(embed=embed)
+            
+
+
 
     @app_commands.command(name="list", description="list all ticket panels")
     @app_commands.default_permissions(administrator=True)
