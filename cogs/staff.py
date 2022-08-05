@@ -2,6 +2,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 from typing import Literal
+from utils.paginator import Paginator
 import random
 import string
 class Staff(app_commands.Group):
@@ -22,12 +23,16 @@ class Staff(app_commands.Group):
                 '_id': member.id,
                 'post': [],
                 'recovery_code': None,
+                'timezone': None
             }
             await interaction.client.staff.insert(data)
-        if post.value in data['post']:
+
+        if post.name in data['post']:
             await interaction.edit_original_message(content=None, embed=discord.Embed(title="User already has this post", color=discord.Color.red()))
             return
-        await interaction.client.staff.update(data)
+        else:
+            data['post'].append(post.name)
+        await interaction.client.staff.upsert(data)
         role = discord.utils.get(interaction.guild.roles, id=int(post.value))
         await member.add_roles(role)
         await interaction.edit_original_message(content=None, embed=discord.Embed(description=f"<:dynosuccess:1000349098240647188> | Successfully added {member.mention} to {role.name}`", color=discord.Color.green()))
@@ -43,9 +48,11 @@ class Staff(app_commands.Group):
         if not data:
             await interaction.edit_original_message(content=None, embed=discord.Embed(description=f"<:dynoError:1000351802702692442> | {member.mention} is not in the staff list", color=discord.Color.red()))
             return
-        if post.value not in data['post']:
+        if post.name not in data['post']:
             await interaction.edit_original_message(content=None, embed=discord.Embed(description=f"<:dynoError:1000351802702692442> | {member.mention} is not a {post.name}", color=discord.Color.red()))
             return
+        else:
+            data['post'].remove(post.name)
         await interaction.client.staff.update(data)
         role = discord.utils.get(interaction.guild.roles, id=int(post.value))
         await member.remove_roles(role)
@@ -53,43 +60,54 @@ class Staff(app_commands.Group):
 
     @app_commands.command(name="list", description="List all users in the staff list")
     async def list(self, interaction: discord.Interaction):
-        await interaction.response.send_message("Listing all users in the staff list...")
         data = await interaction.client.staff.get_all()
-        embed = discord.Embed(title="Staff List", color=discord.Color.blue())
-        Head_admin = ""
-        Admin = ""
-        Moderator = ""
-        Trial_Moderator = ""
-        Partnership_Manager = ""
-        Giveaway_Manager = ""
-        Event_Manager = ""
-        all_staff = ""
-        for member in data:
-            for post in member['post']:
-                if post == "Head Admin":
-                    Head_admin += f"{interaction.guild.get_member(member['_id']).mention}\n"
-                elif post == "Admin":
-                    Admin += f"{interaction.guild.get_member(member['_id']).mention}\n"
-                elif post == "Moderator":
-                    Moderator += f"{interaction.guild.get_member(member['_id']).mention}\n"
-                elif post == "Trial Moderator":
-                    Trial_Moderator += f"{interaction.guild.get_member(member['_id']).mention}\n"
-                elif post == "Partnership Manager":
-                    Partnership_Manager += f"{interaction.guild.get_member(member['_id']).mention}\n"
-                elif post == "Giveaway Manager":
-                    Giveaway_Manager += f"{interaction.guild.get_member(member['_id']).mention}\n"
-                elif post == "Event Manager":
-                    Event_Manager += f"{interaction.guild.get_member(member['_id']).mention}\n"
-            all_staff += f"{interaction.guild.get_member(member['_id']).mention} **TimeZone:** {member['timezone']}\n"
-        embed.add_field(name="Head Admin", value=Head_admin if Head_admin else "None", inline=False)
-        embed.add_field(name="Admin", value=Admin if Admin else "None", inline=False)
-        embed.add_field(name="Moderator", value=Moderator if Moderator else "None", inline=False)
-        embed.add_field(name="Trial Moderator", value=Trial_Moderator if Trial_Moderator else "None", inline=False)
-        embed.add_field(name="Partnership Manager", value=Partnership_Manager if Partnership_Manager else "None", inline=False)
-        embed.add_field(name="Giveaway Manager", value=Giveaway_Manager if Giveaway_Manager else "None", inline=False)
-        embed.add_field(name="Event Manager", value=Event_Manager if Event_Manager else "None", inline=False)
-        embed.add_field(name="All Staff", value=all_staff if all_staff else "None", inline=False)
-        await interaction.edit_original_message(content=None, embed=embed)
+        Head_admin = discord.Embed(title="Head Admin", description="",color=discord.Color.blue())
+        Admin = discord.Embed(title="Admin", description="",color=discord.Color.blue())
+        Moderator = discord.Embed(title="Moderator", description="",color=discord.Color.blue())
+        Trial_Moderator = discord.Embed(title="Trial Moderator", description="",color=discord.Color.blue())
+        Partnership_Manager = discord.Embed(title="Partnership Manager", description="",color=discord.Color.blue())
+        Giveaway_Manager = discord.Embed(title="Giveaway Manager", description="",color=discord.Color.blue())
+        Event_Manager = discord.Embed(title="Event Manager", description="",color=discord.Color.blue())
+        all_staff = discord.Embed(title="All Staff", description="",color=discord.Color.blue())
+        for staff in data:
+            if "Head Admin" in staff['post']:
+                member = discord.utils.get(interaction.guild.members, id=staff['_id'])
+                if member:
+                    Head_admin.description += f"{member.mention} --> {staff['timezone'] if staff['timezone'] else None}\n"
+            
+            if "Admin" in staff['post']:
+                member = discord.utils.get(interaction.guild.members, id=staff['_id'])
+                if member:
+                    Admin.description += f"{member.mention} --> {staff['timezone'] if staff['timezone'] else None}\n"
+            
+            if "Moderator" in staff['post']:
+                member = discord.utils.get(interaction.guild.members, id=staff['_id'])
+                if member:
+                    Moderator.description += f"{member.mention} --> {staff['timezone'] if staff['timezone'] else None}\n"
+            
+            if "Trial Moderator" in staff['post']:
+                member = discord.utils.get(interaction.guild.members, id=staff['_id'])
+                if member:
+                    Trial_Moderator.description += f"{member.mention} --> {staff['timezone'] if staff['timezone'] else None}\n"
+            
+            if "Partnership Manager" in staff['post']:
+                member = discord.utils.get(interaction.guild.members, id=staff['_id'])
+                if member:
+                    Partnership_Manager.description += f"{member.mention} --> {staff['timezone'] if staff['timezone'] else None}\n"
+            
+            if "Giveaway Manager" in staff['post']:
+                member = discord.utils.get(interaction.guild.members, id=staff['_id'])
+                if member:
+                    Giveaway_Manager.description += f"{member.mention} --> {staff['timezone'] if staff['timezone'] else None}\n"
+            
+            if "Event Manager" in staff['post']:
+                member = discord.utils.get(interaction.guild.members, id=staff['_id'])
+                if member:
+                    Event_Manager.description += f"{member.mention} --> {staff['timezone'] if staff['timezone'] else None}\n"
+            
+        embeds = [Head_admin, Admin, Moderator, Trial_Moderator, Partnership_Manager, Giveaway_Manager, Event_Manager]
+
+        await Paginator(interaction, embeds, ).start(embeded=True)
 
     @app_commands.command(name="recovery", description="Set a recovery code for a user")
     async def recovery(self, interaction: discord.Interaction, member: discord.Member):
