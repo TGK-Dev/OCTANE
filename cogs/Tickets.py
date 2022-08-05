@@ -280,9 +280,6 @@ class Panel(app_commands.Group):
         view = Panel_edit(interaction, data, name)
         await interaction.response.send_message(embed=embed, view=view)
         view.message = await interaction.original_message()
-            
-
-
 
     @app_commands.command(name="list", description="list all ticket panels")
     @app_commands.default_permissions(administrator=True)
@@ -340,20 +337,6 @@ class Ticket(commands.Cog, name="Ticket System", description="Create Ticket With
         for i in data:
             view = Ticket_Control(i['panels'])
             self.bot.add_view(view)
-
-    @commands.command()
-    async def setup(self, ctx):
-        embed = discord.Embed(title="Support Centre",description="This channel is for in-server support purpose only, talking anything here which is not related to the channel usage will result in warn or mute, mini-modding is also not allowed, we have enough staff members to handle it. Thank you for your cooperation.",color=0xff0000)
-        embed.set_footer(text=ctx.guild.name, icon_url=ctx.guild.icon.url)
-        #await ctx.send(embed=embed, view=Ticket_main(self.bot))
-
-    @commands.command()
-    async def reload(self, ctx, name:str):
-        try:
-            await self.bot.reload_extension(f"cogs.{name}")
-            await ctx.send(f"{name} has been reloaded")
-        except Exception as e:
-            await ctx.send(f"{name} has failed to reload\n`{e}`")
 
 async def setup(bot):
     await bot.add_cog(Ticket(bot))

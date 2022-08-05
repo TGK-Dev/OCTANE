@@ -195,6 +195,9 @@ class Ticket_Control(discord.ui.View):
                     style = discord.ButtonStyle.red
                 elif value['color'] == 'blurple' or 'blue':
                     style = discord.ButtonStyle.blurple
+                elif value['color'] == 'gray':
+                    style = discord.ButtonStyle.gray
+                    
             btn = Panel_Button(label=i, style=style, custom_id="persistent_view:{}".format(i), emoji=str(value['emoji']) if value['emoji'] is not None else None)
             self.add_item(btn)
 
