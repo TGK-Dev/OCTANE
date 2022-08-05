@@ -365,6 +365,16 @@ class Panel_edit(discord.ui.View):
         modal.add_item(discord.ui.TextInput(label="Color", style=discord.TextStyle.short, custom_id="PANEL:SETTINGS:COLOR", default=self.data['panels'][self.name]['color'] if self.data['panels'][self.name]['color'] is not None else None, placeholder="Please state the color of the panel."))
         await interaction.response.send_modal(modal)
 
+    async def interaction_check(self, interaction: Interaction):
+        if interaction.user.id != self.interaction.user.id:
+            await interaction.response.send_message("Your not allowed to use those buttons.", ephemeral=True)
+            return False
+        return True
+
+    async def on_timeout(self):
+        for butoon in self.children:
+            butoon.disabled = True
+            await self.message.edit(content="Panel edit timed out.", view=self)
 
 
 
