@@ -91,34 +91,6 @@ class Events(commands.Cog):
             if role:
                 await member.add_roles(role)
                 await asyncio.sleep(2)
-        
-        embed = discord.Embed()
-
-        if member.avatar != None:
-            embed.set_thumbnail(url=member.avatar.url or None)
-            embed.set_author(name=f"{member.name}#{member.discriminator}", icon_url=member.avatar.url or None)
-        else:
-            embed.set_thumbnail(url=member.default_avatar)
-            embed.set_author(name=f"{member.name}#{member.discriminator}", icon_url=member.default_avatar.url)
-
-        
-        embed.description = f"Welcome {member.mention} to {guild.name}!"
-        embed.timestamp = discord.utils.utcnow()
-        embed.set_footer(text=member.id)
-
-        if guild_data['welcome'] is not None:
-            channel = guild.get_channel(guild_data['welcome'])
-            if channel:
-                await channel.send(member.mention, embed=embed)
-        try:
-            await member.send(embed=embed)
-        except discord.HTTPException:
-            pass
-        
-        if guild_data['qurantine'] == True:
-            role = discord.utils.get(member.guild.roles, id=953006119436030054)
-            await member.add_roles(role, reason="Verification Enabled")
-
 
     @commands.Cog.listener()
     async def on_member_ban(self, guild, member):
