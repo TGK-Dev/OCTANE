@@ -8,3 +8,4 @@ cogs/moderation.txt
 cogs/test.py
 test.py
 discord.log
+.vscode
