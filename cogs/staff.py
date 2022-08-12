@@ -1,148 +1,169 @@
 import discord
+import datetime
 from discord import app_commands
 from discord.ext import commands
-from typing import Literal
+from typing import Literal, List
 from utils.paginator import Paginator
-import random
-import string
-class Staff(app_commands.Group):
-    def __init__(self):
-        super().__init__(name='staff')
-    
 
-    @app_commands.command(name="add", description="Add a user to the staff list")
-    @app_commands.choices(post=[app_commands.Choice(name="Head Admin", value="799037944735727636"), app_commands.Choice(name="Admin", value="785845265118265376"), app_commands.Choice(name="Moderator", value="787259553225637889"), app_commands.Choice(name="Trial Moderator", value="843775369470672916"),app_commands.Choice(name="Partnership Manager", value="831405039830564875"), app_commands.Choice(name="Giveaway Manager", value="803230347575820289"), app_commands.Choice(name="Event Manager", value="852125566802198528")])
-    async def add(self, interaction: discord.Interaction, member: discord.Member, post: app_commands.Choice[str]):
-        if interaction.user.id not in [488614633670967307, 301657045248114690,651711446081601545,413651113485533194,562738920031256576]:
-            await interaction.response.send_message(content=None, embed=discord.Embed(description=f"<:dynoError:1000351802702692442> | You do not have permission to use this command", color=discord.Color.red()))
-            return
-        await interaction.response.send_message("Adding user to staff list...")
-        data = await interaction.client.staff.find(member.id)
+staff_list = {
+    'TRIAL MODERATOR': 843775369470672916,
+    'PartnerShip Manager': 831405039830564875,
+    'Giveaway Manager': 803230347575820289,
+    'Event Manager': 852125566802198528,
+}
+
+class Staff(app_commands.Group):
+    def __init__(self, bot):
+        self.bot = bot
+        super().__init__(name='staff')
+
+    @app_commands.command(name="appoint", description="appoint staff to user")
+    @app_commands.choices(post=[app_commands.Choice(name="TRIAL MODERATOR", value=str(843775369470672916)), app_commands.Choice(name="PartnerShip Manager", value=str(831405039830564875)), app_commands.Choice(name="Giveaway Manager", value=str(803230347575820289)), app_commands.Choice(name="Event Manager", value=str(852125566802198528))])
+    @app_commands.checks.has_permissions(administrator=True)
+    async def appoint_user(self, interaction: discord.Interaction, user: discord.Member, post: app_commands.Choice[str]):
+        staff_role = discord.utils.get(interaction.guild.roles, id=int(post.value))
+        base_role = discord.utils.get(interaction.guild.roles, id=818129661325869058)
+        data = await self.bot.staff.find(user.id)
         if not data:
             data = {
-                '_id': member.id,
+                '_id': user.id,
                 'post': [],
                 'recovery_code': None,
-                'timezone': None
+                'timezone': None,
+                'vacation': {'last_vacation': None, 'days': 0, 'reason': None, 'start': None, 'end': None, 'approved_by': None},
             }
-            await interaction.client.staff.insert(data)
-
+            await self.bot.staff.insert(data)
         if post.name in data['post']:
-            await interaction.edit_original_message(content=None, embed=discord.Embed(title="User already has this post", color=discord.Color.red()))
+            await interaction.response.send_message(f"{user.mention} already has `{staff_role.name}`")
             return
-        else:
-            data['post'].append(post.name)
-        await interaction.client.staff.upsert(data)
-        role = discord.utils.get(interaction.guild.roles, id=int(post.value))
-        await member.add_roles(role)
-        await interaction.edit_original_message(content=None, embed=discord.Embed(description=f"<:dynosuccess:1000349098240647188> | Successfully added {member.mention} to {role.name}`", color=discord.Color.green()))
+        data['post'].append(post.name)
+        await self.bot.staff.update(data)
+        print(await self.bot.staff.find(user.id))
+        await user.add_roles(staff_role, base_role, reason=f"{interaction.user.name} appoint {user.name} to {staff_role.name}")
+        embed = discord.Embed(description=f"{user.mention} has been appoint to {staff_role.name}", color=discord.Color.green())
+        await interaction.response.send_message(embed=embed)
     
-    @app_commands.command(name="remove", description="Remove a user from the staff list")
-    @app_commands.choices(post=[app_commands.Choice(name="Head Admin", value="799037944735727636"), app_commands.Choice(name="Admin", value="785845265118265376"), app_commands.Choice(name="Moderator", value="787259553225637889"), app_commands.Choice(name="Trial Moderator", value="785845265118265376"), app_commands.Choice(name="Partnership Manager", value="831405039830564875"), app_commands.Choice(name="Giveaway Manager", value="803230347575820289"), app_commands.Choice(name="Event Manager", value="852125566802198528")])
-    async def remove(self, interaction: discord.Interaction, member: discord.Member, post:str):
-        if interaction.user.id not in [488614633670967307, 301657045248114690,651711446081601545,413651113485533194,562738920031256576]:
-            await interaction.response.send_message(content=None, embed=discord.Embed(description=f"<:dynoError:1000351802702692442> | You do not have permission to use this command", color=discord.Color.red()))
-            return
-        await interaction.response.send_message("Removing user from staff list...")
-        data = await interaction.client.staff.find(member.id)
+    @app_commands.command(name="remove", description="remove staff from user")
+    @app_commands.choices(post=[app_commands.Choice(name="TRIAL MODERATOR", value=str(843775369470672916)), app_commands.Choice(name="PartnerShip Manager", value=str(831405039830564875)), app_commands.Choice(name="Giveaway Manager", value=str(803230347575820289)), app_commands.Choice(name="Event Manager", value=str(852125566802198528))])
+    @app_commands.checks.has_permissions(administrator=True)
+    async def remove_user(self, interaction: discord.Interaction, user: discord.Member, post: app_commands.Choice[str]):
+        staff_role = discord.utils.get(interaction.guild.roles, id=int(post.value))
+        base_role = discord.utils.get(interaction.guild.roles, id=818129661325869058)
+        data = await self.bot.staff.find(user.id)
         if not data:
-            await interaction.edit_original_message(content=None, embed=discord.Embed(description=f"<:dynoError:1000351802702692442> | {member.mention} is not in the staff list", color=discord.Color.red()))
+            await interaction.response.send_message(f"{user.mention} is not staff")
             return
         if post.name not in data['post']:
-            await interaction.edit_original_message(content=None, embed=discord.Embed(description=f"<:dynoError:1000351802702692442> | {member.mention} is not a {post.name}", color=discord.Color.red()))
+            await interaction.response.send_message(f"{user.mention} is not {staff_role.name}")
             return
+        data['post'].remove(post.name)
+        if data['post'] == []:
+            await self.bot.staff.delete(user.id)
+            await user.remove_roles(staff_role, base_role, reason=f"{interaction.user.name} remove staff team")
+            embed = discord.Embed(description=f"{user.mention} has been removed from staff team all post", color=discord.Color.red())
+            await interaction.response.send_message(embed=embed)
         else:
-            data['post'].remove(post.name)
-        await interaction.client.staff.update(data)
-        role = discord.utils.get(interaction.guild.roles, id=int(post.value))
-        await member.remove_roles(role)
-        await interaction.edit_original_message(content=None, embed=discord.Embed(description=f"<:dynosuccess:1000349098240647188> | Successfully removed {member.mention} from {role.name}`", color=discord.Color.green()))
+            await self.bot.staff.update(data)
+            await user.remove_roles(staff_role, reason=f"{interaction.user.mention} remove {user.name} from {staff_role.name}")
+            embed = discord.Embed(description=f"{user.mention} has been removed from {staff_role.name}", color=discord.Color.red())
+            await interaction.response.send_message(embed=embed)
 
-    @app_commands.command(name="list", description="List all users in the staff list")
-    async def list(self, interaction: discord.Interaction):
-        data = await interaction.client.staff.get_all()
-        Head_admin = discord.Embed(title="Head Admin", description="",color=discord.Color.blue())
-        Admin = discord.Embed(title="Admin", description="",color=discord.Color.blue())
-        Moderator = discord.Embed(title="Moderator", description="",color=discord.Color.blue())
-        Trial_Moderator = discord.Embed(title="Trial Moderator", description="",color=discord.Color.blue())
-        Partnership_Manager = discord.Embed(title="Partnership Manager", description="",color=discord.Color.blue())
-        Giveaway_Manager = discord.Embed(title="Giveaway Manager", description="",color=discord.Color.blue())
-        Event_Manager = discord.Embed(title="Event Manager", description="",color=discord.Color.blue())
-        all_staff = discord.Embed(title="All Staff", description="",color=discord.Color.blue())
-        for staff in data:
-            if "Head Admin" in staff['post']:
-                member = discord.utils.get(interaction.guild.members, id=staff['_id'])
-                if member:
-                    Head_admin.description += f"{member.mention} --> {staff['timezone'] if staff['timezone'] else None}\n"
-            
-            if "Admin" in staff['post']:
-                member = discord.utils.get(interaction.guild.members, id=staff['_id'])
-                if member:
-                    Admin.description += f"{member.mention} --> {staff['timezone'] if staff['timezone'] else None}\n"
-            
-            if "Moderator" in staff['post']:
-                member = discord.utils.get(interaction.guild.members, id=staff['_id'])
-                if member:
-                    Moderator.description += f"{member.mention} --> {staff['timezone'] if staff['timezone'] else None}\n"
-            
-            if "Trial Moderator" in staff['post']:
-                member = discord.utils.get(interaction.guild.members, id=staff['_id'])
-                if member:
-                    Trial_Moderator.description += f"{member.mention} --> {staff['timezone'] if staff['timezone'] else None}\n"
-            
-            if "Partnership Manager" in staff['post']:
-                member = discord.utils.get(interaction.guild.members, id=staff['_id'])
-                if member:
-                    Partnership_Manager.description += f"{member.mention} --> {staff['timezone'] if staff['timezone'] else None}\n"
-            
-            if "Giveaway Manager" in staff['post']:
-                member = discord.utils.get(interaction.guild.members, id=staff['_id'])
-                if member:
-                    Giveaway_Manager.description += f"{member.mention} --> {staff['timezone'] if staff['timezone'] else None}\n"
-            
-            if "Event Manager" in staff['post']:
-                member = discord.utils.get(interaction.guild.members, id=staff['_id'])
-                if member:
-                    Event_Manager.description += f"{member.mention} --> {staff['timezone'] if staff['timezone'] else None}\n"
-            
-        embeds = [Head_admin, Admin, Moderator, Trial_Moderator, Partnership_Manager, Giveaway_Manager, Event_Manager]
+    # @app_commands.command(name="list", description="list staff")
+    # @app_commands.choices(short=[app_commands.Choice(name="TRIAL MODERATOR", value=str(843775369470672916)), app_commands.Choice(name="PartnerShip Manager", value=str(831405039830564875)), app_commands.Choice(name="Giveaway Manager", value=str(803230347575820289)), app_commands.Choice(name="Event Manager", value=str(852125566802198528))])
+    # @app_commands.describe(short="Short list of staff on base of post")
+    # async def list_staff(self, interaction: discord.Interaction, short: app_commands.Choice[str] = None):
+    #     staff_list = await self.bot.staff.get_all()
+    #     if not staff_list:
+    #         await interaction.response.send_message("No staff", ephemeral=True)
+    #         return
+    #     hadmin = discord.Embed(title="Head Administrator", color=discord.Color.green(), description="")
+    #     admin = discord.Embed(title="Administrator", color=discord.Color.green(), description="")
+    #     moderator = discord.Embed(title="Moderator", color=discord.Color.green(), description="")
+    #     trial_moderator = discord.Embed(title="Trial Moderator", color=discord.Color.green(), description="")
+    #     partnership_manager = discord.Embed(title="PartnerShip Manager", color=discord.Color.green(), description="")
+    #     giveaway_manager = discord.Embed(title="Giveaway Manager", color=discord.Color.green(), description="")
+    #     event_manager = discord.Embed(title="Event Manager", color=discord.Color.green(), description="")
 
-        await Paginator(interaction, embeds, ).start(embeded=True)
+    #     if not staff_list:
+    #         if not short:
+    #             for staff in staff_list:
+    #                 if staff['post'] == []:
+    #                     continue
+    #                 if 'HEAD ADMINISTRATOR' in staff['post']:
+    #                     hadmin.description += f"<@{staff['_id']}>\n"
+    #                 if 'ADMINISTRATOR' in staff['post']:
+    #                     admin.description += f"<@{staff['_id']}>\n"
+    #                 if 'MODERATOR' in staff['post']:
+    #                     moderator.description += f"<@{staff['_id']}>\n"
+    #                 if 'TRIAL MODERATOR' in staff['post']:
+    #                     trial_moderator.description += f"<@{staff['_id']}>\n"
+    #                 if 'PartnerShip Manager' in staff['post']:
+    #                     partnership_manager.description += f"<@{staff['_id']}>\n"
+    #                 if 'Giveaway Manager' in staff['post']:
+    #                     giveaway_manager.description += f"<@{staff['_id']}>\n"
+    #                 if 'Event Manager' in staff['post']:
+    #                     event_manager.description += f"<@{staff['_id']}>\n"
+            
+    #             embeds = [hadmin, admin, moderator, trial_moderator, partnership_manager, giveaway_manager, event_manager]
+    #             await Paginator(interaction, embeds).start(embeded=True, quick_navigation=True)
+    #         else:
+    #             embed = discord.Embed(title=short.name, color=discord.Color.green(), description="")
+    #             for staff in staff_list:
+    #                 if staff['post'] == []:
+    #                     continue
+    #                 if short.name in staff['post']:
+    #                     embed.description += f"<@{staff['_id']}>\n"
+    #             await interaction.response.send_message(embed=embed)
 
-    @app_commands.command(name="recovery", description="Set a recovery code for a user")
-    async def recovery(self, interaction: discord.Interaction, member: discord.Member):
-        if interaction.user.id not in [488614633670967307, 301657045248114690,651711446081601545,413651113485533194,562738920031256576]:
-            await interaction.response.send_message(content=None, embed=discord.Embed(description=f"<:dynoError:1000351802702692442> | You do not have permission to use this command", color=discord.Color.red()))
-            return
+    # @app_commands.command(name="vacation", description="Set leave of days")
+    # @app_commands.describe(days="Number of days", reason="Reason for vacation", user="User to request vacation")
+    # @app_commands.checks.has_permissions(administrator=True)
+    # async def leave_of_days(self, interaction: discord.Interaction, user: discord.Member, days: int, reason: str):
+    #     data = await self.bot.staff.find(user.id)
+    #     if not data:
+    #         await interaction.response.send_message(f"{user.mention} is not staff", ephemeral=True)
+    #         return
+    #     if data['vacation']['days'] != 0:
+    #         await interaction.response.send_message(f"{interaction.author.mention} already has {data['vacation']['days']} days of leave", ephemeral=True)
+    #         return
+    #     data['vacation']['days'] = days
+    #     data['vacation']['reason'] = reason
+    #     data['vacation']['start'] = datetime.datetime.now()
+    #     data['vacation']['last_vacation'] = datetime.datetime.now()
+    #     data['vacation']['approvaed'] = interaction.user.id
 
-        data = await interaction.client.staff.find(member.id)
-        await interaction.response.send_message("Setting recovery code...")
-        if not data:
-            await interaction.edit_original_message(content=None, embed=discord.Embed(description=f"<:dynoError:1000351802702692442> | {member.mention} is not in the staff list", color=discord.Color.red()))
-            return
+    #     await self.bot.staff.update(data)
+    #     await interaction.response.send_message(f"<a:loading:1004658436778229791> | Setting up leave of days for {user.mention}")
+    #     for post in data['post']:
+    #         staff_role = discord.utils.get(interaction.guild.roles, id=staff_list[post])
+    #         await user.remove_roles(staff_role, reason=f"User has stared leave of {days}")
         
-        #create randonm code 
-        code = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(6))
-        data['recovery_code'] = code
-        embed = discord.Embed(description=f"<:dynosuccess:1000349098240647188> | Successfully set a recovery code for {member.mention}", color=discord.Color.green())
-        dm_embed = discord.Embed(description=f"You have received a recovery code incase you lost your current account password.\nNever share this code with anyone.\nHigher staff will never ask you for your recovery code.\nTo use your recovery code, type `-recovery {code}` in the DM with the bot.\nIf you did not request a recovery code, please ignore this message.", color=discord.Color.green())
-        dm_embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/999553621895155723/1003581466950783026/tgk.gif")
-        await interaction.client.staff.update(data)
-        msg = await member.send(embed=dm_embed)
-        await msg.pin()
-        await interaction.edit_original_message(content=None, embed=embed)
-    
-    @app_commands.command(name="set-timezone", description="Set Timezone of a user")
-    @app_commands.describe(timezone="Your Timezone")
-    async def set_timezone(self, interaction: discord.Interaction, timezone:str):
-        data = await interaction.client.staff.find(interaction.user.id)
-        await interaction.response.send_message("Setting timezone...")
-        if not data:
-            await interaction.edit_original_message(content=None, embed=discord.Embed(description=f"<:dynoError:1000351802702692442> | {interaction.user.mention} is not in the staff list", color=discord.Color.red()))
-            return
-        data['timezone'] = timezone
-        await interaction.client.staff.update(data)
-        await interaction.edit_original_message(content=None, embed=discord.Embed(description=f"<:dynosuccess:1000349098240647188> | Successfully set {interaction.user.mention}'s timezone to {timezone}", color=discord.Color.green()))
+    #     await interaction.edit_original_message(content=None, embed=discord.Embed(description=f"<:dynosuccess:1000349098240647188> | {user.mention} has been set up leave of days for {days} days", color=discord.Color.green()))
+
+    # @app_commands.command(name="endvacation", description="Remove leave of days")
+    # @app_commands.describe(user="User to remove leave of days")
+    # @app_commands.checks.has_permissions(administrator=True)
+    # async def end_vacation(self, interaction: discord.Interaction, user: discord.Member):
+    #     data = await self.bot.staff.find(user.id)
+    #     if not data:
+    #         await interaction.response.send_message(f"{user.mention} is not staff", ephemeral=True)
+    #         return
+    #     if data['vacation']['days'] == 0:
+    #         await interaction.response.send_message(f"{interaction.author.mention} does not have any leave of days", ephemeral=True)
+    #         return
+    #     data['vacation']['days'] = 0
+    #     data['vacation']['reason'] = None
+    #     data['vacation']['start'] = None
+    #     data['vacation']['approvaed'] = None
+
+    #     await self.bot.staff.update(data)
+    #     await interaction.response.send_message(f"<a:loading:1004658436778229791> | Removing leave of days for {user.mention}")
+    #     for post in data['post']:
+    #         staff_role = discord.utils.get(interaction.guild.roles, id=staff_list[post])
+    #         await user.add_roles(staff_role, reason=f"User has ended leave")
+        
+    #     await interaction.edit_original_message(content=None, embed=discord.Embed(description=f"<:dynosuccess:1000349098240647188> | {user.mention} has been removed leave of days", color=discord.Color.green()))
+
 
 class Staff_mamagement(commands.Cog):
     def __init__(self, bot):
@@ -150,7 +171,7 @@ class Staff_mamagement(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        self.bot.tree.add_command(Staff(), guild=discord.Object(785839283847954433))
+        self.bot.tree.add_command(Staff(self.bot), guild=discord.Object(785839283847954433))
         print(f"{self.__class__.__name__} Cog has been loaded")
 
     @commands.command(name="recovery", description="Use your recovery code")
