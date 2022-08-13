@@ -170,16 +170,16 @@ class Decancer(commands.Cog, description="Fix Member name on Join"):
         self.bot.tree.add_command(Decancer_Commands(self.bot), guild=discord.Object(785839283847954433))
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
     
-    @commands.Cog.listener()
-    async def on_member_update(self, before, after):
-        if before.display_name != after.display_name:
-            bypass = await self.bot.decancer.find(after.guild.id)
-            roles = [role.id for role in after.roles]
-            if not bypass or set(roles).intersection(bypass["bypass"]):
-                if self.is_cancerous(after.display_name):
-                    new_name = await self.nick_maker(after.guild, after.display_name)
-                    await after.edit(nick=new_name, reason="Decancer started")
-                    await after.send(f"Your new nickname consists of cancerous characters. Your new nickname is {new_name}\nName Edited By - AutoMod")
+    # @commands.Cog.listener()
+    # async def on_member_update(self, before, after):
+    #     if before.display_name != after.display_name:
+    #         bypass = await self.bot.decancer.find(after.guild.id)
+    #         roles = [role.id for role in after.roles]
+    #         if not bypass or set(roles).intersection(bypass["bypass"]):
+    #             if self.is_cancerous(after.display_name):
+    #                 new_name = await self.nick_maker(after.guild, after.display_name)
+    #                 await after.edit(nick=new_name, reason="Decancer started")
+    #                 await after.send(f"Your new nickname consists of cancerous characters. Your new nickname is {new_name}\nName Edited By - AutoMod")
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
