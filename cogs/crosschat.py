@@ -1,5 +1,7 @@
-from discord.ext import commands
+from discord.ext import commands, tasks
 from discord import app_commands, Embed
+from copy import deepcopy
+import aiohttp
 import discord
 import datetime
 
@@ -80,86 +82,92 @@ class CrossChat_slash(app_commands.Group, name="crosschat", description="utils c
 class CorssChat(commands.Cog, name="Cross Chat"):
     def __init__(self, bot):
         self.bot = bot
+        self.cross_chache = {}
+    
+    @tasks.loop(minutes=2)
+    async def cross_chat_loop(self):
+        current_messsages = deepcopy(self.cross_chache)
+        for key, value in current_messsages.items():
+            data = await self.cross_chache[key]
+            #check if 30mins have passed from data['time']
+            if (datetime.datetime.utcnow() - data['time']).total_seconds() > 1800:
+                try:
+                    self.cross_chache.pop(key)
+                except KeyError:
+                    del self.cross_chache[key]
+                except Exception as e:
+                    pass
 
-    async def Send_web_Message(self, channel: discord.TextChannel, message: discord.Message, reply_message: discord.Message=None) -> discord.Message:
-        webhook = None
-        for webhook in await channel.webhooks():
-            if webhook.user.id == self.bot.user.id:
-                webhook = webhook
-                break
-        
-        if webhook is None:
-            webhook = await channel.create_webhook(name="CrossChat",reason="CrossChat")
-
-        if message.author.avatar.url != None:
-            avatar = message.author.avatar.url
-        else:
-            avatar = message.author.default_avatar
-
-        content = message.content
-
-        for attachment in message.attachments:
-            content += f"\n{attachment.url}"
-
-        embed_list = []
-
-        if reply_message is not None:
-
-            if reply_message.author.avatar.url != None:
-                embed_avatar = reply_message.author.avatar.url
-            else:
-                embed_avatar = reply_message.author.default_avatar
-            embed = discord.Embed()
-            embed.set_author(name=reply_message.author, icon_url=embed_avatar)
-            embed.description = reply_message.content
-            embed.color = 0xADD8E6
-            embed.timestamp = reply_message.created_at
-            if len(message.attachments) > 0:
-                embed.set_image(url=message.attachments[0].url)
-        
-        if len(message.stickers) > 0:
-            if message.stickers[0].url.endswith(".json"):
-                pass
-            else:
-                sticker_embed = discord.Embed(color=message.author.color)
-            sticker_embed.set_image(url=message.stickers[0].url)
-            embed_list.append(sticker_embed)
-
-        return await webhook.send(content=content,embeds=embed_list,username=message.author.display_name, avatar_url=avatar, allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
 
     @commands.Cog.listener()
     async def on_ready(self):
-        self.bot.tree.add_command(CrossChat_slash(self.bot), guild=discord.Object(785839283847954433))
-        self.bot.tree.add_command(CrossChat_slash(self.bot), guild=discord.Object(811037093715116072))
+        # self.bot.tree.add_command(CrossChat_slash(self.bot), guild=discord.Object(785839283847954433))
+        # self.bot.tree.add_command(CrossChat_slash(self.bot), guild=discord.Object(811037093715116072))
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
     
     @commands.Cog.listener()
     async def on_message(self, message):
         if self.bot.cross_chat_toggle == False or message.content.startswith("-") or message.author.bot or message.author.id in self.bot.cross_chat_blacklist:
             return
-
+        if message.author.bot: return
+        if not message.guild: return
+        if message.author.discriminator == "0000": return
+        other_side = None
         if message.channel.id == 970681327374467082:
-            place2 = self.bot.get_channel(972433560327827466)
-            reply_message = None
-            if message.reference:
-                try:
-                    reply_message = await message.channel.fetch_message(message.reference.message_id)
-                except discord.NotFound:
-                    pass
+            other_side = self.bot.get_channel(972433560327827466)
+        elif message.channel.id == 972433560327827466:
+            other_side = self.bot.get_channel(970681327374467082)
+        else:
+            return
+        
+        if other_side is None:
+            return
+        else:
+            webhook = None
+            for webhook in await other_side.webhooks():
+                if webhook.user.id == self.bot.user.id:
+                    webhook = webhook
+                    break
+            if webhook is None:
+                webhook = await other_side.create_webhook(name="CrossChat", reason="CrossChat webhook")
+            
+            async with aiohttp.ClientSession() as session:
+                url = f"https://canary.discord.com/api/webhooks/{webhook.id}/{webhook.token}"
+                webhook = discord.Webhook.from_url(url, session=session)
+                webhook_message = await webhook.send(wait=True,content=message.content, username=message.author.name, avatar_url=message.author.avatar.url if message.author.avatar else message.author.default_avatar.url)
+                other_side_message = await other_side.fetch_message(webhook_message.id)
+                self.cross_chache[message.id] = {'other_side_id': other_side_message.id, 'other_side_channel_id': other_side.id, 'time': other_side.created_at}
+        
+    @commands.Cog.listener()
+    async def on_message_delete(self, message):
+        if message.id in self.cross_chache.keys():
+            other_side_id = self.cross_chache[message.id]['other_side_id']
 
-            send_msg = await self.Send_web_Message(place2, message, reply_message)
+            other_side_channel_id = self.cross_chache[message.id]['other_side_channel_id']
+            other_side_channel = self.bot.get_channel(other_side_channel_id)
+            other_side_message = await other_side_channel.fetch_message(other_side_id)
+            await other_side_message.delete()
+            del self.cross_chache[message.id]
+    
+    @commands.Cog.listener()
+    async def on_message_edit(self, before, after):
+        if before.id in self.cross_chache.keys():
+            other_side_data = self.cross_chache[before.id]
+            other_side_id = other_side_data['other_side_id']
+            other_side_channel = self.bot.get_channel(other_side_data['other_side_channel_id'])
 
-        if message.channel.id == 972433560327827466:
-            place1 = self.bot.get_channel(970681327374467082)
+            for webhook in await other_side_channel.webhooks():
+                if webhook.user.name == self.bot.user.name:
+                    webhook = webhook
+                    break
+            async with aiohttp.ClientSession() as session:
+                url = f"https://canary.discord.com/api/webhooks/{webhook.id}/{webhook.token}"
+                webhook = discord.Webhook.from_url(url,session=session)
 
-            reply_message = None
-            if message.reference:
-                try:
-                    reply_message = await message.channel.fetch_message(message.reference.message_id)
-                except discord.NotFound:
-                    pass
+                await webhook.edit_message(other_side_id, content=after.content)
 
-            send_msg = await self.Send_web_Message(place1, message, reply_message)
+            
+
 
 
 async def setup(bot):
