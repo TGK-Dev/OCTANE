@@ -42,7 +42,6 @@ class Ar(commands.Cog, name="Auto Responce", description="Easy way to add Auto R
         if message.channel.category_id in [932948559412748298, 785841152553123861,821807876812701706]: return
         
         if "heist" in message.content.lower() and message.guild.id in self.heist_ar.keys():
-            print(f"{message.author.name} said heist")
             ar_data = self.heist_ar[message.guild.id]
             embed = discord.Embed(description=f"> **{ar_data['ammount']} Heist** **begins** <t:{round(ar_data['time'].timestamp())}:R>")
             if ar_data['role'] != None:

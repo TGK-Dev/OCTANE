@@ -186,18 +186,16 @@ class Ticket_Control(discord.ui.View):
     def __init__(self, data: dict):
         super().__init__(timeout=None)
         self.data = data
-        style = discord.ButtonStyle.secondary
+        style = None
         for i, value in data.items():
-            if value['color']:
-                if value['color'] == 'green':
-                   style = discord.ButtonStyle.green
-                elif value['color'] == 'red':
-                    style = discord.ButtonStyle.red
-                elif value['color'] == 'blurple' or 'blue':
-                    style = discord.ButtonStyle.blurple
-                elif value['color'] == 'grey' or 'gray':
-                    style = discord.ButtonStyle.secondary
-                    
+            if value['color'] == "green":
+                style = discord.ButtonStyle.green
+            elif value['color'] == "red":
+                style = discord.ButtonStyle.red
+            elif value['color'] == "blue" or "blurple":
+                style = discord.ButtonStyle.blurple
+            elif value['color'] == "grey" or "default" or "gray":
+                style = discord.ButtonStyle.grey
             btn = Panel_Button(label=i, style=style, custom_id="persistent_view:{}".format(i), emoji=str(value['emoji']) if value['emoji'] is not None else None)
             self.add_item(btn)
 
@@ -420,7 +418,7 @@ class Ticket_Panel_edit_Other(discord.ui.Modal):
             if child.label == "Color":
                 if child.value == "":
                     self.data['panels'][self.name]['color'] = None
-                if child.value in ['red', 'green', 'blue', 'grey']:
+                if child.value in ['red', 'green', 'blue', 'grey', 'gray']:
                     self.data['panels'][self.name]['color'] = child.value
             
         await interaction.response.defer(thinking=True, ephemeral=True)
@@ -502,3 +500,10 @@ class Ticket_Panel_Roles(discord.ui.Modal):
             
         await interaction.client.ticket_system.update(self.data)
         await update_embed(interaction, self.data, self.name)
+
+class MyModal(discord.ui.Modal):
+    name = discord.ui.TextInput(label='Name')
+    foo = discord.ui.Select(options=[discord.SelectOption(label='option 1'), discord.SelectOption(label='option 2')])
+
+    async def on_submit(self, interaction):
+        await interaction.response.send_message(f'Thanks for your response', ephemeral=True)
