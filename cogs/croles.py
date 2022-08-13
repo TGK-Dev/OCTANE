@@ -2,141 +2,119 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 from utils.paginator import Paginator
+from utils.converter import TimeConverter
 import typing
 
 class Custom_Roles_slash(app_commands.Group):
     def __init__(self):
         super().__init__(name="custom_roles")
     
-    @app_commands.command(name="link", description="Link custom role to user")
-    @app_commands.describe(role="Role to link", member="Member to link role to")
-    @app_commands.guilds(785839283847954433)
-    async def link_role(self, interaction: discord.Interaction, role: discord.Role, member: discord.Member):
-        if not interaction.user.guild_permissions.administrator:
-            return await interaction.send("You don't have permission to use this command.")
+    @app_commands.command(name="Create", description="Create a custom role")
+    @app_commands.checks.has_permissions(administrator=True)
+    @app_commands.describe(name="Name of the role", color="Color of the role", time="duration of the role")
+    async def create(self, interaction: discord.Interaction, owner: discord.Member, name: str, color: str, time: str):
+        time = await TimeConverter().convert(interaction, time)
+        role = await interaction.guild.create_role(name=name, color=discord.Color(int(color, 16)), reason=f"Created by {interaction.user.name}")
+        await owner.add_roles(role, reason=f"Created by {interaction.user.name}")
+        embed = discord.Embed(description=f"{role.mention} has been created", color=discord.Color.blue())
+        await interaction.response.send_message(embed=embed)
+        data = {"_id": owner.id, 'created_at': role.created_at, 'created_by': interaction.user.id, 'time': time, 'frineds': [], 'role': role.id, 'frinds_limit': 2}
+        await interaction.client.crole.insert(data)
 
-        data = await interaction.client.crole.find(role.id)
-        if data is not None:
-            await interaction.response.send_message("Role is Already Linked to User use `/crole unlink`", ephemeral=True)
-        else:
-            data = {"_id": member.id, "role": role.id, "linked_by": interaction.user.id, "members": []}
-            await interaction.client.crole.insert(data)
-            await member.add_roles(role)
-            embed = discord.Embed(description=f"{role.name} has been linked to {member.mention}", color=member.color)
-            await interaction.response.send_message(embed=embed, ephemeral=False)
-    
-    @app_commands.command(name="unlink", description="Unlink custom role from user")
-    @app_commands.describe(role="Role to unlink", member="Member to unlink role from")
-    @app_commands.guilds(785839283847954433)
-    async def unlink_role(self, interaction: discord.Interaction, role: discord.Role, member: discord.Member):
-        if not interaction.user.guild_permissions.administrator:
-            return await interaction.send("You don't have permission to use this command.")
-        data = await interaction.client.crole.find(member.id)
-        if data is None:
-            await interaction.response.send_message("Role is Not Linked to User use `/crole link`", ephemeral=True)
-        else:
-            await interaction.client.crole.delete(member.id)
-            embed = discord.Embed(description=f"{role.name} has been unlinked from {member.mention}", color=member.color)
-            await interaction.response.send_message(embed=embed, ephemeral=False)
-    
-    @app_commands.command(name="list", description="List all custom roles")
-    @app_commands.guilds(785839283847954433)
-    async def list_roles(self, interaction: discord.Interaction):
-        data = await interaction.client.crole.get_all()
-        if data is None:
-            await interaction.response.send_message("No Custom Roles", ephemeral=True)
-        else:
-            pages = []
-            for i in data:
-                role = discord.utils.get(interaction.guild.roles, id=i["role"])
-                member = discord.utils.get(interaction.guild.members, id=i["_id"])
-                embed = discord.Embed(description=f"Role: {role.mention}\nOwner: {member.mention}\nMember: {len(i['members'])}\nLinked By: <@{i['linked_by']}>", color=role.color)
-                pages.append(embed)
-            
-            await Paginator(interaction, pages).start(quick_navigation=False,embeded=True)
-
-    @app_commands.command(name="edit", description="edit custom role")
-    @app_commands.guilds(785839283847954433)
-    @app_commands.describe(name="New name of role", color="Hex color of role", icon="File of role icon")
-    async def edit_role(self, interaction: discord.Interaction, name: str=None, color: str=None, icon: discord.Attachment=None):        
-        data = await interaction.client.crole.find(interaction.message.author.id)
-        if data is None:
-            await interaction.response.send_message("You don't have an avctive custom role linked\nIf you think this is a mistake, contact a moderator", ephemeral=True)
+    @app_commands.command(name="Delete", description="Delete a custom role")
+    @app_commands.checks.has_permissions(administrator=True)
+    @app_commands.describe(role="select option", reason="reason for deleting role")
+    async def delete(self, interaction: discord.Interaction, role: discord.Role, reason: str="No reason provided"):
+        data = await interaction.client.crole.find_by_custom({'role': role.id})
+        if not data:
+            embed = discord.Embed(description=f"{role.mention} is not a custom role", color=discord.Color.red())
+            await interaction.response.send_message(embed=embed)
             return
-        await interaction.response.send_message("Please wait while we edit your role", ephemeral=False)
-        role = discord.utils.get(interaction.guild.roles, id=data["role"])
-        embed = discord.Embed(title="Result of Editing", color=role.color)
-        if name is not None:
-            try:
-                old_name = role.name
-                await role.edit(name=name)
-                embed.add_field(name="Name", value=f"{old_name} -> {role.name}")
-            except Exception as e:
-                embed.add_field(name="Error in name", value=str(e)[:100])
-        
-        if color is not None:
-            try:
-                old_color = role.color
-                await role.edit(color=discord.Color(int(color, 16)))
-                embed.add_field(name="Color", value=f"{old_color} -> {role.color}")
-            except Exception as e:
-                embed.add_field(name="Error in color", value=str(e)[:100])
-        
-        if icon is not None:
-            if icon.filename.endswith(".png") or icon.filename.endswith(".jpg"):
-                try:
-                    icon = await icon.read()
-                    await role.edit(display_icon=icon)
-                    embed.add_field(name="Icon", value=f"updated")
-                except Exception as e:
-                    embed.add_field(name="Error in icon", value=str(e)[:100])
-        
-        await interaction.response.send_message(embed=embed, ephemeral=False)
-
-
-    @app_commands.command(name="manage", description="Add member to custom role")
-    @app_commands.describe(option="chose to add/remove members", member="Member to add to role")
-    @app_commands.guilds(785839283847954433)
-    async def add_member(self, interaction: discord.Interaction, member: discord.Member, option: typing.Literal['add', 'remove']):
-        data = await interaction.client.crole.find(interaction.user.id)
-        if data is None:
-            await interaction.response.send_message("You have currently no custom role liked to you", ephemeral=True)
+        await interaction.guild.delete_role(role, reason=reason)
+        await interaction.client.crole.delete_by_custom({'role': role.id})
+        embed = discord.Embed(description=f"{role.mention} has been deleted", color=discord.Color.blue())
+        await interaction.response.send_message(embed=embed)
+    
+    @app_commands.command(name="addtime", description="Add time to a custom role")
+    @app_commands.checks.has_permissions(administrator=True)
+    @app_commands.describe(user="User to add time", time="duration of the role")
+    async def addtime(self, interaction: discord.Interaction, user: discord.Member, time:str):
+        data = await interaction.client.crole.find_by_custom({'_id': user.id})
+        if not data:
+            embed = discord.Embed(description=f"{user.mention} has no custom role", color=discord.Color.red())
+            await interaction.response.send_message(embed=embed)
             return
-        if option == 'add':
+        time = await TimeConverter().convert(interaction, time)
+        data['time'] += time
+        await interaction.client.crole.update(data)
+        embed = discord.Embed(description=f"{user.mention} has been given {time} more time", color=discord.Color.blue())
+        await interaction.response.send_message(embed=embed)
+    
+    @app_commands.command(name="addfriend", description="Add a friend to a custom role")
+    @app_commands.describe(user="User to add friend", friend="friend to add")
+    async def addfriend(self, interaction: discord.Interaction, friend: discord.Member):
+        data = await interaction.client.crole.find_by_custom({'_id': interaction.author.id})
+        if not data:
+            embed = discord.Embed(description=f"{interaction.author.mention} has no custom role", color=discord.Color.red())
+            await interaction.response.send_message(embed=embed)
+            return
+        if friend in data['friends']:
+            embed = discord.Embed(description=f"{friend.mention} is already a friend of {interaction.author.mention}", color=discord.Color.red())
+            await interaction.response.send_message(embed=embed)
+            return
+        if len(data['friends']) >= data['frinds_limit']:
+            embed = discord.Embed(description=f"{interaction.author.mention} has reached the limit of friends", color=discord.Color.red())
+            await interaction.response.send_message(embed=embed)
+            return
+        data['friends'].append(friend.id)
+        await interaction.client.crole.update(data)
+        await friend.add_roles(interaction.guild.get_role(data['role']), reason=f"Added by {interaction.author.name}")
+        embed = discord.Embed(description=f"{friend.mention} has been added to {interaction.author.mention}'s friends", color=discord.Color.blue())
+        await interaction.response.send_message(embed=embed)
 
-            if member.id in data['members']:
-                await interaction.response.send_message("Member is already in the role", ephemeral=True)
-                return
+    @app_commands.command(name="removefriend", description="Remove a friend from a custom role")
+    @app_commands.describe(user="User to remove friend", friend="friend to remove")
+    async def removefriend(self, interaction: discord.Interaction, friend: discord.Member):
+        data = await interaction.client.crole.find_by_custom({'_id': interaction.author.id})
+        if not data:
+            embed = discord.Embed(description=f"{interaction.author.mention} has no custom role", color=discord.Color.red())
+            await interaction.response.send_message(embed=embed)
+            return
+        if friend not in data['friends']:
+            embed = discord.Embed(description=f"{friend.mention} is not a friend of {interaction.author.mention}", color=discord.Color.red())
+            await interaction.response.send_message(embed=embed)
+            return
+        data['friends'].remove(friend.id)
+        await interaction.client.crole.update(data)
+        await friend.remove_roles(interaction.guild.get_role(data['role']), reason=f"Removed by {interaction.author.name}")
+        embed = discord.Embed(description=f"{friend.mention} has been removed from {interaction.author.mention}'s friends", color=discord.Color.blue())
+        await interaction.response.send_message(embed=embed)
+    
+    @app_commands.command(name="setlimit", description="Set the limit of friends a custom role can have")
+    @app_commands.describe(user="User to set limit", limit="limit of friends")
+    @app_commands.checks.has_permissions(administrator=True)
+    async def setlimit(self, interaction: discord.Interaction, user: discord.Member, limit:int):
+        data = await interaction.client.crole.find_by_custom({'_id': user.id})
+        if not data:
+            embed = discord.Embed(description=f"{user.mention} has no custom role", color=discord.Color.red())
+            await interaction.response.send_message(embed=embed)
+            return
+        if limit > 10:
+            embed = discord.Embed(description=f"{limit} is too high", color=discord.Color.red())
+            await interaction.response.send_message(embed=embed)
+            return
+        data['friends_limit'] = limit
+        await interaction.client.crole.update(data)
+        embed = discord.Embed(description=f"{user.mention}'s friends limit has been set to {limit}", color=discord.Color.blue())
+        await interaction.response.send_message(embed=embed)
 
-            if len(data['members']) >= 5:
-                await interaction.response.send_message("You have reached the maximum amount of members in the role", ephemeral=True)
-                return
-
-            data['members'].append(member.id)
-            await interaction.client.crole.update(data)
-            await member.add_roles(discord.utils.get(interaction.guild.roles, id=data["role"]))
-            await interaction.response.send_message(f"{member.mention} has been added to the role", ephemeral=True)
-
-        elif option == 'remove':
-            if member.id == interaction.user.id:
-                await interaction.response.send_message("You can't remove yourself from the role", ephemeral=True)
-                return
-
-            if member.id not in data['members']:
-                await interaction.response.send_message("Member is not in the role", ephemeral=True)
-                return
-
-            data['members'].remove(member.id)
-            await interaction.client.crole.update(data)
-            await member.remove_roles(discord.utils.get(interaction.guild.roles, id=data["role"]))
-            await interaction.response.send_message(f"{member.mention} has been removed from the role", ephemeral=True)
-
-
-    async def on_error(self, interaction: discord.Interaction, error: Exception):
+    async def on_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError) -> None:
         try:
-            await interaction.response.send_message(f"An error has occured {str(error)[:2000]}", ephemeral=True)
+            await interaction.response.send_message(error, ephemeral=True)
+        except discord.InteractionResponded:
+            await interaction.followup.send(error, ephemeral=True)
         except:
-            await interaction.followup.send_message(f"An error has occured {str(error)[:2000]}")
+            pass
 class Custom_Roles(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
