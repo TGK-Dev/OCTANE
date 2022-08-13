@@ -9,7 +9,7 @@ class Custom_Roles_slash(app_commands.Group):
     def __init__(self):
         super().__init__(name="custom_roles")
     
-    @app_commands.command(name="Create", description="Create a custom role")
+    @app_commands.command(name="create", description="Create a custom role")
     @app_commands.checks.has_permissions(administrator=True)
     @app_commands.describe(name="Name of the role", color="Color of the role", time="duration of the role")
     async def create(self, interaction: discord.Interaction, owner: discord.Member, name: str, color: str, time: str):
@@ -21,7 +21,7 @@ class Custom_Roles_slash(app_commands.Group):
         data = {"_id": owner.id, 'created_at': role.created_at, 'created_by': interaction.user.id, 'time': time, 'frineds': [], 'role': role.id, 'frinds_limit': 2}
         await interaction.client.crole.insert(data)
 
-    @app_commands.command(name="Delete", description="Delete a custom role")
+    @app_commands.command(name="delete", description="Delete a custom role")
     @app_commands.checks.has_permissions(administrator=True)
     @app_commands.describe(role="select option", reason="reason for deleting role")
     async def delete(self, interaction: discord.Interaction, role: discord.Role, reason: str="No reason provided"):
@@ -51,7 +51,7 @@ class Custom_Roles_slash(app_commands.Group):
         await interaction.response.send_message(embed=embed)
     
     @app_commands.command(name="addfriend", description="Add a friend to a custom role")
-    @app_commands.describe(user="User to add friend", friend="friend to add")
+    @app_commands.describe(friend="friend to add")
     async def addfriend(self, interaction: discord.Interaction, friend: discord.Member):
         data = await interaction.client.crole.find_by_custom({'_id': interaction.author.id})
         if not data:
@@ -73,7 +73,7 @@ class Custom_Roles_slash(app_commands.Group):
         await interaction.response.send_message(embed=embed)
 
     @app_commands.command(name="removefriend", description="Remove a friend from a custom role")
-    @app_commands.describe(user="User to remove friend", friend="friend to remove")
+    @app_commands.describe(friend="friend to remove")
     async def removefriend(self, interaction: discord.Interaction, friend: discord.Member):
         data = await interaction.client.crole.find_by_custom({'_id': interaction.author.id})
         if not data:
