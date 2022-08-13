@@ -6,7 +6,7 @@ from typing import Union, List, Literal
 from utils.checks import Commands_Checks
 from utils.functions import make_db_temp
 from utils.paginator import Paginator
-from ui.Ticket_system import Ticket_Control, Panel_edit
+from ui.Ticket_system import Ticket_Control, Panel_edit, MyModal
 import discord
 import os
 import logging
@@ -337,6 +337,10 @@ class Ticket(commands.Cog, name="Ticket System", description="Create Ticket With
         for i in data:
             view = Ticket_Control(i['panels'])
             self.bot.add_view(view)
+    
+    @app_commands.command(name="test")
+    async def test(self, interaction: discord.Interaction):
+        await interaction.response.send_modal(MyModal())
 
 async def setup(bot):
     await bot.add_cog(Ticket(bot))
