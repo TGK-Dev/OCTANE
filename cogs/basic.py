@@ -98,6 +98,15 @@ class Basic(commands.Cog, name="Basic", description="General Basic Commands"):
             embed.set_footer(text=f"Sniped by {interaction.user.name}")
             await interaction.response.send_message(embed=embed, ephemeral=hidden)
     
+        
+    @app_commands.command(name="enter", description="Tell everyone that you enter the chat")
+    async def enter(self, interaction: discord.Interaction):
+        await interaction.response.send_message(f"**{interaction.user}#{interaction.user.discriminator}** has entered the room! <:TGK_pepeenter:790189012148682782>")
+    
+    @app_commands.command(name="exit", description="Tell everyone that you leave the chat")
+    async def exit(self, interaction: discord.Interaction):
+        await interaction.response.send_message(f"**{interaction.user}#{interaction.user.discriminator}** has left the room! <:TGK_pepeexit:790189012151059200>")
+
     @commands.command(name="vote", description="Vote for a server", brife="vote")
     async def vote(self, ctx):
         await ctx.message.delete()
