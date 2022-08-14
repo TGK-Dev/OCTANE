@@ -112,7 +112,7 @@ class Basic(commands.Cog, name="Basic", description="General Basic Commands"):
         await ctx.message.delete()
         tgk = self.bot.get_guild(785839283847954433)
         embed = discord.Embed(
-                title=f"🌹 {tgk.name}", 
+                title=f"<a:tgk_redcrown:1005473874693079071> {tgk.name}", 
                 description= f"<:tgk_redarrow:1005361235715424296> `+1x` amari guild-wide\n"
                 f"<:tgk_redarrow:1005361235715424296> Access to [**Special Channel**](https://discord.com/channels/785839283847954433/929613393097293874)\n"
                 f"<:tgk_redarrow:1005361235715424296> `+1x` entry in <@700743797977514004>'s gaws\n", 
