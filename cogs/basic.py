@@ -110,20 +110,18 @@ class Basic(commands.Cog, name="Basic", description="General Basic Commands"):
     @commands.command(name="vote", description="Vote for a server", brife="vote")
     async def vote(self, ctx):
         await ctx.message.delete()
+        tgk = self.bot.get_guild(785839283847954433)
         embed = discord.Embed(
-            title=f"Vote for {ctx.guild.name}", 
-            description =
-                f"❥ Special <@&786884615192313866> Role with 1x guild-wide multi.\n"
-                f"❥ 1x extra entry into all frisky giveaways.\n"
-                f"❥ 2,500 Casino Cash. Collect using ,collectincome in <#786117471840895016>.\n"
-                f"❥ Access to <#929613393097293874> with 2x Amaari\n", 
-            color=ctx.author.color
-        )
-        embed.set_thumbnail(url = "https://cdn.discordapp.com/emojis/942521024476487741.webp?size=128&quality=lossless")
+                title=f"🌹 {tgk.name}", 
+                description= f"<:tgk_redarrow:1005361235715424296> `+1x` amari guild-wide\n"
+                f"<:tgk_redarrow:1005361235715424296> Access to [**Special Channel**](https://discord.com/channels/785839283847954433/929613393097293874)\n"
+                f"<:tgk_redarrow:1005361235715424296> `+1x` entry in <@700743797977514004>'s gaws\n", 
+                color=0xff0000,
+                url="https://top.gg/servers/785839283847954433/vote"
+                )
         view = discord.ui.View()
         view.add_item(discord.ui.Button(label=f'Top.gg', url="https://top.gg/servers/785839283847954433/vote"))
         await ctx.send(embed=embed, view=view)
-        
 
 async def setup(bot):
     await bot.add_cog(Basic(bot))
