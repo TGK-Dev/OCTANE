@@ -79,13 +79,13 @@ class Highlight_Slash(app_commands.Group, name="highlight"):
             await interaction.response.send_message(embed=embed)
             return
 
-        embed.add_field(name="Triggers", value=", ".join(data['tigger']))
+        embed.add_field(name="Triggers", value=f"{'.'.join(data['tigger']) if len(data['tigger']) > 0 else 'None'}")
         channels = []
 
         for channel in data['ignore_channel']:
             channels.append(f"<#{channel}>")
         
-        embed.add_field(name="Ignore Channels", value=",".join(channels))
+        embed.add_field(name="Ignore Channels", value=f"{'.'.join(channels) if len(channels) > 0 else 'None'}")
         embed.set_footer(text=f"Made by JAY#0138 & utki007#0007")
         embed.timestamp = datetime.datetime.utcnow()
         await interaction.response.send_message(embed=embed)
@@ -139,12 +139,12 @@ class Highlight(commands.Cog, name="Votes",description="Server Vote counter with
             for msg in message_content:
                 if msg in data['tigger']:
                     if message.channel.id in data['ignore_channel']:
-                        return
+                        break
                     if message.author.id == data['_id']:
-                        return
+                        break
                     async for cmsg in message.channel.history(limit=20, before=message):
                         if cmsg.author.id == data['_id']:
-                            return
+                            break
                     self.bot.dispatch("hl_trigger", message, data, msg)                    
                     return
     
