@@ -181,7 +181,10 @@ class Highlight(commands.Cog, name="Votes",description="Server Vote counter with
     
     @commands.Cog.listener()
     async def on_hl_trigger(self, trigger_message: discord.Message, data: dict, trigger_key: str):
-    
+        channel = message.channel
+        user = message.guil.get_member(data['_id'])
+        if user not in channel.members:
+            return
         await asyncio.sleep(5)
 
         embed = discord.Embed(title=trigger_key, description="", color=discord.Color.yellow())
@@ -191,13 +194,13 @@ class Highlight(commands.Cog, name="Votes",description="Server Vote counter with
 
         for message in after_message:
             formattime = str(message.created_at.strftime("%H:%M:%S"))
-            embed.description += f"**[{formattime}] {message.author.display_name}:** {message.content if len(message.content) < 20 else message.content[:20]}\n"
+            embed.description += f"**[{formattime}] {message.author.display_name}:** {message.content if len(message.content) < 40 else message.content[:40]}\n"
 
         embed.description += f"<:pin:1000719163851018340> **[{trigger_message.created_at.strftime('%H:%M:%S')}] {trigger_message.author.display_name}:** {trigger_message.content if len(trigger_message.content) < 20 else trigger_message.content[:20]}\n"
 
         for message in before_message:
             formattime = str(message.created_at.strftime("%H:%M:%S"))
-            embed.description += f"**[{formattime}] {message.author.display_name}:** {message.content if len(message.content) < 20 else message.content[:20]}\n"
+            embed.description += f"**[{formattime}] {message.author.display_name}:** {message.content if len(message.content) < 40 else message.content[:40]}\n"
       
         embed.add_field(name="Source", value=f"[Jump to Message]({trigger_message.jump_url})", inline=False)
         
