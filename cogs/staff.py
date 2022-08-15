@@ -7,7 +7,7 @@ from utils.paginator import Paginator
 
 staff_list = {
     'TRIAL MODERATOR': 843775369470672916,
-    'PartnerShip Manager': 831405039830564875,
+    'Partnership Manager': 831405039830564875,
     'Giveaway Manager': 803230347575820289,
     'Event Manager': 852125566802198528,
 }
@@ -18,7 +18,7 @@ class Staff(app_commands.Group):
         super().__init__(name='staff')
 
     @app_commands.command(name="appoint", description="appoint staff to user")
-    @app_commands.choices(post=[app_commands.Choice(name="TRIAL MODERATOR", value=str(843775369470672916)), app_commands.Choice(name="PartnerShip Manager", value=str(831405039830564875)), app_commands.Choice(name="Giveaway Manager", value=str(803230347575820289)), app_commands.Choice(name="Event Manager", value=str(852125566802198528))])
+    @app_commands.choices(post=[app_commands.Choice(name="TRIAL MODERATOR", value=str(843775369470672916)), app_commands.Choice(name="Partnership Manager", value=str(831405039830564875)), app_commands.Choice(name="Giveaway Manager", value=str(803230347575820289)), app_commands.Choice(name="Event Manager", value=str(852125566802198528))])
     @app_commands.checks.has_permissions(administrator=True)
     async def appoint_user(self, interaction: discord.Interaction, user: discord.Member, post: app_commands.Choice[str]):
         staff_role = discord.utils.get(interaction.guild.roles, id=int(post.value))
@@ -44,7 +44,7 @@ class Staff(app_commands.Group):
         await interaction.response.send_message(embed=embed)
     
     @app_commands.command(name="remove", description="remove staff from user")
-    @app_commands.choices(post=[app_commands.Choice(name="TRIAL MODERATOR", value=str(843775369470672916)), app_commands.Choice(name="PartnerShip Manager", value=str(831405039830564875)), app_commands.Choice(name="Giveaway Manager", value=str(803230347575820289)), app_commands.Choice(name="Event Manager", value=str(852125566802198528))])
+    @app_commands.choices(post=[app_commands.Choice(name="TRIAL MODERATOR", value=str(843775369470672916)), app_commands.Choice(name="Partnership Manager", value=str(831405039830564875)), app_commands.Choice(name="Giveaway Manager", value=str(803230347575820289)), app_commands.Choice(name="Event Manager", value=str(852125566802198528))])
     @app_commands.checks.has_permissions(administrator=True)
     async def remove_user(self, interaction: discord.Interaction, user: discord.Member, post: app_commands.Choice[str]):
         staff_role = discord.utils.get(interaction.guild.roles, id=int(post.value))
@@ -69,7 +69,7 @@ class Staff(app_commands.Group):
             await interaction.response.send_message(embed=embed)
 
     @app_commands.command(name="list", description="list staff")
-    @app_commands.choices(short=[app_commands.Choice(name="TRIAL MODERATOR", value=str(843775369470672916)), app_commands.Choice(name="PartnerShip Manager", value=str(831405039830564875)), app_commands.Choice(name="Giveaway Manager", value=str(803230347575820289)), app_commands.Choice(name="Event Manager", value=str(852125566802198528))])
+    @app_commands.choices(short=[app_commands.Choice(name="TRIAL MODERATOR", value=str(843775369470672916)), app_commands.Choice(name="Partnership Manager", value=str(831405039830564875)), app_commands.Choice(name="Giveaway Manager", value=str(803230347575820289)), app_commands.Choice(name="Event Manager", value=str(852125566802198528))])
     @app_commands.describe(short="Short list of staff on base of post")
     async def list_staff(self, interaction: discord.Interaction, short: app_commands.Choice[str] = None):
         staff_list = await self.bot.staff.get_all()
@@ -80,7 +80,7 @@ class Staff(app_commands.Group):
         admin = discord.Embed(title="Administrator", color=discord.Color.green(), description="")
         moderator = discord.Embed(title="Moderator", color=discord.Color.green(), description="")
         trial_moderator = discord.Embed(title="Trial Moderator", color=discord.Color.green(), description="")
-        partnership_manager = discord.Embed(title="PartnerShip Manager", color=discord.Color.green(), description="")
+        partnership_manager = discord.Embed(title="Partnership Manager", color=discord.Color.green(), description="")
         giveaway_manager = discord.Embed(title="Giveaway Manager", color=discord.Color.green(), description="")
         event_manager = discord.Embed(title="Event Manager", color=discord.Color.green(), description="")
 
@@ -97,7 +97,7 @@ class Staff(app_commands.Group):
                         moderator.description += f"<@{staff['_id']}>\n"
                     if 'TRIAL MODERATOR' in staff['post']:
                         trial_moderator.description += f"<@{staff['_id']}>\n"
-                    if 'PartnerShip Manager' in staff['post']:
+                    if 'Partnership Manager' in staff['post']:
                         partnership_manager.description += f"<@{staff['_id']}>\n"
                     if 'Giveaway Manager' in staff['post']:
                         giveaway_manager.description += f"<@{staff['_id']}>\n"
