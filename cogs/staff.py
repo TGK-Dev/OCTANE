@@ -189,6 +189,8 @@ class Staff(app_commands.Group):
         embed.description += f"Approved by: <@{data['vacation']['approvaed']}>\n"
         embed.description += f"Last vacation: <t:{round(data['vacation']['last_vacation'].timestamp())}:R>\n"
         await interaction.response.send_message(embed=embed)
+        channel = self.bot.get_channel(974913093266182144)
+        await channel.send(embed=embed)
 
 class Staff_mamagement(commands.Cog):
     def __init__(self, bot):
