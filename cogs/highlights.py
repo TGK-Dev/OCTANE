@@ -181,7 +181,7 @@ class Highlight(commands.Cog, name="Votes",description="Server Vote counter with
     
     @commands.Cog.listener()
     async def on_hl_trigger(self, trigger_message: discord.Message, data: dict, trigger_key: str):
-        channel = message.channel
+        channel = trigger_message.channel
         user = message.guil.get_member(data['_id'])
         await asyncio.sleep(5)
 

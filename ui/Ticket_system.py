@@ -75,7 +75,7 @@ class Ticket_Control_Panel(discord.ui.View):
 
             embed.description = "<:dynosuccess:1000349098240647188> | Ticket opened!"
             embed.color = discord.Color.green()
-            await interaction.edit_original_message(embed=embed)
+            await interaction.edit_original_response(embed=embed)
             await interaction.message.edit(view=self)
 
             log_channel = interaction.guild.get_channel(ticket_config['logging'])
@@ -112,7 +112,7 @@ class Ticket_Control_Panel(discord.ui.View):
 
             embed.description = "<:dynosuccess:1000349098240647188> | Ticket closed!"
             embed.color = discord.Color.green()
-            await interaction.edit_original_message(embed=embed)
+            await interaction.edit_original_response(embed=embed)
             await interaction.message.edit(view=self)
 
             log_channel = interaction.guild.get_channel(ticket_config['logging'])
@@ -134,7 +134,7 @@ class Ticket_Control_Panel(discord.ui.View):
 
         transcript = await chat_exporter.export(interaction.channel, limit=None,tz_info="Asia/Kolkata")
         if transcript is None:
-            return await interaction.edit_original_message("Failed to save ticket.")
+            return await interaction.edit_original_response("Failed to save ticket.")
         
         transcript_file = discord.File(io.BytesIO(transcript.encode()),filename=f"transcript-{interaction.channel.name}.html")
         transcript_log_channel = self.bot.get_channel(ticket_data["transcripts"])
@@ -148,14 +148,14 @@ class Ticket_Control_Panel(discord.ui.View):
 
         embed.description = "<:dynosuccess:1000349098240647188> | Ticket saved!\n<a:loading:998834454292344842> | Deleting ticket in 10 seconds send fs to cancel."
         embed.color = discord.Color.green()
-        await interaction.edit_original_message(embed=embed)
+        await interaction.edit_original_response(embed=embed)
         try:
             stop_m = await self.bot.wait_for("message", check=lambda m: m.author == interaction.user and m.content.lower() == "fs" and m.channel.id == interaction.channel.id, timeout=10)
-            msg = await interaction.original_message()
+            msg = await interaction.original_response()
             await msg.add_reaction("<:dynoError:1000351802702692442>")
             embed.description = "<:dynoError:1000351802702692442> | Cancelled."
             embed.color = discord.Color.red()
-            await interaction.edit_original_message(embed=embed)
+            await interaction.edit_original_response(embed=embed)
             return
         except asyncio.TimeoutError:
             user_in_channel = {}
@@ -270,7 +270,7 @@ class Partnership_Qestion(discord.ui.Modal):
             ticket_data['logging_message'] = msg.id
             
         await self.interaction.client.tickets.insert(ticket_data)
-        await interaction.edit_original_message(content=f"Your ticket has been created. You can view it here: {channel.mention}")
+        await interaction.edit_original_response(content=f"Your ticket has been created. You can view it here: {channel.mention}")
 
 class General_Qestions(discord.ui.Modal):
     def __init__(self, interaction: discord.Interaction, panel: str):
@@ -324,7 +324,7 @@ class General_Qestions(discord.ui.Modal):
                     ticket_data['logging_message'] = msg.id
                     
                 await self.interaction.client.tickets.insert(ticket_data)
-                await interaction.edit_original_message(content=f"Your ticket has been created. You can view it here: {channel.mention}")
+                await interaction.edit_original_response(content=f"Your ticket has been created. You can view it here: {channel.mention}")
 
 
 class Panel_edit(discord.ui.View):

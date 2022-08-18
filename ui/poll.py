@@ -48,7 +48,7 @@ async def make_poll(interaction: discord.Interaction, title:str, options:str, du
     embed.color = discord.Color.random()
     await interaction.followup.send(embed=embed, view=PollView(embed))
 
-    msg = await interaction.original_message()
+    msg = await interaction.original_response()
     poll_data['_id'] = msg.id
     poll_data['channel'] = msg.channel.id
     poll_data['author'] = msg.author.id
