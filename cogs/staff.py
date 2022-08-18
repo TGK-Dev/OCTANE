@@ -6,6 +6,7 @@ from typing import Literal, List
 from utils.paginator import Paginator
 
 staff_list = {
+    'Moderator': 787259553225637889,
     'TRIAL MODERATOR': 843775369470672916,
     'Partnership Manager': 831405039830564875,
     'Giveaway Manager': 803230347575820289,
@@ -89,11 +90,7 @@ class Staff(app_commands.Group):
                 for staff in staff_list:
                     if staff['post'] == []:
                         continue
-                    if 'HEAD ADMINISTRATOR' in staff['post']:
-                        hadmin.description += f"<@{staff['_id']}>\n"
-                    if 'ADMINISTRATOR' in staff['post']:
-                        admin.description += f"<@{staff['_id']}>\n"
-                    if 'MODERATOR' in staff['post']:
+                    if 'Moderator' in staff['post']:
                         moderator.description += f"<@{staff['_id']}>\n"
                     if 'TRIAL MODERATOR' in staff['post']:
                         trial_moderator.description += f"<@{staff['_id']}>\n"
@@ -145,6 +142,14 @@ class Staff(app_commands.Group):
         await user.add_roles(leave_role, reason=f"User has started leave of {days}")
 
         await interaction.edit_original_message(content=None, embed=discord.Embed(description=f"<:dynosuccess:1000349098240647188> | {user.mention} has been set up leave of days for {days} days", color=discord.Color.green()))
+        channel = interaction.client.get_channel(974913093266182144)
+        embed = discord.Embed(title=f"Info for {user.name}", color=discord.Color.green())
+        embed.add_field(name="Days", value=days, inline=True)
+        embed.add_field(name="Start", value=data['vacation']['start'].strftime("%d %B %Y"), inline=True)
+        embed.add_field(name="End", value=data['vacation']['end'].strftime("%d %B %Y"), inline=True)
+        embed.add_field(name="Reason", value=reason, inline=True)
+        embed.add_field(name="Approved by", value=f"<@{interaction.user.id}>", inline=True)
+        await channel.send(embed=embed)
 
     @app_commands.command(name="endvacation", description="Remove leave of days")
     @app_commands.describe(user="User to remove leave of days")
