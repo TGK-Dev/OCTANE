@@ -63,7 +63,7 @@ class Eco(commands.Cog):
         embed = discord.Embed(title="Select booster",color=discord.Color.random())
         view = Booster_main(self.bot, interaction)
         await interaction.response.send_message(embed=embed, view=view)
-        view.message = await interaction.original_message()
+        view.message = await interaction.original_response()
     
     @app_commands.command(name="inventory", description="Check your inventory")
     @app_commands.guild_only()

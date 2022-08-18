@@ -430,7 +430,7 @@ class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
         if not member.bot:
             view = ui.member_view.Member_view(self.bot, member, interaction)
             await interaction.response.send_message(embed=embed,view=view)
-            view.message = await interaction.original_message()
+            view.message = await interaction.original_response()
         else:
             await interaction.response.send_message(embed=embed)
     
@@ -460,7 +460,7 @@ class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
         if not member.bot:
             view = ui.member_view.Member_view(self.bot, member, interaction)
             await interaction.response.send_message(embed=embed,view=view)
-            view.message = await interaction.original_message()
+            view.message = await interaction.original_response()
         else:
             await interaction.response.send_message(embed=embed)
 

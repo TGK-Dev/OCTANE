@@ -183,8 +183,6 @@ class Highlight(commands.Cog, name="Votes",description="Server Vote counter with
     async def on_hl_trigger(self, trigger_message: discord.Message, data: dict, trigger_key: str):
         channel = message.channel
         user = message.guil.get_member(data['_id'])
-        if user not in channel.members:
-            return
         await asyncio.sleep(5)
 
         embed = discord.Embed(title=trigger_key, description="", color=discord.Color.yellow())
