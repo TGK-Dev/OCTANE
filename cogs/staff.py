@@ -141,7 +141,7 @@ class Staff(app_commands.Group):
         await user.remove_roles(base_role, reason=f"User has started leave of {days}")
         await user.add_roles(leave_role, reason=f"User has started leave of {days}")
 
-        await interaction.edit_original_message(content=None, embed=discord.Embed(description=f"<:dynosuccess:1000349098240647188> | {user.mention} has been set up leave of days for {days} days", color=discord.Color.green()))
+        await interaction.edit_original_response(content=None, embed=discord.Embed(description=f"<:dynosuccess:1000349098240647188> | {user.mention} has been set up leave of days for {days} days", color=discord.Color.green()))
         channel = interaction.client.get_channel(974913093266182144)
         embed = discord.Embed(title=f"Info for {user.name}", color=discord.Color.green())
         embed.add_field(name="Days", value=days, inline=True)
@@ -173,7 +173,7 @@ class Staff(app_commands.Group):
             staff_role = discord.utils.get(interaction.guild.roles, id=staff_list[post])
             await user.add_roles(staff_role, reason=f"User has ended leave")
         
-        await interaction.edit_original_message(content=None, embed=discord.Embed(description=f"<:dynosuccess:1000349098240647188> | {user.mention} has been removed leave of days", color=discord.Color.green()))
+        await interaction.edit_original_response(content=None, embed=discord.Embed(description=f"<:dynosuccess:1000349098240647188> | {user.mention} has been removed leave of days", color=discord.Color.green()))
 
     @app_commands.command(name="currentvacation", description="Get current leaves")
     @app_commands.describe(user="User to get current leaves")
