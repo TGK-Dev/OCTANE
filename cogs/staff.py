@@ -121,7 +121,7 @@ class Staff(app_commands.Group):
             await interaction.response.send_message(f"{user.mention} is not staff", ephemeral=True)
             return
         if data['vacation']['days'] != 0:
-            await interaction.response.send_message(f"{interaction.author.mention} already has {data['vacation']['days']} days of leave", ephemeral=True)
+            await interaction.response.send_message(f"{interaction.user.mention} already has {data['vacation']['days']} days of leave", ephemeral=True)
             return
         data['vacation']['days'] = days
         data['vacation']['reason'] = reason
