@@ -32,7 +32,7 @@ class Dump(app_commands.Group, name="dump", description="dump data"):
             file = discord.File(buffer, filename=f"{role.name}.txt")
             buffer.close()
 
-            await interaction.edit_original_message(attachments=[file])
+            await interaction.edit_original_response(attachments=[file])
 
 
     @app_commands.command(name="invite", description="Dumps invite data of user")
@@ -48,7 +48,7 @@ class Dump(app_commands.Group, name="dump", description="dump data"):
             for i in invited_users:
                 embed.description += f"{int(i)}\n"
             
-            await interaction.edit_original_message(embed=embed, content=None)
+            await interaction.edit_original_response(embed=embed, content=None)
 
         elif len(invited_users) > 10:
             users = ""
@@ -57,7 +57,7 @@ class Dump(app_commands.Group, name="dump", description="dump data"):
             buffer = BytesIO(users.encode('utf-8'))
             file = discord.File(buffer, filename=f"{user.name}.txt")
             buffer.close()
-            await interaction.edit_original_message(content=None,attachments=[file])
+            await interaction.edit_original_response(content=None,attachments=[file])
        
 
 class Poll(app_commands.Group):

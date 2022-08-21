@@ -37,7 +37,7 @@ class level_check(discord.ui.View):
         embed = discord.Embed(description=f"**Name:** {interaction.user.mention}\n**Level:** {data.level}\n**XP:** {data.exp}\n**Weeklyexp:** {data.weeklyexp}", color=interaction.user.color)
         embed.timestamp = discord.utils.utcnow()
         embed.set_footer(text=f"{interaction.user.name}#{interaction.user.discriminator}", icon_url=self.bot.user.avatar.url)
-        await interaction.edit_original_message(content=None, embed=embed)
+        await interaction.edit_original_response(content=None, embed=embed)
 
 
 class Levels(commands.Cog):

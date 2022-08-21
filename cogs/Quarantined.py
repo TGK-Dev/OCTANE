@@ -29,7 +29,7 @@ class Quarantined(commands.Cog, name="Quarantined", description="Server Member V
         verify_code = Make_Verify_Code()
         image = ImageCaptcha().generate(verify_code)
         await interaction.channel.send(f"Please type the following code in the channel to verify {member.mention}", file=discord.File(image, f"{member.id} verify.png"))
-        await interaction.edit_original_message(content="Started")
+        await interaction.edit_original_response(content="Started")
     
     @app_commands.command(name="quarantine", description="Quarantine a member",)
     @app_commands.describe(member="The member to quarantine", reason="The reason for the quarantine")
@@ -49,7 +49,7 @@ class Quarantined(commands.Cog, name="Quarantined", description="Server Member V
         
         quarant_role = discord.utis.get(member.guild.roles, name="Quarantined")
         await member.add_roles(quarant_role)
-        await interaction.edit_original_message(embed=discord.Embed(description=f"<:allow:819194696874197004> | {member.mention} has been quarantined for {reason}", color=0x00ff00))
+        await interaction.edit_original_response(embed=discord.Embed(description=f"<:allow:819194696874197004> | {member.mention} has been quarantined for {reason}", color=0x00ff00))
         await self.bot.quarantined.insert(data)
     
     @app_commands.command(name="unquarantine", description="Unquarantine a member")
@@ -69,7 +69,7 @@ class Quarantined(commands.Cog, name="Quarantined", description="Server Member V
         
         quarant_role = discord.utils.get(member.guild.roles, name="Quarantined")
         await member.remove_roles(quarant_role)
-        await interaction.edit_original_message(embed=discord.Embed(description=f"<:allow:819194696874197004> | {member.mention} has been unquarantined", color=0x00ff00))
+        await interaction.edit_original_response(embed=discord.Embed(description=f"<:allow:819194696874197004> | {member.mention} has been unquarantined", color=0x00ff00))
         await self.bot.quarantined.delete({'_id': member.id})
 
 

@@ -65,27 +65,27 @@ class Ticket_slash(app_commands.Group, name="ticket", description="ticket system
             if target.id in data['add_roles']:
                 embed.description = "<:dynoError:1000351802702692442> | This role is already in the Ticket"
                 embed.color = discord.Color.red()
-                await interaction.edit_original_message(embed=embed)
+                await interaction.edit_original_response(embed=embed)
                 return
             else:
                 data['add_roles'].append(target.id)
                 embed.description = f"<:dynosuccess:1000349098240647188> | Added {target.mention} to the Ticket"
                 embed.color = discord.Color.green()
                 await interaction.channel.set_permissions(target, read_messages=True, send_messages=True, read_message_history=True, attach_files=True)
-                await interaction.edit_original_message(embed=embed)
+                await interaction.edit_original_response(embed=embed)
 
         if isinstance(target, discord.Member):
             if target.id in data['add_users']:
                 embed.description = "<:dynoError:1000351802702692442> | This member is already in the Ticket"
                 embed.color = discord.Color.red()
-                await interaction.edit_original_message(embed=embed)
+                await interaction.edit_original_response(embed=embed)
                 return
             else:
                 data['add_users'].append(target.id)
                 embed.description = f"<:dynosuccess:1000349098240647188> | Added {target.mention} to the Ticket"
                 embed.color = discord.Color.green()
                 await interaction.channel.set_permissions(target, read_messages=True, send_messages=True, read_message_history=True, attach_files=True)
-                await interaction.edit_original_message(embed=embed)
+                await interaction.edit_original_response(embed=embed)
 
         await interaction.client.tickets.update(data)
         ticket_config = await self.bot.ticket_system.find(interaction.guild.id)
@@ -109,27 +109,27 @@ class Ticket_slash(app_commands.Group, name="ticket", description="ticket system
             if target.id not in data['add_roles']:
                 embed.description = "<:dynoError:1000351802702692442> | This role is not in the Ticket"
                 embed.color = discord.Color.red()
-                await interaction.edit_original_message(embed=embed)
+                await interaction.edit_original_response(embed=embed)
                 return
             else:
                 data['add_roles'].remove(target.id)
                 embed.description = f"<:dynosuccess:1000349098240647188> | Removed {target.mention} from the Ticket"
                 embed.color = discord.Color.green()
                 await interaction.channel.set_permissions(target, read_messages=False)
-                await interaction.edit_original_message(embed=embed)
+                await interaction.edit_original_response(embed=embed)
                 
         if isinstance(target, discord.Member):
             if target.id not in data['add_users']:
                 embed.description = "<:dynoError:1000351802702692442> | This member is not in the Ticket"
                 embed.color = discord.Color.red()
-                await interaction.edit_original_message(embed=embed)
+                await interaction.edit_original_response(embed=embed)
                 return
             else:
                 data['add_users'].remove(target.id)
                 embed.description = f"<:dynosuccess:1000349098240647188> | Removed {target.mention} from the Ticket"
                 embed.color = discord.Color.green()
                 await interaction.channel.set_permissions(target, read_messages=False)
-                await interaction.edit_original_message(embed=embed)
+                await interaction.edit_original_response(embed=embed)
 
         await interaction.client.tickets.update(data)
         ticket_config = await self.bot.ticket_system.find(interaction.guild.id)
@@ -181,7 +181,7 @@ class Panel(app_commands.Group):
             msg = await channel.send(embed=embed, view=view)
             data['last_plane_messaeg'] = msg.id
             await self.bot.ticket_system.update(data)
-            await interaction.edit_original_message(content="Successfully sent all panels to support channel")
+            await interaction.edit_original_response(content="Successfully sent all panels to support channel")
 
         elif data['last_plane_messaeg']:
 
@@ -195,7 +195,7 @@ class Panel(app_commands.Group):
                     embed.add_field(name=key, value=value['description'], inline=False)
                 view = Ticket_Control(data['panels'])
                 await message.edit(embed=embed, view=view)
-                await interaction.edit_original_message(content="Successfully Edited all panels to support channel")
+                await interaction.edit_original_response(content="Successfully Edited all panels to support channel")
     
     @app_commands.command(name="create", description="create a ticket panel")
     @app_commands.default_permissions(administrator=True)

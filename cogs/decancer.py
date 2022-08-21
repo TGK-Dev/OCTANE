@@ -85,7 +85,7 @@ class Decancer_Commands(app_commands.Group, description="Decancer server"):
                     await member.edit(nick=new_name, reason=f"Server decancer started by {interaction.user.name}")
                     
         embed.description = "Decancering server complete"
-        await interaction.edit_original_message(embed=embed)
+        await interaction.edit_original_response(embed=embed)
     
     @app_commands.command(name="bypass", description="set bypass for decancer")
     @app_commands.checks.has_permissions(administrator=True)

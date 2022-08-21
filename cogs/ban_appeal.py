@@ -15,7 +15,7 @@ class Support(discord.ui.View):
 
         data = await interaction.client.config.find(interaction.guild.id)
         if not data:
-            return await interaction.edit_original_message(content="Setup is not complete, please run `setup`", ephemeral=True)
+            return await interaction.edit_original_response(content="Setup is not complete, please run `setup`", ephemeral=True)
         
         overwrites = {
             interaction.guild.default_role: discord.PermissionOverwrite(read_messages=False, view_channel=False),
@@ -46,7 +46,7 @@ class Support(discord.ui.View):
         }
 
         #await interaction.client.ticket.insert(data)
-        await interaction.edit_original_message(content=f"Your ticket has been created, you can view it here: {channel.mention}")
+        await interaction.edit_original_response(content=f"Your ticket has been created, you can view it here: {channel.mention}")
         #embed = discord.Embed(description="```\nPlease wait for a moderator to review your ticket\nPlease Send Answers of Following Qestions\n\n1. Why did you get banned?\n\n2. Why do you think your appeal should be accepted?\n\n3. Is there anything else you would like for us to know?\n\n```", color=0x00FF00)
         embed = discord.Embed(description="**Please wait for a staff to review your ticket.**\n\n> Do let us know why do you think your appeal should be accepted?", color=0x00FF00)
         await channel.send(embed=embed, content=interaction.user.mention)

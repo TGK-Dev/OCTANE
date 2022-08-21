@@ -230,7 +230,7 @@ class Highlight(commands.Cog, name="Votes",description="Server Vote counter with
         await interaction.client.hightlights.update(data)
         
         embed.description = "<:dynosuccess:1000349098240647188> | Sussessfully added reaction"
-        await interaction.edit_original_message(embed=embed)
+        await interaction.edit_original_response(embed=embed)
         self.bot.hl_chache[user.id] = data
 
 async def setup(bot):

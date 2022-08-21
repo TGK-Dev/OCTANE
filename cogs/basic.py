@@ -65,7 +65,7 @@ class Basic(commands.Cog, name="Basic", description="General Basic Commands"):
         dping = (dend - dstart)
         dping = dping.total_seconds()
 
-        await interaction.edit_original_message(content=f"**Response TIme** {round(self.bot.latency * 1000)}ms\n**API**: {round((end_time - start_time) * 1000)}ms\n**Database Ping**: {round(dping * 1000)}Ms\n**Last Reboot**: <t:{round(self.bot.uptime.timestamp())}:R>")
+        await interaction.edit_original_response(content=f"**Response TIme** {round(self.bot.latency * 1000)}ms\n**API**: {round((end_time - start_time) * 1000)}ms\n**Database Ping**: {round(dping * 1000)}Ms\n**Last Reboot**: <t:{round(self.bot.uptime.timestamp())}:R>")
     
     @app_commands.command(name="snipe", description="Snipe the message in current channel")
     @app_commands.guilds(785839283847954433)
