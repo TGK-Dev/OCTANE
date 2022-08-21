@@ -160,7 +160,7 @@ class Staff(app_commands.Group):
             await interaction.response.send_message(f"{user.mention} is not staff", ephemeral=True)
             return
         if data['vacation']['days'] == 0:
-            await interaction.response.send_message(f"{interaction.author.mention} does not have any leave of days", ephemeral=True)
+            await interaction.response.send_message(f"{interaction.user.mention} does not have any leave of days", ephemeral=True)
             return
         data['vacation']['days'] = 0
         data['vacation']['reason'] = None
@@ -184,7 +184,7 @@ class Staff(app_commands.Group):
             await interaction.response.send_message(f"{user.mention} is not staff", ephemeral=True)
             return
         if data['vacation']['days'] == 0:
-            await interaction.response.send_message(f"{interaction.author.mention} does not have any leave of days", ephemeral=True)
+            await interaction.response.send_message(f"{interaction.user.mention} does not have any leave of days", ephemeral=True)
             return
         embed = discord.Embed(title=f"{user.name}'s current leave", color=discord.Color.green(), description=f"")
         embed.description += f"Days: {data['vacation']['days']}\n"
