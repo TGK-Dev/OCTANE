@@ -221,11 +221,11 @@ class Owner(commands.Cog, name="Owner", description="Owner/admin commands."):
                         await self.bot.unload_extension(f"cogs.{module[:-3]}")
                         await self.bot.load_extension(f"cogs.{module[:-3]}")
                         embed.add_field(name=f"{module[:-3]}", value="Reloaded", inline=True)
-                        await interaction.edit_original_message(embed=embed)
+                        await interaction.edit_original_response(embed=embed)
                     except Exception as e:
                         error = "".join(format_exception(e,e,e.__traceback__))
                         embed.add_field(name=f"{module}", value=f"Failure | {error[:100]}", inline=True)
-                        await interaction.edit_original_message(embed=embed)
+                        await interaction.edit_original_response(embed=embed)
 
     @app_commands.command(name="get-logs", description="Get Logs of bot console")
     @app_commands.default_permissions(administrator=True)
