@@ -102,9 +102,9 @@ class BanAppeal(commands.Cog, name="Ban Appeal", description="Easy way to add Ba
         try:
             ban = await main_guild.fetch_ban(user)
             if ban:
-                await main_guild.unban(user, reason="Ban Appeal Approved by {}".format(interaction.author.name))
+                await main_guild.unban(user, reason="Ban Appeal Approved by {}".format(interaction.user.name))
                 await interaction.response.send_message("Ban Appeal Approved", ephemeral=True)
-                await interaction.channel.send(f"{user.mention} Your ban has been lifted by {interaction.author.mention}")
+                await interaction.channel.send(f"{user.mention} Your ban has been lifted by {interaction.user.mention}")
         except discord.NotFound:
             await interaction.response.send_message("User is not banned")
             return        
