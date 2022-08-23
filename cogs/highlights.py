@@ -22,6 +22,7 @@ class Highlight_Slash(app_commands.Group, name="highlight"):
 
     @app_commands.command(name="add", description="Add an Trigger to the Highlight List")
     @app_commands.describe(tigger="The Trigger to add to the Highlight List")
+    @app_commands.rename(tigger="word")
     async def add(self, interaction: discord.Interaction, tigger: str):
         data = await interaction.client.hightlights.find(interaction.user.id)
         if data is None:
