@@ -101,8 +101,8 @@ class CorssChat(commands.Cog, name="Cross Chat"):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        # self.bot.tree.add_command(CrossChat_slash(self.bot), guild=discord.Object(785839283847954433))
-        # self.bot.tree.add_command(CrossChat_slash(self.bot), guild=discord.Object(811037093715116072))
+        self.bot.tree.add_command(CrossChat_slash(self.bot), guild=discord.Object(785839283847954433))
+        self.bot.tree.add_command(CrossChat_slash(self.bot), guild=discord.Object(811037093715116072))
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
     
     @commands.Cog.listener()
@@ -134,7 +134,7 @@ class CorssChat(commands.Cog, name="Cross Chat"):
             async with aiohttp.ClientSession() as session:
                 url = f"https://canary.discord.com/api/webhooks/{webhook.id}/{webhook.token}"
                 webhook = discord.Webhook.from_url(url, session=session)
-                webhook_message = await webhook.send(wait=True,content=message.content, username=message.author.name, avatar_url=message.author.avatar.url if message.author.avatar else message.author.default_avatar.url)
+                webhook_message = await webhook.send(wait=True,content=message.content, username=message.author.name, avatar_url=message.author.avatar.url if message.author.avatar else message.author.default_avatar.url, allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
                 other_side_message = await other_side.fetch_message(webhook_message.id)
                 self.cross_chache[message.id] = {'other_side_id': other_side_message.id, 'other_side_channel_id': other_side.id, 'time': other_side.created_at}
         
