@@ -8,10 +8,9 @@ from dateutil.relativedelta import relativedelta
 from io import BytesIO
 import os
 
-class Dump(app_commands.Group, name="dump", description="dump data"):
+class Dump(commands.GroupCog, name="dump", description="dump data"):
     def __init__(self, bot):
         self.bot = bot
-        super().__init__(name="dump", description="Dump data from discord Objectes")
 
     @app_commands.command(name="role", description="Dump role data")
     async def dump_user(self, interaction: Interaction, role: discord.Role):
@@ -60,18 +59,18 @@ class Dump(app_commands.Group, name="dump", description="dump data"):
             await interaction.edit_original_response(content=None,attachments=[file])
        
 
-class Poll(app_commands.Group):
-    def __init__(self):
-        super().__init__(name="poll", description="Poll commands")
+class Poll(commands.GroupCog, name="poll", description="poll commands"):
+    def __init__(self, bot):
+        self.bot = bot
     
-    @app_commands.command(name='create')
+    @app_commands.command(name='create', description="Create a poll")
     @app_commands.describe(title="title of the poll", options="options of the poll spearated by !", duration="duration of the poll ex: 1h30m", thread="Create poll with thread", one_vote="only one vote per user")
     @app_commands.rename(one_vote="single_vote")
     @app_commands.default_permissions(manage_messages=True)
     async def create(self, interaction: Interaction, title: str, options: str,duration: str, thread: bool=None, one_vote: bool=False):
         await make_poll(interaction, title, options, duration, thread, one_vote)
 
-class Serverutils(commands.Cog, description="Contains commands that are useful for the server."):
+class Serverutils_backend(commands.Cog, description="Contains commands that are useful for the server."):
     def __init__(self, bot):
         self.bot = bot
         self.poll_check = self.check_polls.start()
@@ -117,17 +116,10 @@ class Serverutils(commands.Cog, description="Contains commands that are useful f
 
     @commands.Cog.listener()
     async def on_ready(self):
-        currrent_polls = await self.bot.poll.get_all()
-        for poll in currrent_polls:
-            channel = self.bot.get_channel(poll['channel'])
-            msg = await channel.fetch_message(poll['_id'])
-            self.bot.add_view(PollView(msg.embeds[0]))
-            self.bot.polls[poll['_id']] = poll
-
-        self.bot.tree.add_command(Dump(self.bot), guild=discord.Object(785839283847954433))
-        self.bot.tree.add_command(Poll(), guild=discord.Object(785839283847954433))
         print(f"{self.__class__.__name__} Cog has been loaded.")
 
 
 async def setup(bot):
-    await bot.add_cog(Serverutils(bot))
+    await bot.add_cog(Serverutils_backend(bot), guild=discord.Object(785839283847954433))
+    await bot.add_cog(Poll(bot), guild=discord.Object(785839283847954433))
+    await bot.add_cog(Dump(bot), guild=discord.Object(785839283847954433))

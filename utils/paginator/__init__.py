@@ -43,7 +43,7 @@ class _select(Select):
 
 class _view(View):
 	def __init__(self, author: User, pages: List[SelectOption], embeded: bool):
-		super().__init__()
+		super().__init__(timeout=15)
 		self.author = author
 		self.pages = pages
 		self.embeded = embeded
@@ -53,10 +53,14 @@ class _view(View):
 	async def interaction_check(self, interaction: Interaction) -> bool:
 		return (interaction.user.id == self.author.id)
 
+	async def on_timeout(self):		
+		self.stop()
 
 	async def update_children(self, interaction: Interaction):
 		self.next.disabled = (self.current_page + 1 == len(self.pages))
 		self.previous.disabled = (self.current_page <= 0)
+		self.last.disabled=self.next.disabled
+		self.first.disabled=self.previous.disabled
 
 		kwargs = {'content': self.pages[self.current_page]} if not (self.embeded) else {'embed': self.pages[self.current_page]}
 		kwargs['view'] = self
@@ -64,36 +68,42 @@ class _view(View):
 		await interaction.response.edit_message(**kwargs)
 
 
-	@button(label="◀◀", style=ButtonStyle.gray, row=1)
+	@button(label="<<", style=ButtonStyle.gray, row=1)
 	async def first(self, interaction: Interaction, button: Button):
 		self.current_page = 0
 
 		await self.update_children(interaction)
 
-	@button(label="◀", style=ButtonStyle.blurple, row=1)
+	@button(label="<", style=ButtonStyle.gray, row=1)
 	async def previous(self, interaction: Interaction, button: Button):
 		self.current_page -= 1
 
 		await self.update_children(interaction)
 
-	@button(label="▶", style=ButtonStyle.blurple, row=1)
+	
+	@button(label="◼", style=ButtonStyle.gray, row=1,custom_id='stop')
+	async def quit(self, interaction: Interaction, button: Button):
+		kwargs = {'content': self.pages[self.current_page]} if not (self.embeded) else {'embed': self.pages[self.current_page]}
+
+		for button in self.children:
+			button.disabled = True
+
+		kwargs['view'] = self
+		
+		await interaction.response.edit_message(**kwargs)
+		self.stop()
+
+	@button(label=">", style=ButtonStyle.gray, row=1)
 	async def next(self, interaction: Interaction, button: Button):
 		self.current_page += 1
 
 		await self.update_children(interaction)
 
-	@button(label="▶▶", style=ButtonStyle.gray, row=1)
+	@button(label=">>", style=ButtonStyle.gray, row=1)
 	async def last(self, interaction: Interaction, button: Button):
 		self.current_page = len(self.pages) - 1
 
 		await self.update_children(interaction)
-
-
-	@button(label="Quit", style=ButtonStyle.red, row=1)
-	async def quit(self, interaction: Interaction, button: Button):
-		await interaction.message.delete()
-		self.stop()
-
 
 class Paginator:
 	def __init__(self, interaction: Interaction, pages: list, custom_children: Optional[List[Union[Button, Select]]] = []):
@@ -118,8 +128,38 @@ class Paginator:
 
 		view = _view(self.interaction.user, self.pages, embeded)
 
+		if (len(self.custom_children) == 5):
+			for index,button in enumerate(view.children):
+				button.style = self.custom_children[index].style
+				button.url = self.custom_children[index].url
+				button.label = self.custom_children[index].label
+				button.emoji = self.custom_children[index].emoji
+				button.row = self.custom_children[index].row
+				button.disabled = self.custom_children[index].disabled
+		elif (len(self.custom_children) == 4):
+			view.remove_item(view.quit)
+			for index,button in enumerate(view.children):
+				button.style = self.custom_children[index].style
+				button.url = self.custom_children[index].url
+				button.label = self.custom_children[index].label
+				button.emoji = self.custom_children[index].emoji
+				button.row = self.custom_children[index].row
+				button.disabled = self.custom_children[index].disabled
+		elif (len(self.custom_children) == 3):
+			view.remove_item(view.first)
+			view.remove_item(view.last)
+			for index,button in enumerate(view.children):
+				button.style = self.custom_children[index].style
+				button.url = self.custom_children[index].url
+				button.label = self.custom_children[index].label
+				button.emoji = self.custom_children[index].emoji
+				button.row = self.custom_children[index].row
+				button.disabled = self.custom_children[index].disabled
+
 		view.previous.disabled = True if (view.current_page <= 0) else False
 		view.next.disabled = True if (view.current_page + 1 >= len(self.pages)) else False
+		view.last.disabled=view.next.disabled
+		view.first.disabled=view.previous.disabled
 
 		if (quick_navigation):
 			options = []
@@ -128,18 +168,16 @@ class Paginator:
 
 			view.add_item(_select(options))
 
-		if (len(self.custom_children) > 0):
-			for child in self.custom_children:
-				view.add_item(child)
-
 		kwargs = {'content': self.pages[view.current_page]} if not (embeded) else {'embed': self.pages[view.current_page]}
 		kwargs['view'] = view
 
 		await self.interaction.response.send_message(**kwargs)
 
 		await view.wait()
-		
-		await self.interaction.delete_original_message()
+
+		for button in view.children:
+			button.disabled = True
+		await self.interaction.edit_original_response(view=view)
 
 class Contex_Paginator:
 	def __init__(self, interaction: commands.Context, pages: list, custom_children: Optional[List[Union[Button, Select]]] = []):
@@ -164,8 +202,38 @@ class Contex_Paginator:
 
 		view = _view(self.interaction.author, self.pages, embeded)
 
+		if (len(self.custom_children) == 5):
+			for index,button in enumerate(view.children):
+				button.style = self.custom_children[index].style
+				button.url = self.custom_children[index].url
+				button.label = self.custom_children[index].label
+				button.emoji = self.custom_children[index].emoji
+				button.row = self.custom_children[index].row
+				button.disabled = self.custom_children[index].disabled
+		elif (len(self.custom_children) == 4):
+			view.remove_item(view.quit)
+			for index,button in enumerate(view.children):
+				button.style = self.custom_children[index].style
+				button.url = self.custom_children[index].url
+				button.label = self.custom_children[index].label
+				button.emoji = self.custom_children[index].emoji
+				button.row = self.custom_children[index].row
+				button.disabled = self.custom_children[index].disabled
+		elif (len(self.custom_children) == 3):
+			view.remove_item(view.first)
+			view.remove_item(view.last)
+			for index,button in enumerate(view.children):
+				button.style = self.custom_children[index].style
+				button.url = self.custom_children[index].url
+				button.label = self.custom_children[index].label
+				button.emoji = self.custom_children[index].emoji
+				button.row = self.custom_children[index].row
+				button.disabled = self.custom_children[index].disabled
+
 		view.previous.disabled = True if (view.current_page <= 0) else False
 		view.next.disabled = True if (view.current_page + 1 >= len(self.pages)) else False
+		view.last.disabled=view.next.disabled
+		view.first.disabled=view.previous.disabled
 
 		if (quick_navigation):
 			options = []
@@ -174,12 +242,7 @@ class Contex_Paginator:
 
 			view.add_item(_select(options))
 
-		if (len(self.custom_children) > 0):
-			for child in self.custom_children:
-				view.add_item(child)
-
 		kwargs = {'content': self.pages[view.current_page]} if not (embeded) else {'embed': self.pages[view.current_page]}
 		kwargs['view'] = view
 
 		await self.interaction.channel.send(**kwargs)
-		

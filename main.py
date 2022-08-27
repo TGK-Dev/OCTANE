@@ -59,11 +59,10 @@ class Bot(commands.Bot):
         bot.crole = Document(bot.db, 'crole')
         bot.poll = Document(bot.db, 'poll')
         bot.hightlights = Document(bot.db, 'hightlights')
-        bot.Amari_api = AmariClient(bot.Amari_token)
         bot.eco_api = eco_client(bot.eco_toekn)
         
         for file in os.listdir('./cogs'):
-            if file.endswith('.py') and not file.startswith("_") and not file.startswith("valorant"):
+            if file.endswith('.py') and not file.startswith("_"):
                 await bot.load_extension(f'cogs.{file[:-3]}')
 
 

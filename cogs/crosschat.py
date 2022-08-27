@@ -5,11 +5,92 @@ import aiohttp
 import discord
 import datetime
 
-class CrossChat_slash(app_commands.Group, name="crosschat", description="utils commands for crosschat"):
+class CorssChat(commands.GroupCog, name="crosschat", description="utils commands for crosschat"):
     def __init__(self, bot):
         self.bot = bot
-        super().__init__(name='crosschat', description="utils commands for crosschat")
+        self.cross_chache = {}
     
+    @tasks.loop(minutes=2)
+    async def cross_chat_loop(self):
+        current_messsages = deepcopy(self.cross_chache)
+        for key, value in current_messsages.items():
+            data = await self.cross_chache[key]
+            #check if 30mins have passed from data['time']
+            if (datetime.datetime.utcnow() - data['time']).total_seconds() > 1800:
+                try:
+                    self.cross_chache.pop(key)
+                except KeyError:
+                    del self.cross_chache[key]
+                except Exception as e:
+                    pass
+
+
+    @commands.Cog.listener()
+    async def on_ready(self):
+        print(f"{self.__class__.__name__} Cog has been loaded\n-----")
+    
+    @commands.Cog.listener()
+    async def on_message(self, message):
+        if self.bot.cross_chat_toggle == False or message.content.startswith("-") or message.author.bot or message.author.id in self.bot.cross_chat_blacklist:
+            return
+        if message.author.bot: return
+        if not message.guild: return
+        if message.author.discriminator == "0000": return
+        other_side = None
+        if message.channel.id == 970681327374467082:
+            other_side = self.bot.get_channel(972433560327827466)
+        elif message.channel.id == 972433560327827466:
+            other_side = self.bot.get_channel(970681327374467082)
+        else:
+            return
+        
+        if other_side is None:
+            return
+        else:
+            webhook = None
+            for webhook in await other_side.webhooks():
+                if webhook.user.id == self.bot.user.id:
+                    webhook = webhook
+                    break
+            if webhook is None:
+                webhook = await other_side.create_webhook(name="CrossChat", reason="CrossChat webhook")
+            
+            async with aiohttp.ClientSession() as session:
+                url = f"https://canary.discord.com/api/webhooks/{webhook.id}/{webhook.token}"
+                webhook = discord.Webhook.from_url(url, session=session)
+                webhook_message = await webhook.send(wait=True,content=message.content, username=message.author.name, avatar_url=message.author.avatar.url if message.author.avatar else message.author.default_avatar.url, allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
+                other_side_message = await other_side.fetch_message(webhook_message.id)
+                self.cross_chache[message.id] = {'other_side_id': other_side_message.id, 'other_side_channel_id': other_side.id, 'time': other_side.created_at}
+        
+    @commands.Cog.listener()
+    async def on_message_delete(self, message):
+        if message.id in self.cross_chache.keys():
+            other_side_id = self.cross_chache[message.id]['other_side_id']
+
+            other_side_channel_id = self.cross_chache[message.id]['other_side_channel_id']
+            other_side_channel = self.bot.get_channel(other_side_channel_id)
+            other_side_message = await other_side_channel.fetch_message(other_side_id)
+            await other_side_message.delete()
+            del self.cross_chache[message.id]
+    
+    @commands.Cog.listener()
+    async def on_message_edit(self, before, after):
+        if before.id in self.cross_chache.keys():
+            other_side_data = self.cross_chache[before.id]
+            other_side_id = other_side_data['other_side_id']
+            other_side_channel = self.bot.get_channel(other_side_data['other_side_channel_id'])
+
+            for webhook in await other_side_channel.webhooks():
+                if webhook.user.name == self.bot.user.name:
+                    webhook = webhook
+                    break
+            async with aiohttp.ClientSession() as session:
+                url = f"https://canary.discord.com/api/webhooks/{webhook.id}/{webhook.token}"
+                webhook = discord.Webhook.from_url(url,session=session)
+
+                await webhook.edit_message(other_side_id, content=after.content)
+
+            
     @app_commands.command(name="toggle", description="Turn CrossChat on/off")
     @app_commands.guilds(785839283847954433, 811037093715116072)
     @app_commands.describe(option="select option", reason="reason for turning CrossChat on/off")
@@ -79,96 +160,6 @@ class CrossChat_slash(app_commands.Group, name="crosschat", description="utils c
         else:
             await interaction.response.send_message(f"{member.mention} is not blacklisted", ephemeral=True)
 
-class CorssChat(commands.Cog, name="Cross Chat"):
-    def __init__(self, bot):
-        self.bot = bot
-        self.cross_chache = {}
-    
-    @tasks.loop(minutes=2)
-    async def cross_chat_loop(self):
-        current_messsages = deepcopy(self.cross_chache)
-        for key, value in current_messsages.items():
-            data = await self.cross_chache[key]
-            #check if 30mins have passed from data['time']
-            if (datetime.datetime.utcnow() - data['time']).total_seconds() > 1800:
-                try:
-                    self.cross_chache.pop(key)
-                except KeyError:
-                    del self.cross_chache[key]
-                except Exception as e:
-                    pass
-
-
-    @commands.Cog.listener()
-    async def on_ready(self):
-        self.bot.tree.add_command(CrossChat_slash(self.bot), guild=discord.Object(785839283847954433))
-        self.bot.tree.add_command(CrossChat_slash(self.bot), guild=discord.Object(811037093715116072))
-        print(f"{self.__class__.__name__} Cog has been loaded\n-----")
-    
-    @commands.Cog.listener()
-    async def on_message(self, message):
-        if self.bot.cross_chat_toggle == False or message.content.startswith("-") or message.author.bot or message.author.id in self.bot.cross_chat_blacklist:
-            return
-        if message.author.bot: return
-        if not message.guild: return
-        if message.author.discriminator == "0000": return
-        other_side = None
-        if message.channel.id == 970681327374467082:
-            other_side = self.bot.get_channel(972433560327827466)
-        elif message.channel.id == 972433560327827466:
-            other_side = self.bot.get_channel(970681327374467082)
-        else:
-            return
-        
-        if other_side is None:
-            return
-        else:
-            webhook = None
-            for webhook in await other_side.webhooks():
-                if webhook.user.id == self.bot.user.id:
-                    webhook = webhook
-                    break
-            if webhook is None:
-                webhook = await other_side.create_webhook(name="CrossChat", reason="CrossChat webhook")
-            
-            async with aiohttp.ClientSession() as session:
-                url = f"https://canary.discord.com/api/webhooks/{webhook.id}/{webhook.token}"
-                webhook = discord.Webhook.from_url(url, session=session)
-                webhook_message = await webhook.send(wait=True,content=message.content, username=message.author.name, avatar_url=message.author.avatar.url if message.author.avatar else message.author.default_avatar.url, allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
-                other_side_message = await other_side.fetch_message(webhook_message.id)
-                self.cross_chache[message.id] = {'other_side_id': other_side_message.id, 'other_side_channel_id': other_side.id, 'time': other_side.created_at}
-        
-    @commands.Cog.listener()
-    async def on_message_delete(self, message):
-        if message.id in self.cross_chache.keys():
-            other_side_id = self.cross_chache[message.id]['other_side_id']
-
-            other_side_channel_id = self.cross_chache[message.id]['other_side_channel_id']
-            other_side_channel = self.bot.get_channel(other_side_channel_id)
-            other_side_message = await other_side_channel.fetch_message(other_side_id)
-            await other_side_message.delete()
-            del self.cross_chache[message.id]
-    
-    @commands.Cog.listener()
-    async def on_message_edit(self, before, after):
-        if before.id in self.cross_chache.keys():
-            other_side_data = self.cross_chache[before.id]
-            other_side_id = other_side_data['other_side_id']
-            other_side_channel = self.bot.get_channel(other_side_data['other_side_channel_id'])
-
-            for webhook in await other_side_channel.webhooks():
-                if webhook.user.name == self.bot.user.name:
-                    webhook = webhook
-                    break
-            async with aiohttp.ClientSession() as session:
-                url = f"https://canary.discord.com/api/webhooks/{webhook.id}/{webhook.token}"
-                webhook = discord.Webhook.from_url(url,session=session)
-
-                await webhook.edit_message(other_side_id, content=after.content)
-
-            
-
-
 
 async def setup(bot):
-    await bot.add_cog(CorssChat(bot))
+    await bot.add_cog(CorssChat(bot), guilds=[discord.Object(811037093715116072), discord.Object(785839283847954433)])

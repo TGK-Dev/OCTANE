@@ -1,22 +1,16 @@
 from discord import app_commands
 from discord.ext import commands
-from discord.app_commands import Choice
 from discord import Interaction
-from typing import Union, List, Literal
-from utils.checks import Commands_Checks
-from utils.functions import make_db_temp
+from typing import Union, List
 from utils.paginator import Paginator
 from ui.Ticket_system import Ticket_Control, Panel_edit, MyModal
 import discord
 import os
-import logging
-from traceback import format_exception
 from ui.Ticket_system import Ticket_Control_Panel
 
-class Ticket_slash(app_commands.Group, name="ticket", description="ticket system commands"):
+class Ticket_slash(commands.GroupCog, name="ticket", description="ticket system commands"):
     def __init__(self, bot):
         self.bot = bot
-        super().__init__(name='ticket')     
 
     @app_commands.command(name="config", description="configure ticket system")
     @app_commands.default_permissions(administrator=True)
@@ -140,10 +134,9 @@ class Ticket_slash(app_commands.Group, name="ticket", description="ticket system
         await log_channel.send(embed=logging_embed)    
 
 
-class Panel(app_commands.Group):
+class Panel(commands.GroupCog, name="panel", description="Manage Ticket system palnel"):
     def __init__(self, bot):
         self.bot = bot
-        super().__init__(name='panel')
     
     async def panel_auto(self, interaction: discord.Interaction, current: str) -> List[app_commands.Choice[str]]:
         current_panel = await self.bot.ticket_system.find(interaction.guild.id)
@@ -342,4 +335,5 @@ class Ticket(commands.Cog, name="Ticket System", description="Create Ticket With
         await interaction.response.send_modal(MyModal())
 
 async def setup(bot):
-    await bot.add_cog(Ticket(bot))
+    await bot.add_cog(Ticket_slash(bot), guilds=[discord.Object(785839283847954433), discord.Object(988761284956799038)])
+    await bot.add_cog(Panel(bot), guilds=[discord.Object(785839283847954433), discord.Object(988761284956799038)])

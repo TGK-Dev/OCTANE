@@ -8,48 +8,12 @@ import unidecode
 from datetime import datetime, timedelta
 from discord.ext import commands
 from discord import app_commands
-from utils.db import Document
-class Decancer_Commands(app_commands.Group, description="Decancer server"):
+from utils.db import Document        
+
+class Decancer(commands.GroupCog, description="Fix Member name on Join", name="decancer"):
     def __init__(self, bot):
-        super().__init__(name="decancer", description="Decancer server")
         self.bot = bot
         self.bot.decancer = Document(self.bot.db, "decancer")
-    
-    @staticmethod
-    def is_cancerous(text: str) -> bool:
-        for segment in text.split():
-            for char in segment:
-                if not (char.isascii() and char.isalnum()):
-                    return True
-        return False
-    
-    @staticmethod
-    def strip_accs(text):
-        try:
-            text = unicodedata.normalize("NFKC", text)
-            text = unicodedata.normalize("NFD", text)
-            text = unidecode.unidecode(text)
-            text = text.encode("ascii", "ignore")
-            text = text.decode("utf-8")
-        except Exception as e:
-            print(e)
-        return str(text)
-    
-    async def nick_maker(self, guild: discord.Guild, old_shit_nick):
-        old_shit_nick = self.strip_accs(old_shit_nick)
-        new_cool_nick = re.sub("[^a-zA-Z0-9 \n.]", "", old_shit_nick)
-        new_cool_nick = " ".join(new_cool_nick.split())
-        new_cool_nick = stringcase.lowercase(new_cool_nick)
-        new_cool_nick = stringcase.titlecase(new_cool_nick)
-        default_name = "Request a new name"
-        if len(new_cool_nick.replace(" ", "")) <= 1 or len(new_cool_nick) > 32:
-            if default_name == "random":
-                new_cool_nick = await self.get_random_nick(2)
-            elif default_name:
-                new_cool_nick = default_name
-            else:
-                new_cool_nick = "simp name"
-        return new_cool_nick
     
     @app_commands.command(name="user", description="decancer user")
     @app_commands.describe(user="user to decancer")
@@ -129,11 +93,6 @@ class Decancer_Commands(app_commands.Group, description="Decancer server"):
         except:
             pass
 
-
-class Decancer(commands.Cog, description="Fix Member name on Join"):
-    def __init__(self, bot):
-        self.bot = bot
-    
     @staticmethod
     def is_cancerous(text: str) -> bool:
         for segment in text.split():
@@ -172,7 +131,6 @@ class Decancer(commands.Cog, description="Fix Member name on Join"):
     
     @commands.Cog.listener()
     async def on_ready(self):
-        self.bot.tree.add_command(Decancer_Commands(self.bot), guild=discord.Object(785839283847954433))
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
 
     @commands.Cog.listener()
@@ -204,4 +162,4 @@ class Decancer(commands.Cog, description="Fix Member name on Join"):
                 pass
 
 async def setup(bot):
-    await bot.add_cog(Decancer(bot))
+    await bot.add_cog(Decancer(bot), guilds=[discord.Object(785839283847954433)])

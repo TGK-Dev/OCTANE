@@ -6,9 +6,9 @@ import discord
 from typing import List, Optional
 import asyncio
 
-class Highlight_Slash(app_commands.Group, name="highlight"):
-    def __init__(self):
-        super().__init__(name="highlight")
+class Highlight(commands.GroupCog, name="highlight", description="utils commands for highlights"):
+    def __init__(self, bot):
+        self.bot = bot
     
     async def remove_hl(self, interacton: discord.Interaction, current: str) -> List[app_commands.Choice[str]]:
         current_hl = interacton.client.highlights.find(interacton.guild.id)
@@ -70,7 +70,7 @@ class Highlight_Slash(app_commands.Group, name="highlight"):
             interaction.client.hl_chache['_id'] = data
             return
 
-    @app_commands.command(name="info", description="List all Triggers in the Highlight List")
+    @app_commands.command(name="info", description="List all Triggers in the Highlight List", extras={'example': "/highlight info"})
     async def list(self, interaction: discord.Interaction):
         data = await interaction.client.hightlights.find(interaction.user.id)
         embed = discord.Embed(title="Highlight Info", color=discord.Color.blue())
@@ -125,7 +125,7 @@ class Highlight_Slash(app_commands.Group, name="highlight"):
             interaction.client.hl_chache['_id'] = data
             return
         
-class Highlight(commands.Cog, name="Votes",description="Server Vote counter with Top.gg"):
+class Highlight_backend(commands.Cog, name="Votes",description="Server Vote counter with Top.gg"):
     def __init__(self, bot):
         self.bot = bot
         self.bot.hl_chache = {}
@@ -165,7 +165,6 @@ class Highlight(commands.Cog, name="Votes",description="Server Vote counter with
 
     @commands.Cog.listener()
     async def on_ready(self):
-        self.bot.tree.add_command(Highlight_Slash(), guild=discord.Object(785839283847954433))
         all_hl = await self.bot.hightlights.get_all()
         for hl in all_hl:
             self.bot.hl_chache[hl['_id']] = hl
@@ -188,19 +187,14 @@ class Highlight(commands.Cog, name="Votes",description="Server Vote counter with
 
         embed = discord.Embed(title=trigger_key, description="", color=discord.Color.yellow())
         
-        after_message = [message async for message in trigger_message.channel.history(limit=2, after=trigger_message)]
-        before_message = [message async for message in trigger_message.channel.history(limit=2, before=trigger_message)]
+        before_message = [message async for message in trigger_message.channel.history(limit=4, before=trigger_message)]
 
-        for message in after_message:
-            formattime = str(message.created_at.strftime("%H:%M:%S"))
-            embed.description += f"**[{formattime}] {message.author.display_name}:** {message.content if len(message.content) < 40 else message.content[:40]}\n"
-
-        embed.description += f"<:pin:1000719163851018340> **[{trigger_message.created_at.strftime('%H:%M:%S')}] {trigger_message.author.display_name}:** {trigger_message.content if len(trigger_message.content) < 20 else trigger_message.content[:20]}\n"
 
         for message in before_message:
             formattime = str(message.created_at.strftime("%H:%M:%S"))
-            embed.description += f"**[{formattime}] {message.author.display_name}:** {message.content if len(message.content) < 40 else message.content[:40]}\n"
-      
+            embed.description += f"**[{formattime}] {message.author.display_name}:** {message.content}\n"
+
+        embed.description += f"**<:pin:1000719163851018340> [{str(trigger_message.created_at.strftime('%H:%M:%S'))}] {trigger_message.author.display_name}:** {trigger_message.content}"
         embed.add_field(name="Source", value=f"[Jump to Message]({trigger_message.jump_url})", inline=False)
         
         user = trigger_message.guild.get_member(data['_id'])
@@ -235,7 +229,8 @@ class Highlight(commands.Cog, name="Votes",description="Server Vote counter with
         self.bot.hl_chache[user.id] = data
 
 async def setup(bot):
-    await bot.add_cog(Highlight(bot))
+    await bot.add_cog(Highlight_backend(bot), guild=discord.Object(785839283847954433))
+    await bot.add_cog(Highlight(bot), guild=discord.Object(785839283847954433))
 
 
 

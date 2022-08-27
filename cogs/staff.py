@@ -13,10 +13,9 @@ staff_list = {
     'Event Manager': 852125566802198528,
 }
 
-class Staff(app_commands.Group):
+class Staff(commands.GroupCog, name="staff", description="Staff management commands"):
     def __init__(self, bot):
         self.bot = bot
-        super().__init__(name='staff')
 
     @app_commands.command(name="appoint", description="appoint staff to user")
     @app_commands.choices(post=[app_commands.Choice(name="TRIAL MODERATOR", value=str(843775369470672916)), app_commands.Choice(name="Partnership Manager", value=str(831405039830564875)), app_commands.Choice(name="Giveaway Manager", value=str(803230347575820289)), app_commands.Choice(name="Event Manager", value=str(852125566802198528))])
@@ -197,51 +196,6 @@ class Staff(app_commands.Group):
         channel = self.bot.get_channel(974913093266182144)
         await channel.send(embed=embed)
 
-class Staff_mamagement(commands.Cog):
-    def __init__(self, bot):
-        self.bot = bot
-
-    @commands.Cog.listener()
-    async def on_ready(self):
-        self.bot.tree.add_command(Staff(self.bot), guild=discord.Object(785839283847954433))
-        print(f"{self.__class__.__name__} Cog has been loaded")
-
-    @commands.command(name="recovery", description="Use your recovery code")
-    @commands.dm_only()
-    async def recovery(self, ctx, code: str):
-        await ctx.send("Checking recovery code...")
-        data = await self.bot.staff.find_by_custom({'recovery_code': code})
-        if not data:
-            await ctx.send(embed=discord.Embed(description="<:dynoError:1000351802702692442> | Invalid recovery code", color=discord.Color.red()))
-            return
-        if data:
-            data['recovery_account'] = ctx.author.id
-            data['recovery_code'] = None
-            await self.bot.staff.update(data)
-            await ctx.send(embed=discord.Embed(description="<:dynosuccess:1000349098240647188> | Successfully recovered your account\nServer Owners are notified of your recovery request\nPlease wait for them to respond", color=discord.Color.green()))
-
-            channel = self.bot.get_channel(792246185238069249)
-            embed = discord.Embed(title="Recovery Request", color=discord.Color.blue())
-            embed.add_field(name="Old Account", value=f"<@{data['_id']}>", inline=False)
-            embed.add_field(name="New Account", value=f"<@{ctx.author.id}>", inline=False)
-            embed.add_field(name="Staff Position", value=",".join(data['post']), inline=False)
-            await channel.send(embed=embed)
-    
-    @commands.command(name="link-code", description="Link your account to a recovery code")
-    @commands.dm_only()
-    async def link_code(self, ctx, code: str):
-        await ctx.send("Linking account...")
-        data = await self.bot.staff.find(ctx.author.id)
-        if not data:
-            await ctx.send(embed=discord.Embed(description="<:dynoError:1000351802702692442> | You are not in the staff list", color=discord.Color.red()))
-            return
-        if data:
-            data['recovery_code'] = code
-            data['recovery_account'] = None
-            await self.bot.staff.update(data)
-            await ctx.send(embed=discord.Embed(description="<:dynosuccess:1000349098240647188> | Successfully linked your account", color=discord.Color.green()))
-        
-
 async def setup(bot):
-    await bot.add_cog(Staff_mamagement(bot))
+    await bot.add_cog(Staff(bot), guilds=[discord.Object(785839283847954433)])
     
