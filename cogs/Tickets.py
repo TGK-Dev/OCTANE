@@ -148,6 +148,19 @@ class Panel(commands.GroupCog, name="panel", description="Manage Ticket system p
             for name in current_panel['panels'].keys() if current.lower() in name.lower()
         ]
         return choice
+    
+    @commands.Cog.listener()
+    async def on_ready(self):
+        self.bot.add_view(Ticket_Control_Panel(self.bot))
+        print(f"{self.__class__.__name__} Cog has been loaded\n-----")
+        self.bot.dispatch("load_panels")
+    
+    @commands.Cog.listener()
+    async def on_load_panels(self):
+        data = await self.bot.ticket_system.get_all()
+        for i in data:
+            view = Ticket_Control(i['panels'])
+            self.bot.add_view(view)
 
     @app_commands.command(name="send", description="send all panel to support channel")
     @app_commands.default_permissions(administrator=True)
@@ -297,42 +310,6 @@ class Panel(commands.GroupCog, name="panel", description="Manage Ticket system p
         except discord.InteractionResponded:
             await interaction.followup.send(f"Error: {error}", ephemeral=True)
 
-
-class Ticket(commands.Cog, name="Ticket System", description="Create Ticket Without Any Worry"):
-    def __init__(self, bot,):
-        self.bot = bot
-    
-    async def cog_autocomplete(self, interaction: discord.Interaction, current: str) -> List[app_commands.Choice[str]]:
-        current_cogs = []
-        for file in os.listdir("./cogs"):
-            if file.endswith(".py") and not file.startswith("_"):
-                current_cogs.append(file[:-3])
-        new_options = [app_commands.Choice(name="reload all cogs", value="*")]
-        for cog in current_cogs:
-            new_options.append(app_commands.Choice(name=cog, value=cog))
-        return new_options[:24]
-
-    @commands.Cog.listener()
-    async def on_ready(self):
-        self.bot.add_view(Ticket_Control_Panel(self.bot))
-        self.bot.tree.add_command(Ticket_slash(self.bot), guild=discord.Object(785839283847954433)) #main server
-        self.bot.tree.add_command(Panel(self.bot), guild=discord.Object(785839283847954433)) #main server
-        self.bot.tree.add_command(Ticket_slash(self.bot), guild=discord.Object(988761284956799038)) #appeal server
-        self.bot.tree.add_command(Panel(self.bot), guild=discord.Object(988761284956799038)) #appeal server
-
-        print(f"{self.__class__.__name__} Cog has been loaded\n-----")
-        self.bot.dispatch("load_panels")
-    
-    @commands.Cog.listener()
-    async def on_load_panels(self):
-        data = await self.bot.ticket_system.get_all()
-        for i in data:
-            view = Ticket_Control(i['panels'])
-            self.bot.add_view(view)
-    
-    @app_commands.command(name="test")
-    async def test(self, interaction: discord.Interaction):
-        await interaction.response.send_modal(MyModal())
 
 async def setup(bot):
     await bot.add_cog(Ticket_slash(bot), guilds=[discord.Object(785839283847954433), discord.Object(988761284956799038)])
