@@ -340,9 +340,9 @@ class Panel_edit(discord.ui.View):
         modal = Ticket_Panel_Roles(interaction,self.name, self.data)
         default = [str(role) for role in self.data['panels'][self.name]['support_role']]
 
-        modal.add_item(discord.ui.TextInput(label="Support Role", style=discord.TextStyle.paragraph, custom_id="PANEL:ROLES:QUESTIONS", 
+        modal.add_item(discord.ui.TextInput(required=False,label="Support Role", style=discord.TextStyle.paragraph, custom_id="PANEL:ROLES:QUESTIONS", 
             max_length=1000, default=",".join(default) if len(default) > 0 else None, placeholder="Please state the roles you want to be able to support, seperated by a comma."))
-        modal.add_item(discord.ui.TextInput(label="Ping Roles", style=discord.TextStyle.short, custom_id="PANEL:ROLES:PING", default=self.data['panels'][self.name]['ping_role'] if self.data['panels'][self.name]['ping_role'] is not None else None, placeholder="Please state the role you want to ping on ticket creation."))
+        modal.add_item(discord.ui.TextInput(required=False,label="Ping Roles", style=discord.TextStyle.short, custom_id="PANEL:ROLES:PING", default=self.data['panels'][self.name]['ping_role'] if self.data['panels'][self.name]['ping_role'] is not None else None, placeholder="Please state the role you want to ping on ticket creation."))
 
         await interaction.response.send_modal(modal)
     
