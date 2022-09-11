@@ -7,6 +7,8 @@ from discord import app_commands
 from utils.db import Document
 from utils.converter import TimeConverter
 from typing import Union
+from io import BytesIO
+import asyncio
 
 class Perks(commands.GroupCog):
     def __init__(self, bot):
@@ -77,7 +79,7 @@ class Perks(commands.GroupCog):
         data['channel_perks']['friend_limit'] = 5
         await self.bot.perks.update(data)
         await interaction.edit_original_response(content="Custom Channel Perks has been given to {}".format(user.mention))
-    
+
     @app_commands.command(name="config", description="Configure perks")
     @app_commands.describe(role_poistion="Positiob of role to create", category="Category of channel to create")
     async def config(self, interaction: Interaction, role_poistion: int, category: discord.CategoryChannel):
@@ -109,7 +111,6 @@ class Perks(commands.GroupCog):
             await user.send("Your Custom Role/Channel Perks has been cleared, please contact an admin if you think this is a mistake")
         except discord.HTTPException:
             pass
-
 class Custom(commands.GroupCog):
     def __init__(self, bot):
         self.bot = bot
@@ -199,7 +200,9 @@ class Custom(commands.GroupCog):
         if color:
             await role.edit(color=discord.Color(int(color, 16)))
         if icon:
-            await role.edit(display_icon=icon)
+            await interaction.edit_original_response(content="Role icon is not supported yet")
+            await asyncio.sleep(2)
+
         embed = discord.Embed(description="<:dynosuccess:1000349098240647188> | Custom Role has been edited", color=discord.Color.green())
         await interaction.edit_original_response(embed=embed, content=None)
     
