@@ -10,10 +10,11 @@ class Help(commands.Cog):
     
     async def command_auto_complete(self, interaction: discord.Interaction, current: str) -> List[app_commands.Choice[str]]:
         commands = interaction.client.tree.get_commands(guild=interaction.guild)
-        return [
+        choices =  [
             app_commands.Choice(name=str(commnad.name), value=str(commnad.name))
             for commnad in commands if current.lower() in commnad.name.lower()
         ]
+        return choices[:24]
     
     @app_commands.command(name="help", description="Show an short help message about a command", extras={'example': '/help command: ping'})
     @app_commands.describe(command="command to show help message")
@@ -21,7 +22,7 @@ class Help(commands.Cog):
     async def _help(self, interaction: discord.Interaction, command: str):
         command = interaction.client.tree.get_command(command, guild=interaction.guild)
 
-        embed = discord.Embed(title=f"Help | {command.name.title()}", description=f"{command.description}", color=interaction.client.color['default'])
+        embed = discord.Embed(title=f"Help | {command.name.title()}", description=f"{command.description}", color=0x36393f)
         useage = ""
         query = ""
         useage += f"/{command.name} "
@@ -50,7 +51,7 @@ class Help(commands.Cog):
             await interaction.response.send_message(embed=embed)
         elif type(command) == app_commands.commands.Group:
 
-            embed = discord.Embed(title=f"Help | {command.name}", description=f"{command.description}", color=interaction.client.color['default'])
+            embed = discord.Embed(title=f"Help | {command.name}", description=f"{command.description}", color=0x36393f)
             embed.description += f"\n\n**Available Commands:**\n"
             for subcommand in command.commands:
                 embed.description += f"`/{command.name} {subcommand.name}`\n"
@@ -58,7 +59,7 @@ class Help(commands.Cog):
             pages = [embed]
             for sub_command in command.commands:
                 if type(sub_command) == app_commands.commands.Command:
-                    sub_cmd_embed = discord.Embed(title=f"{command.name.title()} {sub_command.name}", description=f"{sub_command.description}", color=interaction.client.color['default'])
+                    sub_cmd_embed = discord.Embed(title=f"{command.name.title()} {sub_command.name}", description=f"{sub_command.description}", color=0x36393f)
                     useage = ""
                     query = ""
                     useage += f"/{command.name} {sub_command.name}"
@@ -82,7 +83,7 @@ class Help(commands.Cog):
                 elif type(sub_command) == app_commands.commands.Group:
                     for sub_cmd_groub in sub_command.commands:
                         if type(sub_cmd_groub) == app_commands.commands.Command:
-                            sub_cmd_embed = discord.Embed(title=f"{command.name.title()} {sub_command.name} {sub_cmd_groub.name}", description=f"{sub_cmd_groub.description}", color=interaction.client.color['default'])
+                            sub_cmd_embed = discord.Embed(title=f"{command.name.title()} {sub_command.name} {sub_cmd_groub.name}", description=f"{sub_cmd_groub.description}", color=0x36393f)
                             useage = ""
                             query = ""
                             useage += f"/{command.name} {sub_command.name} {sub_cmd_groub.name}"
@@ -109,4 +110,4 @@ class Help(commands.Cog):
 
     
 async def setup(bot):
-    await bot.add_cog(Help(bot))
+    await bot.add_cog(Help(bot), guilds = [discord.Object(785839283847954433)])
