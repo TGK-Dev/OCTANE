@@ -14,7 +14,7 @@ class Anti_nuke(commands.Cog):
     async def on_ready(self):
         self.bot.quarantine = Document(self.bot.db, "Quarantine")
         self.bypass_role = []
-        for i in [786281307063189565, 785842380565774368,803635405638991902]:
+        for i in [785842380565774368, 803635405638991902, 823647447271211059]:
             guild = self.bot.get_guild(785839283847954433)
             role = guild.get_role(i)
             self.bypass_role.append(role)
@@ -129,13 +129,15 @@ class Anti_nuke(commands.Cog):
     @commands.Cog.listener()
     async def on_member_update(self, before, after):
         if before.guild.id != 785839283847954433: return
-        if before.is_bot_managed == True or before.managed == True: return
+        if before.bot: return
         if before.roles == after.roles: return
         guild: discord.Guild = before.guild
 
         diffrent_role = list(set(after.roles).difference(set(before.roles)))
+
         for permmission in diffrent_role:
-            if any(permmission.administrator, permmission.manage_channels, permmission.manage_guild, permmission.manage_messages, permmission.manage_roles, permmission.manage_permissions):
+            perms = [perm[0] for perm in permmission.permissions if perm[1] == True]
+            if (set[perms] & set(['kick_members', 'ban_members', 'administrator', 'manage_channels', 'manage_guild', 'manage_messages', 'manage_roles', 'manage_permissions'])):
                 role = discord.utils.get(guild.roles, id=before.id)
                 server_audit_logs = [log async for log in guild.audit_logs(limit=10, action=discord.AuditLogAction.member_update)]
                 for log in server_audit_logs:
