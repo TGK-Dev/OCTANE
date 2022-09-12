@@ -17,46 +17,17 @@ class AFK(commands.Cog, name="AFK", description="Member Afk Module"):
             return
         
         if message.guild.id != 785839283847954433: return
-        current_afk = deepcopy(self.bot.current_afk)
-
-        if message.author.id in self.bot.current_afk:
-            value  = self.bot.current_afk[message.author.id]
-            try:
-                await message.author.edit(nick=value['last_name'])
-            except:
-                pass            
-            
-
-            embed = discord.Embed(description=f"{message.author.mention} is no longer AFK\nAFK Started: <t:{value['time']}:R>", color=0x00ff00)
-
-            await message.reply(embed=embed)
+        if message.author.id in self.bot.current_afk.keys():
+            del self.bot.current_afk[message.author.id]
+            await message.reply("Welcome back! I have removed your AFK status.")
             await self.bot.afk.delete(message.author.id)
-
-            try:
-                self.bot.current_afk.pop(message.author.id)
-            except KeyError:
-                pass
-            return
         
-        if message.reference:
-            try:
-                reply_message = await message.channel.fetch_message(message.reference.message_id)
-            except discord.NotFound:
-                return
-            for key, value in current_afk.items():
-                if reply_message.author.id == key:
-                    user = message.guild.get_member(key)
-                    embed = discord.Embed(description=f"Reason: {value['message']}\nAFK Since : <t:{value['time']}:R>", color=user.color)
-                    embed.set_author(name=f"{user.display_name} is AFK", icon_url=user.avatar.url if user.avatar else user.default_avatar)
-                    return await message.reply(embed=embed)
-
         if len(message.mentions) > 0:
-            for key, value in current_afk.items():
-                if key in [_id.id for _id in message.mentions]:
-                    user = message.guild.get_member(key)
-                    embed = discord.Embed(description=f"Reason: {value['message']}\nAFK Since: <t:{value['time']}:R>", color=user.color)
-                    embed.set_author(name=f"{user.display_name} is AFK", icon_url=user.avatar.url if user.avatar else user.default_avatar)
-                    return await message.reply(embed=embed)
+            for user in message.mentions:
+                if user.id in self.bot.current_afk.keys():
+                    afk = await self.bot.afk.get(user.id)
+                    await message.reply(f"{user.mention} is AFK Since <t:{afk['time']}:R>\nReason: {afk['reason']}", delete_after=10, allowed_mentions=discord.AllowedMentions(users=True, roles=False, everyone=False))
+        
 
     @app_commands.command(name="afk", description="Set your AFK status")
     @app_commands.guilds(785839283847954433)
@@ -70,10 +41,8 @@ class AFK(commands.Cog, name="AFK", description="Member Afk Module"):
 
         afk_data = {'_id':interaction.user.id, 'message': status, 'last_name': interaction.user.display_name,'time': round(discord.utils.utcnow().timestamp())}
         await self.bot.afk.insert(afk_data)
-        embed = discord.Embed(description=f"{interaction.user.mention} You are now afk\nReason: {status}", color=0x00ff00)
-        embed.set_author(name=f"{interaction.user.display_name} is now afk", icon_url=interaction.user.avatar.url if interaction.user.avatar else interaction.user.default_avatar)
 
-        await interaction.response.send_message(embed=embed)
+        await interaction.response.send_message(f"Set your AFK status to: {status}", ephemeral=True)
         try:
             await interaction.user.edit(nick=f"{interaction.user.display_name} [AFK]")
         except:
