@@ -32,6 +32,19 @@ class AFK(commands.Cog, name="AFK", description="Member Afk Module"):
                     afk = self.bot.current_afk[user.id]
                     await message.reply(f"{user.mention} is AFK Since <t:{afk['time']}:R>\nReason: {afk['message']}", delete_after=10, allowed_mentions=discord.AllowedMentions(users=True, roles=False, everyone=False))
         
+        if message.interaction != None:
+            interaction = message.interaction
+            if interaction.user.id in self.bot.current_afk.keys():
+                try:
+                    await interaction.user.edit(nick=self.bot.current_afk[interaction.user.id]['last_name'])
+                except discord.Forbidden:
+                    pass
+                await message.reply("Welcome back! I have removed your AFK status.")
+                await self.bot.afk.delete(interaction.user.id)
+                del self.bot.current_afk[interaction.user.id]
+
+                
+        
 
     @app_commands.command(name="afk", description="Set your AFK status")
     @app_commands.guilds(785839283847954433)
