@@ -18,15 +18,19 @@ class AFK(commands.Cog, name="AFK", description="Member Afk Module"):
         
         if message.guild.id != 785839283847954433: return
         if message.author.id in self.bot.current_afk.keys():
-            del self.bot.current_afk[message.author.id]
-            await message.reply("Welcome back! I have removed your AFK status.")
+            try:
+                await message.author.edit(nick=self.bot.current_afk[message.author.id]['last_name'])
+            except discord.Forbidden:
+                pass
+            await message.reply("Welcome back! I have removed your AFK status.")            
             await self.bot.afk.delete(message.author.id)
+            del self.bot.current_afk[message.author.id]
         
         if len(message.mentions) > 0:
             for user in message.mentions:
                 if user.id in self.bot.current_afk.keys():
-                    afk = await self.bot.afk.get(user.id)
-                    await message.reply(f"{user.mention} is AFK Since <t:{afk['time']}:R>\nReason: {afk['reason']}", delete_after=10, allowed_mentions=discord.AllowedMentions(users=True, roles=False, everyone=False))
+                    afk = self.bot.current_afk[user.id]
+                    await message.reply(f"{user.mention} is AFK Since <t:{afk['time']}:R>\nReason: {afk['message']}", delete_after=10, allowed_mentions=discord.AllowedMentions(users=True, roles=False, everyone=False))
         
 
     @app_commands.command(name="afk", description="Set your AFK status")
