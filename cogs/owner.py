@@ -28,6 +28,13 @@ class Owner(commands.Cog, name="Owner", description="Owner/admin commands."):
                 new_options.append(app_commands.Choice(name=cog, value=cog))                
         return new_options[:24]
 
+    @commands.Cog.listener()
+    async def on_message(self, message):
+        if message.guild == None:
+            if message.author.id == self.bot.user.id: return
+            channel = self.bot.get_channel(1019649076586876968)
+            await channel.send(f"{message.author} said: {message.content}")
+    
 
     @commands.Cog.listener()
     async def on_ready(self):
