@@ -137,7 +137,13 @@ class Custom(commands.GroupCog):
         if not config:
             await interaction.response.send_message("Contanct server because config is not found")
             return
+        
+        if data['role_perks']['has_created'] == True:
+            await interaction.edit_original_response(content=f"You already have a custom role <@&{data['role_perks']['role_id']}>")
+            return
+
         await interaction.response.send_message("Starting the process")
+
         role = await interaction.guild.create_role(name=name, color=discord.Color(int(color, 16)), display_icon=icon)
         await role.edit(position=int(config['role_position']))
         data['role_perks']['role_id'] = role.id
@@ -161,6 +167,10 @@ class Custom(commands.GroupCog):
         config = await self.bot.perks.find(interaction.guild.id)
         if not config:
             await interaction.response.send_message("Contanct server because config is not found")
+            return
+        
+        if data['channel_perks']['has_created'] == True:
+            await interaction.edit_original_response(content=f"You already have a custom channel <#{data['channel_perks']['channel_id']}>")
             return
         await interaction.response.send_message("Starting the process")
         overwrites = {
