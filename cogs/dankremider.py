@@ -112,7 +112,7 @@ class dankremiders(commands.GroupCog, name="dankremiders"):
                 data = {"_id": user.id,"enabled": True,"reminders": {}}
                 await self.bot.dank_reminders.insert(data)
             elif view.value == False:
-                await msg.edit(content="Ok, you can enable it later with `/dankremiders enable`")
+                await msg.edit(content="Ok, you can enable it later with `/dankremiders enable`", view=None)
                 await view.interaction.response.send_message("Cancelled", ephemeral=True)
                 return
 
