@@ -171,7 +171,8 @@ class Staff(commands.GroupCog, name="staff", description="Staff management comma
         for post in data['post']:
             staff_role = discord.utils.get(interaction.guild.roles, id=staff_list[post])
             await user.add_roles(staff_role, reason=f"User has ended leave")
-        
+        leave_role = discord.utils.get(interaction.guild.roles, id=787055415157850142)
+        await user.remove_roles(leave_role, reason=f"User has ended leave")
         await interaction.edit_original_response(content=None, embed=discord.Embed(description=f"<:dynosuccess:1000349098240647188> | {user.mention} has been removed leave of days", color=discord.Color.green()))
 
     @app_commands.command(name="currentvacation", description="Get current leaves")
