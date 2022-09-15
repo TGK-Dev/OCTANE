@@ -93,7 +93,7 @@ class dankremiders(commands.GroupCog, name="dankremiders"):
     @commands.Cog.listener()
     async def on_message(self, message):
 
-        if message.guild == None or message.interaction == None or not message.author.bot or message.guild.id != 785839283847954433 or message.author.id != 270904126974590976 or message.channel.category.id != 821807876812701706:
+        if message.guild == None or message.interaction == None or not message.author.bot or message.guild.id != 785839283847954433 or message.author.id != 270904126974590976 or message.channel.category.id not in [785841152553123861, 821807876812701706]:
             return
         user = message.interaction.user
         data = await self.bot.dank_reminders.find(user.id)
