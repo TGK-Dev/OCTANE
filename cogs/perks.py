@@ -407,7 +407,7 @@ class Custom(commands.GroupCog):
         if not data:
             await interaction.response.send_message("You don't have custom perks", ephemeral=True)
             return
-        if interaction.channel.id == data['channel_perks']['channel_id']:return await interaction.response.send_message("you can only delete messages from your custom channel", ephemeral=True)
+        if interaction.channel.id != data['channel_perks']['channel_id']:return await interaction.response.send_message("you can only delete messages from your custom channel", ephemeral=True)
 
         try:
             msg = await interaction.channel.fetch_message(message)
@@ -432,7 +432,7 @@ class Custom(commands.GroupCog):
         if not data:
             await interaction.response.send_message("You don't have custom perks", ephemeral=True)
             return
-        if interaction.channel.id == data['channel_perks']['channel_id']:return await interaction.response.send_message("you can only ping members from your custom channel", ephemeral=True)
+        if interaction.channel.id != data['channel_perks']['channel_id']:return await interaction.response.send_message("you can only ping members from your custom channel", ephemeral=True)
 
         try:
             msg = await interaction.channel.fetch_message(message)
