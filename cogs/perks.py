@@ -394,7 +394,64 @@ class Custom(commands.GroupCog):
         embed.add_field(name="Friends", value=f"Friends Limit: {len(data['channel_perks']['friends'])}/{data['channel_perks']['friend_limit']}"+"\n"+",".join([f"<@{member}>" for member in data['channel_perks']['friends']]))
         embed.color = discord.Color.green()
         await interaction.response.send_message(embed=embed)
+    
+    @channel.command(name="message-delete", description="delete a message from your custom channel")
+    @app_commands.describe(message="id of the message to delete")
+    async def message_delete(self, interaction: Interaction, message: str):
+        try:
+            message: int = int(message)
+        except:
+            await interaction.response.send_message("Invalid message id", ephemeral=True)
+            return
+        data = await self.bot.perks.find(interaction.user.id)
+        if not data:
+            await interaction.response.send_message("You don't have custom perks", ephemeral=True)
+            return
+        if interaction.channel.id == data['channel_perks']['channel_id']:return await interaction.response.send_message("you can only delete messages from your custom channel", ephemeral=True)
 
+        try:
+            msg = await interaction.channel.fetch_message(message)
+            if msg.author.id in [816699167824281621, 810041263452848179]: return await interaction.response.send_message("You can't delete messages from me or my bro", ephemeral=True)
+
+            await msg.delete()
+            embed = discord.Embed(description="<:dynosuccess:1000349098240647188> | Deleted message from {msg.author.mention}".format(msg=msg), color=discord.Color.green())
+            await interaction.response.send_message(embed=embed)
+        except discord.NotFound:
+            await interaction.response.send_message("Message not found", ephemeral=True)
+            return
+    
+    @channel.command(name="message-ping", description="ping a user from your custom channel")
+    @app_commands.describe(message="id of the message to ping")
+    @app_commands.describe(member="member to ping")
+    async def message_ping(self, interaction: Interaction, message: str):
+        try:
+            message: int = int(message)
+        except:
+            await interaction.response.send_message("Invalid message id", ephemeral=True)
+            return
+        data = await self.bot.perks.find(interaction.user.id)
+        if not data:
+            await interaction.response.send_message("You don't have custom perks", ephemeral=True)
+            return
+        if interaction.channel.id == data['channel_perks']['channel_id']:return await interaction.response.send_message("you can only ping members from your custom channel", ephemeral=True)
+
+        try:
+            msg = await interaction.channel.fetch_message(message)
+            if msg.pinned == True:
+                await msg.unpin()
+                embed = discord.Embed(description="<:dynosuccess:1000349098240647188> | Unpinned message from {msg.author.mention}".format(msg=msg), color=discord.Color.green())
+                await interaction.response.send_message(embed=embed)
+
+            else:
+                await msg.pin()
+                embed = discord.Embed(description="<:dynosuccess:1000349098240647188> | Pinned message from {msg.author.mention}".format(msg=msg), color=discord.Color.green())
+                await interaction.response.send_message(embed=embed)
+
+            await interaction.response.send_message(msg.author.mention)
+        except Exception as e:
+            embed = discord.Embed(description="Error: {e}".format(e=e), color=discord.Color.red())
+            await interaction.response.send_message(embed=embed)
+            return
 
 
 async def setup(bot):
