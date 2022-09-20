@@ -422,7 +422,6 @@ class Custom(commands.GroupCog):
     
     @channel.command(name="message-ping", description="ping a user from your custom channel")
     @app_commands.describe(message="id of the message to ping")
-    @app_commands.describe(member="member to ping")
     async def message_ping(self, interaction: Interaction, message: str):
         try:
             message: int = int(message)
