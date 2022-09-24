@@ -150,6 +150,7 @@ class Highlight_backend(commands.Cog, name="Votes",description="Server Vote coun
                     return
     
     async def autoreactions(self, message: discord.Message):
+        if message.author.bot: return
         if len(message.mentions) == 0:
             return
         for user in message.mentions:
