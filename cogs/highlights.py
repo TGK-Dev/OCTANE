@@ -145,7 +145,9 @@ class Highlight_backend(commands.Cog, name="Votes",description="Server Vote coun
                         break
                     async for cmsg in message.channel.history(limit=20, before=message):
                         if cmsg.author.id == data['_id']:
-                            break
+                            return
+                    if cmsg.author not in message.channel.members:
+                        return
                     self.bot.dispatch("hl_trigger", message, data, msg)                    
                     return
     
