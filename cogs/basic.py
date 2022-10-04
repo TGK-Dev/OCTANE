@@ -24,11 +24,11 @@ class Basic(commands.Cog, name="Basic", description="General Basic Commands"):
         for activity in after.activities:
             try:
                 if activity.type == discord.ActivityType.custom:
-                    if ".gg/dankmemers" in activity.name.lower():
+                    if ".gg/tgk" in activity.name.lower():
                         role = discord.utils.get(after.guild.roles, id=992108093271965856)
                         await after.add_roles(role)
                         return
-                    elif not ".gg/dankmemers" in activity.name.lower():
+                    elif not ".gg/tgk" in activity.name.lower():
                         role = discord.utils.get(after.guild.roles, id=992108093271965856)
                         if role in after.roles:
                             await after.remove_roles(role)
