@@ -188,16 +188,16 @@ class Highlight_backend(commands.Cog, name="Votes",description="Server Vote coun
         user = trigger_message.guild.get_member(data['_id'])
         await asyncio.sleep(5)
 
-        embed = discord.Embed(title=trigger_key, description="", color=discord.Color.yellow())
+        embed = discord.Embed(title="You were Highlight", description="Recent Message:", color=discord.Color.blue())
         
         before_message = [message async for message in trigger_message.channel.history(limit=4, before=trigger_message)]
 
 
         for message in before_message:
             formattime = str(message.created_at.strftime("%H:%M:%S"))
-            embed.description += f"**[{formattime}] {message.author.display_name}:** {message.content}\n"
+            embed.description += f"> [<t:{round(message.created_at.timestamp())}:R>]**{message.author.display_name}:** {message.content}\n"
 
-        embed.description += f"**<:pin:1000719163851018340> [{str(trigger_message.created_at.strftime('%H:%M:%S'))}] {trigger_message.author.display_name}:** {trigger_message.content}"
+        embed.description += f"> [<t:{round(trigger_message.created_at.timestamp())}:R>]**{trigger_message.author.display_name}:** {trigger_message.content}\n"
         embed.add_field(name="Source", value=f"[Jump to Message]({trigger_message.jump_url})", inline=False)
         
         user = trigger_message.guild.get_member(data['_id'])
