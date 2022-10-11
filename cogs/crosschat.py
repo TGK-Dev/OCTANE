@@ -36,6 +36,7 @@ class CorssChat(commands.GroupCog, name="crosschat", description="utils commands
         if message.author.bot: return
         if not message.guild: return
         if message.author.discriminator == "0000": return
+        if message.content is None: return
         other_side = None
         if message.channel.id == 970681327374467082:
             other_side = self.bot.get_channel(972433560327827466)
