@@ -26,11 +26,13 @@ class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
         self.mute_task = self.check_current_mutes.start()
         self.whoisapp_cmd = app_commands.ContextMenu(name="Whois", callback=self.whois_context)
         self.bot.tree.add_command(self.whoisapp_cmd)
+        self.ban_session = aiohttp.ClientSession()
     
     def cog_unload(self):
         self.ban_task.cancel()
         self.bot.tree.remove_command(self.whoisapp_cmd, type=self.whois_context.type)
         self.mute_task.cancel()
+        self.ban_session.close()
 
     @tasks.loop(seconds=30)
     async def check_current_mutes(self):
@@ -74,7 +76,7 @@ class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
             if currentTime >= unbantime:
                 guild = self.bot.get_guild(int(value['guildId']))
                 member = await self.bot.fetch_user(int(value['_id']))
-                moderator = guild.get_member(value['BanedBy'])
+                moderator = guild.get_member(value['BannedBy'])
                 self.bot.dispatch('ban_expired', guild, member, moderator)
 
                 try:
@@ -109,9 +111,9 @@ class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
         await self.bot.config.upsert(data)
 
         log_channel = self.bot.get_channel(int(data['mod_log']))
-        if log_channel:
-            await log_channel.send(embed=embed)
-        
+        webhook = Webhook.from_url("https://canary.discord.com/api/webhooks/936297803016179733/nsRH8LRBTGoKtlncQz0ylB8dV8xMV_aYNy_4QoSIdUc4seR8YAQ8UxnwDE9lfeDig8w3", session=self.ban_session)
+        await webhook.send(embed=embed, username="👑┋OCT∆NΞ Logging", avatar_url=self.bot.user.avatar.url)
+
         await self.bot.bans.delete(user.id)
 
     @commands.Cog.listener()
@@ -183,7 +185,7 @@ class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
         if member.id == interaction.user.id:
             return await interaction.followup.send("You can't ban yourself", ephemeral=True)
         
-        data = {'_id': member.id, 'guildId': interaction.guild.id, 'BanedBy': interaction.user.id, 'BannedAt': datetime.datetime.utcnow(), 'BanDuration': time, 'Reason': reason}
+        data = {'_id': member.id, 'guildId': interaction.guild.id, 'BannedBy': interaction.user.id, 'BannedAt': datetime.datetime.utcnow(), 'BanDuration': time, 'Reason': reason}
         guild_data = await self.bot.config.find(interaction.guild.id)
         if not guild_data:
             guild_data = make_db_temp(interaction.guild.id)
