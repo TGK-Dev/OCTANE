@@ -33,7 +33,7 @@ class Highlight(commands.GroupCog, name="highlight", description="utils commands
                 'last_react': None
             }
             await interaction.client.hightlights.insert(data)
-            interaction.client.hl_chache['_id'] = data
+            interaction.client.hl_chache[data['_id']] = data
         if tigger in data['tigger']:
             await interaction.response.send_message("This Trigger is already in the Highlight List", ephemeral=True)
             return
@@ -45,7 +45,7 @@ class Highlight(commands.GroupCog, name="highlight", description="utils commands
             else:
                 data['tigger'].append(tigger)
                 await interaction.client.hightlights.update(data)
-                interaction.client.hl_chache['_id'] = data
+                interaction.client.hl_chache[data['_id']] = data
                 embed = discord.Embed(description=f"<:dynosuccess:1000349098240647188> | Added {tigger} to the Highlight List", color=discord.Color.green())
                 await interaction.response.send_message(embed=embed)                
                 return
@@ -67,7 +67,7 @@ class Highlight(commands.GroupCog, name="highlight", description="utils commands
             await interaction.client.hightlights.update(data)
             embed = discord.Embed(description=f"<:dynosuccess:1000349098240647188> | Removed {tigger} from the Highlight List", color=discord.Color.green())
             await interaction.response.send_message(embed=embed)
-            interaction.client.hl_chache['_id'] = data
+            interaction.client.hl_chache[data['_id']] = data
             return
 
     @app_commands.command(name="info", description="List all Triggers in the Highlight List", extras={'example': "/highlight info"})
@@ -105,7 +105,7 @@ class Highlight(commands.GroupCog, name="highlight", description="utils commands
             data['ignore_channel'].append(channel.id)
             await interaction.client.hightlights.update(data)
             await interaction.response.send_message(f"{channel.name} has been added to the Highlight List")
-            interaction.client.hl_chache['_id'] = data
+            interaction.client.hl_chache[data['_id']] = data
             return
     
     @app_commands.command(name="unignore", description="Remove a Channel from the Highlight List")
@@ -122,7 +122,7 @@ class Highlight(commands.GroupCog, name="highlight", description="utils commands
             data['ignore_channel'].remove(channel.id)
             await interaction.client.hightlights.update(data)
             await interaction.response.send_message(f"{channel.name} has been removed from the Highlight List")
-            interaction.client.hl_chache['_id'] = data
+            interaction.client.hl_chache[data['_id']] = data
             return
         
 class Highlight_backend(commands.Cog, name="Votes",description="Server Vote counter with Top.gg"):
@@ -140,14 +140,20 @@ class Highlight_backend(commands.Cog, name="Votes",description="Server Vote coun
             for msg in message_content:
                 if msg in data['tigger']:
                     if message.channel.id in data['ignore_channel']:
-                        break
+                        return
                     if message.author.id == data['_id']:
-                        break
+                        return
+
                     async for cmsg in message.channel.history(limit=20, before=message):
                         if cmsg.author.id == data['_id']:
-                            return
-                    if cmsg.author not in message.channel.members:
+                            if not (message.created_at - cmsg.created_at).total_seconds() > 300:
+                                return
+
+                    channel_member_ids = [member.id for member in message.channel.members]
+                    if data['_id'] not in channel_member_ids:
                         return
+
+
                     self.bot.dispatch("hl_trigger", message, data, msg)                    
                     return
     
@@ -192,7 +198,8 @@ class Highlight_backend(commands.Cog, name="Votes",description="Server Vote coun
         value = ""
         before_message = [message async for message in trigger_message.channel.history(limit=4, before=trigger_message)]
 
-
+        #reverse the list
+        before_message.reverse()
         for message in before_message:
             value += f"> [<t:{round(message.created_at.timestamp())}:R>]**{message.author.display_name}:** {message.content}\n"
 
