@@ -1,203 +1,143 @@
 import discord
-from discord.ext import commands , tasks
-from discord import app_commands, Interaction
+import datetime
+from asyncio import TimeoutError
+from discord.ext import commands, tasks
+from discord import app_commands
+from typing import Literal
 from utils.db import Document
 from ui.confirm import Confirm
-import datetime
-from typing import Literal
-from enum import Enum
 
-commands_cooldown = {
-    "work shift": {'time': 3600, 'mention': "</work shift:1011560371267579942>"},
-    "adventure": {'time': 300, 'mention': "</adventure:1011560371041095695>"},
-    "stream": {'time': 600, 'mention': "</stream:1011560371267579938>"},
-    "crime": {'time': 45, 'mention': "</crime:1011560371078832202>"},
-    "beg": {'time': 45, 'mention': "</beg:1011560371041095699>"},
-}
-
-class command_list(Enum):
-    work_shift = "work shift"
-    adventure = "adventure"
-    stream = "stream"
-    crime = "crime"
-    beg = "beg"
-
-
-class dankremiders(commands.GroupCog, name="dankremiders"):
+class DankReminder(commands.GroupCog, name="dankreminder"):
     def __init__(self, bot):
         self.bot = bot
-        self.bot.dank_reminders = Document(self.bot.db, "dank_reminders")
         self.bot.dank_reminders_cache = {}
-        self.dank_reminder_task = self.dank_reminder.start()
+        self.bot.dank_reminders = Document(self.bot.db, "dank_reminders")
     
-    def cog_unload(self):
-        self.dank_reminder_task.cancel()
-    
+    @staticmethod
+    async def get_userdata(self, user: discord.Member):
+        data = await self.bot.dank_reminders.get(user.id)
+        if data is None:
+            data = {
+                "_id": user.id,
+                "reminders": {},
+                "enabled": True
+            }
+            await self.bot.dank_reminders.insert(data)
+        return data
+
+    @staticmethod
+    async def make_cache(self):
+        print("Caching dank reminders")
+        data = await self.bot.dank_reminders.get_all()
+        for user in data:
+            self.bot.dank_reminders_cache[user["_id"]] = user
+        print("Done caching dank reminders")
+
+    @staticmethod
+    async def get_cache(self, user: discord.Member):
+        if user.id in self.bot.dank_reminders_cache.keys():
+            return self.bot.dank_reminders_cache[user.id]
+        else:
+            return await self.get_userdata(self, user)
+        
+    @staticmethod
+    async def update_data(self, user: discord.Member, data: dict):
+        await self.bot.dank_reminders.update(data)
+        self.bot.dank_reminders_cache[user.id] = data
+
     @commands.Cog.listener()
     async def on_ready(self):
-        current_data = await self.bot.dank_reminders.get_all()
-        for data in current_data:
-            if data['enabled'] == False:
-                continue
-            else:
-                self.bot.dank_reminders_cache[data["_id"]] = data        
-        print(self.bot.dank_reminders_cache)
+        await self.make_cache(self)
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
     
-    @tasks.loop(seconds=30)
-    async def dank_reminder(self):
-        current_time = datetime.datetime.now()
-        for data in self.bot.dank_reminders_cache.values():
-            if data['enabled'] == False:
-                del self.bot.dank_reminders_cache[data["_id"]]
-                continue
-            
-            for _type, reminder in data['reminders'].items():
-                if reminder['enabled'] == False:
-                    continue         
-                if reminder['next_remider'] == None:
-                    continue
-                if reminder['reminded'] == True:
-                    continue
-                if current_time >= reminder['next_remider']:
-                    self.bot.dispatch("dank_reminder", data, _type)
-
-
-    
-    @dank_reminder.before_loop
-    async def before_dank_reminder(self):
-        await self.bot.wait_until_ready()
-    
     @commands.Cog.listener()
-    async def on_dank_reminder(self, data: dict, _type: str):
-        print(f"dank_reminder event fired {_type}")
-        reminder = data['reminders'][_type]
-        guild = self.bot.get_guild(reminder['guild_id'])
-        channel = guild.get_channel(reminder['last_channel'])
-        user = guild.get_member(data['_id'])
-        if user == None:
-            del self.bot.dank_reminders_cache[data["_id"]]
-            return
+    async def on_message(self, message):
+        if not message.author.bot: return
+        if message.guild is None: return
+        if message.guild.id != 785839283847954433: return
+        if message.author.id != 270904126974590976: return
+        if message.interaction is None: return
 
-        if channel == None:
-            data['reminders'][_type]['enabled'] = False
-            data['reminders'][_type]['last_channel'] = None
-            await self.bot.dank_reminders.update(data)
-            del self.bot.dank_reminders_cache[data["_id"]]
+        if message.interaction.name == "work shift":
+            self.bot.dispatch("dank_wrok_shift", message)
+        if message.interaction.name == "crime":
+            self.bot.dispatch("dank_crime", message)
+
+    @commands.Cog.listener()
+    async def on_dank_wrok_shift(self, message):
+        user = message.interaction.user
+        data = await self.get_cache(self, user)
+        if data['enabled'] is False: return
+        def check(m):
+            embed = m.embeds[0]
+            return embed.title == "Terrible work!" or "Great work!"
+
+        try:
+            await self.bot.wait_for('message_edit', check=check, timeout=60)
+            
+            if "work" not in data['reminders'].keys():
+                view = Confirm(user, 60)
+                msg = await message.reply(f"Hey! {user.mention} do you want me to remind you when you can use the work command again?", view=view)
+                view.message = msg
+                await view.wait()
+                if view.value is True:
+                    data['reminders']['work'] = {
+                        "enabled": True,
+                        "last_channel": message.channel.id,
+                        "reminded": False,
+                        "next_remider": datetime.datetime.now() + datetime.timedelta(minutes=60),
+                        "last_used": datetime.datetime.now(),
+                        "guild_id": message.guild.id
+                    }
+                    await self.update_data(self, user, data)
+                    await view.interaction.response.edit_message(content="Alright! I will remind you when you can use the work command again!", view=None)
+                    await message.add_reaction("<:octane_yes:1019957051721535618>")
+                else:
+                    await view.interaction.response.edit_message(content="Alright! I won't remind you when you can use the work command again!", view=None)
+                    await message.add_reaction("<:octane_no:1019957051721535617>")
+            else:
+                if data['reminders']['work']['enabled'] is False: return
+                data['reminders']['work']['reminded'] = False
+                data['reminders']['work']['next_remider'] = datetime.datetime.now() + datetime.timedelta(minutes=60)
+                await self.update_data(self, user, data)
+                await message.add_reaction("<:octane_yes:1019957051721535618>")
+        except TimeoutError:
+            if message.embeds[0].title == "You just received a promotion!":
+                pass
+
+    @app_commands.command(name="toggle", description="Toggle a reminder")
+    async def toggle(self, interaction: discord.Interaction, command: Literal['work'], enabled: bool):
+        data = await self.get_userdata(self, interaction.user)
+        if command not in data['reminders'].keys():
+            data['reminders'][command] = {
+                "enabled": True,
+                "reminded": False,
+                "next_remider": None,
+                "last_channel": None,
+                "guild_id": interaction.guild.id
+            }
         
-        data['reminders'][_type]['reminded'] = True
-        await channel.send(f"Hey {user.mention}! You can now use the command {commands_cooldown[_type]['mention']} again!")
+        if enabled is True:
+            data['reminders'][command]['enabled'] = True
+            await interaction.response.send_message("Reminder enabled!", ephemeral=True)
+        else:
+            data['reminders'][command]['enabled'] = False
+            await interaction.response.send_message("Reminder disabled!", ephemeral=True)
+
         await self.bot.dank_reminders.update(data)
         self.bot.dank_reminders_cache[data["_id"]] = data
 
-    @commands.Cog.listener()
-    async def on_message(self, message):
-
-        if message.guild == None or message.interaction == None or not message.author.bot or message.guild.id != 785839283847954433 or message.author.id != 270904126974590976 or message.channel.category.id not in [785841152553123861, 821807876812701706]:
-            return
-        user = message.interaction.user
-        data = await self.bot.dank_reminders.find(user.id)
-        command = message.interaction.name
-
-        if command not in commands_cooldown.keys():
-            return
-        
-        if not data:
-            view = Confirm(user, 60)
-            msg = await message.reply(f"Hey {user.mention}! do you want to enable dankremiders for {commands_cooldown[command]['mention']} and other commands? (this will remind you when you can use the command again)", view=view)
-            view.message = msg
-            await view.wait()
-
-            if view.value == True:
-                data = {"_id": user.id,"enabled": True,"reminders": {}}
-                await self.bot.dank_reminders.insert(data)
-            elif view.value == False:
-                await msg.edit(content="Ok, you can enable it later with `/dankremiders enable`", view=None)
-                await view.interaction.response.send_message("Cancelled", ephemeral=True)
-                return
-
-            if command not in data['reminders'].keys():
-                data['reminders'][command] = {
-                    "enabled": True,
-                    "reminded": False,
-                    "guild_id": message.guild.id,
-                    "last_channel": message.channel.id,
-                    "next_remider": datetime.datetime.now() + datetime.timedelta(seconds=commands_cooldown[command]['time']),
-                    "last_used": round(datetime.datetime.now().timestamp())
-                }
-
-            data['reminders'][command]['reminded'] = True
-            data['reminders'][command]['guild_id'] = message.guild.id
-            data['reminders'][command]['last_channel'] = message.channel.id
-            data['reminders'][command]['next_remider'] = datetime.datetime.now() + datetime.timedelta(seconds=commands_cooldown[command]['time'])
-            data['reminders'][command]['last_used'] = round(datetime.datetime.now().timestamp())
-
-            await self.bot.dank_reminders.update(data)
-            self.bot.dank_reminders_cache[data['_id']] = data
-            await message.add_reaction("<:octane_yes:1019957051721535618>")
-            await view.interaction.response.send_message("Reminder has been enabled!", ephemeral=True)
-            await msg.edit(view=None, content="Reminders are now enabled, you can enable or disable other commands reminders by using the `dankreminders` command")
-        else:
-            if command not in data['reminders'].keys():
-                data['reminders'][command] = {
-                    "enabled": True,
-                    "reminded": False,
-                    "guild_id": message.guild.id,
-                    "last_channel": message.channel.id,
-                    "next_remider": datetime.datetime.now() + datetime.timedelta(seconds=commands_cooldown[command]['time']),
-                    "last_used": round(datetime.datetime.now().timestamp())
-                }
-            else:
-                data['reminders'][command]['reminded'] = False
-                data['reminders'][command]['guild_id'] = message.guild.id
-                data['reminders'][command]['last_channel'] = message.channel.id
-                data['reminders'][command]['next_remider'] = datetime.datetime.now() + datetime.timedelta(seconds=commands_cooldown[command]['time'])
-            await self.bot.dank_reminders.update(data)
-            self.bot.dank_reminders_cache[data['_id']] = data
-            await message.add_reaction("<:octane_yes:1019957051721535618>")
-
-    @app_commands.command(name="manage", description="Manage your dank reminders")
-    @app_commands.describe(reminder="The reminder you want to manage", toggle="Enable or disable the reminder")
-    async def dankreminders_manage(self, interaction: Interaction, reminder: command_list, toggle: bool):
-        data = await self.bot.dank_reminders.find(interaction.user.id)
-        if not data:
-            return await interaction.response.send_message("You don't have any dank reminders enabled!", ephemeral=True)
-        if reminder.value not in data['reminders'].keys():
-            data['reminders'][reminder.value] = {
-                "enabled": toggle,
-                "reminded": False,
-                "guild_id": None,
-                "last_channel": interaction.channel.id,
-                "next_remider": None,
-                "last_used": None
-            }
-
-        data['reminders'][reminder.value]['enabled'] = toggle
-        await self.bot.dank_reminders.update(data)
-        self.bot.dank_reminders_cache[data['_id']] = data
-        await interaction.response.send_message(f"Successfully {'enabled' if toggle else 'disabled'} the reminder for {commands_cooldown[reminder.value]['mention']}", ephemeral=True)
-    
-    @app_commands.command(name="info", description="View your dank reminders")
-    async def dankreminders_info(self, interaction: Interaction):
-        embed = discord.Embed(color=0x2f3136, description="", title="Dank Reminders")
-        data = await self.bot.dank_reminders.find(interaction.user.id)
-        if not data:await interaction.response.send_message("You don't have any dank reminders set up", ephemeral=True)
-
-        embed.description += f"**Global Status:** {'<:octane_yes:1019957051721535618>' if data['enabled'] == True else '<:octane_no:1019957208466862120>'}\n"
-        for _type, reminder in commands_cooldown.items():
-            if _type in data['reminders'].keys():
-                value = f"Enabled: {'<:octane_yes:1019957051721535618>' if data['reminders'][_type]['enabled'] == True else '<:octane_no:1019957208466862120>'}\n"
-                value += f"Reminded: {'<:octane_yes:1019957051721535618>' if data['reminders'][_type]['reminded'] == True else '<:octane_no:1019957208466862120>'}\n"
-                value += f"Next reminder: <t:{round(data['reminders'][_type]['next_remider'].timestamp())}:R>\n" if data['reminders'][_type]['next_remider'] else "Next reminder: N/A\n"
-                # value += f"Last used: <t:{data['reminders'][_type]['last_used']}:R>\n" if data['reminders'][_type]['last_used'] else "Last used: N/A\n"
-                embed.add_field(name=_type.capitalize(), value=value)
-            else:
-                data['reminders'][_type] = {"enabled": False,"reminded": False,"guild_id": None,"last_channel": None,"next_remider": None,"last_used": None}
-                value = f"Enabled: {'<:octane_yes:1019957051721535618>' if data['reminders'][_type]['enabled'] == True else '<:octane_no:1019957208466862120>'}\n"
-                value += "Next reminder: N/A"
-                embed.add_field(name=_type.capitalize(), value=value)
-        await self.bot.dank_reminders.update(data)
-        await interaction.response.send_message(embed=embed)
+    @app_commands.command(name="view", description="View your reminders")
+    async def view(self, interaction: discord.Interaction):
+        data = await self.get_userdata(self, interaction.user)
+        embed = discord.Embed(title="Dank Reminders", color=0x2F3136)
+        for reminder in data['reminders'].keys():
+            value = f"Enabled: {data['reminders'][reminder]['enabled']}"
+            value += f"\nReminded: {data['reminders'][reminder]['reminded']}"
+            value += f"\nNext Remider: {round(data['reminders'][reminder]['next_remider'].timestamp()) if data['reminders'][reminder]['next_remider'] is not None else 'None'}"
+            value += f"Last Used: {round(data['reminders'][reminder]['last_used'].timestamp()) if data['reminders'][reminder]['last_used'] is not None else 'None'}"
+            embed.add_field(name=reminder, value=value, inline=False)
+        await interaction.response.send_message(embed=embed, ephemeral=True)
 
 async def setup(bot):
-    await bot.add_cog(dankremiders(bot), guilds=[discord.Object(785839283847954433)])
+    await bot.add_cog(DankReminder(bot), guilds=[discord.Object(785839283847954433)])

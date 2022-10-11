@@ -197,6 +197,7 @@ class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
         else:
             embed.description += f"\n**Duration**: Permanent"
         embed.description += f"\n**Reason**: {reason}"
+        embed.description += f"\n**Moderator**: {interaction.user.name} | {interaction.user.mention}"
         embed.timestamp = datetime.datetime.utcnow()
         embed.set_footer(text=f"ID: {member.id}")
         guild_data["case"] += 1
