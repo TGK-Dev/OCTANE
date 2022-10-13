@@ -112,16 +112,14 @@ class DankReminder(commands.GroupCog, name="dankreminder"):
             embed = after.embeds[0]
             if embed.title == "Terrible work!" or "Great work!":
                 self.bot.dispatch("dank_workShift_done", after, after.interaction)
-                self.message_in_progress.append(after.id)
         
         if after.interaction.name == "crime":
             if after.components[0].children[0].disabled == True and after.components[0].children[-1].disabled == True:
                 self.bot.dispatch("dank_crime_done", after, after.interaction)
-                self.message_in_progress.append(after.id)
 
     @commands.Cog.listener()
     async def on_dank_crime_done(self, message, interaction):
-        if message.id in self.message_in_progress: return
+        self.message_in_progress.append(message.id)
         user = interaction.user
         data = await self.get_cache(self, user)
         if "crime" not in data['reminders'].keys():
@@ -167,7 +165,7 @@ class DankReminder(commands.GroupCog, name="dankreminder"):
     
     @commands.Cog.listener()
     async def on_dank_workShift_done(self, message, interaction):
-        print("work shift done")
+        self.message_in_progress.append(message.id)
         user = interaction.user
         data = await self.get_cache(self, user)
         if not data["enabled"]: return
