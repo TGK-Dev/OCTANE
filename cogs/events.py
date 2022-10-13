@@ -38,7 +38,7 @@ class Events(commands.Cog):
         elif isinstance(error, app_commands.MissingAnyRole):
             await interaction.response.send_message("You are missing the required role to use this command!", ephemeral=True)
         else:
-            embed = discord.Embed(description="Errror: {}".format(error), color=discord.Color.red)
+            embed = discord.Embed(description="Errror: {}".format(error), color=discord.Color.red())
             await interaction.response.send_message(embed=embed)
     
     @tasks.loop(seconds=300)
