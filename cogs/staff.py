@@ -1,9 +1,11 @@
 import discord
 import datetime
 from discord import app_commands
-from discord.ext import commands
+from discord.ext import commands, tasks
 from typing import Literal, List
 from utils.paginator import Paginator
+from utils.db import Document
+from discord.app_commands import Group
 
 staff_list = {
     'Moderator': 787259553225637889,
@@ -16,6 +18,49 @@ staff_list = {
 class Staff(commands.GroupCog, name="staff", description="Staff management commands"):
     def __init__(self, bot):
         self.bot = bot
+        self.leave_task = self.leave_task.start()
+        self.bot.staff = Document(bot.db, 'staff')
+
+    leave = Group(name="leave", description="manage staff leaves")
+
+    def cog_unload(self):
+        self.leave_task.cancel()
+    
+    @tasks.loop(hours=1)
+    async def leave_task(self):
+        current_staff = await self.bot.staff.get_all()
+        today = datetime.datetime.now()
+        leave_log_channel = self.bot.get_channel(974913093266182144)
+        main_guild = self.bot.get_guild(785839283847954433)
+        leave_role = main_guild.get_role(787055415157850142)
+        for staff in current_staff:
+            if 'leave' not in staff.keys(): continue
+
+            if staff['leave']['end'] < today:
+                staff_member = main_guild.get_member(staff['id'])
+
+                try:
+                    leave_message = await leave_log_channel.fetch_message(staff['leave']['message'])
+                except discord.NotFound:
+                    pass
+
+                embed = leave_message.embeds[0]
+                embed.title = f"{embed.title} (Ended)"
+
+                await leave_message.edit(embed=embed)
+                for post in staff['posts']:
+                    role = discord.utils.get(main_guild.roles, id=staff_list[post])
+                    await staff_member.add_role(role, reason="Staff leave ended")
+                await staff_member.remove_role(leave_role, reason="Staff leave ended")
+
+                try:
+                    await staff.member.send("Your Staff leave in **The Gambler's Kingdom** has ended, if you want to extend your leave, please contact a Head Administator.")
+                except discord.HTTPException:
+                    pass
+        
+    @leave_task.before_loop
+    async def before_leave_task(self):
+        await self.bot.wait_until_ready()
 
     @app_commands.command(name="appoint", description="appoint staff to user")
     @app_commands.choices(post=[app_commands.Choice(name="TRIAL MODERATOR", value=str(843775369470672916)), app_commands.Choice(name="Partnership Manager", value=str(831405039830564875)), app_commands.Choice(name="Giveaway Manager", value=str(803230347575820289)), app_commands.Choice(name="Event Manager", value=str(852125566802198528))])
@@ -110,93 +155,70 @@ class Staff(commands.GroupCog, name="staff", description="Staff management comma
                     if short.name in staff['post']:
                         embed.description += f"<@{staff['_id']}>\n"
                 await interaction.response.send_message(embed=embed)
-
-    @app_commands.command(name="vacation", description="Set leave of days")
-    @app_commands.describe(days="Number of days", reason="Reason for vacation", user="User to request vacation")
-    @app_commands.checks.has_permissions(administrator=True)
-    async def leave_of_days(self, interaction: discord.Interaction, user: discord.Member, days: int, reason: str):
-        data = await self.bot.staff.find(user.id)
+    
+    @leave.command(name="set", description="set leave for a staff member")
+    @app_commands.describe(member="Member to set leave for", days="Days of leave", reason="Reason for leave")
+    async def _set(self, interaction: discord.Interaction, member: discord.Member, days: app_commands.Range[int,1, 30], reason: str):
+        data = await self.bot.staff.find(member.id)
         if not data:
-            await interaction.response.send_message(f"{user.mention} is not staff", ephemeral=True)
+            await interaction.response.send_message(f"{member.mention} is not staff", ephemeral=True)
             return
-        if data['vacation']['days'] != 0:
-            await interaction.response.send_message(f"{interaction.user.mention} already has {data['vacation']['days']} days of leave", ephemeral=True)
+        if 'leave' in data.keys():
+            await interaction.response.send_message(f"{member.mention} already on leave", ephemeral=True)
             return
-        data['vacation']['days'] = days
-        data['vacation']['reason'] = reason
-        data['vacation']['start'] = datetime.datetime.now()
-        data['vacation']['last_vacation'] = datetime.datetime.now()
-        data['vacation']['approvaed'] = interaction.user.id
-        data['vacation']['end'] = data['vacation']['start'] + datetime.timedelta(days=days)
 
-        await self.bot.staff.update(data)
-        await interaction.response.send_message(f"<a:loading:1004658436778229791> | Setting up leave of days for {user.mention}")
-        for post in data['post']:
-            staff_role = discord.utils.get(interaction.guild.roles, id=staff_list[post])
-            await user.remove_roles(staff_role, reason=f"User has stared leave of {days}")
+        await interaction.response.send_message(f"Setting leave for {member.mention}", ephemeral=False, allowed_mentions=discord.AllowedMentions(users=False))
+        data['leave'] = {'days': days, 'reason': reason, 'start': datetime.datetime.now(), 'end': datetime.datetime.now() + datetime.timedelta(days=days), 'approved_by': interaction.user.id}
         
-        base_role = discord.utils.get(interaction.guild.roles, id=818129661325869058)
-        leave_role = discord.utils.get(interaction.guild.roles, id=787055415157850142)
-        await user.remove_roles(base_role, reason=f"User has started leave of {days}")
-        await user.add_roles(leave_role, reason=f"User has started leave of {days}")
 
-        await interaction.edit_original_response(content=None, embed=discord.Embed(description=f"<:dynosuccess:1000349098240647188> | {user.mention} has been set up leave of days for {days} days", color=discord.Color.green()))
-        channel = interaction.client.get_channel(974913093266182144)
-        embed = discord.Embed(title=f"Info for {user.name}", color=discord.Color.green())
-        embed.add_field(name="Days", value=days, inline=True)
-        embed.add_field(name="Start", value=data['vacation']['start'].strftime("%d %B %Y"), inline=True)
-        embed.add_field(name="End", value=data['vacation']['end'].strftime("%d %B %Y"), inline=True)
-        embed.add_field(name="Reason", value=reason, inline=True)
-        embed.add_field(name="Approved by", value=f"<@{interaction.user.id}>", inline=True)
-        await channel.send(embed=embed)
-
-    @app_commands.command(name="endvacation", description="Remove leave of days")
-    @app_commands.describe(user="User to remove leave of days")
-    @app_commands.checks.has_permissions(administrator=True)
-    async def end_vacation(self, interaction: discord.Interaction, user: discord.Member):
-        data = await self.bot.staff.find(user.id)
-        if not data:
-            await interaction.response.send_message(f"{user.mention} is not staff", ephemeral=True)
-            return
-        if data['vacation']['days'] == 0:
-            await interaction.response.send_message(f"{interaction.user.mention} does not have any leave of days", ephemeral=True)
-            return
-        data['vacation']['days'] = 0
-        data['vacation']['reason'] = None
-        data['vacation']['start'] = None
-        data['vacation']['approvaed'] = None
-
+        embed = discord.Embed(title=f"{member.name} is on leave", description=f"", color=discord.Color.green())
+        embed.add_field(name="Days", value=days, inline=False)
+        embed.add_field(name="Reason", value=reason, inline=False)
+        embed.add_field(name="Start", value=datetime.datetime.now().strftime("%d %B %Y"), inline=False)
+        embed.add_field(name="End", value=(datetime.datetime.now() + datetime.timedelta(days=days)).strftime("%d %B %Y"), inline=False)
+        embed.add_field(name="Approved by", value=interaction.user.mention, inline=False)
+        embed.set_footer(text=f"Leave Ends")
+        embed.timestamp = datetime.datetime.now() + datetime.timedelta(days=days)
+        channel = self.bot.get_channel(974913093266182144)
+        msg = await channel.send(embed=embed)
+        data['leave']['message_id'] = msg.id
         await self.bot.staff.update(data)
-        await interaction.response.send_message(f"<a:loading:1004658436778229791> | Removing leave of days for {user.mention}")
-        for post in data['post']:
-            staff_role = discord.utils.get(interaction.guild.roles, id=staff_list[post])
-            await user.add_roles(staff_role, reason=f"User has ended leave")
-        leave_role = discord.utils.get(interaction.guild.roles, id=787055415157850142)
-        await user.remove_roles(leave_role, reason=f"User has ended leave")
-        await interaction.edit_original_response(content=None, embed=discord.Embed(description=f"<:dynosuccess:1000349098240647188> | {user.mention} has been removed leave of days", color=discord.Color.green()))
 
-    @app_commands.command(name="currentvacation", description="Get current leaves")
-    @app_commands.describe(user="User to get current leaves")
-    @app_commands.checks.has_permissions(administrator=True)
-    async def current_vacation(self, interaction: discord.Interaction, user: discord.Member):
-        data = await self.bot.staff.find(user.id)
+        for post in data['post']:
+            role = discord.utils.get(interaction.guild.roles, id=staff_list[post])
+            await member.remove_roles(role, reason=f"Leave for {days} days")
+        
+        leave_role = discord.utils.get(interaction.guild.roles, id=787055415157850142)
+        await member.add_roles(leave_role, reason=f"Leave for {days} days")
+        await interaction.edit_original_response(content=f"Leave set for {member.mention}")
+    
+    @leave.command(name="remove", description="remove leave for a staff member")
+    @app_commands.describe(member="Member to remove leave for")
+    async def _remove(self, interaction: discord.Interaction, member: discord.Member):
+        data = await self.bot.staff.find(member.id)
         if not data:
-            await interaction.response.send_message(f"{user.mention} is not staff", ephemeral=True)
+            await interaction.response.send_message(f"{member.mention} is not staff", ephemeral=True)
             return
-        if data['vacation']['days'] == 0:
-            await interaction.response.send_message(f"{interaction.user.mention} does not have any leave of days", ephemeral=True)
+        if 'leave' not in data.keys():
+            await interaction.response.send_message(f"{member.mention} is not on leave", ephemeral=True)
             return
-        embed = discord.Embed(title=f"{user.name}'s current leave", color=discord.Color.green(), description=f"")
-        embed.description += f"Days: {data['vacation']['days']}\n"
-        embed.description += f"Reason: {data['vacation']['reason']}\n"
-        embed.description += f"Start: <t:{round(data['vacation']['start'].timestamp())}:F> | <t:{round(data['vacation']['start'].timestamp())}:R>\n"
-        embed.description += f"End: <t:{round(data['vacation']['end'].timestamp())}:F> | <t:{round(data['vacation']['end'].timestamp())}:R>\n"
-        embed.description += f"Approved by: <@{data['vacation']['approvaed']}>\n"
-        embed.description += f"Last vacation: <t:{round(data['vacation']['last_vacation'].timestamp())}:R>\n"
-        await interaction.response.send_message(embed=embed)
+
+        await interaction.response.send_message(f"Removing leave for {member.mention}", ephemeral=False, allowed_mentions=discord.AllowedMentions(users=False))
+        await self.bot.staff.unset(data, 'leave')
+
+        embed = discord.Embed(title=f"{member.name} leave removed", description=f"Leave removed by {interaction.user.name}", color=discord.Color.green())
         channel = self.bot.get_channel(974913093266182144)
         await channel.send(embed=embed)
 
+        for post in data['post']:
+            role = discord.utils.get(interaction.guild.roles, id=staff_list[post])
+            await member.add_roles(role, reason=f"Leave removed")
+        
+        leave_role = discord.utils.get(interaction.guild.roles, id=787055415157850142)
+        await member.remove_roles(leave_role, reason=f"Leave removed")
+        await interaction.edit_original_response(content=f"Leave removed for {member.mention}")
+
+        
 async def setup(bot):
     await bot.add_cog(Staff(bot), guilds=[discord.Object(785839283847954433)])
     
