@@ -49,11 +49,9 @@ class DankReminder(commands.GroupCog, name="dankreminder"):
 
     @staticmethod
     async def make_cache(self):
-        print("Caching dank reminders")
         data = await self.bot.dank_reminders.get_all()
         for user in data:
             self.bot.dank_reminders_cache[user["_id"]] = user
-        print("Done caching dank reminders")
 
     @staticmethod
     async def get_cache(self, user: discord.Member):
