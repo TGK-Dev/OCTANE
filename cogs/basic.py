@@ -5,35 +5,46 @@ from typing import Literal
 from utils.checks import Commands_Checks
 import time
 import datetime
+import asyncio
 class Basic(commands.Cog, name="Basic", description="General Basic Commands"):
     def __init__(self, bot):
         self.bot = bot
+        self.bot.presence_chache = {}
     
     @commands.Cog.listener()
-    async def on_ready(self):
+    async def on_ready(self):        
         print(f"{self.__class__.__name__} Cog has been loaded")
     
     @commands.Cog.listener()
     async def on_presence_update(self, before, after):
         if before.guild.id != 785839283847954433: return
-        if len(after.activities) <= 0: 
-            role = discord.utils.get(after.guild.roles, id=992108093271965856)
-            if role in after.roles:
-                await after.remove_roles(role)
-            return
+        supporter_role = before.guild.get_role(992108093271965856)
+        supporter_log_channel = before.guild.get_channel(1031514773310930945)
+        if len(after.activities) <= 0 and supporter_role in after.roles:
+            await after.remove_roles(supporter_role, reason="No longer supporting")
+            return        
+        await asyncio.sleep(5)
+
         for activity in after.activities:
             try:
                 if activity.type == discord.ActivityType.custom:
                     if ".gg/tgk" in activity.name.lower():
-                        role = discord.utils.get(after.guild.roles, id=992108093271965856)
-                        await after.add_roles(role)
+
+                        if supporter_role in after.roles: return
+                        embed = discord.Embed(description=f"Thanks for supporting the The Gambler's Kingdom\n\nYou have been given the {supporter_role.mention} role", color=supporter_role.color)
+                        embed.set_author(name=f"{after.name}#{after.discriminator} ({after.id})", icon_url=after.avatar.url if after.avatar else after.default_avatar)
+                        embed.set_footer(text=self.bot.user.name, icon_url=self.bot.user.avatar.url)
+                        embed.timestamp = datetime.datetime.now()
+                        embed.set_thumbnail(url="https://cdn.discordapp.com/emojis/869579480509841428.gif?v=1")
+                        await supporter_log_channel.send(embed=embed)
+                        await after.add_roles(supporter_role)
                         return
+
                     elif not ".gg/tgk" in activity.name.lower():
-                        role = discord.utils.get(after.guild.roles, id=992108093271965856)
-                        if role in after.roles:
-                            await after.remove_roles(role)
+                        
+                        if supporter_role in after.roles: await after.remove_roles(supporter_role)                        
                         return
-            except:
+            except Exception as e:
                 pass
         
     
