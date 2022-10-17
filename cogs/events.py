@@ -38,8 +38,12 @@ class Events(commands.Cog):
         elif isinstance(error, app_commands.MissingAnyRole):
             await interaction.response.send_message("You are missing the required role to use this command!", ephemeral=True)
         else:
-            embed = discord.Embed(description="Errror: {}".format(error), color=discord.Color.red())
-            await interaction.response.send_message(embed=embed)
+            embed = discord.Embed(description="**Error:** {}".format(error), color=discord.Color.red())
+            try:
+                
+                await interaction.response.send_message(embed=embed)
+            except:
+                await interaction.followup.send(embed=embed, ephemeral=True)
     
     @tasks.loop(seconds=300)
     async def check_update_task(self):
