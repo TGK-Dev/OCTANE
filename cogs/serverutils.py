@@ -62,18 +62,13 @@ class Dump(commands.GroupCog, name="dump", description="dump data"):
 class Poll(commands.GroupCog, name="poll", description="poll commands"):
     def __init__(self, bot):
         self.bot = bot
-    
-    @app_commands.command(name='create', description="Create a poll")
-    @app_commands.describe(title="title of the poll", options="options of the poll spearated by !", duration="duration of the poll ex: 1h30m", thread="Create poll with thread", one_vote="only one vote per user")
-    @app_commands.rename(one_vote="single_vote")
-    @app_commands.default_permissions(manage_messages=True)
-    async def create(self, interaction: Interaction, title: str, options: str,duration: str, thread: bool=None, one_vote: bool=False):
-        await make_poll(interaction, title, options, duration, thread, one_vote)
-
-class Serverutils_backend(commands.Cog, description="Contains commands that are useful for the server."):
-    def __init__(self, bot):
-        self.bot = bot
         self.poll_check = self.check_polls.start()
+    
+    @commands.Cog.listener()
+    async def on_ready(self):
+        for poll in await self.bot.poll.get_all():
+            self.bot.polls[poll['_id']] = poll
+        print(f"{self.__class__.__name__} Cog has been loaded.")
     
     def cog_unload(self):
         self.poll_check.cancel()
@@ -81,8 +76,8 @@ class Serverutils_backend(commands.Cog, description="Contains commands that are 
     @tasks.loop(seconds=10)
     async def check_polls(self):
         current_polls = deepcopy(self.bot.polls)
-        for item, value in current_polls.items():      
-
+        for item, value in current_polls.items():
+            print(datetime.datetime.now() > value['end_time'])
             if datetime.datetime.now() > value['end_time']:
                 self.bot.dispatch('poll_end', value)
     
@@ -94,7 +89,6 @@ class Serverutils_backend(commands.Cog, description="Contains commands that are 
     async def on_poll_end(self, poll):
         print("event Triggered")
         channel = self.bot.get_channel(poll['channel'])
-
         try:
             msg = await channel.fetch_message(poll['_id'])
         except discord.errors.NotFound:
@@ -113,13 +107,14 @@ class Serverutils_backend(commands.Cog, description="Contains commands that are 
             pass        
         
         await self.bot.poll.delete(poll['_id'])
-
-    @commands.Cog.listener()
-    async def on_ready(self):
-        print(f"{self.__class__.__name__} Cog has been loaded.")
-
+    
+    @app_commands.command(name='create', description="Create a poll")
+    @app_commands.describe(title="title of the poll", options="options of the poll spearated by !", duration="duration of the poll ex: 1h30m", thread="Create poll with thread", one_vote="only one vote per user")
+    @app_commands.rename(one_vote="single_vote")
+    @app_commands.default_permissions(manage_messages=True)
+    async def create(self, interaction: Interaction, title: str, options: str,duration: str, thread: bool=None, one_vote: bool=False):
+        await make_poll(interaction, title, options, duration, thread, one_vote)
 
 async def setup(bot):
-    await bot.add_cog(Serverutils_backend(bot), guild=discord.Object(785839283847954433))
     await bot.add_cog(Poll(bot), guild=discord.Object(785839283847954433))
     await bot.add_cog(Dump(bot), guild=discord.Object(785839283847954433))
