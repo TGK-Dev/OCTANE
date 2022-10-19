@@ -116,5 +116,5 @@ class Poll(commands.GroupCog, name="poll", description="poll commands"):
         await make_poll(interaction, title, options, duration, thread, one_vote)
 
 async def setup(bot):
-    await bot.add_cog(Poll(bot), guild=discord.Object(785839283847954433))
+    await bot.add_cog(Poll(bot))
     await bot.add_cog(Dump(bot), guild=discord.Object(785839283847954433))
