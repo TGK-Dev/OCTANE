@@ -7,6 +7,8 @@ import os
 import random
 import discord
 import asyncio
+import datetime
+
 class verify(discord.ui.View):
     def __init__(self, bot):
         super().__init__(timeout=None)
@@ -100,4 +102,45 @@ class Req_veriy_code(discord.ui.View):
         
         os.remove('captcha.png')
 
-        
+class Payout_Buttton(discord.ui.View):
+    def __init__(self):
+        super().__init__(timeout=None)
+    
+    @discord.ui.button(label="Payout", style=discord.ButtonStyle.green, custom_id="payout")
+    async def payout(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_message("Marking payout", ephemeral=True)
+        print(interaction.message.id)
+        data = await interaction.client.payout.find_by_custom({"log_channel_id": interaction.message.id})
+        if data is None:
+            await interaction.response.send_message("No data found", ephemeral=True)
+        else:
+            embed = interaction.message.embeds[0]
+            embed.remove_field(len(embed.fields)-1)
+            embed.add_field(name="Payout Status", value="**<:nat_reply_cont:1011501118163013634> Done**")
+            embed.title = "Payout Done"
+            embed.set_footer(text="Payout Done At")
+            embed.add_field(name="Payout By", value=f"**<:nat_reply_cont:1011501118163013634> {interaction.user.mention}**")
+            embed.timestamp = datetime.datetime.now()
+            button.disabled = True
+            button.label = "Payout Done"
+
+            await interaction.message.edit(embed=embed, content="Payment Done", view=self)
+            await interaction.edit_original_response(content="Payout Marked as done successfully")
+            await interaction.client.payout.delete(data["_id"])
+    
+    async def on_error(self, interaction: Interaction, error: Exception, item: discord.ui.Item):
+        try:
+            await interaction.response.send_message(f"Error: {error}", ephemeral=True)
+        except discord.InteractionResponded:
+            await interaction.edit_edit_original_response(f"Error: {error}", ephemeral=True)
+        except:
+            pass
+
+    async def interaction_check(self, interaction: Interaction):
+        dank_manager_role = discord.utils.get(interaction.guild.roles, id=989947301126631504)
+        if dank_manager_role in interaction.user.roles:
+            return True
+        else:
+            embed = discord.Embed(title="Error", description="You don't have permission to use this button", color=discord.Color.red())
+            await interaction.response.send_message(embed=embed, ephemeral=True)
+            return False
