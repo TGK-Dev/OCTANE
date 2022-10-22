@@ -79,8 +79,11 @@ class PollButton(discord.ui.Button):
 
         #check if user has already voted
         if interaction.user.id in data['options'][str(index)]['users']:
-            await interaction.followup.send("You have already voted for this option.")
-            return
+            #remove user vote
+            data['options'][str(index)]['users'].remove(interaction.user.id)
+            data['options'][str(index)]['votes'] -= 1
+            data['total_votes'] -= 1
+            await interaction.followup.send("Your vote has been removed.", ephemeral=True)
         
         #check if user has voted for another option
         if data['one_vote'] == True:
