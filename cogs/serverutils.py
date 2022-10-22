@@ -6,6 +6,8 @@ from ui.poll import *
 from copy import deepcopy
 from dateutil.relativedelta import relativedelta
 from io import BytesIO
+from utils.db import Document
+from ui.buttons import Payout_Buttton
 import os
 
 class Dump(commands.GroupCog, name="dump", description="dump data"):
@@ -115,6 +117,59 @@ class Poll(commands.GroupCog, name="poll", description="poll commands"):
     async def create(self, interaction: Interaction, title: str, options: str,duration: str, thread: bool=None, one_vote: bool=False):
         await make_poll(interaction, title, options, duration, thread, one_vote)
 
+
+class Payout(commands.GroupCog, name="payout"):
+    def __init__(self, bot):
+        self.bot = bot
+        self.bot.payout = Document(self.bot.db, "payout")
+
+    @commands.Cog.listener()
+    async def on_ready(self):
+        self.bot.add_view(Payout_Buttton())
+        print(f"{self.__class__.__name__} Cog has been loaded.")
+    
+    @app_commands.command(name="set", description="Set payout for a event")
+    @app_commands.describe(event="event name", message_link="event message link", winner="winner of the event", price="price of the event")
+    async def set(self, interaction: Interaction, event: str, message_link: str, winner: discord.Member, price: str):
+        await interaction.response.send_message("Setting payout...", ephemeral=True)
+
+        message_link = message_link.split("/")
+        if len(message_link) < 6:
+            return await interaction.edit_original_response(content="Invalid message link split")
+
+        channel = self.bot.get_channel(int(message_link[5]))
+        if not channel:
+            return await interaction.edit_original_response(content="Message link channel not found")
+        try:
+            message = await channel.fetch_message(int(message_link[6]))
+        except discord.NotFound:
+            return await interaction.edit_original_response(content="Message not found")
+        
+        data = await self.bot.payout.find(message.id)
+        if data: return await interaction.edit_original_response(content="Payout already set for this event")
+        data = {'_id': message.id,'event': event,'winner': winner.id,'price': price,'message_link': message_link,'set_by': interaction.user.id, 'log_channel_id': None}
+
+        await interaction.edit_original_response(content="Payout added to queue successfully")
+
+        embed = discord.Embed(title="New Payout Pending")
+        embed.add_field(name="Event", value=f"**<:nat_reply_cont:1011501118163013634> {event}**")
+        embed.add_field(name="Winner", value=f"**<:nat_reply_cont:1011501118163013634> {winner.mention}**")
+        embed.add_field(name="Price", value=f"**<:nat_reply_cont:1011501118163013634> {price}**")
+        embed.add_field(name="Channel", value=f"**<:nat_reply_cont:1011501118163013634> {message.channel.mention}**")
+        embed.add_field(name="Message Link", value=f"**<:nat_reply_cont:1011501118163013634> [Click Here]({message.jump_url})**")
+        embed.add_field(name="Set By", value=f"**<:nat_reply_cont:1011501118163013634> {interaction.user.mention}**")
+        embed.add_field(name="Payout Status", value="**<:nat_reply_cont:1011501118163013634> Pending**")
+
+        embed.color = discord.Color.random()
+        embed.set_footer(text="Payout Created At", icon_url=interaction.guild.icon.url)
+        embed.timestamp = datetime.datetime.now()
+        
+        payout_channel = self.bot.get_channel(1031982594826457098)
+        msg = await payout_channel.send(embed=embed, content="<@&989947301126631504> New Payout Pending", view=Payout_Buttton())
+        data['log_channel_id'] = msg.id
+        await self.bot.payout.insert(data)
+
 async def setup(bot):
+    await bot.add_cog(Payout(bot), guild=discord.Object(785839283847954433))
     await bot.add_cog(Poll(bot), guild=discord.Object(785839283847954433))
     await bot.add_cog(Dump(bot), guild=discord.Object(785839283847954433))
