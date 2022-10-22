@@ -37,24 +37,24 @@ class Staff(commands.GroupCog, name="staff", description="Staff management comma
             if 'leave' not in staff.keys(): continue
 
             if staff['leave']['end'] < today:
-                staff_member = main_guild.get_member(staff['id'])
+                staff_member = main_guild.get_member(staff['_id'])
 
                 try:
-                    leave_message = await leave_log_channel.fetch_message(staff['leave']['message'])
+                    leave_message = await leave_log_channel.fetch_message(staff['leave']['message_id'])
                 except discord.NotFound:
-                    pass
+                    return
 
                 embed = leave_message.embeds[0]
                 embed.title = f"{embed.title} (Ended)"
 
                 await leave_message.edit(embed=embed)
-                for post in staff['posts']:
+                for post in staff['post']:
                     role = discord.utils.get(main_guild.roles, id=staff_list[post])
-                    await staff_member.add_role(role, reason="Staff leave ended")
-                await staff_member.remove_role(leave_role, reason="Staff leave ended")
+                    await staff_member.add_roles(role, reason="Staff leave ended")
+                await staff_member.remove_roles(leave_role, reason="Staff leave ended")
 
                 try:
-                    await staff.member.send("Your Staff leave in **The Gambler's Kingdom** has ended, if you want to extend your leave, please contact a Head Administator.")
+                    await staff_member.send("Your Staff leave in **The Gambler's Kingdom** has ended, if you want to extend your leave, please contact a Head Administator.")
                 except discord.HTTPException:
                     pass
         
