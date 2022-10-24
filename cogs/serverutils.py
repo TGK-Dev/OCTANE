@@ -73,7 +73,6 @@ class Poll(commands.GroupCog, name="poll", description="poll commands"):
             self.bot.polls[poll['_id']] = poll
             self.bot.add_view(PollView(poll))
         print(f"{self.__class__.__name__} Cog has been loaded.")
-        await self.bot.tree.sync(guild=discord.Object(999551299286732871))
     
     def cog_unload(self):
         self.poll_check.cancel()
@@ -177,6 +176,6 @@ class Payout(commands.GroupCog, name="payout"):
         await self.bot.payout.insert(data)
 
 async def setup(bot):
-    # await bot.add_cog(Payout(bot), guild=discord.Object(785839283847954433))
-    await bot.add_cog(Poll(bot), guild=discord.Object(999551299286732871))
-    # await bot.add_cog(Dump(bot), guild=discord.Object(785839283847954433))
+    await bot.add_cog(Payout(bot), guild=discord.Object(785839283847954433))
+    await bot.add_cog(Poll(bot), guild=discord.Object(785839283847954433))
+    await bot.add_cog(Dump(bot), guild=discord.Object(785839283847954433))

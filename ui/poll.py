@@ -3,24 +3,27 @@ from discord import Interaction
 import discord.ui as ui
 import datetime
 from utils.converter import TimeConverter
+from humanfriendly import format_timespan
+from typing import Union
+
 def bar():
     return (f"`┃          ┃`")
 
 def update_bar(total, count):
     return (f"`┃{'█' * int(count/total*10)}{' ' * int(10-count/total*10)}┃`")
 
-default_emoji = "1️⃣ 2️⃣ 3️⃣ 4️⃣ 5️⃣ 6️⃣ 7️⃣ 8️⃣ 9️⃣ 🔟".split(" ")
+default_emoji = ['<a:Number1:1034099314877812818>', '<a:Number2:1034099538371280989>', '<a:Number3:1034099610886615110>', '<a:Number4:1034099702205005834>', '<a:Number5:1034099793544364103>', '<a:Number6:1034100138135797780>', '<a:Number7:1034100185539821608>', '<a:Number8:1034100344000618526>', '<a:Number9:1034100403387777045>']
 booleanEmoji = ["✅", "❌"]
 
-async def make_poll(interaction: discord.Interaction, title:str, options:str, duration:str, thread:bool=False, one_vote:bool=True):
+async def make_poll(interaction: discord.Interaction, title:str, options:str, duration:str, thread:bool=False):
     await interaction.response.defer(thinking=True)
     options = options.split("!")
 
     if len(options) < 2:
         await interaction.followup.send("You need at least 2 options to make a poll.")
         return
-    elif len(options) > 10:
-        await interaction.followup.send("You can only have 10 options max.")
+    elif len(options) > 9:
+        await interaction.followup.send("You can only have 9 options max.")
         return
     
     #check if len of options is odd or even
@@ -30,38 +33,114 @@ async def make_poll(interaction: discord.Interaction, title:str, options:str, du
         inline=True
 
     poll_data = {'options': {}}
-    duration = await TimeConverter().convert(interaction, duration)
-    duration = datetime.datetime.now() + datetime.timedelta(seconds=duration)
-    durationSTAMP = round(duration.timestamp())
+    for option in options:
+        poll_data['options'][str(options.index(option))] = {'count': 0, 'users': []}
+    poll_duration = await TimeConverter().convert(interaction, duration)
+    poll_duration_seconds = poll_duration
+    poll_duration = datetime.datetime.now() + datetime.timedelta(seconds=poll_duration)
+    poll_duration_TIMESTAMP = round(poll_duration.timestamp())
 
-    embed = discord.Embed(title=title)
-    for i in range(len(options)):
-        poll_data['options'][str(i)] = {'name': options[i], 'votes': 0, 'users': []}
-        embed.add_field(name=f"{default_emoji[i]} {options[i]}", value=bar(), inline=inline)
-    embed.set_footer(text=f"Asked by {interaction.user.name}#{interaction.user.discriminator}", icon_url=interaction.user.avatar.url)
-    embed.description = "• 0 votes\n"
-    if one_vote == False:
-        embed.description += "• Multiple votes\n"
-    else:
-        embed.description += "• One vote per user\n"
-    embed.description += f"• Duration: <t:{durationSTAMP}:R>"
-    embed.color = discord.Color.random()
-    await interaction.followup.send(embed=embed, view=PollView(embed))
+    embed = discord.Embed(title=title, description="")
+    for option in options:
+        embed.add_field(name=f"{default_emoji[options.index(option)]} {option}", value=bar(), inline=inline)
+    embed.description += "\n\n"
+    embed.description += f"**Poll Duration:** {format_timespan(poll_duration_seconds)}\n"
+    embed.description += f"**Poll Ends:** <t:{poll_duration_TIMESTAMP}:R>\n"
+    embed.description += f"**Total Votes:** 0"
+    embed.set_footer(text=f"Poll Started by {interaction.user}")
+    embed.timestamp = datetime.datetime.now()
 
-    msg = await interaction.original_response()
-    poll_data['_id'] = msg.id
-    poll_data['channel'] = msg.channel.id
-    poll_data['author'] = msg.author.id
-    poll_data['title'] = title
+    await interaction.followup.send(embed=embed , view=PollView(poll_data))
+    poll_message = await interaction.original_response()
+    if thread:
+        await poll_message.create_thread(name=f"Poll: {title}", auto_archive_duration=60)
+    
+    poll_data['_id'] = poll_message.id
+    poll_data['channel'] = poll_message.channel.id
+    poll_data['guild'] = poll_message.guild.id
+    poll_data['author'] = poll_message.author.id
     poll_data['total_votes'] = 0
-    poll_data['end_time'] = duration
-    poll_data['one_vote'] = one_vote
-    interaction.client.polls[msg.id] = poll_data
-
+    poll_data['end_time'] = poll_duration
+    interaction.client.polls[poll_message.id] = poll_data
     await interaction.client.poll.insert(poll_data)
 
-    if thread:
-        await msg.create_thread(name=title, slowmode_delay=3)
+    await interaction.followup.send("Poll created successfully.", ephemeral=True)
+
+async def update_poll(interaction: discord.Interaction, poll_data: dict, current_option: int,user: Union[discord.Member, discord.User]):
+    poll_data_copy = poll_data.copy()
+    embed = interaction.message.embeds[0]
+    current_option_data = poll_data_copy['options'][str(current_option)]
+
+    if user.id in current_option_data['users']:
+        current_option_data['count'] -= 1
+        current_option_data['users'].remove(user.id)
+        poll_data_copy['total_votes'] -= 1
+
+        embed_response = discord.Embed(description=f"You have successfully removed your vote from {embed.fields[int(current_option)].name}", color=discord.Color.red())
+
+        for field in embed.fields:
+            if poll_data_copy['options'][str(embed.fields.index(field))]['count'] > 0:
+                embed.set_field_at(embed.fields.index(field), name=field.name, value=update_bar(poll_data_copy['total_votes'], poll_data_copy['options'][str(embed.fields.index(field))]['count']), inline=field.inline)
+            else:
+                embed.set_field_at(embed.fields.index(field), name=field.name, value=bar(), inline=field.inline)
+        new_description = embed.description.replace(f"**Total Votes:** {poll_data['total_votes']}", f"**Total Votes:** {poll_data_copy['total_votes']}")
+        embed.description = new_description
+
+        await interaction.message.edit(embed=embed)
+        await interaction.followup.send(embed=embed_response, ephemeral=True)
+        await interaction.client.poll.update(poll_data_copy)
+        interaction.client.polls[poll_data_copy['_id']] = poll_data_copy
+
+    else:
+        changed_option = False
+        for option in poll_data_copy['options']:
+            if user.id in poll_data_copy['options'][option]['users']:
+                poll_data_copy['options'][option]['users'].remove(user.id)
+                poll_data_copy['options'][option]['count'] -= 1
+                poll_data_copy['total_votes'] -= 1
+
+                poll_data_copy['options'][str(current_option)]['users'].append(user.id)
+                poll_data_copy['options'][str(current_option)]['count'] += 1
+                poll_data_copy['total_votes'] += 1
+
+                for field in embed.fields:
+                    if poll_data_copy['options'][str(embed.fields.index(field))]['count'] > 0:
+                        embed.set_field_at(embed.fields.index(field), name=field.name, value=update_bar(poll_data_copy['total_votes'], poll_data_copy['options'][str(embed.fields.index(field))]['count']), inline=field.inline)
+                    else:
+                        embed.set_field_at(embed.fields.index(field), name=field.name, value=bar(), inline=field.inline)
+                new_description = embed.description.replace(f"**Total Votes:** {poll_data['total_votes']}", f"**Total Votes:** {poll_data_copy['total_votes']}")
+                embed.description = new_description
+                
+                embed_response = discord.Embed(description=f"You have successfully changed your vote from {embed.fields[int(option)].name} to {embed.fields[int(current_option)].name}", color=discord.Color.green())
+                
+                await interaction.message.edit(embed=embed)
+                await interaction.followup.send(embed=embed_response, ephemeral=True)
+                await interaction.client.poll.update(poll_data_copy)
+                interaction.client.polls[poll_data_copy['_id']] = poll_data_copy
+                changed_option = True
+                break
+
+        if changed_option == False:
+            poll_data_copy['options'][str(current_option)]['users'].append(user.id)
+            poll_data_copy['options'][str(current_option)]['count'] += 1
+            poll_data_copy['total_votes'] += 1
+
+            for field in embed.fields:
+                if poll_data_copy['options'][str(embed.fields.index(field))]['count'] > 0:
+                    embed.set_field_at(embed.fields.index(field), name=field.name, value=update_bar(poll_data_copy['total_votes'], poll_data_copy['options'][str(embed.fields.index(field))]['count']), inline=field.inline)
+                else:
+                    embed.set_field_at(embed.fields.index(field), name=field.name, value=bar(), inline=field.inline)
+                    
+            new_description = embed.description.replace(f"**Total Votes:** {poll_data['total_votes']}", f"**Total Votes:** {poll_data_copy['total_votes']}")
+            embed.description = new_description
+
+            embed_response = discord.Embed(description=f"You have successfully voted for {embed.fields[int(current_option)].name}", color=discord.Color.green())
+            
+            await interaction.message.edit(embed=embed)
+            await interaction.client.poll.update(poll_data_copy)
+            interaction.client.polls[poll_data_copy['_id']] = poll_data_copy
+            await interaction.followup.send(embed=embed_response, ephemeral=True)
+            
 
 class PollButton(discord.ui.Button):
     async def callback(self, interaction: Interaction):
@@ -70,61 +149,28 @@ class PollButton(discord.ui.Button):
             await interaction.followup.send("This poll has expired./invalid poll")
             return
         
-        data = interaction.client.polls[interaction.message.id]
-        index = default_emoji.index(self.emoji.name)
-
-        if str(index) not in data['options']:
-            await interaction.followup.send("This option does not exist.")
+        poll_data = interaction.client.polls[interaction.message.id]
+        if not poll_data:
+            poll_data = await interaction.client.poll.find(interaction.message.id)
+            if not poll_data:
+                await interaction.response.send_message("This poll has expired./invalid poll", ephemeral=True)
+        
+        print(interaction.data)
+        poll_option = interaction.data['custom_id'].split(":")[-1]
+        if poll_option not in poll_data['options'].keys():
+            await interaction.followup.send("This poll has expired./invalid poll")
             return
+        print("got option data")
 
-        #check if user has already voted
-        if interaction.user.id in data['options'][str(index)]['users']:
-            #remove user vote
-            data['options'][str(index)]['users'].remove(interaction.user.id)
-            data['options'][str(index)]['votes'] -= 1
-            data['total_votes'] -= 1
-            await interaction.followup.send("Your vote has been removed.", ephemeral=True)
-        
-        #check if user has voted for another option
-        if data['one_vote'] == True:
-            for i in data['options']:
-                if interaction.user.id in data['options'][i]['users']:
-                    data['options'][i]['users'].remove(interaction.user.id)
-                    data['options'][i]['votes'] -= 1
-                    data['total_votes'] -= 1
-                    break
+        await update_poll(interaction, poll_data, poll_option, interaction.user)
 
-        
-        option = data['options'][str(index)]
-        option['users'].append(interaction.user.id)
-        option['votes'] += 1
-        data['total_votes'] += 1
-
-        embed = interaction.message.embeds[0]
-        #update embed with new bar
-        k = 0
-        for i in embed.fields:
-            embed.set_field_at(k, name=i.name, value=update_bar(data['total_votes'], data['options'][str(k)]['votes']))
-            k += 1
-        #find • {number} votes and update
-        description = embed.description.split("\n")
-        for i in range(len(description)):
-            if "votes" in description[i]:
-                description[i] = f"• {data['total_votes']} votes"
-                break
-        embed.description = "\n".join(description)
-
-        await interaction.message.edit(embed=embed)
-
-        await interaction.followup.send(f"You have successfully voted for {option['name']}.")
-        await interaction.client.poll.update(data)    
 
 class PollView(discord.ui.View):
-    def __init__(self, embed: discord.Embed=None):
+    def __init__(self, poll_data: dict):
+        print("loading poll view")
         super().__init__(timeout=None)
         k = 0
-        for i in embed.fields:
-            name = i.name.split(" ")
-            btn = PollButton(emoji=default_emoji[k], custom_id=f"POLL:BUTTON:{k}", style=discord.ButtonStyle.blurple)
+        for i in poll_data['options'].keys():
+            self.add_item(PollButton(emoji=default_emoji[k], custom_id=f"POLL:BUTTON:{k}", style=discord.ButtonStyle.blurple))
             k += 1
-            self.add_item(btn)
+
