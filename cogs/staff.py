@@ -52,7 +52,7 @@ class Staff(commands.GroupCog, name="staff", description="Staff management comma
                     role = discord.utils.get(main_guild.roles, id=staff_list[post])
                     await staff_member.add_roles(role, reason="Staff leave ended")
                 await staff_member.remove_roles(leave_role, reason="Staff leave ended")
-
+                await self.bot.staff.unset(staff['_id'], 'leave')
                 try:
                     await staff_member.send("Your Staff leave in **The Gambler's Kingdom** has ended, if you want to extend your leave, please contact a Head Administator.")
                 except discord.HTTPException:
