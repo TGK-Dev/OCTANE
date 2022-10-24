@@ -65,12 +65,15 @@ class Poll(commands.GroupCog, name="poll", description="poll commands"):
     def __init__(self, bot):
         self.bot = bot
         self.poll_check = self.check_polls.start()
+
     
     @commands.Cog.listener()
     async def on_ready(self):
         for poll in await self.bot.poll.get_all():
             self.bot.polls[poll['_id']] = poll
+            self.bot.add_view(PollView(poll))
         print(f"{self.__class__.__name__} Cog has been loaded.")
+        await self.bot.tree.sync(guild=discord.Object(999551299286732871))
     
     def cog_unload(self):
         self.poll_check.cancel()
@@ -79,7 +82,6 @@ class Poll(commands.GroupCog, name="poll", description="poll commands"):
     async def check_polls(self):
         current_polls = deepcopy(self.bot.polls)
         for item, value in current_polls.items():
-            print(datetime.datetime.now() > value['end_time'])
             if datetime.datetime.now() > value['end_time']:
                 self.bot.dispatch('poll_end', value)
     
@@ -89,7 +91,6 @@ class Poll(commands.GroupCog, name="poll", description="poll commands"):
 
     @commands.Cog.listener()
     async def on_poll_end(self, poll):
-        print("event Triggered")
         channel = self.bot.get_channel(poll['channel'])
         try:
             msg = await channel.fetch_message(poll['_id'])
@@ -97,10 +98,16 @@ class Poll(commands.GroupCog, name="poll", description="poll commands"):
             self.bot.poll.delete(poll['_id'])
         
         view = discord.ui.View.from_message(msg)
-        for buttin in view.children:
-            buttin.disabled = True
+        for button in view.children:
+            button.disabled = True
+            button.style = discord.ButtonStyle.green
+
         embed = msg.embeds[0]
-        embed.set_footer(text=f"Poll Has Ended • {embed.footer.text}")
+        for field in embed.fields:
+            index = embed.fields.index(field)
+            embed.set_field_at(index=index, name=f"{field.name} | {poll['options'][str(index)]['count']} ({poll['options'][str(index)]['count']/poll['total_votes']*100:.2f}%)", value=field.value, inline=field.inline)
+        
+        embed.set_footer(text="Poll has ended automatically.")
         await msg.edit(view=view, embed=embed)                
 
         try:
@@ -111,11 +118,11 @@ class Poll(commands.GroupCog, name="poll", description="poll commands"):
         await self.bot.poll.delete(poll['_id'])
     
     @app_commands.command(name='create', description="Create a poll")
-    @app_commands.describe(title="title of the poll", options="options of the poll spearated by !", duration="duration of the poll ex: 1h30m", thread="Create poll with thread", one_vote="only one vote per user")
+    @app_commands.describe(title="title of the poll", options="options of the poll spearated by !", duration="duration of the poll ex: 1h30m", thread="Create poll with thread")
     @app_commands.rename(one_vote="single_vote")
     @app_commands.default_permissions(manage_messages=True)
-    async def create(self, interaction: Interaction, title: str, options: str,duration: str, thread: bool=None, one_vote: bool=False):
-        await make_poll(interaction, title, options, duration, thread, one_vote)
+    async def create(self, interaction: Interaction, title: str, options: str,duration: str, thread: bool=None):
+        await make_poll(interaction, title, options, duration, thread)
 
 
 class Payout(commands.GroupCog, name="payout"):
@@ -127,6 +134,7 @@ class Payout(commands.GroupCog, name="payout"):
     async def on_ready(self):
         self.bot.add_view(Payout_Buttton())
         print(f"{self.__class__.__name__} Cog has been loaded.")
+        
     
     @app_commands.command(name="set", description="Set payout for a event")
     @app_commands.describe(event="event name", message_link="event message link", winner="winner of the event", price="price of the event")
@@ -170,6 +178,6 @@ class Payout(commands.GroupCog, name="payout"):
         await self.bot.payout.insert(data)
 
 async def setup(bot):
-    await bot.add_cog(Payout(bot), guild=discord.Object(785839283847954433))
-    await bot.add_cog(Poll(bot), guild=discord.Object(785839283847954433))
-    await bot.add_cog(Dump(bot), guild=discord.Object(785839283847954433))
+    # await bot.add_cog(Payout(bot), guild=discord.Object(785839283847954433))
+    await bot.add_cog(Poll(bot), guild=discord.Object(999551299286732871))
+    # await bot.add_cog(Dump(bot), guild=discord.Object(785839283847954433))
