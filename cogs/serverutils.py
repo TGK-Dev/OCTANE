@@ -119,7 +119,6 @@ class Poll(commands.GroupCog, name="poll", description="poll commands"):
     
     @app_commands.command(name='create', description="Create a poll")
     @app_commands.describe(title="title of the poll", options="options of the poll spearated by !", duration="duration of the poll ex: 1h30m", thread="Create poll with thread")
-    @app_commands.rename(one_vote="single_vote")
     @app_commands.default_permissions(manage_messages=True)
     async def create(self, interaction: Interaction, title: str, options: str,duration: str, thread: bool=None):
         await make_poll(interaction, title, options, duration, thread)
