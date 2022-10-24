@@ -48,6 +48,7 @@ async def make_poll(interaction: discord.Interaction, title:str, options:str, du
     embed.description += f"**Poll Ends:** <t:{poll_duration_TIMESTAMP}:R>\n"
     embed.description += f"**Total Votes:** 0"
     embed.set_footer(text=f"Poll Started by {interaction.user}")
+    embed.color = discord.Color.random()
     embed.timestamp = datetime.datetime.now()
 
     await interaction.followup.send(embed=embed , view=PollView(poll_data))
