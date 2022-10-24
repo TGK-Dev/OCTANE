@@ -6,6 +6,6 @@ cogs/moderation.txt
 .env
 .venv
 cogs/test.py
-test.py
+test_bot.py
 discord.log
 .vscode
