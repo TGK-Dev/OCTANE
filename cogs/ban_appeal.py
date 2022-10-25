@@ -14,6 +14,7 @@ class BanAppeal(commands.Cog, name="Ban Appeal", description="Easy way to add Ba
 
     @app_commands.command(name='check', description='check reason of ban from main server')
     @app_commands.checks.has_any_role(988764089713066005)
+    @app_commands.guilds(988761284956799038)
     async def check(self, interaction: discord.Interaction, user: discord.Member):
         user = await interaction.client.fetch_user(user.id)
         main_guild = interaction.client.get_guild(785839283847954433)
@@ -43,6 +44,7 @@ class BanAppeal(commands.Cog, name="Ban Appeal", description="Easy way to add Ba
 
     @app_commands.command(name="deny", description="Deny a ban appeal")
     @app_commands.guild_only()
+    @app_commands.guilds(988761284956799038)
     @app_commands.checks.has_any_role(988764089713066005)
     async def deny(self, interaction: Interaction, user: discord.Member, reason: str=None):
         main_guild = await self.bot.fetch_guild(785839283847954433)
