@@ -144,3 +144,38 @@ class Payout_Buttton(discord.ui.View):
             embed = discord.Embed(title="Error", description="You don't have permission to use this button", color=discord.Color.red())
             await interaction.response.send_message(embed=embed, ephemeral=True)
             return False
+
+class ButtonOnCooldown(commands.CommandError):
+  def __init__(self, retry_after: float):
+    self.retry_after = retry_after
+
+def key(interaction: discord.Interaction):
+  return interaction.user
+class level_check(discord.ui.View):
+    def __init__(self, bot):
+        self.bot = bot
+        super().__init__(timeout=None)
+        self.cd = commands.CooldownMapping.from_cooldown(1.0, 300, key)    
+    
+    async def interaction_check(self, interaction: discord.Interaction):
+        retry_after = self.cd.update_rate_limit(interaction)
+        if retry_after:
+            raise ButtonOnCooldown(retry_after)
+        
+        return True
+    async def on_error(self, interaction: discord.Interaction, error: Exception, item: discord.ui.Item):
+        if isinstance(error, ButtonOnCooldown):
+            seconds = int(error.retry_after)
+            unit = 'second' if seconds == 1 else 'seconds'
+            await interaction.response.send_message(f"You're on cooldown for {seconds} {unit}!", ephemeral=True)
+        else:
+            await super().on_error(interaction, error, item)
+
+    @discord.ui.button(label='Check Level', style=discord.ButtonStyle.green, custom_id="LEVEL:CHECK")
+    async def count(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_message("Getting data...", ephemeral=True)
+        data = await self.bot.Amari_api.fetch_user(interaction.guild.id, interaction.user.id)
+        embed = discord.Embed(description=f"**Name:** {interaction.user.mention}\n**Level:** {data.level}\n**XP:** {data.exp}\n**Weeklyexp:** {data.weeklyexp}", color=interaction.user.color)
+        embed.timestamp = discord.utils.utcnow()
+        embed.set_footer(text=f"{interaction.user.name}#{interaction.user.discriminator}", icon_url=self.bot.user.avatar.url)
+        await interaction.edit_original_response(content=None, embed=embed)

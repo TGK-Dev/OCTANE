@@ -9,6 +9,7 @@ from utils.converter import TimeConverter
 from typing import Union
 from io import BytesIO
 import asyncio
+import aiohttp
 
 class Perks(commands.GroupCog):
     def __init__(self, bot):
@@ -143,7 +144,15 @@ class Custom(commands.GroupCog):
             return
 
         await interaction.response.send_message("Starting the process")
-
+        if icon:
+            if not icon.filename.endswith(('.png', '.jpg')):
+                await interaction.edit_original_response(content="Please provide a valid image file type (png, jpg)")
+                return
+            else:
+                url = icon.url
+                async with aiohttp.ClientSession() as session:
+                    async with session.get(url) as response:
+                        icon = await response.read()
         role = await interaction.guild.create_role(name=name, color=discord.Color(int(color, 16)), display_icon=icon)
         await role.edit(position=int(config['role_position']))
         data['role_perks']['role_id'] = role.id
@@ -210,10 +219,17 @@ class Custom(commands.GroupCog):
         if color:
             await role.edit(color=discord.Color(int(color, 16)))
         if icon:
-            await interaction.edit_original_response(content="Role icon is not supported yet")
-            await asyncio.sleep(2)
+            if not icon.filename.endswith(('.png', '.jpg')):
+                await interaction.edit_original_response(content="Please provide a valid image file type (png, jpg)")
+                return
+            else:
+                url = icon.url
+                async with aiohttp.ClientSession() as session:
+                    async with session.get(url) as response:
+                        role_icon = await response.read()
+                await role.edit(display_icon=role_icon)                    
 
-        embed = discord.Embed(description="<:dynosuccess:1000349098240647188> | Custom Role has been edited", color=discord.Color.green())
+        embed = discord.Embed(description="<:dynosuccess:1000349098240647188> | Custom Role has been edited successfully", color=discord.Color.green())
         await interaction.edit_original_response(embed=embed, content=None)
     
     @channel.command(name="edit", description="Edit a custom channel")
@@ -314,8 +330,7 @@ class Custom(commands.GroupCog):
         embed.add_field(name="Role", value=role.mention)
         embed.add_field(name="Role ID", value=role.id)
         embed.add_field(name="Friends", value=f"Friends Limit: {len(data['role_perks']['friends'])}/{data['role_perks']['friend_limit']}"+"\n"+"\n".join([f"<@{friend}>" for friend in data['role_perks']['friends']]))
-        await interaction.response.send_message(embed=embed)
-
+        await interaction.response.send_message(embed=embed)    
     
     @channel.command(name="addfriend", description="add your custom channel to a friend")
     @app_commands.describe(member="friend to add channel to")
