@@ -3,16 +3,22 @@ from discord.ext import commands
 from discord import app_commands
 from typing import Literal
 from utils.checks import Commands_Checks
+from ui.buttons import level_check
 import time
 import datetime
 import asyncio
+import aiohttp
+from amari import AmariClient
 class Basic(commands.Cog, name="Basic", description="General Basic Commands"):
     def __init__(self, bot):
         self.bot = bot
+        self.session = aiohttp.ClientSession()
+        self.bot.Amari_api = AmariClient(bot.Amari_token)
         self.bot.presence_chache = {}
     
     @commands.Cog.listener()
-    async def on_ready(self):        
+    async def on_ready(self):
+        self.bot.add_view(level_check(self.bot)) 
         print(f"{self.__class__.__name__} Cog has been loaded")
     
     @commands.Cog.listener()
@@ -133,6 +139,13 @@ class Basic(commands.Cog, name="Basic", description="General Basic Commands"):
         view = discord.ui.View()
         view.add_item(discord.ui.Button(label=f'Top.gg', url="https://top.gg/servers/785839283847954433/vote"))
         await ctx.send(embed=embed, view=view)
+
+    @app_commands.command(name="level")
+    @app_commands.default_permissions(manage_messages=True)
+    @app_commands.guilds(785839283847954433, 811037093715116072)
+    async def level(self, interaction: discord.Interaction):
+        embed = discord.Embed(description="Click Below Button To Check Level", color=0xADD8E6)
+        await interaction.response.send_message(embed=embed, view=level_check(self.bot))
 
 async def setup(bot):
     await bot.add_cog(Basic(bot))
