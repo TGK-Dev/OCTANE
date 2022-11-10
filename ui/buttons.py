@@ -117,12 +117,12 @@ class Payout_Buttton(discord.ui.View):
             embed = interaction.message.embeds[0]
             embed.remove_field(len(embed.fields)-1)
             embed.add_field(name="Payout Status", value="**<:nat_reply_cont:1011501118163013634> Done**")
-            embed.title = "Payout Done"
-            embed.set_footer(text="Payout Done At")
-            embed.add_field(name="Payout By", value=f"**<:nat_reply_cont:1011501118163013634> {interaction.user.mention}**")
+            embed.title = "Successfull Payment!"
+            embed.set_footer(text="Completed At")
+            embed.add_field(name="Santioned By", value=f"**<:nat_reply_cont:1011501118163013634> {interaction.user.mention}**")
             embed.timestamp = datetime.datetime.now()
             button.disabled = True
-            button.label = "Payout Done"
+            button.label = "Paid Successfully!"
 
             await interaction.message.edit(embed=embed, content="Payment Done", view=self)
             await interaction.edit_original_response(content="Payout Marked as done successfully")
