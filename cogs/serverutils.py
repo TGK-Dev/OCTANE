@@ -171,7 +171,7 @@ class Payout(commands.GroupCog, name="payout"):
         embed.timestamp = datetime.datetime.now()
         
         payout_channel = self.bot.get_channel(1031982594826457098)
-        msg = await payout_channel.send(embed=embed, content=f"{winner.mention}, you will be paid out in the next 24hrs! \n> Feel free to raise a ticket from <#785901543349551104> if not paid within the deadline.", view=Payout_Buttton())
+        msg = await payout_channel.send(embed=embed, content=f"{winner.mention}, you will be paid out in the next `24hrs`! \n> If not paid within the deadline claim from <#785901543349551104>.", view=Payout_Buttton())
         data['log_channel_id'] = msg.id
         await self.bot.payout.insert(data)
 

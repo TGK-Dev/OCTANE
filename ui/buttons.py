@@ -124,7 +124,7 @@ class Payout_Buttton(discord.ui.View):
             button.disabled = True
             button.label = "Paid Successfully!"
 
-            await interaction.message.edit(embed=embed, content="Payment Done", view=self)
+            await interaction.message.edit(embed=embed, view=self)
             await interaction.edit_original_response(content="Payout Marked as done successfully")
             await interaction.client.payout.delete(data["_id"])
     
