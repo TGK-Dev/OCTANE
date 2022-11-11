@@ -30,7 +30,7 @@ class AFK(commands.Cog, name="AFK", description="Member Afk Module"):
             for user in message.mentions:
                 if user.id in self.bot.current_afk.keys():
                     afk = self.bot.current_afk[user.id]
-                    await message.reply(f"{user.mention} is AFK Since <t:{afk['time']}:R>\nReason: {afk['message']}", delete_after=10, allowed_mentions=discord.AllowedMentions(users=True, roles=False, everyone=False))
+                    await message.reply(f"{user.mention} is AFK Since <t:{afk['time']}:R>\nReason: {afk['message']}", delete_after=10, allowed_mentions=discord.AllowedMentions(users=False, roles=False, everyone=False))
         
         if message.interaction != None:
             interaction = message.interaction
