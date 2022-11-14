@@ -146,10 +146,13 @@ async def on_ready():
 
 @bot.event
 async def on_message(message):
+
+    if message.author.id == 646937666251915264 and message.content != None and "server is currenty" in message.content:
+        await message.reply(f"> <@&1034072149247397938> for up!")  
+
     if message.author.bot:
         return
-    
-    
+
     if message.author.id in bot.blacklist_users:
         return
     
