@@ -136,10 +136,8 @@ class Payout_Buttton(discord.ui.View):
     async def on_error(self, interaction: Interaction, error: Exception, item: discord.ui.Item):
         try:
             await interaction.response.send_message(f"Error: {error}", ephemeral=True)
-        except discord.InteractionResponded:
-            await interaction.edit_edit_original_response(f"Error: {error}", ephemeral=True)
         except:
-            pass
+            await interaction.edit_original_response(content=f"Error: {error}")
 
     async def interaction_check(self, interaction: Interaction):
         dank_manager_role = discord.utils.get(interaction.guild.roles, id=989947301126631504)

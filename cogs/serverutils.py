@@ -146,8 +146,9 @@ class Payout(commands.GroupCog, name="payout"):
             winner = message.mentions[0]
             price = "10M Dmc"
             event = "daily Rumble"
+            message_link = message_link.split("/")
 
-            data = {'_id': message.id,'event': event,'winner': winner.id,'price': price,'message_link': message.jump_url,'set_by': "AutoMatic Payout System", 'log_channel_id': None}
+            data = {'_id': message.id,'event': event,'winner': winner.id,'price': price,'message_link': message_link,'set_by': "AutoMatic Payout System", 'log_channel_id': None}
             embed = discord.Embed(title="Payout Queued")
             embed.add_field(name="Event", value=f"**<:nat_reply_cont:1011501118163013634> {event}**")
             embed.add_field(name="Winner", value=f"**<:nat_reply_cont:1011501118163013634> {winner.mention}**")
