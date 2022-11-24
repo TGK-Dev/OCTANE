@@ -146,6 +146,7 @@ class Payout(commands.GroupCog, name="payout"):
             winner = message.mentions[0]
             price = "10M Dmc"
             event = "daily Rumble"
+            message_link = message.jump_url
             message_link = message_link.split("/")
 
             data = {'_id': message.id,'event': event,'winner': winner.id,'price': price,'message_link': message_link,'set_by': "AutoMatic Payout System", 'log_channel_id': None}
