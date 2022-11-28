@@ -188,7 +188,7 @@ class Panel(commands.GroupCog, name="panel", description="Manage Ticket system p
             msg = await channel.send(embed=embed, view=view)
             data['last_plane_messaeg'] = msg.id
             await self.bot.ticket_system.update(data)
-            await interaction.edit_original_response(content="Successfully sent all panels to support channel")
+            await interaction.edit_original_response(content=f"Successfully sent panel to {channel.mention}!")
 
         elif data['last_plane_messaeg']:
 
@@ -204,7 +204,7 @@ class Panel(commands.GroupCog, name="panel", description="Manage Ticket system p
                         embed.add_field(name=key, value=value['description'], inline=False)
                     view = Ticket_Control(data['panels'])
                     await message.edit(embed=embed, view=view)
-                    await interaction.edit_original_response(content="Successfully Edited all panels to support channel")
+                    await interaction.edit_original_response(content=f"Successfully edited panel in {channel.mention}!")
             except:
                 await interaction.edit_original_response(content = "Existing panel does not exist.")
                 embed = discord.Embed(color=0x9e3bff, description = " Choose which type of support you need from the panel buttons below the embed.")
@@ -217,7 +217,7 @@ class Panel(commands.GroupCog, name="panel", description="Manage Ticket system p
                 msg = await channel.send(embed=embed, view=view)
                 data['last_plane_messaeg'] = msg.id
                 await self.bot.ticket_system.update(data)
-                await interaction.edit_original_response(content="Successfully sent all panels to support channel")
+                await interaction.edit_original_response(content=f"Successfully edited panel in {channel.mention}!")
     
     @app_commands.command(name="create", description="create a ticket panel")
     @app_commands.default_permissions(administrator=True)

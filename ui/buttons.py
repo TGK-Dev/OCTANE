@@ -130,7 +130,7 @@ class Payout_Buttton(discord.ui.View):
             await message.add_reaction("<:paid:1035061256073248849>")
 
             await interaction.message.edit(embed=embed, content="", view=self)
-            await interaction.edit_original_response(content="Payout Marked as done successfully")
+            await interaction.edit_original_response(content=f"Payout Marked as done successfully for {message.jump_url}")
             await interaction.client.payout.delete(data["_id"])
     
     async def on_error(self, interaction: Interaction, error: Exception, item: discord.ui.Item):
