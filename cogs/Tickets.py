@@ -206,7 +206,7 @@ class Panel(commands.GroupCog, name="panel", description="Manage Ticket system p
                     await message.edit(embed=embed, view=view)
                     await interaction.edit_original_response(content="Successfully Edited all panels to support channel")
             except:
-                await interaction.response.send_message("Existing panel does not exist.")
+                await interaction.response.edit_original_response("Existing panel does not exist.")
                 embed = discord.Embed(color=0x9e3bff, description = " Choose which type of support you need from the panel buttons below the embed.")
                 embed.set_author(name=f"{interaction.guild.name} Support Panel", icon_url=str(interaction.guild.icon))
                 for key, value in data['panels'].items():
