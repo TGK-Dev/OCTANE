@@ -179,7 +179,7 @@ class Panel(commands.GroupCog, name="panel", description="Manage Ticket system p
         if data['last_plane_messaeg'] is None:
             await interaction.response.send_message("Sending all panels to support channel")
             embed = discord.Embed(color=0x9e3bff, description = " Choose which type of support you need from the panel buttons below the embed.")
-            embed.set_author(name=f"{interaction.guild.name}'s Support Panel", icon_url=str(interaction.guild.icon))
+            embed.set_author(name=f"{interaction.guild.name} Support Panel", icon_url=str(interaction.guild.icon))
             for key, value in data['panels'].items():
                 embed.add_field(name=key, value=value['description'], inline=False)
         
@@ -208,7 +208,7 @@ class Panel(commands.GroupCog, name="panel", description="Manage Ticket system p
             except:
                 await interaction.response.send_message("Existing panel does not exist.")
                 embed = discord.Embed(color=0x9e3bff, description = " Choose which type of support you need from the panel buttons below the embed.")
-                embed.set_author(name=f"{interaction.guild.name}'s Support Panel", icon_url=str(interaction.guild.icon))
+                embed.set_author(name=f"{interaction.guild.name} Support Panel", icon_url=str(interaction.guild.icon))
                 for key, value in data['panels'].items():
                     embed.add_field(name=key, value=value['description'], inline=False)
             
