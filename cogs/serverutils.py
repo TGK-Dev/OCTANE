@@ -144,16 +144,16 @@ class Payout(commands.GroupCog, name="payout"):
         embed = message.embeds[0]
         if embed.title == "<:Crwn2:872850260756664350> **__WINNER!__**" and len(message.mentions) == 1:
             winner = message.mentions[0]
-            price = "10M Dmc"
+            prize = "10M Dmc"
             event = "daily Rumble"
             message_link = message.jump_url
             message_link = message_link.split("/")
 
-            data = {'_id': message.id,'event': event,'winner': winner.id,'price': price,'message_link': message_link,'set_by': "AutoMatic Payout System", 'log_channel_id': None}
+            data = {'_id': message.id,'event': event,'winner': winner.id,'prize': prize,'message_link': message_link,'set_by': "AutoMatic Payout System", 'log_channel_id': None}
             embed = discord.Embed(title="Payout Queued")
             embed.add_field(name="Event", value=f"**<:nat_reply_cont:1011501118163013634> {event}**")
             embed.add_field(name="Winner", value=f"**<:nat_reply_cont:1011501118163013634> {winner.mention}**")
-            embed.add_field(name="Price", value=f"**<:nat_reply_cont:1011501118163013634> {price}**")
+            embed.add_field(name="Prize", value=f"**<:nat_reply_cont:1011501118163013634> {prize}**")
             embed.add_field(name="Channel", value=f"**<:nat_reply_cont:1011501118163013634> {message.channel.mention}**")
             embed.add_field(name="Message Link", value=f"**<:nat_reply_cont:1011501118163013634> [Click Here]({message.jump_url})**")
             embed.add_field(name="Set By", value=f"**<:nat_reply_cont:1011501118163013634> AutoMatic Payout System**")
@@ -164,12 +164,11 @@ class Payout(commands.GroupCog, name="payout"):
             msg = await payout_channel.send(embed=embed, content=f"{winner.mention}, you will be paid out in the next `24hrs`! \n> If not paid within the deadline claim from <#785901543349551104>.", view=Payout_Buttton())
             data['log_channel_id'] = msg.id
             await self.bot.payout.insert(data)
-            await message.channel.send(f"{winner.mention}, you price has been queued for payout. Please wait for the payout to be processed. \n> If not paid within the deadline claim from <#785901543349551104>.")            
-        
+            await message.channel.send(f"{winner.mention}, you prize has been queued for payout. Please wait for the payout to be processed. \n> If not paid within the deadline claim from <#785901543349551104>.")            
     
     @app_commands.command(name="set", description="Set payout for a event")
-    @app_commands.describe(event="event name", message_link="event message link", winner="winner of the event", price="price of the event")
-    async def set(self, interaction: Interaction, event: str, message_link: str, winner: discord.Member, price: str):
+    @app_commands.describe(event="event name", message_link="event message link", winner="winner of the event", prize="prize of the event")
+    async def set(self, interaction: Interaction, event: str, message_link: str, winner: discord.Member, prize: str):
         await interaction.response.send_message("Setting payout...", ephemeral=True)
 
         message_link = message_link.split("/")
@@ -186,14 +185,14 @@ class Payout(commands.GroupCog, name="payout"):
         
         data = await self.bot.payout.find(message.id)
         if data: return await interaction.edit_original_response(content="Payout already set for this event")
-        data = {'_id': message.id,'event': event,'winner': winner.id,'price': price,'message_link': message_link,'set_by': interaction.user.id, 'log_channel_id': None}
+        data = {'_id': message.id,'event': event,'winner': winner.id,'prize': prize,'message_link': message_link,'set_by': interaction.user.id, 'log_channel_id': None}
 
         await interaction.edit_original_response(content="Payout added to queue successfully")
 
         embed = discord.Embed(title="Payout Queued")
         embed.add_field(name="Event", value=f"**<:nat_reply_cont:1011501118163013634> {event}**")
         embed.add_field(name="Winner", value=f"**<:nat_reply_cont:1011501118163013634> {winner.mention}**")
-        embed.add_field(name="Price", value=f"**<:nat_reply_cont:1011501118163013634> {price}**")
+        embed.add_field(name="prize", value=f"**<:nat_reply_cont:1011501118163013634> {prize}**")
         embed.add_field(name="Channel", value=f"**<:nat_reply_cont:1011501118163013634> {message.channel.mention}**")
         embed.add_field(name="Message Link", value=f"**<:nat_reply_cont:1011501118163013634> [Click Here]({message.jump_url})**")
         embed.add_field(name="Set By", value=f"**<:nat_reply_cont:1011501118163013634> {interaction.user.mention}**")
