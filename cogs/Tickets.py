@@ -178,7 +178,7 @@ class Panel(commands.GroupCog, name="panel", description="Manage Ticket system p
 
         if data['last_plane_messaeg'] is None:
             await interaction.response.send_message("Sending all panels to support channel")
-            embed = discord.Embed(title="Ticket System Panel", color=discord.Color.random())
+            embed = discord.Embed(title="Ticket System Panel", color=0x9e3bff)
             for key, value in data['panels'].items():
                 embed.add_field(name=key, value=value['description'], inline=False)
         
