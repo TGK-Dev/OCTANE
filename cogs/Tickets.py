@@ -176,7 +176,7 @@ class Panel(commands.GroupCog, name="panel", description="Manage Ticket system p
             await interaction.response.send_message("Please add panels using /ticket panel-create and /ticket panel-edit")
             return
 
-        if data['last_plane_messaeg'] is None:
+        if data['last_plane_messaeg']:
             await interaction.response.send_message("Sending all panels to support channel")
             embed = discord.Embed(title="Ticket System Panel", color=0x9e3bff)
             for key, value in data['panels'].items():
@@ -189,19 +189,19 @@ class Panel(commands.GroupCog, name="panel", description="Manage Ticket system p
             await self.bot.ticket_system.update(data)
             await interaction.edit_original_response(content="Successfully sent all panels to support channel")
 
-        elif data['last_plane_messaeg']:
+        # elif data['last_plane_messaeg']:
 
-            await interaction.response.send_message("Found Existing Panel Message starting editing")
-            channel = interaction.guild.get_channel(data['channel'])
-            message = await channel.fetch_message(data['last_plane_messaeg'])
-            if message:
-                embed = message.embeds[0]
-                embed.clear_fields()
-                for key, value in data['panels'].items():
-                    embed.add_field(name=key, value=value['description'], inline=False)
-                view = Ticket_Control(data['panels'])
-                await message.edit(embed=embed, view=view)
-                await interaction.edit_original_response(content="Successfully Edited all panels to support channel")
+        #     await interaction.response.send_message("Found Existing Panel Message starting editing")
+        #     channel = interaction.guild.get_channel(data['channel'])
+        #     message = await channel.fetch_message(data['last_plane_messaeg'])
+        #     if message:
+        #         embed = message.embeds[0]
+        #         embed.clear_fields()
+        #         for key, value in data['panels'].items():
+        #             embed.add_field(name=key, value=value['description'], inline=False)
+        #         view = Ticket_Control(data['panels'])
+        #         await message.edit(embed=embed, view=view)
+        #         await interaction.edit_original_response(content="Successfully Edited all panels to support channel")
     
     @app_commands.command(name="create", description="create a ticket panel")
     @app_commands.default_permissions(administrator=True)
