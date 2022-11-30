@@ -6,6 +6,7 @@ from discord import Interaction
 from discord import app_commands
 from utils.db import Document
 from utils.converter import TimeConverter
+from ui.confirm import Confirm
 from typing import Union
 from io import BytesIO
 import asyncio
@@ -321,7 +322,7 @@ class Custom(commands.GroupCog):
             return
         elif data['has_role_perks'] == False or None:
             await interaction.response.send_message("You don't have custom perks", ephemeral=True)
-            return
+            return 
         elif data['role_perks']['has_created'] == False or None or data['role_perks']['role_id'] == None:
             await interaction.response.send_message("You haven't created a role yet", ephemeral=True)
             return
@@ -330,7 +331,31 @@ class Custom(commands.GroupCog):
         embed.add_field(name="Role", value=role.mention)
         embed.add_field(name="Role ID", value=role.id)
         embed.add_field(name="Friends", value=f"Friends Limit: {len(data['role_perks']['friends'])}/{data['role_perks']['friend_limit']}"+"\n"+"\n".join([f"<@{friend}>" for friend in data['role_perks']['friends']]))
-        await interaction.response.send_message(embed=embed)    
+        await interaction.response.send_message(embed=embed)
+    
+    @role.command(name="friendfix", description="fix your roles from friends")
+    async def friendfix(self, interaction: Interaction):
+        data = await self.bot.perks.find(interaction.user.id)
+        if not data:
+            await interaction.response.send_message("You don't have custom perks", ephemeral=True)
+            return
+        embed = discord.Embed(description="Caution: This will overwrite your friends list with all the members that have your role. Are you sure you want to continue?", color=discord.Color.red())
+        view = Confirm(interaction.user, 60)
+        await interaction.response.send_message(embed=embed, view=view)
+        view.message  = await interaction.original_response()
+        await view.wait()
+        if view.value is None or False:
+            await view.interaction.response.edit_message(embed=discord.Embed(description="Command cancelled", color=discord.Color.red()), view=None)
+            return
+        elif view.value is True:
+            custom_role = interaction.guild.get_role(data['role_perks']['role_id'])
+            members = [member.id for member in custom_role.members if member.id != interaction.user.id]
+            data['role_perks']['friends'] = members
+            await self.bot.perks.update(data)
+            embed = discord.Embed(description="Bellissimo! Your friends list has been updated", color=discord.Color.green())
+            embed.add_field(name="Friends", value=f"Friends Limit: {len(data['role_perks']['friends'])}/{data['role_perks']['friend_limit']}"+"\n"+"\n".join([f"<@{friend}>" for friend in data['role_perks']['friends']]))
+            embed.add_field(name="New Friends", value="\n".join([f"<@{friend}>" for friend in members]))
+            await view.interaction.response.edit_message(embed=embed, view=None)
     
     @channel.command(name="addfriend", description="add your custom channel to a friend")
     @app_commands.describe(member="friend to add channel to")
