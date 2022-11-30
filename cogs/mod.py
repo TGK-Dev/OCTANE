@@ -1,23 +1,16 @@
 import datetime
 import discord
-import re
-from discord import Webhook
 import aiohttp
-import asyncio
 from humanfriendly import format_timespan
 from copy import deepcopy
 from dateutil.relativedelta import relativedelta
 from discord.ext import commands
 from discord.ext import tasks
 from discord import app_commands
-from typing import Union
-from utils.converter import TimeConverter
 from utils.functions import make_db_temp
-from utils.checks import Commands_Checks
 from utils.checks import Dynamic_cooldown
-import ui.models as models
+from utils.transformers import TimeConverter
 import ui.member_view 
-import math
 
 class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
     def __init__(self, bot):
@@ -33,6 +26,21 @@ class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
         self.bot.tree.remove_command(self.whoisapp_cmd, type=self.whois_context.type)
         self.mute_task.cancel()
         self.ban_session.close()
+    
+    async def send_modlog(self, target: discord.Member, moderator: discord.Member, reason: str, action: str, duration: str = None):
+        data = await self.bot.config.find(moderator.guild.id)
+        embed = discord.Embed(title=f"Case #{data['case']} | {action}", color=discord.Color.red(), description="")
+        embed.description += f"**Offender:** {target.mention} ({target.id})\n"
+        embed.description += f"**Moderator:** {moderator.mention} ({moderator.id})\n"
+        embed.description += f"**Reason:** {reason}\n"
+        if duration:
+            embed.description += f"**Duration:** {format_timespan(duration) if duration != 'Permanent' else duration}\n"
+        embed.set_footer(text=f"User ID: {target.id}")
+        data['case'] += 1
+        await self.bot.config.upsert(data)
+        log_channel = moderator.guild.get_channel(data['mod_log'])
+        if log_channel:
+            await log_channel.send(embed=embed)
 
     @tasks.loop(seconds=30)
     async def check_current_mutes(self):
@@ -101,18 +109,9 @@ class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
         try:
             await guild.unban(user, reason="Automatic ban expired")
         except discord.NotFound:
-            pass
-        data = await self.bot.config.find(guild.id)
-        embed = discord.Embed(title=f"🔨 UnBan | Case ID: {data['case']}",
-                                    description=f" **Offender**: {user.name} | {user.mention} \n**Reason**: Automatic punishment expire\n **Moderator**: {moderator.name} {moderator.mention}", color=0xE74C3C)
-        embed.timestamp = datetime.datetime.utcnow()
-        embed.set_footer(text=f"ID: {user.id}")
-        data["case"] += 1
-        await self.bot.config.upsert(data)
-
-        log_channel = self.bot.get_channel(int(data['mod_log']))
-        webhook = Webhook.from_url("https://canary.discord.com/api/webhooks/936297803016179733/nsRH8LRBTGoKtlncQz0ylB8dV8xMV_aYNy_4QoSIdUc4seR8YAQ8UxnwDE9lfeDig8w3", session=self.ban_session)
-        await webhook.send(embed=embed, username="👑┋OCT∆NΞ Logging", avatar_url=self.bot.user.avatar.url)
+            pass   
+        
+        await self.send_modlog(user, moderator, "Automatic ban expired", "Unban")
 
         await self.bot.bans.delete(user.id)
 
@@ -166,241 +165,148 @@ class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
 
     @app_commands.command(name="ban", description="Ban a user")
     @app_commands.guilds(785839283847954433)
-    @app_commands.describe(member="User to ban")
-    @app_commands.describe(reason="Reason for ban")
-    @app_commands.describe(time="Duration of ban")
-    @commands.check_any(Commands_Checks.can_use(), Commands_Checks.is_me())
-    async def ban(self, interaction: discord.Interaction, member: Union[discord.Member, discord.User], time: str=None, reason: str="No reason given"):
-        await interaction.response.defer()
-        if time:
-            time = await TimeConverter().convert(interaction, time)
+    @app_commands.describe(reason="Reason for ban", time="Duration of ban", member="User to ban")
+    @app_commands.default_permissions(ban_members=True)
+    @app_commands.transformers()
+    async def ban(self, interaction: discord.Interaction, member: discord.Member, reason: str , time: app_commands.Transform[str, TimeConverter]=None):
+        if member == interaction.user or member == interaction.guild.owner:
+            return await interaction.response.send_message("You can't ban this user", ephemeral=True)
+        if member.top_role >= interaction.guild.me.top_role:
+            return await interaction.response.send_message("I can't ban this user", ephemeral=True)
+        if member.top_role >= interaction.author.top_role:
+            return await interaction.response.send_message("You can't ban this user due to role hierarchy", ephemeral=True)
         
-        if member.id in [self.bot.owner_id, self.bot.user.id]:
-            return await interaction.followup.sen("You can't ban me and my owner")
-
-        if type(member) is discord.Member:
-            if member.top_role >= interaction.user.top_role:
-                return await interaction.followup.send("You can't ban someone with a higher/Equal role than you", ephemeral=True)
-        
-        if member.id == interaction.user.id:
-            return await interaction.followup.send("You can't ban yourself", ephemeral=True)
-        
-        data = {'_id': member.id, 'guildId': interaction.guild.id, 'BannedBy': interaction.user.id, 'BannedAt': datetime.datetime.utcnow(), 'BanDuration': time, 'Reason': reason}
-        guild_data = await self.bot.config.find(interaction.guild.id)
-        if not guild_data:
-            guild_data = make_db_temp(interaction.guild.id)
-            
-        embed = discord.Embed(title=f"🔨 Ban | Case ID: {guild_data['case']}",
-                                    description=f" **Offender**: {member.name} | {member.mention}", color=0xE74C3C)
-        if time !=None:
-            embed.description += f"\n**Duration**: {format_timespan(time)}"
-        else:
-            embed.description += f"\n**Duration**: Permanent"
-        embed.description += f"\n**Reason**: {reason}"
-        embed.description += f"\n**Moderator**: {interaction.user.name} | {interaction.user.mention}"
-        embed.timestamp = datetime.datetime.utcnow()
-        embed.set_footer(text=f"ID: {member.id}")
-        guild_data["case"] += 1
-        await self.bot.config.upsert(guild_data)
+        data = {'_id': member.id, 'guildId': interaction.guild.id, 'BannedBy': interaction.user.id, 'BannedAt': datetime.datetime.now(), 'BanDuration': time, 'Reason': reason}
 
         try:
-
-            await member.send(f"You have been banned from {interaction.guild.name}\nReason: {reason}")
+            await member.send(embed=discord.Embed(description=f"You have been banned from {interaction.guild.name} for {format_timespan(time)}\n**Reason**: {reason}", color=0x2f3136))
         except discord.HTTPException:
             pass
-        await interaction.guild.ban(member, reason=reason, delete_message_days=0)
-        log_channel = interaction.guild.get_channel(guild_data['mod_log'])
-        await log_channel.send(embed=embed)
-        response_embed = discord.Embed(description=f"<:allow:819194696874197004> | Banned {member.mention} has been banned for {reason}", color=0x32CD32)
-        await interaction.followup.send(embed=response_embed)
-        if time:
-            await self.bot.bans.insert(data)
-            self.bot.current_bans[member.id] = data
-        else:
-            pass
+            
+        await interaction.guild.ban(member, reason=reason)
+        await interaction.response.send_message(f"Banned {member.mention}", ephemeral=True)
+        await self.bot.bans.insert(data)
+        self.bot.current_bans[member.id] = data
+        await interaction.followup.send(embed=discord.Embed(description=f"{member.mention} has been banned for {format_timespan(time)}\n**Reason**: {reason}", color=0x2f3136), ephemeral=False)
+        await self.send_modlog(member, interaction.user, reason, "Ban", time if time else "Permanent")
+
     
     @app_commands.command(name="unban", description="Unban a user")
     @app_commands.guilds(785839283847954433)
-    @app_commands.describe(member="User to unban")
-    @commands.check_any(Commands_Checks.can_use(), Commands_Checks.is_me())
-    async def unban(self, interaction: discord.Interaction, member: discord.User, reason: str="No reason given"):
-        await interaction.response.defer()
-
+    @app_commands.describe(member="User to unban", reason="Reason for unban")
+    @app_commands.default_permissions(ban_members=True)
+    async def unban(self, interaction: discord.Interaction, member: discord.User, reason: str):
         try:
             await interaction.guild.unban(member, reason=reason)
         except discord.NotFound:
-            return await interaction.followup.send("That user is not banned")
-
-        data = await self.bot.config.find(interaction.guild.id)
-
-        if not data:
-            data = make_db_temp(interaction.guild.id)
-        embed = discord.Embed(title=f"🔨 UnBan | Case ID: {data['case']}",
-                                    description=f" **Offender**: {member.name} | {member.mention}\n**Reason**: {reason}\n **Moderator**: {interaction.user.name} {interaction.user.mention}", color=0xE74C3C)
-        embed.timestamp = datetime.datetime.utcnow()
-        embed.set_footer(text=f"ID: {member.id}")
-        data["case"] += 1
-        await self.bot.config.upsert(data)
-
-        log_channel = interaction.guild.get_channel(data['mod_log'])
-        await log_channel.send(embed=embed)
-        response_embed = discord.Embed(description=f"<:allow:819194696874197004> | Unbanned {member.mention} has been unbanned", color=0x32CD32)
-        await interaction.followup.send(embed=response_embed)
+            return await interaction.response.send_message("This user is not banned", ephemeral=True)
+        await interaction.response.send_message(f"Unbanned {member.mention}", ephemeral=True)
+        embed = discord.Embed(description=f"{member.mention} has been unbanned\n**Reason**: {reason}", color=0x2f3136)
+        await interaction.followup.send(embed=embed, ephemeral=False)
+        await self.send_modlog(member, interaction.user, reason, "Unban")
         await self.bot.bans.delete(member.id)
-
         try:
-            self.bot.current_bans.pop(member.id)
+            del self.bot.current_bans[member.id]
         except KeyError:
             pass
     
     @app_commands.command(name="kick", description="Kick a user")
     @app_commands.guilds(785839283847954433)
-    @app_commands.describe(member="User to kick")
-    @app_commands.describe(reason="Reason for kick")
-    @commands.check_any(Commands_Checks.can_use(), Commands_Checks.is_me())
-    async def kick(self, interaction: discord.Interaction, member: discord.Member, reason: str="No reason given"):
-        await interaction.response.defer()
-        if member.id in [self.bot.owner_id, self.bot.user.id]:
-            return await interaction.followup.sen("You can't kick me and my owner")
-        
-        if member.top_role >= interaction.user.top_role:
-            return await interaction.followup.send("You can't kick someone with a higher/Equal role than you", ephemeral=True)
-        
-        if member.id == interaction.user.id:
-            return await interaction.followup.send("You can't kick yourself", ephemeral=True)
-        
-        guild_data = await self.bot.config.find(interaction.guild.id)
-        if not guild_data:
-            guild_data = make_db_temp(interaction.guild.id)
-
-        await self.bot.config.increment(interaction.guild.id, 1, "case")
-
+    @app_commands.describe(member="User to kick", reason="Reason for kick")
+    @app_commands.default_permissions(kick_members=True, ban_members=True)
+    async def kick(self, interaction: discord.Interaction, member: discord.Member, reason: str):
+        if member == interaction.user or member == interaction.guild.owner:
+            return await interaction.response.send_message("You can't kick this user", ephemeral=True)
+        if member.top_role >= interaction.guild.me.top_role:
+            return await interaction.response.send_message("I can't kick this user", ephemeral=True)
+        if member.top_role >= interaction.author.top_role:
+            return await interaction.response.send_message("You can't kick this user due to role hierarchy", ephemeral=True)
         try:
-            await member.send(f"You have been kicked from {interaction.guild.name} for {reason}")
+            await member.send(embed=discord.Embed(description=f"You have been kicked from {interaction.guild.name}\n**Reason**: {reason}", color=0x2f3136))
         except discord.HTTPException:
             pass
-        await interaction.guild.kick(member, reason=reason)
-
-        log_channel = interaction.guild.get_channel(guild_data['mod_log'])
-
-        embed = discord.Embed(title=f"🔨 Kick | Case ID: {guild_data['case']}",
-                            description=f" **Offender**: {member.name} | {member.mention}\n**Reason**: {reason}\n **Moderator**: {interaction.user.name} {interaction.user.mention}", color=0xE74C3C)
-        embed.timestamp = datetime.datetime.utcnow()
-        embed.set_footer(text=f"ID: {member.id}")
-        await log_channel.send(embed=embed)
-        response_embed = discord.Embed(description=f"<:allow:819194696874197004> | Kicked {member.mention} has been kicked", color=0x32CD32)
-        await interaction.followup.send(embed=response_embed)
-    
-    @app_commands.command(name="massban", description="Massban a users")
-    @app_commands.guilds(785839283847954433)
-    @app_commands.checks.has_permissions(administrator=True)
-    @app_commands.describe(reason="Reason for ban")
-    async def massban(self, interaction: discord.Interaction, reason: str="No reason given"):
-        await interaction.response.send_modal(models.Mass_ban(self.bot, interaction, reason))
+        await member.kick(reason=reason)
+        await interaction.response.send_message(f"Kicked {member.mention}", ephemeral=True)
+        embed = discord.Embed(description=f"{member.mention} has been kicked\n**Reason**: {reason}", color=0x2f3136)
+        await interaction.followup.send(embed=embed, ephemeral=False)
+        await self.send_modlog(member, interaction.user, reason, "Kick")
 
     @app_commands.command(name="mute", description="Mute a user")
     @app_commands.guilds(785839283847954433)
-    @app_commands.describe(member="User to mute")
-    @app_commands.describe(time="Time to mute")
-    @app_commands.describe(reason="Reason for mute")
-    async def mute(self, interaction: discord.Interaction, member: discord.Member, time: str=None, reason: str="No reason given"):
-        await interaction.response.defer(thinking=True)
-        time = await TimeConverter().convert(interaction, time)
-        if member.id in [self.bot.owner_id, self.bot.user.id]:
-            return await interaction.followup.send("You can't mute me and my owner")
-        
-        if member.top_role >= interaction.user.top_role:
-            return await interaction.followup.send("You can't mute someone with a higher/Equal role than you")
-        
-        if member.id == interaction.user.id:
-            return await interaction.followup.send("You can't mute yourself")
-        
-        guild_data = await self.bot.config.find(interaction.guild.id)
+    @app_commands.describe(time="Time to mute", reason="Reason for mute",member="User to mute")
+    async def mute(self, interaction: discord.Interaction, member: discord.Member,reason: str,  time: app_commands.Transform[str, TimeConverter]=None):
+        if member == interaction.user or member == interaction.guild.owner:
+            return await interaction.response.send_message("You can't mute this user", ephemeral=True)
+        if member.top_role >= interaction.guild.me.top_role:
+            return await interaction.response.send_message("I can't mute this user", ephemeral=True)
+        if member.top_role >= interaction.author.top_role:
+            return await interaction.response.send_message("You can't mute this user due to role hierarchy", ephemeral=True)
+        if member.id in self.bot.current_mutes:
+            return await interaction.response.send_message("This user is already muted", ephemeral=True)
 
-        Muted_role = discord.utils.get(interaction.guild.roles, name="Muted")
-
-        if not Muted_role:
-            Muted_role = await interaction.guild.create_role(name="Muted", reason="No Muted role Found in server")
-            overrite = discord.PermissionOverwrite()
-            overrite.send_messages = False
-            overrite.add_reactions = False
-            overrite.read_messages = False
+        await interaction.response.defer(thinking=True, ephemeral=True)
+        mute_role = discord.utils.get(interaction.guild.roles, name="Muted")
+        if not role:
+            role = await interaction.guild.create_role(name="Muted", reason="Mute command")
             for channel in interaction.guild.channels:
-                await channel.set_permissions(Muted_role, overwrite=overrite)
+                await channel.set_permissions(role, send_messages=False, add_reactions=False)
         
-        if Muted_role in member.roles:
-            return await interaction.followup.send("This user is already muted")
-        
-        data = {'_id': member.id, 'guildId': interaction.guild.id, 'MutedBy': interaction.user.id, 'MutedAt': datetime.datetime.utcnow(), 'MutedDuration': time,'old_roles': []}
-        await member.add_roles(Muted_role)
-
-        for role in member.roles:
-            try:
-                if role.id == Muted_role.id:
-                    continue
-                else:
-                    await member.remove_roles(role)
-                    data['old_roles'].append(role.id)                
-            except:
-                pass
-
-        log_channel = interaction.guild.get_channel(guild_data['mod_log'])
-        
-        embed = discord.Embed(title=f"🔇 Mute | Case ID: {guild_data['case']}",
-            description=f" **Offender**: {member.name} | {member.mention}\n**Duration:** {format_timespan(time)}\n**Reason**: {reason}\n **Moderator**: {interaction.user.name} {interaction.user.mention}", color=0xE74C3C)
-
-        embed.timestamp = datetime.datetime.utcnow()
-        embed.set_footer(text=f"ID: {member.id}")
-        await log_channel.send(embed=embed)
-        response_embed = discord.Embed(description=f"<:allow:819194696874197004> | Muted {member.mention} has been muted", color=0x32CD32)
-        await interaction.followup.send(embed=response_embed)
-        try:
-            if time is not None:
-                remove_time = round((discord.utils.utcnow() + datetime.timedelta(seconds=time)).timestamp())
+        roles = []
+        old_roles = []
+        for r in member.roles:
+            if r == interaction.guild.default_role or r.managed or r.position >= interaction.guild.me.top_role.position: 
+                roles.append(r)
             else:
-                remove_time = "Infinite"
-            await member.send(f"You have been muted from {interaction.guild.name} for {reason}\n Unmute in <t:{remove_time}:R>")
-        except discord.HTTPException:
-            pass
+                old_roles.append(r)
+        
+        roles.append(mute_role)
+        await member.edit(roles=roles, reason=reason)
+        data = { '_id': member.id,'guildId': interaction.guild.id,'MutedBy': interaction.user.id,'MutedAt': datetime.datetime.now(),'MutedDuration': time,'old_roles': old_roles}
+        await self.bot.mutes.insert(data)
+        self.bot.current_mutes[member.id] = data
+        await interaction.followup.send(embed=discord.Embed(description=f"{member.mention} has been muted for {format_timespan(time)}\n**Reason**: {reason}", color=0x2f3136), ephemeral=False)
+        await interaction.channel.send(embed=discord.Embed(description=f"{member.mention} has been muted **Reason**: {reason}", color=0x2f3136), ephemeral=False)
+
+        await self.send_modlog(member, interaction.user, reason, "Mute", time if time else "Permanent")
     
     @app_commands.command(name="unmute", description="Unmute a user")
     @app_commands.guilds(785839283847954433)
     @app_commands.describe(member="User to unmute", reason="Reason for unmute")
     @app_commands.checks.has_permissions(administrator=True)
     async def unmute(self, interaction: discord.Interaction, member: discord.Member, reason: str="No reason given"):
-        await interaction.response.defer(thinking=True)
-        guild_data = await self.bot.config.find(interaction.guild.id)
-        Muted_role = discord.utils.get(interaction.guild.roles, name="Muted")
-        if not Muted_role:
-            return await interaction.followup.send("No Muted role found in server")
-        if Muted_role not in member.roles:
-            return await interaction.followup.send("This user is not muted")
-        await member.remove_roles(Muted_role)
-        mute_data = await self.bot.mutes.find(member.id)
-        if mute_data is not None:
-            for role in mute_data['old_roles']:
-                try:
-                    await member.add_roles(discord.utils.get(interaction.guild.roles, id=role))
-                except:
-                    pass
-            await self.bot.mutes.delete(member.id)
-        
-        log_channel = interaction.guild.get_channel(guild_data['mod_log'])
-        embed = discord.Embed(title=f"🔈 Unmute | Case ID: {guild_data['case']}",
-            description=f" **Offender**: {member.name} | {member.mention}\n**Reason**: {reason}\n **Moderator**: {interaction.user.name} {interaction.user.mention}", color=0xE74C3C)
-        embed.timestamp = datetime.datetime.utcnow()
-        embed.set_footer(text=f"ID: {member.id}")
-        await log_channel.send(embed=embed)
-        guild_data['case'] += 1
-        await self.bot.config.update(guild_data)
-        response_embed = discord.Embed(description=f"<:allow:819194696874197004> | {member.mention} has been unmuted", color=0x32CD32)
-        await interaction.followup.send(embed=response_embed)
+        if member.id not in self.bot.current_mutes:
+            return await interaction.response.send_message("This user is not muted", ephemeral=True)
+
+        await interaction.response.defer(thinking=True, ephemeral=True)
+        mute_role = discord.utils.get(interaction.guild.roles, name="Muted")
+
+        if not mute_role:
+            return await interaction.response.send_message("This user is not muted", ephemeral=True)
+
+        roles = []
+        await member.remove_roles(mute_role, reason=reason)
+
+        for r in self.bot.current_mutes[member.id]['old_roles']:
+            roles.append(interaction.guild.get_role(r))            
+        await member.edit(roles=roles, reason=reason)
+
+        await interaction.followup.send(embed=discord.Embed(description=f"{member.mention} has been unmuted\n**Reason**: {reason}", color=0x2f3136), ephemeral=False)
+        await interaction.channel.send(embed=discord.Embed(description=f"{member.mention} has been unmuted **Reason**: {reason}", color=0x2f3136), ephemeral=False)
+
+        await self.send_modlog(member, interaction.user, reason, "Unmute")
+
+        await self.bot.mutes.delete({'_id': member.id})
+        try:
+            del self.bot.current_mutes[member.id]
+        except KeyError:
+            pass
+
     
     @app_commands.command(name="role", description="add/remove a role to a user")
     @app_commands.guilds(785839283847954433)
     @app_commands.describe(member="User to add/remove a role", role="Role to add/remove")
     async def role(self, interaction: discord.Interaction, member: discord.Member, role: discord.Role):
-        if role.permissions.administrator or role.permissions.manage_guild or role.permissions.manage_roles or role.permissions.manage_channels or role.permissions.ban_members or role.permissions.kick_members:
+        if role.permissions.administrator or role.permissions.manage_guild or role.permissions.manage_roles or role.permissions.manage_channels or role.permissions.ban_members or role.permissions.kick_members or role.position >= interaction.guild.me.top_role.position or role.position >= interaction.user.top_role.position:
             return await interaction.response.send_message("You can't add/remove this role due to security reasons, contact the owner if you think this is a mistake", ephemeral=True)
            
         await interaction.response.defer(thinking=True)
@@ -441,31 +347,8 @@ class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
     async def afk_error(self, interaction: discord.Interaction, error):
         embed = discord.Embed(description=f"Error | {error}",color=discord.Color.red())
         await interaction.response.send_message(embed=embed,ephemeral=True)
-
-    @app_commands.guilds(785839283847954433)
-    async def whois_context(self, interaction: discord.Interaction, member: discord.Member):
-
-        embed = discord.Embed(title=f"User Info - {member.name}#{member.discriminator}")
-        embed.set_thumbnail(url=member.avatar.url if member.avatar else member.default_avatar.url)
-
-        embed.add_field(name="<:authorized:991735095587254364> ID:", value=member.id)
-        embed.add_field(name="<:displayname:991733326857654312> Display Name:", value=member.display_name)
-
-        embed.add_field(name="<:bot:991733628935610388> Bot Account:", value=member.bot)
-
-        embed.add_field(name="<:settings:991733871118917683> Account creation:", value=member.created_at.strftime('%d/%m/%Y %H:%M:%S'))
-        embed.add_field(name="<:join:991733999477203054> Server join:", value=member.joined_at.strftime('%d/%m/%Y %H:%M:%S'))
-        user = await self.bot.fetch_user(member.id)
         
-        if user.banner.url is not None:
-            embed.set_image(url=user.banner.url)
-
-        if not member.bot:
-            view = ui.member_view.Member_view(self.bot, member, interaction)
-            await interaction.response.send_message(embed=embed,view=view)
-            view.message = await interaction.original_response()
-        else:
-            await interaction.response.send_message(embed=embed)
-
 async def setup(bot):
     await bot.add_cog(Mod(bot))
+
+#data = {'_id': member.id, 'guildId': interaction.guild.id, 'BannedBy': interaction.user.id, 'BannedAt': datetime.datetime.utcnow(), 'BanDuration': time, 'Reason': reason}
