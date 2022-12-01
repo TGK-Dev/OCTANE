@@ -80,9 +80,8 @@ class Member_view(discord.ui.View):
                         for event in data['event']:
                             if event['bal'] > 0:
                                 event_dono += f"**{event['name']}:** ⏣`{millify(event['bal'])}`\n"
-                            if len(event_dono) > 0:
-                                embed.add_field(name="Event Donations", value=event_dono)
                             
+                        embed.add_field(name="Event Donation", value=event_dono)
                     await interaction.response.edit_message(embed=embed)
 
             case "roles":
@@ -119,7 +118,6 @@ class Member_view(discord.ui.View):
                     embed.description += f"**Last Vote:** <t:{round(votes_data['last_vote'].timestamp())}:R>"
 
                 await interaction.response.edit_message(embed=embed)
-
 
     async def on_timeout(self):
         for i in self.children:

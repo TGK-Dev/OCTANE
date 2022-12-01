@@ -105,22 +105,6 @@ async def on_ready():
         if votes['reminded'] == False:
             bot.current_votes[votes['_id']] = votes
     
-    current_ban = await bot.bans.get_all()
-    for bans in current_ban:
-        bot.current_bans[bans['_id']] = bans
-    
-    current_afk = await bot.afk.get_all()
-    for afk in current_afk:
-        bot.current_afk[afk['_id']] = afk
-    
-    current_mute = await bot.mutes.get_all()
-    for mute in current_mute:
-        bot.current_mutes[mute['_id']] = mute
-    
-    current_perm = await bot.perms.get_all()
-    for perm in current_perm:
-        bot.perm[perm['_id']] = perm
-    
     current_config = await bot.config.get_all()
     for config in current_config:
         bot.config_cache[config['_id']] = config

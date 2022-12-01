@@ -202,6 +202,61 @@ class Starboard(commands.Cog, name="Starboard", description="Starboard Module"):
         await self.bot.config.update(ctx.guild.id, guild_data)
         await ctx.send(f"Starboard self star set to {toggle}")
 
+class Commands_Checks(commands.GroupCog):
+    def __init__(self, bot):
+        self.bot = bot
+    
+    @commands.Cog.listener()
+    async def on_ready(self):
+        print(f"Loaded {self.__class__.__name__}")
+    
+    @app_commands.command(name="toggle", description="Toggle starboard on/off")
+    @app_commands.describe(toggle="True/False")
+    @app_commands.default_permissions(manage_guild=True)
+    async def toggle(self, interaction: discord.Interaction, toggle: bool=True):
+        guild_data = await self.bot.config.find(interaction.guild.id)
+        guild_data['starboard']['toggle'] = toggle
+        await self.bot.config.update(interaction.guild.id, guild_data)
+        embed = discord.Embed(title="Starboard Toggle", description=f"Starboard toggle set to {'<:Toggle_on:1029771260114243584>' if toggle else '<:Toggle_off:1029770614430498926>'}", color=0x9e3bff)
+        await interaction.response.send_message(embed=embed, ephemeral=False)
+    
+    @app_commands.command(name="channel", description="Set starboard channel")
+    @app_commands.describe(channel="Channel")
+    @app_commands.default_permissions(manage_guild=True)
+    async def channel(self, interaction: discord.Interaction, channel: discord.TextChannel):
+        guild_data = await self.bot.config.find(interaction.guild.id)
+        guild_data['starboard']['channel'] = channel.id
+        await self.bot.config.update(interaction.guild.id, guild_data)
+        embed = discord.Embed(title="Starboard Channel", description=f"Starboard channel set to {channel.mention}", color=0x9e3bff)
+        await interaction.response.send_message(embed=embed, ephemeral=False)
+    
+    @app_commands.command(name="threshold", description="Set starboard threshold")
+    @app_commands.describe(threshold="Threshold")
+    @app_commands.default_permissions(manage_guild=True)
+    async def threshold(self, interaction: discord.Interaction, threshold: app_commands.Range[int, 3, 20]=5):
+        guild_data = await self.bot.config.find(interaction.guild.id)
+        guild_data['starboard']['threshold'] = threshold
+        await self.bot.config.update(interaction.guild.id, guild_data)
+        embed = discord.Embed(title="Starboard Threshold", description=f"Starboard threshold set to {threshold}", color=0x9e3bff)
+        await interaction.response.send_message(embed=embed, ephemeral=False)
+    
+    @app_commands.command(name="selfstar", description="Toggle starboard self star")
+    @app_commands.describe(toggle="True/False")
+    @app_commands.default_permissions(manage_guild=True)
+    async def selfstar(self, interaction: discord.Interaction, toggle: bool=False):
+        guild_data = await self.bot.config.find(interaction.guild.id)
+        guild_data['starboard']['self_star'] = toggle
+        await self.bot.config.update(interaction.guild.id, guild_data)
+        embed = discord.Embed(title="Starboard Self Star", description=f"Starboard self star set to {'<:Toggle_on:1029771260114243584>' if toggle else '<:Toggle_off:1029770614430498926>'}", color=0x9e3bff)
+        await interaction.response.send_message(embed=embed, ephemeral=False)
+    
+    @app_commands.command(name="info", description="Get starboard info")
+    @app_commands.default_permissions(manage_guild=True)
+    async def info(self, interaction: discord.Interaction):
+        guild_data = await self.bot.config.find(interaction.guild.id)
+        embed = discord.Embed(title="Starboard Info", description=f"Starboard toggle: {'<:Toggle_on:1029771260114243584>' if guild_data['starboard']['toggle'] else '<:Toggle_off:1029770614430498926>'}\nStarboard channel: {interaction.guild.get_channel(guild_data['starboard']['channel'])}\nStarboard threshold: {guild_data['starboard']['threshold']}\nStarboard self star: {'<:Toggle_on:1029771260114243584>' if guild_data['starboard']['self_star'] else '<:Toggle_off:1029770614430498926>'}", color=0x9e3bff)
+        await interaction.response.send_message(embed=embed, ephemeral=False)
+
 async def setup(bot):
     await bot.add_cog(Starboard(bot))
 

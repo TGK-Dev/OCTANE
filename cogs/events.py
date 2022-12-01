@@ -115,12 +115,8 @@ class Events(commands.Cog):
         if not guild_data: return
         if guild.id != 785839283847954433: return
         
-        roles = []
-        for role in guild_data['join_roles']:
-            role = discord.utils.get(member.guild.roles, id=role)
-            if role:
-                await member.add_roles(role)
-                await asyncio.sleep(2)
+        roles = [member.get_role(role) for role in guild_data['join_roles']]
+        await member.edit(roles=roles)
 
     @commands.Cog.listener()
     async def on_member_ban(self, guild, member):

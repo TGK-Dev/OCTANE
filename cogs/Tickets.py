@@ -56,38 +56,20 @@ class Ticket_slash(commands.GroupCog, name="ticket", description="ticket system 
         embed = discord.Embed(description=f"<a:loading:998834454292344842> | Adding {target.mention}", color=discord.Color.blurple())
         await interaction.response.send_message(embed=embed)
         if isinstance(target, discord.Role):
-            if target.id in data['add_roles']:
-                embed.description = "<:dynoError:1000351802702692442> | This role is already in the Ticket"
-                embed.color = discord.Color.red()
-                await interaction.edit_original_response(embed=embed)
-                return
-            else:
-                data['add_roles'].append(target.id)
-                embed.description = f"<:dynosuccess:1000349098240647188> | Added {target.mention} to the Ticket"
-                embed.color = discord.Color.green()
-                await interaction.channel.set_permissions(target, read_messages=True, send_messages=True, read_message_history=True, attach_files=True)
-                await interaction.edit_original_response(embed=embed)
+            data['add_roles'].append(target.id)
+        elif isinstance(target, discord.Member):
+            data['add_users'].append(target.id)
+        
+        await interaction.channel.set_permissions(target, read_messages=True, send_messages=True, read_message_history=True, attach_files=True)
+        await self.bot.tickets.update(data)
+        embed = discord.Embed(description=f"<a:check:998834454292344842> | Added {target.mention}", color=discord.Color.blurple())
+        await interaction.edit_original_message(embed=embed)
 
-        if isinstance(target, discord.Member):
-            if target.id in data['add_users']:
-                embed.description = "<:dynoError:1000351802702692442> | This member is already in the Ticket"
-                embed.color = discord.Color.red()
-                await interaction.edit_original_response(embed=embed)
-                return
-            else:
-                data['add_users'].append(target.id)
-                embed.description = f"<:dynosuccess:1000349098240647188> | Added {target.mention} to the Ticket"
-                embed.color = discord.Color.green()
-                await interaction.channel.set_permissions(target, read_messages=True, send_messages=True, read_message_history=True, attach_files=True)
-                await interaction.edit_original_response(embed=embed)
-
-        await interaction.client.tickets.update(data)
+        embed = discord.Embed(description=f"User: {target.mention}\nAction: Added to Ticket {interaction.channel.mention} by {interaction.user.mention}", color=discord.Color.red())
         ticket_config = await self.bot.ticket_system.find(interaction.guild.id)
-        if not ticket_config:
-            return
+        if not ticket_config:return
         log_channel = interaction.client.get_channel(ticket_config['logging'])
-        logging_embed = discord.Embed(title="Ticket System Log", description=f"{interaction.user.mention} added {target.mention} to the {interaction.channel.mention}", color=discord.Color.blurple())
-        await log_channel.send(embed=logging_embed)
+        await log_channel.send(embed=embed)
 
     @app_commands.command(name="remove", description="remove someone from Ticket")
     @app_commands.default_permissions(manage_messages=True)
@@ -99,40 +81,30 @@ class Ticket_slash(commands.GroupCog, name="ticket", description="ticket system 
             return
         embed = discord.Embed(description=f"<a:loading:998834454292344842> | Removing {target.mention}", color=discord.Color.blurple())
         await interaction.response.send_message(embed=embed)
+
         if isinstance(target, discord.Role):
-            if target.id not in data['add_roles']:
-                embed.description = "<:dynoError:1000351802702692442> | This role is not in the Ticket"
-                embed.color = discord.Color.red()
-                await interaction.edit_original_response(embed=embed)
-                return
-            else:
+            if target.id in data['add_roles']:
                 data['add_roles'].remove(target.id)
-                embed.description = f"<:dynosuccess:1000349098240647188> | Removed {target.mention} from the Ticket"
-                embed.color = discord.Color.green()
-                await interaction.channel.set_permissions(target, read_messages=False)
-                await interaction.edit_original_response(embed=embed)
-                
-        if isinstance(target, discord.Member):
-            if target.id not in data['add_users']:
-                embed.description = "<:dynoError:1000351802702692442> | This member is not in the Ticket"
-                embed.color = discord.Color.red()
-                await interaction.edit_original_response(embed=embed)
-                return
             else:
+                await interaction.edit_original_message(embed=discord.Embed(description="Role not found in ticket", color=discord.Color.red()))
+                return
+        elif isinstance(target, discord.Member):
+            if target.id in data['add_users']:
                 data['add_users'].remove(target.id)
-                embed.description = f"<:dynosuccess:1000349098240647188> | Removed {target.mention} from the Ticket"
-                embed.color = discord.Color.green()
-                await interaction.channel.set_permissions(target, read_messages=False)
-                await interaction.edit_original_response(embed=embed)
+            else:
+                await interaction.edit_original_message(embed=discord.Embed(description="User not found in ticket", color=discord.Color.red()))
+                return
+        
+        await interaction.channel.set_permissions(target, read_messages=None, send_messages=None, read_message_history=None, attach_files=None)
+        await self.bot.tickets.update(data)
+        embed = discord.Embed(description=f"<a:check:998834454292344842> | Removed {target.mention}", color=discord.Color.blurple())
+        await interaction.edit_original_message(embed=embed)
 
-        await interaction.client.tickets.update(data)
+        embed = discord.Embed(description=f"User: {target.mention}\nAction: Removed from Ticket {interaction.channel.mention} by {interaction.user.mention}", color=discord.Color.red())
         ticket_config = await self.bot.ticket_system.find(interaction.guild.id)
-        if not ticket_config:
-            return
+        if not ticket_config:return
         log_channel = interaction.client.get_channel(ticket_config['logging'])
-        logging_embed = discord.Embed(title="Ticket System Log", description=f"{interaction.user.mention} removed {target.mention} from the {interaction.channel.mention}", color=discord.Color.blurple())
-        await log_channel.send(embed=logging_embed)    
-
+        await log_channel.send(embed=embed)
 
 class Panel(commands.GroupCog, name="panel", description="Manage Ticket system palnel"):
     def __init__(self, bot):

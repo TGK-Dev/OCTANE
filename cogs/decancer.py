@@ -33,19 +33,23 @@ class Decancer(commands.GroupCog, description="Fix Member name on Join", name="d
     @app_commands.command(name="server", description="decancer server")
     @app_commands.checks.has_permissions(administrator=True)
     async def server(self, interaction: discord.Interaction):
-        embed = discord.Embed(description="Decancering server", color=discord.Color.blue())
+        embed = discord.Embed(description="Decancering server in below thread", color=discord.Color.blue())
         await interaction.response.send_message(embed=embed)
         data = await interaction.client.find(interaction.guild.id)
 
-        async with interaction.channel.typing():
+        message = await interaction.original_response()
+        thread = await message.create_thread(name="decancer-log", auto_archive_duration=60)
+
+        async with thread.typing():
             for member in interaction.guild.members:
                 roles = [role.id for role in member.roles]
                 bypass = data['bypass']
-                if (set(roles) & set(bypass)): continue
+                if bypass in roles: continue
                 old_name = member.display_name
                 is_cancerous = self.is_cancerous(old_name)
                 if is_cancerous:
                     new_name = await self.nick_maker(interaction.guild, old_name)
+                    await thread.send(f"{member.mention} name changed from {old_name} to {new_name}")
                     await member.edit(nick=new_name, reason=f"Server decancer started by {interaction.user.name}")
                     
         embed.description = "Decancering server complete"
