@@ -16,59 +16,17 @@ from io import BytesIO
 class Owner(commands.Cog, name="Owner", description="Owner/admin commands."):
     def __init__(self, bot):
         self.bot = bot
-
-    async def cog_autocomplete(self, interaction: discord.Interaction, current: str) -> List[app_commands.Choice[str]]:
-        current_cogs = []
-        for file in os.listdir("./cogs"):
-            if file.endswith(".py") and not file.startswith("_"):
-                current_cogs.append(file[:-3])
-        new_options = [app_commands.Choice(name="reload all cogs", value="*")]
-        for cog in current_cogs:
-            if current.lower() in cog.lower():
-                new_options.append(app_commands.Choice(name=cog, value=cog))                
-        return new_options[:24]
-
-    @commands.Cog.listener()
-    async def on_message(self, message):
-        if message.guild == None:
-            if message.author.id == self.bot.user.id: return
-            channel = self.bot.get_channel(1019649076586876968)
-            await channel.send(f"{message.author} said: {message.content}")
     
-
+    async def module_auto_complete(self, interaction: discord.Interaction, current:str) -> List[app_commands.Choice[str]]:
+        _list =  [
+            app_commands.Choice(name=module, value=module)
+            for module in interaction.client.extensions if current.lower() in module.lower()
+        ]
+        return _list[:24]
+        
     @commands.Cog.listener()
     async def on_ready(self):
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
-
-    @commands.command(name="Blacklist", aliases=["bl"], description="Blacklist a user from using the bot", brief="blacklist [user]")
-    @commands.is_owner()
-    async def blacklist(self, ctx, user: Union[discord.Member, discord.User]):
-        guild_data = await self.bot.config.find(ctx.guild.id)
-        if not guild_data:
-            guild_data = make_db_temp(ctx.guild.id)
-        
-        if user.id in guild_data['blacklist']:
-            await ctx.send(f"{user.mention} is already blacklisted.")
-        elif user.id in [self.bot.user.id ,ctx.guild.owner.id, ctx.author.id ,self.bot.owner_id]:
-            await ctx.send(f"You can't blacklist that user.")
-        else:
-            guild_data['blacklist'].append(user.id)
-            await self.bot.config.upsert(guild_data)
-            await ctx.send(f"{user.mention} has been blacklisted.")
-    
-    @commands.command(name="Unblacklist", aliases=["ubl"], description="Unblacklist a user from using the bot", brief="unblacklist [user]")
-    @commands.is_owner()
-    async def unblacklist(self, ctx, user: Union[discord.Member, discord.User]):
-        guild_data = await self.bot.config.find(ctx.guild.id)
-        if not guild_data:
-            guild_data = make_db_temp(ctx.guild.id)
-        
-        if user.id not in guild_data['blacklist']:
-            await ctx.send(f"{user.mention} is not blacklisted.")
-        else:
-            guild_data['blacklist'].remove(user.id)
-            await self.bot.config.upsert(guild_data)
-            await ctx.send(f"{user.mention} has been unblacklisted.")
     
     @commands.group(name="Configuration", invoke_without_command=True, description="Configure the bot", brief="config [command]", aliases=["config"])
     @commands.has_guild_permissions(administrator=True)
@@ -91,17 +49,6 @@ class Owner(commands.Cog, name="Owner", description="Owner/admin commands."):
         embed.set_footer(text=f"Requested by {ctx.author}", icon_url=ctx.author.avatar.url)
         await ctx.send(embed=embed)
     
-    @config.command(name="Welcome", aliases=["w", "welcome"], description="Set the welcome channel", brief="config welcome [channel]")
-    @commands.has_guild_permissions(administrator=True)
-    async def welcome(self, ctx, channel: Union[discord.TextChannel, discord.VoiceChannel]):
-        guild_data = await self.bot.config.find(ctx.guild.id)
-        if not guild_data:
-            guild_data = make_db_temp(ctx.guild.id)
-        
-        guild_data['welcome'] = channel.id
-        await self.bot.config.upsert(guild_data)
-        await ctx.send(f"{channel.mention} is now the welcome channel.")
-    
     @config.command(name="Modlog", aliases=["ml", "modlog"], description="Set the mod log channel", brief="config modlog [channel]")
     @commands.has_guild_permissions(administrator=True)
     async def modlog(self, ctx, channel: discord.TextChannel):
@@ -112,17 +59,6 @@ class Owner(commands.Cog, name="Owner", description="Owner/admin commands."):
         guild_data['mod_log'] = channel.id
         await self.bot.config.upsert(guild_data)
         await ctx.send(f"{channel.mention} is now the mod log channel.")
-    
-    @config.command(name="Suggestion", aliases=["suggestion", "guggest"], description="Set the suggestion channel", brief="config suggestion [channel]")
-    @commands.has_guild_permissions(administrator=True)
-    async def suggestion(self, ctx, channel: discord.TextChannel):
-        guild_data = await self.bot.config.find(ctx.guild.id)
-        if not guild_data:
-            guild_data = make_db_temp(ctx.guild.id)
-
-        guild_data['suggestion'] = channel.id
-        await self.bot.config.upsert(guild_data)
-        await ctx.send(f"{channel.mention} is now the suggestion channel.")
     
     @config.command(name="joinr", aliases=["joinrole", "join-role"], description="Set the join role", brief="config joinr [role]")
     @commands.has_guild_permissions(administrator=True)
@@ -145,29 +81,6 @@ class Owner(commands.Cog, name="Owner", description="Owner/admin commands."):
             guild_data['join_roles'].remove(role.id)
             await self.bot.config.update(guild_data)
             await ctx.send(f"{role.mention} is no longer the join role.", allowed_mentions=discord.AllowedMentions(roles=False))
-    
-    @config.command(name="qurantine", aliases=["q"], description="Toggle Verification system", brief="config qurantine [on/off]")
-    @commands.has_guild_permissions(administrator=True)
-    async def qurantine(self, ctx, state: str):
-        if state.lower() not in ['on', 'off', 'true', 'false', 'enable', 'disable', 'yes', 'no', '1', '0', 'y', 'n']:
-            await ctx.send("Please use `on` or `off`.")
-            return
-
-        data = await self.bot.config.find(ctx.guild.id)
-        if not data:
-            data = make_db_temp(ctx.guild.id)
-            await self.bot.config.insert(data)
-        
-        if state.lower() in ['on', 'true', 'enable', 'yes', '1', 'y']:
-            data['qurantine'] = True
-            await self.bot.config.update(data)
-            await ctx.send("Verification is now enabled.")
-        elif state.lower() in ['off', 'false', 'disable', 'no', '0', 'n']:
-            data['qurantine'] = False
-            await self.bot.config.update(data)
-            await ctx.send("Verification is now disabled.")
-        else:
-            await ctx.send("Please Enter Valid Input.")
 
     @commands.command(name="eval", description="Evaluate a code", brief="eval [code]", hidden=True)
     @commands.check_any(Commands_Checks.is_me())
@@ -206,7 +119,7 @@ class Owner(commands.Cog, name="Owner", description="Owner/admin commands."):
 
     @app_commands.command(name="reload", description="Reload a cog")
     @app_commands.default_permissions(administrator=True)
-    @app_commands.autocomplete(cog=cog_autocomplete)
+    @app_commands.autocomplete(cog=module_auto_complete)
     @app_commands.guilds(785839283847954433)
     async def reload(self, interaction: discord.Interaction, cog: str):
         if cog != "*":
@@ -243,12 +156,6 @@ class Owner(commands.Cog, name="Owner", description="Owner/admin commands."):
             return
             
         await interaction.response.send_message(file=discord.File("./discord.log", filename="discord.log"))
-        
-        
-
-
-
-
 
 async def setup(bot):
     await bot.add_cog(Owner(bot))
