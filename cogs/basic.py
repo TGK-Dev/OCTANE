@@ -203,7 +203,7 @@ class AFK(commands.Cog, name="AFK", description="Member Afk Module"):
             await interaction.response.send_message("You are already afk", ephemeral=True)
             return
 
-        afk_data = {'_id':interaction.user.id, 'message': status, 'last_name': interaction.user.display_name,'time': round(discord.utils.utcnow().timestamp())}
+        afk_data = {'_id':interaction.user.id, 'message': status, 'last_name': interaction.user.display_name,'time': round(discord.utils.utcnow().timestamp()), 'total_afk': 0}
         await self.bot.afk.insert(afk_data)
 
         await interaction.response.send_message(f"Set your AFK status to: {status}", ephemeral=True)

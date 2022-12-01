@@ -175,8 +175,13 @@ class Highlight_backend(commands.Cog, name="Votes",description="Server Vote coun
     @commands.Cog.listener()
     async def on_ready(self):
         all_hl = await self.bot.hightlights.get_all()
+        ar_data = await self.bot.perks.get_all()
         for hl in all_hl:
             self.bot.hl_chache[hl['_id']] = hl
+        for ar in ar_data:
+            if 'has_ar'in ar.keys():
+                if ar['has_ar'] == True:
+                    self.bot.hl_chache[ar['_id']]['autoreact'] = ar['autoreact']['emoji']
 
         print(f"{self.__class__.__name__} Cog has been loaded")
     
@@ -215,28 +220,6 @@ class Highlight_backend(commands.Cog, name="Votes",description="Server Vote coun
             await user.send(content=f"In **{message.guild.name}** {trigger_message.channel.mention}, you where mentioned with highlight word {trigger_key}",embed=embed)
         except discord.HTTPException:
             pass
-    
-    @app_commands.command(name="autoreact", description="Add a Reaction for user")
-    @app_commands.describe(user="user to add reaction to")
-    @app_commands.guilds(785839283847954433)
-    @app_commands.default_permissions(administrator=True)
-    @app_commands.describe(reaction="reaction to add")
-    async def autoreact(self, interaction: discord.Interaction, user: discord.User, reaction: str):
-        data = await interaction.client.hightlights.find(user.id)
-        embed = discord.Embed(description="<a:loading:998834454292344842> | **Loading...**", color=discord.Color.blue())
-
-        if data is None:
-            data = {'_id': user.id, 'tigger': [], 'ignore_channel': [], 'autoreact': None, 'last_react': None}
-            await interaction.client.hightlights.insert(data)
-
-        await interaction.response.send_message(embed=embed)
-
-        data['autoreact'] = reaction
-        await interaction.client.hightlights.update(data)
-        
-        embed.description = "<:dynosuccess:1000349098240647188> | Sussessfully added reaction"
-        await interaction.edit_original_response(embed=embed)
-        self.bot.hl_chache[user.id] = data
 
 async def setup(bot):
     await bot.add_cog(Highlight_backend(bot), guild=discord.Object(785839283847954433))

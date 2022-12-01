@@ -36,6 +36,7 @@ class Perks(commands.GroupCog):
                 'guild': interaction.guild.id,
                 'has_role_perks': None,
                 'has_channel_perks': None,
+                'has_ar': False,
                 'role_perks': {'role_id': None, 'expires': None, 'has_created': False, 'given_by': None, 'given_at': None, 'friend_limit': None, 'friends': []},
                 'channel_perks': {'channel_id': None, 'expires': None, 'has_created': False, 'given_by': None, 'given_at': None, 'friend_limit': None, 'friends': []},
             }
@@ -65,6 +66,7 @@ class Perks(commands.GroupCog):
                 'guild': interaction.guild.id,
                 'has_role_perks': None,
                 'has_channel_perks': None,
+                'has_ar': False,
                 'role_perks': {'role_id': None, 'expires': None, 'has_created': False, 'given_by': None, 'given_at': None, 'friend_limit': friend_limit, 'friends': []},
                 'channel_perks': {'channel_id': None, 'expires': None, 'has_created': False, 'given_by': None, 'given_at': None, 'friend_limit': friend_limit, 'friends': []},
             }
@@ -113,12 +115,35 @@ class Perks(commands.GroupCog):
             await user.send("Your Custom Role/Channel Perks has been cleared, please contact an admin if you think this is a mistake")
         except discord.HTTPException:
             pass
+    
+    @perks_give.command(name="autoreact", description="Give user an custom autoreact perk")
+    @app_commands.describe(user="User to give perks")
+    async def autoreact(self, interaction: Interaction, user: discord.Member):
+        data = await self.bot.perks.find(user.id)
+        if not data:
+            data = {
+                '_id': user.id,
+                'guild': interaction.guild.id,
+                'has_role_perks': None,
+                'has_channel_perks': None,
+                'has_ar': False,
+                'autoreact': {'emoji': None},
+                'role_perks': {'role_id': None, 'expires': None, 'has_created': False, 'given_by': None, 'given_at': None, 'friend_limit': None, 'friends': []},
+                'channel_perks': {'channel_id': None, 'expires': None, 'has_created': False, 'given_by': None, 'given_at': None, 'friend_limit': None, 'friends': []},
+            }
+            await self.bot.perks.insert(data)
+        data['has_ar'] = True
+        await self.bot.perks.update(data)
+        embed = discord.Embed(description="Successfully given autoreact perks to {}".format(user.mention), color=discord.Color.green())
+        await interaction.response.send_message(embed=embed, ephemeral=False)
+        
 class Custom(commands.GroupCog):
     def __init__(self, bot):
         self.bot = bot
         # self.bot.perks = Document(self.bot.db, "Perks")
     role = Group(name="role", description="edit a custom role")
     channel = Group(name="channel", description="edit a custom channel")
+    autoreact = Group(name="autoreact", description="edit autoreact")
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -492,6 +517,19 @@ class Custom(commands.GroupCog):
             await interaction.response.send_message(embed=embed)
             return
 
+    @autoreact.command(name="set", description="set a message to auto react")
+    @app_commands.describe(emoji="emoji to react with must be from this server")
+    async def set(self, interaction: Interaction, emoji: str):
+        data = await self.bot.perks.find(interaction.user.id)
+        if not data: return await interaction.response.send_message("You don't have custom perks", ephemeral=True)
+        if data['has_ar'] == False or None: return await interaction.response.send_message("You don't have custom perks", ephemeral=True)
+
+        data['autoreact']['emoji'] = emoji
+        await self.bot.perks.upsert(data)
+        self.bot.hl_cache[interaction.user.id] = data
+
+        embed = discord.Embed(description="<:dynosuccess:1000349098240647188> | Set autoreact emoji to {emoji}".format(emoji=emoji), color=discord.Color.green())
+        await interaction.response.send_message(embed=embed)
 
 async def setup(bot):
     await bot.add_cog(Perks(bot), guilds=[discord.Object(785839283847954433)])
