@@ -56,6 +56,7 @@ class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
             if datetime.datetime.now() >= value['UnMuteAt']:
                 guild = self.bot.get_guild(value['guildId'])
                 member = guild.get_member(value['_id'])
+                if not member: return
                 moderator = guild.get_member(value['MutedBy'])
                 self.bot.dispatch("unmute", member, moderator, value)
                 try:
@@ -92,6 +93,9 @@ class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
     
     @commands.Cog.listener()
     async def on_ready(self):
+        for bans in await self.bot.bans.get_all(): self.bot.current_bans[bans['_id']] = bans
+        for mutes in await self.bot.mutes.get_all(): self.bot.current_mutes[mutes['_id']] = mutes
+
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
 
     @commands.Cog.listener()
@@ -143,7 +147,7 @@ class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
         if member.top_role >= interaction.user.top_role:
             return await interaction.response.send_message("You can't ban this user due to role hierarchy", ephemeral=True)
         
-        data = {'_id': member.id, 'guildId': interaction.guild.id, 'BannedBy': interaction.user.id, 'UnbanAt': datetime.datetime.now() + relativedelta(seconds=time) if time else None}
+        data = {'_id': member.id, 'guildId': interaction.guild.id, 'BannedBy': interaction.user.id, 'UnbanAt': datetime.datetime.now() + relativedelta(seconds=time) if time else None, 'duration': time if time else None, 'reason': reason}
 
         try:
             await member.send(embed=discord.Embed(description=f"You have been banned from {interaction.guild.name} for {format_timespan(time)}\n**Reason**: {reason}", color=0x2f3136))
@@ -226,7 +230,7 @@ class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
         
         roles.append(mute_role)
         await member.edit(roles=roles, reason=reason)
-        data = { '_id': member.id,'guildId': interaction.guild.id,'MutedBy': interaction.user.id, 'UnMuteAt': datetime.datetime.now() + datetime.timedelta(seconds=time) if time else None, 'old_roles': old_roles}
+        data = { '_id': member.id,'guildId': interaction.guild.id,'MutedBy': interaction.user.id, 'UnMuteAt': datetime.datetime.now() + datetime.timedelta(seconds=time) if time else None, 'old_roles': old_roles, 'duration': time if time else None}
         await self.bot.mutes.insert(data)
         self.bot.current_mutes[member.id] = data
         await interaction.followup.send(embed=discord.Embed(description=f"{member.mention} has been muted for {format_timespan(time)}\n**Reason**: {reason}", color=0x2f3136), ephemeral=False)
@@ -389,6 +393,6 @@ class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
         await interaction.response.send_message(embed=embed,ephemeral=True)
         
 async def setup(bot):
-    await bot.add_cog(Mod(bot), guilds=[discord.Object(1042392324476502096)])
+    await bot.add_cog(Mod(bot), guilds=[discord.Object(785839283847954433)])
 
 #data = {'_id': member.id, 'guildId': interaction.guild.id, 'BannedBy': interaction.user.id, 'BannedAt': datetime.datetime.now(), 'BanDuration': time, 'Reason': reason}

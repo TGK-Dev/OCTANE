@@ -29,35 +29,14 @@ class CorssChat(commands.GroupCog, name="crosschat", description="utils commands
     async def on_ready(self):
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
     
-    async def send_crosschat(self, webhook: discord.Webhook, message: discord.Message, other_side: discord.TextChannel):
+    async def send_crosschat(self, message: discord.Message, other_side: discord.TextChannel, webhook: discord.Webhook):
         embeds = []
-        if message.content == None: return
-        if message.reference:
-            try:
-                reply = await message.channel.fetch_message(message.reference.message_id)
-                embed = Embed(description=reply.content, color=message.author.color)
-                embed.set_author(name=reply.author.display_name, icon_url=reply.author.avatar.url if reply.author.avatar else reply.author.default_avatar.url)
-                embed.set_footer(text=f"Replying to {message.author.display_name}", icon_url=message.author.avatar.url if message.author.avatar else message.author.default_avatar.url)
-                embed.timestamp = reply.created_at
-                embeds.append(embed)
-            except discord.NotFound:
-                pass
-        
-        if message.attachments:
-            embed = Embed(color=message.author.color)
-            embed.set_image(url=message.attachments[0].url)
-            embeds.append(embed)
-        
+        if message.content == None: return        
         async with aiohttp.ClientSession() as session:
             webhook = discord.Webhook.from_url(webhook.url, session=session)
-            webhook_message = await webhook.send(content=message.content, 
-                                                    username=f"{message.author.display_name}#{message.author.discriminator}",
-                                                    avatar_url=message.author.avatar.url if message.author.avatar else message.author.default_avatar.url,
-                                                    embeds=embed,
-                                                    allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False),
-                                                    wait=True)
-            other_side_message = await other_side.fetch_message(webhook_message.id)
-            self.cross_chache[message.id] = {'other_side_id': other_side_message.id, 'other_side_channel_id': other_side.id, 'time': other_side.created_at}
+            print(message.content)
+            await webhook.send(message.content, username=f"{message.author.name}#{message.author.discriminator}", avatar_url=message.author.avatar.url if message.author.avatar else message.author.default_avatar, embeds=embeds, allowed_mentions=discord.AllowedMentions(everyone=False, users=False, roles=False))
+
 
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -86,7 +65,7 @@ class CorssChat(commands.GroupCog, name="crosschat", description="utils commands
             if webhook is None:
                 webhook = await other_side.create_webhook(name="CrossChat", reason="CrossChat webhook")
         
-        await self.send_crosschat(webhook, message, other_side)
+        await self.send_crosschat(message, other_side, webhook)
         
     @commands.Cog.listener()
     async def on_message_delete(self, message):

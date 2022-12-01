@@ -119,33 +119,15 @@ class Owner(commands.Cog, name="Owner", description="Owner/admin commands."):
 
     @app_commands.command(name="reload", description="Reload a cog")
     @app_commands.default_permissions(administrator=True)
-    @app_commands.autocomplete(cog=module_auto_complete)
+    @app_commands.autocomplete(module=module_auto_complete)
     @app_commands.guilds(785839283847954433)
-    async def reload(self, interaction: discord.Interaction, cog: str):
-        if cog != "*":
-            try:
-                await self.bot.unload_extension(f"cogs.{cog}")
-                await self.bot.load_extension(f"cogs.{cog}")
-                embed = discord.Embed(description=f"{cog} has been reloaded.", color=discord.Color.green())
-                await interaction.response.send_message(embed=embed)
-            except Exception as e:
-                embed = discord.Embed(description="Error | {}".format(e), color=0xFF0000)
-                await interaction.response.send_message(embed=embed)
-                return
-        elif cog == "*":
-            embed = discord.Embed(description="Relading Cogs..", color=discord.Color.green())
-            await interaction.response.send_message(embed=embed)
-            for module in os.listdir("./cogs"):
-                if module.endswith(".py") and not module.startswith("_"):
-                    try:
-                        await self.bot.unload_extension(f"cogs.{module[:-3]}")
-                        await self.bot.load_extension(f"cogs.{module[:-3]}")
-                        embed.add_field(name=f"{module[:-3]}", value="Reloaded", inline=True)
-                        await interaction.edit_original_response(embed=embed)
-                    except Exception as e:
-                        error = "".join(format_exception(e,e,e.__traceback__))
-                        embed.add_field(name=f"{module}", value=f"Failure | {error[:100]}", inline=True)
-                        await interaction.edit_original_response(embed=embed)
+    async def reload(self, interaction: discord.Interaction, module: str):
+        await interaction.response.send_message(embed=discord.Embed(description=f"Reloading module `{module}`...", color=discord.Color.green()))
+        try:
+            await self.bot.reload_extension(module)
+            await interaction.edit_original_response(embed=discord.Embed(description=f"Successfully reloaded module `{module}`", color=discord.Color.green()))
+        except Exception as e:
+            await interaction.edit_original_response(content=None, embed=discord.Embed(description=f"Error while reloading module `{module}`: {e}", color=discord.Color.red()))
 
     @app_commands.command(name="get-logs", description="Get Logs of bot console")
     @app_commands.default_permissions(administrator=True)

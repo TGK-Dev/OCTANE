@@ -18,7 +18,9 @@ class Basic(commands.Cog, name="Basic", description="General Basic Commands"):
     
     @commands.Cog.listener()
     async def on_ready(self):
-        self.bot.add_view(level_check(self.bot)) 
+        self.bot.add_view(level_check(self.bot))
+
+        for afk in await self.bot.afk.get_all(): self.bot.current_afk[afk['_id']] = afk        
         print(f"{self.__class__.__name__} Cog has been loaded")
     
     @commands.Cog.listener()

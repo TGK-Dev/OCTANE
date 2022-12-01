@@ -210,7 +210,7 @@ class Commands_Checks(commands.GroupCog):
     async def on_ready(self):
         print(f"Loaded {self.__class__.__name__}")
     
-    @app_commands.command(nae="toggle", description="Toggle starboard on/off")
+    @app_commands.command(name="toggle", description="Toggle starboard on/off")
     @app_commands.describe(toggle="True/False")
     @app_commands.default_permissions(manage_guild=True)
     async def toggle(self, interaction: discord.Interaction, toggle: bool=True):
@@ -230,7 +230,7 @@ class Commands_Checks(commands.GroupCog):
         embed = discord.Embed(title="Starboard Channel", description=f"Starboard channel set to {channel.mention}", color=0x9e3bff)
         await interaction.response.send_message(embed=embed, ephemeral=False)
     
-    @app_commands.command(nae="threshold", description="Set starboard threshold")
+    @app_commands.command(name="threshold", description="Set starboard threshold")
     @app_commands.describe(threshold="Threshold")
     @app_commands.default_permissions(manage_guild=True)
     async def threshold(self, interaction: discord.Interaction, threshold: app_commands.Range[int, 3, 20]=5):
@@ -240,7 +240,7 @@ class Commands_Checks(commands.GroupCog):
         embed = discord.Embed(title="Starboard Threshold", description=f"Starboard threshold set to {threshold}", color=0x9e3bff)
         await interaction.response.send_message(embed=embed, ephemeral=False)
     
-    @app_commands.command(nae="selfstar", description="Toggle starboard self star")
+    @app_commands.command(name="selfstar", description="Toggle starboard self star")
     @app_commands.describe(toggle="True/False")
     @app_commands.default_permissions(manage_guild=True)
     async def selfstar(self, interaction: discord.Interaction, toggle: bool=False):
@@ -250,7 +250,7 @@ class Commands_Checks(commands.GroupCog):
         embed = discord.Embed(title="Starboard Self Star", description=f"Starboard self star set to {'<:Toggle_on:1029771260114243584>' if toggle else '<:Toggle_off:1029770614430498926>'}", color=0x9e3bff)
         await interaction.response.send_message(embed=embed, ephemeral=False)
     
-    @app_commands.command(nae="info", description="Get starboard info")
+    @app_commands.command(name="info", description="Get starboard info")
     @app_commands.default_permissions(manage_guild=True)
     async def info(self, interaction: discord.Interaction):
         guild_data = await self.bot.config.find(interaction.guild.id)
