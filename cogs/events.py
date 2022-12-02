@@ -43,7 +43,7 @@ class Events(commands.Cog):
                 
                 await interaction.response.send_message(embed=embed)
             except:
-                await interaction.followup.send(embed=embed, ephemeral=True)
+                await interaction.edit_original_response(embed=embed)
     
     @tasks.loop(seconds=300)
     async def check_update_task(self):
