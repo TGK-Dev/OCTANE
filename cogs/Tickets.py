@@ -63,7 +63,7 @@ class Ticket_slash(commands.GroupCog, name="ticket", description="ticket system 
         await interaction.channel.set_permissions(target, read_messages=True, send_messages=True, read_message_history=True, attach_files=True)
         await self.bot.tickets.update(data)
         embed = discord.Embed(description=f"<a:check:998834454292344842> | Added {target.mention}", color=discord.Color.blurple())
-        await interaction.edit_original_message(embed=embed)
+        await interaction.edit_original_response(embed=embed)
 
         embed = discord.Embed(description=f"User: {target.mention}\nAction: Added to Ticket {interaction.channel.mention} by {interaction.user.mention}", color=discord.Color.red())
         ticket_config = await self.bot.ticket_system.find(interaction.guild.id)
@@ -86,19 +86,19 @@ class Ticket_slash(commands.GroupCog, name="ticket", description="ticket system 
             if target.id in data['add_roles']:
                 data['add_roles'].remove(target.id)
             else:
-                await interaction.edit_original_message(embed=discord.Embed(description="Role not found in ticket", color=discord.Color.red()))
+                await interaction.edit_original_response(embed=discord.Embed(description="Role not found in ticket", color=discord.Color.red()))
                 return
         elif isinstance(target, discord.Member):
             if target.id in data['add_users']:
                 data['add_users'].remove(target.id)
             else:
-                await interaction.edit_original_message(embed=discord.Embed(description="User not found in ticket", color=discord.Color.red()))
+                await interaction.edit_original_response(embed=discord.Embed(description="User not found in ticket", color=discord.Color.red()))
                 return
         
         await interaction.channel.set_permissions(target, read_messages=None, send_messages=None, read_message_history=None, attach_files=None)
         await self.bot.tickets.update(data)
         embed = discord.Embed(description=f"<a:check:998834454292344842> | Removed {target.mention}", color=discord.Color.blurple())
-        await interaction.edit_original_message(embed=embed)
+        await interaction.edit_original_response(embed=embed)
 
         embed = discord.Embed(description=f"User: {target.mention}\nAction: Removed from Ticket {interaction.channel.mention} by {interaction.user.mention}", color=discord.Color.red())
         ticket_config = await self.bot.ticket_system.find(interaction.guild.id)
