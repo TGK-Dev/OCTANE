@@ -129,6 +129,7 @@ class Highlight_backend(commands.Cog, name="Votes",description="Server Vote coun
     def __init__(self, bot):
         self.bot = bot
         self.bot.hl_chache = {}
+        self.bot.ar_cache = {}
     
     async def highlight(self, message: discord.Message):
         if message.guild.id != 785839283847954433:
@@ -152,37 +153,31 @@ class Highlight_backend(commands.Cog, name="Votes",description="Server Vote coun
                     channel_member_ids = [member.id for member in message.channel.members]
                     if data['_id'] not in channel_member_ids:
                         return
-
-
-                    self.bot.dispatch("hl_trigger", message, data, msg)                    
-                    return
+                    self.bot.dispatch("hl_trigger", message, data, msg)
     
     async def autoreactions(self, message: discord.Message):
         if message.author.bot: return
-        if len(message.mentions) == 0:
-            return
-        for user in message.mentions:
-            if user.id in self.bot.hl_chache.keys():
-                data = self.bot.hl_chache[user.id]
+        if len(message.mentions) == 0: return
 
-                if data['last_react'] is None or (datetime.datetime.utcnow() - data['last_react']).total_seconds() > 10:
+        for user in message.mentions:
+            if user.id not in self.bot.ar_cache.keys():
+                continue
+            else:
+                ar_data = self.bot.ar_cache[user.id]
+                if ar_data['last_react'] is None or (datetime.datetime.utcnow() - ar_data['last_react']).total_seconds() > 20:
                     try:
-                        await message.add_reaction(str(data['autoreact']))
-                        data['last_react'] = datetime.datetime.utcnow()
-                    except KeyError:
-                        pass
+                        await message.add_reaction(ar_data['emoji'])
+                    except Exception as e:
+                        print(e)
+                    ar_data['last_react'] = datetime.datetime.utcnow()
+                    self.bot.ar_cache[user.id] = ar_data
+                    return
 
     @commands.Cog.listener()
     async def on_ready(self):
         all_hl = await self.bot.hightlights.get_all()
-        ar_data = await self.bot.perks.get_all()
-        for hl in all_hl:
-            self.bot.hl_chache[hl['_id']] = hl
-        for ar in ar_data:
-            if 'has_ar'in ar.keys():
-                if ar['has_ar'] == True:
-                    self.bot.hl_chache[ar['_id']]['autoreact'] = ar['autoreact']['emoji']
-                    self.bot.hl_chache[ar['_id']]['last_react'] = ar['autoreact']['last_react']
+        for hl in all_hl: self.bot.hl_chache[hl['_id']] = hl
+        for ar in await self.bot.autoreact.get_all(): self.bot.ar_cache[ar['_id']] = ar        
 
         print(f"{self.__class__.__name__} Cog has been loaded")
     
