@@ -1,5 +1,6 @@
 import discord
-from discord import app_commands
+from discord import app_commands, Interaction
+from discord.ext import commands
 import re
 
 time_regex = re.compile("(?:(\d{1,5})(h|s|m|d))+?")
@@ -18,4 +19,10 @@ class TimeConverter(app_commands.Transformer):
             except ValueError:
                 raise app_commands.BadArgument(f"{key} is not a number!")
         return round(time)
+
+class MutipleRole(app_commands.Transformer):
+    async def transform(self, interaction: Interaction, value: str,):
+        value = value.split(" ")
+        roles = [await commands.RoleConverter().convert(interaction, role) for role in value]
+        return roles
 
