@@ -11,39 +11,39 @@ class Events(commands.Cog):
         self.bot = bot
         self.update_task = self.check_update_task.start()
         self.vote_remider_task = self.check_remiders.start()
-        self.bot.tree.on_error = self.on_app_command_error
+        # self.bot.tree.on_error = self.on_app_command_error
     
     def cog_unload(self):
         self.check_remiders.cancel()
         self.check_update_task.cancel()
     
-    async def on_app_command_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
-        if isinstance(error, app_commands.CommandOnCooldown):
-            m, s = divmod(error.retry_after, 60)
-            h, m = divmod(m, 60)
-            if int(h) == 0 and int(m) == 0:
-                await interaction.response.send_message(f"The command is under a cooldown of **{int(s)} seconds** to prevent abuse!", ephemeral=True)
-            elif int(h) == 0 and int(m) != 0:
-                await interaction.response.send_message(
-                    f"The command is under a cooldown of **{int(m)} minutes and {int(s)} seconds** to prevent abuse!", ephemeral=True,
-                )
-            else:
-                await interaction.response.send_message(
-                    f"The command is under a cooldown of **{int(h)} hours, {int(m)} minutes and {int(s)} seconds** to prevent abuse!", ephemeral=True,
-                )
-        elif isinstance(error, app_commands.MissingPermissions):
-            await interaction.response.send_message("You are missing the required permissions to use this command!", ephemeral=True)
-        elif isinstance(error, app_commands.MissingRole):
-            await interaction.response.send_message("You are missing the required role to use this command!", ephemeral=True)
-        elif isinstance(error, app_commands.MissingAnyRole):
-            await interaction.response.send_message("You are missing the required role to use this command!", ephemeral=True)
-        else:
-            embed = discord.Embed(description="**Error:** {}".format(error), color=discord.Color.red())
-            try:
+    # async def on_app_command_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+    #     if isinstance(error, app_commands.CommandOnCooldown):
+    #         m, s = divmod(error.retry_after, 60)
+    #         h, m = divmod(m, 60)
+    #         if int(h) == 0 and int(m) == 0:
+    #             await interaction.response.send_message(f"The command is under a cooldown of **{int(s)} seconds** to prevent abuse!", ephemeral=True)
+    #         elif int(h) == 0 and int(m) != 0:
+    #             await interaction.response.send_message(
+    #                 f"The command is under a cooldown of **{int(m)} minutes and {int(s)} seconds** to prevent abuse!", ephemeral=True,
+    #             )
+    #         else:
+    #             await interaction.response.send_message(
+    #                 f"The command is under a cooldown of **{int(h)} hours, {int(m)} minutes and {int(s)} seconds** to prevent abuse!", ephemeral=True,
+    #             )
+    #     elif isinstance(error, app_commands.MissingPermissions):
+    #         await interaction.response.send_message("You are missing the required permissions to use this command!", ephemeral=True)
+    #     elif isinstance(error, app_commands.MissingRole):
+    #         await interaction.response.send_message("You are missing the required role to use this command!", ephemeral=True)
+    #     elif isinstance(error, app_commands.MissingAnyRole):
+    #         await interaction.response.send_message("You are missing the required role to use this command!", ephemeral=True)
+    #     else:
+    #         embed = discord.Embed(description="**Error:** {}".format(error), color=discord.Color.red())
+    #         try:
                 
-                await interaction.response.send_message(embed=embed)
-            except:
-                await interaction.edit_original_response(embed=embed)
+    #             await interaction.response.send_message(embed=embed)
+    #         except:
+    #             await interaction.edit_original_response(embed=embed)
     
     @tasks.loop(seconds=300)
     async def check_update_task(self):
@@ -106,17 +106,6 @@ class Events(commands.Cog):
         else:
             embed = discord.Embed(color=0xE74C3C,description=f"<:dnd:840490624670892063> | Error: `{error}`")
             await ctx.send(embed=embed)
-    
-    @commands.Cog.listener()
-    async def on_member_join(self, member):
-        if member.bot: return
-        guild_data = self.bot.config_cache.get(member.guild.id)
-        guild = member.guild
-        if not guild_data: return
-        if guild.id != 785839283847954433: return
-        
-        roles = [member.get_role(role) for role in guild_data['join_roles']]
-        await member.edit(roles=roles)
 
     @commands.Cog.listener()
     async def on_member_ban(self, guild, member):
