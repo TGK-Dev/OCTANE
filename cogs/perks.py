@@ -26,7 +26,7 @@ class Perks(commands.GroupCog):
     @perks_give.command(name="role", description="Give user an custom role perk")
     @app_commands.describe(user="User to give perks", friend_limit="Limit of friends can user add", expire="Expire time of perks")
     async def role(self, interaction: Interaction, user: discord.Member, expire:str,friend_limit: app_commands.Range[int,1, 20]=5):
-        await interaction.response.send_message("Starting the process")
+        await interaction.response.send_message("Starting the process", ephemeral=True)
 
         time= await TimeConverter().convert(interaction, expire)
         data = await self.bot.perks.find(user.id)
@@ -36,7 +36,8 @@ class Perks(commands.GroupCog):
                 'guild': interaction.guild.id,
                 'has_role_perks': None,
                 'has_channel_perks': None,
-                'has_ar': False,
+                'has_ar': None,
+                'autoreact': {'emoji': None, 'last_react': None},
                 'role_perks': {'role_id': None, 'expires': None, 'has_created': False, 'given_by': None, 'given_at': None, 'friend_limit': None, 'friends': []},
                 'channel_perks': {'channel_id': None, 'expires': None, 'has_created': False, 'given_by': None, 'given_at': None, 'friend_limit': None, 'friends': []},
             }
@@ -53,11 +54,12 @@ class Perks(commands.GroupCog):
         data['role_perks']['friend_limit'] = friend_limit
         awat = await self.bot.perks.update(data)
         await interaction.edit_original_response(content="Custom Role Perks has been given to {}".format(user.mention))
+        await interaction.channel.send(f"{user.mention} Now can create custom role by using </custom role create:1013452052401225839> ")
     
     @perks_give.command(name="channel", description="Give user an custom channel perk")
     @app_commands.describe(user="User to give perks", expire="Expire time of perks", friend_limit="Limit of friends can user add")
     async def channel(self, interaction: Interaction, user: discord.Member, expire:str, friend_limit: app_commands.Range[int,1, 20]=5):
-        await interaction.response.send_message("Starting the process")
+        await interaction.response.send_message("Starting the process", ephemeral=True)
 
         data = await self.bot.perks.find(user.id)
         if not data:
@@ -66,9 +68,10 @@ class Perks(commands.GroupCog):
                 'guild': interaction.guild.id,
                 'has_role_perks': None,
                 'has_channel_perks': None,
-                'has_ar': False,
-                'role_perks': {'role_id': None, 'expires': None, 'has_created': False, 'given_by': None, 'given_at': None, 'friend_limit': friend_limit, 'friends': []},
-                'channel_perks': {'channel_id': None, 'expires': None, 'has_created': False, 'given_by': None, 'given_at': None, 'friend_limit': friend_limit, 'friends': []},
+                'has_ar': None,
+                'autoreact': {'emoji': None, 'last_react': None},
+                'role_perks': {'role_id': None, 'expires': None, 'has_created': False, 'given_by': None, 'given_at': None, 'friend_limit': None, 'friends': []},
+                'channel_perks': {'channel_id': None, 'expires': None, 'has_created': False, 'given_by': None, 'given_at': None, 'friend_limit': None, 'friends': []},
             }
             await self.bot.perks.insert(data)
         
@@ -83,6 +86,7 @@ class Perks(commands.GroupCog):
         data['channel_perks']['friend_limit'] = 5
         await self.bot.perks.update(data)
         await interaction.edit_original_response(content="Custom Channel Perks has been given to {}".format(user.mention))
+        await interaction.followup.send_message(f"{user.mention} you can now create a custom channel by using </custom channel create:1013452052401225839> command")
 
     @app_commands.command(name="config", description="Configure perks")
     @app_commands.describe(role_poistion="Positiob of role to create", category="Category of channel to create")
@@ -126,8 +130,8 @@ class Perks(commands.GroupCog):
                 'guild': interaction.guild.id,
                 'has_role_perks': None,
                 'has_channel_perks': None,
-                'has_ar': False,
-                'autoreact': {'emoji': None},
+                'has_ar': None,
+                'autoreact': {'emoji': None, 'last_react': None},
                 'role_perks': {'role_id': None, 'expires': None, 'has_created': False, 'given_by': None, 'given_at': None, 'friend_limit': None, 'friends': []},
                 'channel_perks': {'channel_id': None, 'expires': None, 'has_created': False, 'given_by': None, 'given_at': None, 'friend_limit': None, 'friends': []},
             }
@@ -135,7 +139,8 @@ class Perks(commands.GroupCog):
         data['has_ar'] = True
         await self.bot.perks.update(data)
         embed = discord.Embed(description="Successfully given autoreact perks to {}".format(user.mention), color=discord.Color.green())
-        await interaction.response.send_message(embed=embed, ephemeral=False)
+        await interaction.channel.send(f"{user.mention} You can now use autoreact perks, please use </custom autoreact set:1013452052401225839> to set the emoji")
+        await interaction.response.send_message(embed=embed, ephemeral=True)
         
 class Custom(commands.GroupCog):
     def __init__(self, bot):
@@ -305,7 +310,7 @@ class Custom(commands.GroupCog):
             await interaction.response.send_message("This member already has the role", ephemeral=True)
             return
         await member.add_roles(role)
-        data['role_perks']['friends'].append(member.id)
+        data['role_perks']['friends'].append(member.id) 
         await self.bot.perks.update(data)
         embed = discord.Embed(description="<:dynosuccess:1000349098240647188> | Added {role.mention} to your friend {member.mention}".format(role=role, member=member), color=discord.Color.green())
         await interaction.response.send_message(embed=embed)
@@ -526,7 +531,7 @@ class Custom(commands.GroupCog):
 
         data['autoreact']['emoji'] = emoji
         await self.bot.perks.upsert(data)
-        self.bot.hl_cache[interaction.user.id] = data
+        self.bot.hl_chache[interaction.user.id]['autoreact'] = data['autoreact']['emoji']
 
         embed = discord.Embed(description="<:dynosuccess:1000349098240647188> | Set autoreact emoji to {emoji}".format(emoji=emoji), color=discord.Color.green())
         await interaction.response.send_message(embed=embed)

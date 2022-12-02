@@ -65,7 +65,6 @@ class Bot(commands.Bot):
             if file.endswith('.py') and not file.startswith("_")and not file.startswith("dankremider"):
                 await bot.load_extension(f'cogs.{file[:-3]}')
 
-
 bot = Bot()
 
 load_dotenv()

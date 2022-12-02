@@ -182,6 +182,7 @@ class Highlight_backend(commands.Cog, name="Votes",description="Server Vote coun
             if 'has_ar'in ar.keys():
                 if ar['has_ar'] == True:
                     self.bot.hl_chache[ar['_id']]['autoreact'] = ar['autoreact']['emoji']
+                    self.bot.hl_chache[ar['_id']]['last_react'] = ar['autoreact']['last_react']
 
         print(f"{self.__class__.__name__} Cog has been loaded")
     
