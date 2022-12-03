@@ -181,8 +181,6 @@ class Payout(commands.GroupCog, name="payout"):
 		if data: return await interaction.edit_original_response(content="Payout already set for this event")
 		data = {'_id': message.id, 'channel' : channel.id, 'guild' : interaction.guild.id,'event': event,'winner': winner.id,'prize': prize,'set_by': interaction.user.id, 'log_channel_id': None}
 
-		await interaction.edit_original_response(content="Payout added to queue successfully")
-
 		embed = discord.Embed(title="Payout Queued")
 		embed.add_field(name="Event", value=f"**<:nat_reply_cont:1011501118163013634> {event}**")
 		embed.add_field(name="Winner", value=f"**<:nat_reply_cont:1011501118163013634> {winner.mention}**")
@@ -200,6 +198,10 @@ class Payout(commands.GroupCog, name="payout"):
 		msg = await payout_channel.send(embed=embed, content=f"{winner.mention}, you will be paid out in the next `24hrs`! \n> If not paid within the deadline claim from <#785901543349551104>.", view=Payout_Buttton())
 		data['log_channel_id'] = msg.id
 		await self.bot.payout.insert(data)
+		
+		view = discord.ui.View()
+		view.add_item(discord.ui.Button(label=f'Go to Payout-Queue', url=f"{msg.jump_url}"))
+		await interaction.edit_original_response(content="` - ` Payout is queued successfully!", view=view)
 
 async def setup(bot):
 	await bot.add_cog(Payout(bot), guild=discord.Object(785839283847954433))
