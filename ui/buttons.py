@@ -125,12 +125,15 @@ class Payout_Buttton(discord.ui.View):
             button.label = "Paid Successfully!"
 
             guild = interaction.guild
-            channel = guild.get_channel(int(data["message_link"][-2]))
-            message = await channel.fetch_message(data["message_link"][-1])
+            channel = guild.get_channel(int(data["channel"]))
+            message = await channel.fetch_message(data["_id"])
             await message.add_reaction("<:paid:1035061256073248849>")
 
             await interaction.message.edit(embed=embed, content="", view=self)
-            await interaction.edit_original_response(content=f"Payout Marked as done successfully for {message.jump_url}")
+            view = discord.ui.View()
+            view.add_item(discord.ui.Button(label=f'Winner Message', url=f"{message.jump_url}"))
+            view.add_item(discord.ui.Button(label=f'Payout Queue Message', url=f"{interaction.message.jump_url}"))
+            await interaction.edit_original_response(content=f"` - ` Successfully completed payout!", view= view)
             await interaction.client.payout.delete(data["_id"])
     
     async def on_error(self, interaction: Interaction, error: Exception, item: discord.ui.Item):
