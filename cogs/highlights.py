@@ -168,10 +168,9 @@ class Highlight_backend(commands.Cog, name="Votes",description="Server Vote coun
                     try:
                         await message.add_reaction(ar_data['emoji'])
                     except Exception as e:
-                        print(e)
+                        pass
                     ar_data['last_react'] = datetime.datetime.utcnow()
                     self.bot.ar_cache[user.id] = ar_data
-                    return
 
     @commands.Cog.listener()
     async def on_ready(self):
