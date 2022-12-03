@@ -167,7 +167,7 @@ class Payout(commands.GroupCog, name="payout"):
 	
 	@app_commands.command(name="set", description="Set dank related payouts")
 	@app_commands.describe(event="event name", message_id="winner message id", winner="winner of the event", prize="what did they win?")
-	async def set(self, interaction: Interaction, event: str, message_id: float, winner: discord.Member, prize: str):
+	async def set(self, interaction: Interaction, event: str, message_id: str, winner: discord.Member, prize: str):
 		await interaction.response.send_message("Setting payout...", ephemeral=True)
 
 		channel = interaction.channel
