@@ -6,8 +6,13 @@ from typing import Literal, List
 from utils.paginator import Paginator
 from utils.db import Document
 from discord.app_commands import Group
+from ui.confirm import Confirm
+import asyncio
+import string
+import random
 
 staff_list = {
+    'Head Administator': 785845265118265376,
     'Moderator': 787259553225637889,
     'TRIAL MODERATOR': 843775369470672916,
     'Partnership Manager': 831405039830564875,
@@ -63,7 +68,7 @@ class Staff(commands.GroupCog, name="staff", description="Staff management comma
         await self.bot.wait_until_ready()
 
     @app_commands.command(name="appoint", description="appoint staff to user")
-    @app_commands.choices(post=[app_commands.Choice(name="TRIAL MODERATOR", value=str(843775369470672916)), app_commands.Choice(name="Partnership Manager", value=str(831405039830564875)), app_commands.Choice(name="Giveaway Manager", value=str(803230347575820289)), app_commands.Choice(name="Event Manager", value=str(852125566802198528))])
+    @app_commands.choices(post=[app_commands.Choice(name="Moderator", value=str(787259553225637889)),app_commands.Choice(name="TRIAL MODERATOR", value=str(843775369470672916)), app_commands.Choice(name="Partnership Manager", value=str(831405039830564875)), app_commands.Choice(name="Giveaway Manager", value=str(803230347575820289)), app_commands.Choice(name="Event Manager", value=str(852125566802198528))])
     @app_commands.checks.has_permissions(administrator=True)
     async def appoint_user(self, interaction: discord.Interaction, user: discord.Member, post: app_commands.Choice[str]):
         staff_role = discord.utils.get(interaction.guild.roles, id=int(post.value))
@@ -134,6 +139,10 @@ class Staff(commands.GroupCog, name="staff", description="Staff management comma
                 for staff in staff_list:
                     if staff['post'] == []:
                         continue
+                    if "Head Administator" in staff['post']:
+                        hadmin.description += f"<@{staff['_id']}>\n"
+                    if "Administator" in staff['post']:
+                        admin.description += f"<@{staff['_id']}>\n"
                     if 'Moderator' in staff['post']:
                         moderator.description += f"<@{staff['_id']}>\n"
                     if 'TRIAL MODERATOR' in staff['post']:
@@ -146,7 +155,7 @@ class Staff(commands.GroupCog, name="staff", description="Staff management comma
                         event_manager.description += f"<@{staff['_id']}>\n"
             
                 embeds = [hadmin, admin, moderator, trial_moderator, partnership_manager, giveaway_manager, event_manager]
-                await Paginator(interaction, embeds).start(embeded=True, quick_navigation=True)
+                await Paginator(interaction, embeds).start(embeded=True, quick_navigation=False)
             if short:
                 embed = discord.Embed(title=short.name, color=discord.Color.green(), description="")
                 for staff in staff_list:
@@ -217,6 +226,75 @@ class Staff(commands.GroupCog, name="staff", description="Staff management comma
         leave_role = discord.utils.get(interaction.guild.roles, id=787055415157850142)
         await member.remove_roles(leave_role, reason=f"Leave removed")
         await interaction.edit_original_response(content=f"Leave removed for {member.mention}")
+    
+    @app_commands.command(name='gen-key', description="Generate a key for a staff member")
+    @app_commands.describe(member="Member to generate key for")
+    async def _gen_key(self, interaction: discord.Interaction, member: discord.Member):
+        #generate key of 10 random characters and numbers with uppercase and lowercase letters
+        key = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
+        data = await self.bot.staff.find(member.id)
+        if not data:
+            await interaction.response.send_message(f"{member.mention} is not staff", ephemeral=True)
+            return
+        if data['recovery_code'] != None:
+            await interaction.response.send_message(f"{member.mention} already has a recovery code", ephemeral=True)
+            return
+        
+        data['recovery_code'] = key
+        await self.bot.staff.update(data)
+        await interaction.response.send_message(f"Recovery code for {member.mention} successfully generated", ephemeral=True)
+        try:
+            embed = discord.Embed(title="Recovery Code", description=f"", color=discord.Color.green())
+            embed.description = "You have received a recovery code incase you lost access to your current discord account,"
+            embed.description += "If you have lost access to your current discord account, you can use this code to recover your staff account,"
+            embed.description += "To recover your account use the command `-recover <code>` in my DMs with account your other account."
+            embed.description += "\n\n**Please keep this code safe and do not share it with anyone.**"
+            embed.description += "\n**Higer staff members/owners or anyone will never ask you for this code.**"
+            embed.add_field(name="Recovery Code", value=key, inline=False)
+            await member.send(embed=embed)
+            await interaction.edit_original_response(content=f"Recovery code for {member.mention} successfully generated and sent to them")
+        except:
+            await interaction.edit_original_response(content=f"Recovery code for {member.mention} successfully generated but could not send to them")
+            data['recovery_code'] = None
+            await self.bot.staff.update(data)
+
+    @commands.command(name='recover', description="Recover a staff account")
+    @commands.dm_only()
+    async def _recover(self, ctx, code):
+        #check if channel is DMs
+        if ctx.guild:
+            return
+        #check if code is valid
+        data = await self.bot.staff.find_by_custom({'recovery_code': code})
+        if not data:
+            await ctx.message.add_reaction('❌')
+            return
+        staff_member = self.bot.get_user(data['_id'])
+        embed = discord.Embed(title="Recovery Code", description=f"", color=discord.Color.green())
+        embed.description += f"Do you want to recover {staff_member.name}#{staff_member.discriminator} account?\n"
+        embed.description += "Using this code will invalidate the code and you will not be able to use it again.\n"
+        embed.description += "you need to have request new code after successful recovery."
+        embed.set_footer(text=f"reply with yes or no")
+        await ctx.send(embed=embed)
+        def check(m):
+            return m.author == ctx.author and m.channel == ctx.channel
+        try:
+            msg = await self.bot.wait_for('message', check=check, timeout=60)
+        except asyncio.TimeoutError:
+            await ctx.send('Timed out, please try again.')
+            return
+        if msg.content.lower() == 'yes':
+            data['recovery_code'] = None
+            data['recovery_user'] = ctx.author.id
+            await self.bot.staff.update(data)
+            await ctx.send(f"Your account recovery request has been sent to server owners. Please wait for them to accept your request.")
+        else:
+            return await ctx.send(f"Recovery request cancelled")
+        
+        admin_channel = self.bot.get_channel(792246185238069249)
+        embed = discord.Embed(title="Recovery Code", description=f"", color=discord.Color.green())
+        embed.description += f"User {ctx.author.mention} wants to recover {staff_member.mention} account."
+        await admin_channel.send(embed=embed, content="@here")
 
         
 async def setup(bot):
