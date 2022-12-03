@@ -167,13 +167,13 @@ class Payout(commands.GroupCog, name="payout"):
 	
 	@app_commands.command(name="set", description="Set dank related payouts")
 	@app_commands.describe(event="event name", message_id="winner message id", winner="winner of the event", prize="what did they win?")
-	async def set(self, interaction: Interaction, event: str, message_id: int, winner: discord.Member, prize: str):
+	async def set(self, interaction: Interaction, event: str, message_id: float, winner: discord.Member, prize: str):
 		await interaction.response.send_message("Setting payout...", ephemeral=True)
 
 		channel = interaction.channel
 
 		try:
-			message = await interaction.channel.fetch_message(message_id)
+			message = await interaction.channel.fetch_message(int(message_id))
 		except discord.NotFound:
 			return await interaction.edit_original_response(content=f"Invalid Message ID provided! \n > Message ID should be from the same channel as the one in which you are using the command!")
 		
