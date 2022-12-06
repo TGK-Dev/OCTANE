@@ -14,7 +14,7 @@ class Anti_nuke(commands.Cog):
     async def on_ready(self):
         self.bot.quarantine = Document(self.bot.db, "Quarantine")
         self.bypass_role = []
-        for i in [785842380565774368, 803635405638991902, 823647447271211059]:
+        for i in [785842380565774368, 803635405638991902, 823647447271211059, 1049739291753975811]:
             guild = self.bot.get_guild(785839283847954433)
             role = guild.get_role(i)
             self.bypass_role.append(role)
