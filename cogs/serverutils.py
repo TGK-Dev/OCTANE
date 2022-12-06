@@ -144,7 +144,7 @@ class Payout(commands.GroupCog, name="payout"):
 		embed = message.embeds[0]
 		if embed.title == "<:Crwn2:872850260756664350> **__WINNER!__**" and len(message.mentions) == 1:
 			winner = message.mentions[0]
-			prize = "10M Dmc"
+			prize = "5M Dmc"
 			event = "daily Rumble"
 
 			data = {'_id': message.id, 'channel' : message.channel.id, 'guild' : message.guild.id,'event': event,'winner': winner.id,'prize': prize,'set_by': "Automatic Payout System", 'log_channel_id': None}
