@@ -125,7 +125,7 @@ class Payout_Buttton(discord.ui.View):
             button.label = "Paid Successfully!"
 
             guild = interaction.guild
-            gk = self.bot.get_guild(785839283847954433)
+            # gk = self.bot.get_guild(785839283847954433)
             paidemoji = await guild.fetch_emoji(1035061256073248849)
             channel = guild.get_channel(int(data["channel"]))
             try:
