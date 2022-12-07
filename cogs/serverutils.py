@@ -10,6 +10,14 @@ from utils.db import Document
 from ui.buttons import Payout_Buttton
 import os
 
+
+auto_payout = {
+	1049233633371750400: {'prize': '6.9M', 'event': '69 Player Rumble'},
+	1049233702355468299: {'prize': '10M', 'event': '100 Player Rumble'}, 
+	1040975933772931172: {'prize': '5M', 'event': 'Daily Rumble'},
+	1042408506181025842: {'prize': '25M', 'event': 'Weekly Rumble'},
+}	
+
 class Dump(commands.GroupCog, name="dump", description="dump data"):
 	def __init__(self, bot):
 		self.bot = bot
@@ -138,14 +146,14 @@ class Payout(commands.GroupCog, name="payout"):
 		if message.guild is None or message.guild.id != 785839283847954433: return
 		if not message.author.bot: return
 		if message.author.id != 693167035068317736: return
-		if message.channel.id != 1040975933772931172: return
+		if message.channel.id not in auto_payout.keys(): return
 		if len(message.embeds) == 0: return
 
 		embed = message.embeds[0]
 		if embed.title == "<:Crwn2:872850260756664350> **__WINNER!__**" and len(message.mentions) == 1:
 			winner = message.mentions[0]
-			prize = "5M Dmc"
-			event = "daily Rumble"
+			prize = auto_payout[message.channel.id]['prize']
+			event = auto_payout[message.channel.id]['event']
 
 			data = {'_id': message.id, 'channel' : message.channel.id, 'guild' : message.guild.id,'event': event,'winner': winner.id,'prize': prize,'set_by': "Automatic Payout System", 'log_channel_id': None}
 
