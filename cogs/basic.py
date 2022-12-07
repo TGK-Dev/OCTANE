@@ -178,7 +178,7 @@ class AFK(commands.Cog, name="AFK", description="Member Afk Module"):
                     afk = self.bot.current_afk[user.id]
                     await message.reply(f"{user.mention} is AFK Since <t:{afk['time']}:R>\nReason: {afk['message']}", delete_after=10, allowed_mentions=discord.AllowedMentions(users=False, roles=False, everyone=False))
                     data = await self.bot.afk.find(user.id)
-                    data['total_mentions'] += 1
+                    data['total_afk'] += 1
                     await self.bot.afk.upsert(data)
                     self.bot.current_afk[user.id] = data
         

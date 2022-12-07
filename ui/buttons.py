@@ -126,7 +126,12 @@ class Payout_Buttton(discord.ui.View):
 
             guild = interaction.guild
             # gk = self.bot.get_guild(785839283847954433)
-            paidemoji = await guild.fetch_emoji(1035061256073248849)
+            paidemoji = interaction.client.get_emoji(1035061256073248849)
+            if paidemoji is None:
+                paidemoji = await guild.fetch_emoji(1035061256073248849)
+                if paidemoji is None:
+                    paidemoji = "✅"
+
             channel = guild.get_channel(int(data["channel"]))
             try:
                 message = await channel.fetch_message(data["_id"])
