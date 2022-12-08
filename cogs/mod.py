@@ -188,7 +188,7 @@ class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
             return await interaction.response.send_message("You can't kick this user", ephemeral=True)
         if member.top_role >= interaction.guild.me.top_role:
             return await interaction.response.send_message("I can't kick this user", ephemeral=True)
-        if member.top_role >= interaction.author.top_role:
+        if member.top_role >= interaction.user.top_role:
             return await interaction.response.send_message("You can't kick this user due to role hierarchy", ephemeral=True)
         try:
             await member.send(embed=discord.Embed(description=f"You have been kicked from {interaction.guild.name}\n**Reason**: {reason}", color=discord.Color.red()))
