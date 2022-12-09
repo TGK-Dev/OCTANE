@@ -33,7 +33,7 @@ class Dump(commands.GroupCog, name="dump", description="dump data"):
 			await interaction.response.send_message(msg, embed=embed)
 
 		elif len(role.members) > 10:
-			await interaction.response.send_message("Role has too many members making file to send.")
+			await interaction.response.send_message("Role has totoal of {len(role.members)}, preparing text which contain list of all members with roles")
 			members = ""
 			for member in role.members:
 				members += f"{member.name} | `{member.id}`\n"
