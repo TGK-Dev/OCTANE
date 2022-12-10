@@ -148,7 +148,7 @@ class serversettings(commands.GroupCog):
         embed.add_field(name="Action", value=data["joingate"]["action"])
         embed.add_field(name="Account Age", value=f'{data["joingate"]["accountage"]} Days')
         embed.add_field(name="Decancer", value=data["joingate"]["decancer"] if data["joingate"]["decancer"] else "Disabled")
-        embed.add_field(name="Whitelist", value=", ".join(data["joingate"]["whitelist"]) if data["joingate"]["whitelist"] else "None")
+        embed.add_field(name="Whitelist", value=", ".join(f'<@{user}>' for user in data['joingate']['whitelist']) if data["joingate"]["whitelist"] else "None")
         embed.add_field(name="Autorole", value=", ".join([f"<@&{role}>" for role in data["joingate"]["autorole"]]) if data["joingate"]["autorole"] else "None")
         embed.add_field(name="Log Channel", value=f"<#{data['joingate']['logchannel']}>")
         await interaction.response.send_message(embed=embed)

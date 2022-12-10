@@ -391,6 +391,54 @@ class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
     async def afk_error(self, interaction: discord.Interaction, error):
         embed = discord.Embed(description=f"Error | {error}",color=discord.Color.red())
         await interaction.response.send_message(embed=embed,ephemeral=True)
+    
+    @app_commands.command(name="quarantin", description="Quarantine a user")
+    @app_commands.describe(member="User to quarantine", reason="Reason for quarantine")
+    @app_commands.checks.has_permissions(ban_members=True)
+    async def quarantine(self, interaction: discord.Interaction, member: discord.Member, reason: str):
+        data = await self.bot.qurantine.find(member.id)
+        if data: return await interaction.response.send_message("This user is already quarantined", ephemeral=True)
+
+        quran = discord.utils.get(interaction.guild.roles, name="Quarantine")
+        if not quran: return await interaction.response.send_message("The role `Quarantine` doesn't exist ping owner fast", ephemeral=True)
+        await interaction.response.send_message("Quarantining user...", ephemeral=True)
+        data = {"_id": member.id, "roles": [role.id for role in member.roles], "guild": interaction.guild.id, 'reason': reason}
+
+        roles = [role for role in member.roles if role.managed]
+        roles.append(quran)
+        await member.edit(roles=roles)
+        await self.bot.qurantine.insert(data)
+        try:
+            await member.send(f"You have been quarantined in {interaction.guild.name} for {reason}")
+        except:
+            pass
+        embed = discord.Embed(description=f"{member.mention} has been warned\n**Reason**: {reason}", color=0x2f3136)
+        await interaction.channel.send(embed=embed)
+        await interaction.edit_original_response(embed=embed, content=None)
+        await self.send_modlog(interaction.user.mention, member, reason, "Quarantine")
+
+    @app_commands.command(name="unquarantin", description="Unquarantine a user")
+    @app_commands.describe(member="User to unquarantine")
+    @app_commands.checks.has_permissions(administrator=True)
+    async def unquarantine(self, interaction: discord.Interaction, member: discord.Member):
+        data = await self.bot.qurantine.find(member.id)
+        if not data: return await interaction.response.send_message("This user isn't quarantined", ephemeral=True)
+
+        quran = discord.utils.get(interaction.guild.roles, name="Quarantine")
+        if not quran: return await interaction.response.send_message("The role `Quarantine` doesn't exist ping owner fast", ephemeral=True)
+        await interaction.response.send_message("Unquarantining user...", ephemeral=True)
+        roles = [interaction.guild.get_role(role) for role in data['roles']]
+        await member.edit(roles=roles)
+        await self.bot.qurantine.delete(member.id)
+        try:
+            await member.send(f"You have been unquarantined in {interaction.guild.name}")
+        except:
+            pass
+        embed = discord.Embed(description=f"{member.mention} has been unquarantined", color=0x2f3136)
+        await interaction.channel.send(embed=embed)
+        await interaction.edit_original_response(embed=embed, content=None)
+        await self.send_modlog(interaction.user.mention, member, "None", "Unquarantine")
+
         
 async def setup(bot):
     await bot.add_cog(Mod(bot), guilds=[discord.Object(785839283847954433)])

@@ -2,7 +2,7 @@ import datetime
 import discord
 import aiohttp
 import asyncio
-from discord.ext import commands
+from discord.ext import commands, tasks
 from discord import Webhook, app_commands, Interaction
 from utils.db import Document
 from typing import Union
@@ -356,17 +356,17 @@ class Anti_Nuke(commands.GroupCog, name="antinuke", description="Manage the anti
         if option == 'Roles':
             pages = []
             for key in guild_data['role']:
-                embed = discord.Embed(title=f"Role {key} Settings", description="", color=discord.Color.green())
-                embed.add_field(name="Users", value="\n".join([f"<@{i}>" for i in guild_data['role'][key]['users']]) if len(guild_data['role'][key]['users']) > 0 else "None")
+                embed = discord.Embed(title=f"Role {key.capitalize()} Settings", description="", color=discord.Color.green())
+                #embed.add_field(name="Users", value="\n".join([f"<@{i}>" for i in guild_data['role'][key]['users']]) if len(guild_data['role'][key]['users']) > 0 else "None")
                 embed.add_field(name="Roles", value="\n".join([f"<@&{i}>" for i in guild_data['role'][key]['roles']]) if len(guild_data['role'][key]['roles']) > 0 else "None")
-                embed.add_field(name="Punishment", value=guild_data['role'][key]['punishment']['type'] if guild_data['role'][key]['punishment']['type'] is not None else "None")
+                embed.add_field(name="Punishment", value=guild_data['role'][key]['punishment']['type'] if guild_data['role'][key]['punishment']['type'] != "None" else "None")
                 pages.append(embed)
-            
+
             await Paginator(pages=pages, interaction=interaction).start(quick_navigation=False,embeded=True)        
         elif option == 'Channel':
             pages = []
             for key in guild_data['channel']:
-                embed = discord.Embed(title=f"Channel {key} Settings", description="", color=discord.Color.green())
+                embed = discord.Embed(title=f"Channel {key.capitalize()} Settings", description="", color=discord.Color.green())
                 embed.add_field(name="Users", value="\n".join([f"<@{i}>" for i in guild_data['channel'][key]['users']]) if len(guild_data['channel'][key]['users']) > 0 else "None")
                 embed.add_field(name="Roles", value="\n".join([f"<@&{i}>" for i in guild_data['channel'][key]['roles']]) if len(guild_data['channel'][key]['roles']) > 0 else "None")
                 embed.add_field(name="Punishment", value=guild_data['channel'][key]['punishment']['type'] if guild_data['channel'][key]['punishment']['type'] != "None" else "None")
@@ -391,13 +391,38 @@ class Anti_Nuke(commands.GroupCog, name="antinuke", description="Manage the anti
         await self.bot.antinuke.update(config)
         self.bot.master_config = config
         await interaction.response.send_message(embed=discord.Embed(description=f"<:dynosuccess:1000349098240647188> | Set the log channel to {channel.mention}", color=discord.Color.green()), ephemeral=False)
+    
+    @app_commands.command(name="set-quarantine", description="Set the quarantine role for the antinuke")
+    @app_commands.check(is_me)
+    @app_commands.default_permissions(administrator=True)
+    async def set_quarantine(self, interaction: Interaction):
+        start = datetime.datetime.now()
+        await interaction.response.send_message(embed=discord.Embed(description="<a:Do_not_disturb:1038074377306132531> | Starting up the quarantine role setup", color=discord.Color.red()), ephemeral=False)
+        qurentine_role = discord.utils.get(interaction.guild.roles, name="Quarantine")
+        if qurentine_role: await qurentine_role.delete()
+        qurentine_role = await interaction.guild.create_role(name="Quarantine", reason="Quarantine role for antinuke")
+        await qurentine_role.edit(permissions=discord.Permissions.none())
+        for channel in interaction.guild.channels:
+            await channel.set_permissions(qurentine_role, send_messages=False, read_messages=False, read_message_history=False, view_channel=False)
+            await asyncio.sleep(0.5)
+
+        await interaction.edit_original_response(embed=discord.Embed(description=f"<:octane_yes:1019957051721535618> | Successfully created the quarantine role and completed configuration in {(datetime.datetime.now() - start).total_seconds()} Seconds", color=discord.Color.green()))
 
 class Antinuke_Events(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.bot.master_config = None
+        self.bot.master_config = {}
         self.role_lock_system = None
+        self.update_cache_event = self.update_cache.start()
     
+    @tasks.loop(minutes=5)
+    async def update_cache(self):
+        self.bot.master_config = await self.bot.antinuke.find(785839283847954433)
+    
+    @update_cache.before_loop
+    async def before_update_cache(self):
+        await self.bot.wait_until_ready()
+
     @commands.Cog.listener()
     async def on_ready(self):
         await self.bot.wait_until_ready()
@@ -428,8 +453,7 @@ class Antinuke_Events(commands.Cog):
             await log_channel.send(embed=embed)
         elif punishment == "timeout":
             try:
-                pass
-                #await user.send(f"You have been timed out from {guild.name} for {reason}")
+                await user.send(f"You have been timed out from {guild.name} for {reason}")
             except:
                 pass
             await user.edit(timed_out_until=discord.utils.utcnow() + datetime.timedelta(seconds=5))
@@ -437,8 +461,7 @@ class Antinuke_Events(commands.Cog):
             await log_channel.send(embed=embed)
         elif punishment == "qurantine":
             try:
-                pass
-                #await user.send(f"You have been quarantined from {guild.name} for {reason}")
+                await user.send(f"You have been quarantined from {guild.name} for {reason}")
             except:
                 pass
             roles = [role for role in user.roles if role.managed]
@@ -456,7 +479,7 @@ class Antinuke_Events(commands.Cog):
                 await user.edit(roles=roles, reason=reason)
             embed = discord.Embed(description=f"Offender: {user.mention} ({user.id})\nAction: Quarantine\nReason: {reason}\nModerator: Antinuke-System", color=discord.Color.red())
             await log_channel.send(embed=embed)
-            await self.bot.qurantine.insert(data)
+            await self.bot.qurantine.upsert(data)
         
         end = datetime.datetime.now()
         total_ms = (end - now).total_seconds() * 1000
@@ -472,6 +495,7 @@ class Antinuke_Events(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_role_create(self, role: discord.Role):
+
         if role.guild.id != self.bot.master_config['_id']: return
         config = await self.bot.antinuke.find(role.guild.id)
         guild: discord.Guild = role.guild
