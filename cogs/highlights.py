@@ -1,9 +1,9 @@
 from discord import app_commands
-from discord.ext import commands, tasks
+from discord.ext import commands
 from copy import deepcopy
 import datetime
 import discord
-from typing import List, Optional
+from typing import List
 import asyncio
 
 class Highlight(commands.GroupCog, name="highlight", description="utils commands for highlights"):
@@ -165,19 +165,27 @@ class Highlight_backend(commands.Cog, name="Votes",description="Server Vote coun
             else:
                 ar_data = self.bot.ar_cache[user.id]
                 if ar_data['last_react'] is None or (datetime.datetime.utcnow() - ar_data['last_react']).total_seconds() > 20:
+                    emoji = self.bot.get_emoji(ar_data['emoji'])
+                    if emoji is None:
+                        await message.guild.fetch_emoji(ar_data['emoji'])
+                        if emoji is None:
+                            continue
                     try:
-                        await message.add_reaction(ar_data['emoji'])
+                        await message.add_reaction(emoji)
                     except Exception as e:
                         print(e)
+                        continue
+                    
                     ar_data['last_react'] = datetime.datetime.utcnow()
                     self.bot.ar_cache[user.id] = ar_data
-                    return
+                
 
     @commands.Cog.listener()
     async def on_ready(self):
         all_hl = await self.bot.hightlights.get_all()
         for hl in all_hl: self.bot.hl_chache[hl['_id']] = hl
-        for ar in await self.bot.autoreact.get_all(): self.bot.ar_cache[ar['_id']] = ar        
+        for ar in await self.bot.autoreact.get_all(): 
+            self.bot.ar_cache[ar['_id']] = ar
 
         print(f"{self.__class__.__name__} Cog has been loaded")
     

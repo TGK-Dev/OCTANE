@@ -9,9 +9,12 @@ from utils.converter import TimeConverter
 from ui.confirm import Confirm
 from typing import Union
 from io import BytesIO
+import re
 import asyncio
 import aiohttp
 
+#cretae an regex to get emoji id from str
+emoji_regex = re.compile(r"<a?:\w+:(\d+)>")
 class Perks(commands.GroupCog):
     def __init__(self, bot):
         self.bot = bot
@@ -53,7 +56,7 @@ class Perks(commands.GroupCog):
         data['role_perks']['expires'] = time
         data['role_perks']['given_at'] = datetime.datetime.now()
         data['role_perks']['friend_limit'] = friend_limit
-        awat = await self.bot.perks.update(data)
+        await self.bot.perks.update(data)
         await interaction.edit_original_response(content="Custom Role Perks has been given to {}".format(user.mention))
         await interaction.channel.send(f"{user.mention} Now can create custom role by using </custom role create:1013452052401225839> ")
     
@@ -137,7 +140,8 @@ class Perks(commands.GroupCog):
 class Custom(commands.GroupCog):
     def __init__(self, bot):
         self.bot = bot
-        # self.bot.perks = Document(self.bot.db, "Perks")
+        self.bot.perks = Document(self.bot.db, "Perks")
+        self.emoji_regex = re.compile(r"<a?:\w+:(\d+)>")
     role = Group(name="role", description="edit a custom role")
     channel = Group(name="channel", description="edit a custom channel")
     autoreact = Group(name="autoreact", description="edit autoreact")
@@ -521,11 +525,25 @@ class Custom(commands.GroupCog):
         if not data:
             await interaction.response.send_message("You don't have auto react perks", ephemeral=True)
             return
-        data['emoji'] = emoji
+        emojiID = self.emoji_regex.findall(emoji)
+        if not emojiID:
+            await interaction.response.send_message("Invalid emoji", ephemeral=True)
+            return
+        emojiID = int(emojiID[0])
+        emoji = self.bot.get_emoji(emojiID)
+        if not emoji:
+            await interaction.guild.fetch_emoji(emojiID)
+            if not emoji:
+                await interaction.response.send_message("Invalid emoji", ephemeral=True)
+                return
+        if emoji.guild.id != interaction.guild.id:
+            await interaction.response.send_message("Invalid emoji", ephemeral=True)
+            return
+        data['emoji'] = emoji.id
         await self.bot.autoreact.update(data)
-        embed = discord.Embed(description=f"<:dynosuccess:1000349098240647188> | Set auto react emoji to {emoji}".format(emoji=emoji), color=discord.Color.green())
+        embed = discord.Embed(description="<:dynosuccess:1000349098240647188> | Set auto react emoji to {emoji}".format(emoji=emoji), color=discord.Color.green())
         await interaction.response.send_message(embed=embed)
-        self.bot.ar_cache[interaction.user.id] = data
+
 
 async def setup(bot):
     await bot.add_cog(Perks(bot), guilds=[discord.Object(785839283847954433)])
