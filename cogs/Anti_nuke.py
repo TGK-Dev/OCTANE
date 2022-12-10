@@ -42,17 +42,16 @@ class Anti_Nuke(commands.GroupCog, name="antinuke", description="Manage the anti
     lockdown_command = app_commands.Group(name="lockdown", description="Manage the antinuke lockdown settings")
     settings = app_commands.Group(name="settings", description="show the antinuke settings")
 
+    async def is_me(interaction: discord.Interaction) -> bool:
+        return interaction.user.id in [301657045248114690, 488614633670967307]
+
+
     @commands.Cog.listener()
     async def on_ready(self):
-        # config = await self.bot.antinuke.find(785839283847954433)
-        # if config is None:
-        #     self.system_enabled = False
-        # else:
-        #     self.system_enabled = config['enabled']
-        #     self.role_lock_system = config['role_lock_system']
         print(f'{self.__class__.__name__} Commands has been loaded')
 
     @lockdown_command.command(name="add", description="Add a channel to the lockdown list")
+    @app_commands.check(is_me)
     async def lockdown_add(self, interaction: Interaction):
         config = await self.bot.antinuke.find(interaction.guild.id)
         if config is None:
@@ -82,6 +81,7 @@ class Anti_Nuke(commands.GroupCog, name="antinuke", description="Manage the anti
         self.bot.master_config = config
     
     @lockdown_command.command(name="remove", description="Remove a channel from the lockdown list")
+    @app_commands.check(is_me)
     async def lockdown_remove(self, interaction: Interaction, channel: discord.TextChannel):
         config = await self.bot.antinuke.find(interaction.guild.id)
         if config is None:
@@ -98,6 +98,7 @@ class Anti_Nuke(commands.GroupCog, name="antinuke", description="Manage the anti
         self.bot.master_config = config
 
     @lockdown_command.command(name="list", description="List all the channels in the lockdown list")
+    @app_commands.check(is_me)
     async def lockdown_list(self, interaction: Interaction):
         config = await self.bot.antinuke.find(interaction.guild.id)
         if config is None:
@@ -123,6 +124,7 @@ class Anti_Nuke(commands.GroupCog, name="antinuke", description="Manage the anti
         await Paginator(interaction, pages=embeds).start(embeded=True, quick_navigation=False)
     
     @lockdown_command.command(name="start", description="Start the lockdown")
+    @app_commands.check(is_me)
     async def lockdown_start(self, interaction: Interaction, reason: str = None):
         config = await self.bot.antinuke.find(interaction.guild.id)
         if config is None:
@@ -167,6 +169,7 @@ class Anti_Nuke(commands.GroupCog, name="antinuke", description="Manage the anti
         self.bot.master_config = config
         
     @lockdown_command.command(name="end", description="end the lockdown")
+    @app_commands.check(is_me)
     async def lockdown_end(self, interaction: Interaction, reason: str = None):
         config = await self.bot.antinuke.find(interaction.guild.id)
 
@@ -212,6 +215,7 @@ class Anti_Nuke(commands.GroupCog, name="antinuke", description="Manage the anti
 
     @role_command.command(name="whitelist", description="Mange the antinuke role config")
     @app_commands.default_permissions(administrator=True)
+    @app_commands.check(is_me)
     @app_commands.choices(option=[app_commands.Choice(name="create", value="create"), app_commands.Choice(name="delete", value="delete"), app_commands.Choice(name="edit", value="edit")])
     async def role_create(self, interaction: Interaction, option: app_commands.Choice[str],traget: Union[discord.Member, discord.Role]):
         await interaction.response.pong()
@@ -242,6 +246,7 @@ class Anti_Nuke(commands.GroupCog, name="antinuke", description="Manage the anti
     
     @role_command.command(name="punishment", description="Mange the panishment of the antinuke role config")
     @app_commands.default_permissions(administrator=True)
+    @app_commands.check(is_me)
     @app_commands.choices(
         option=[app_commands.Choice(name="create", value="create"), app_commands.Choice(name="delete", value="delete"), app_commands.Choice(name="edit", value="edit")],
         punishment=[app_commands.Choice(name="ban", value="ban"), app_commands.Choice(name="kick", value="kick"), app_commands.Choice(name="timeout", value="timeout"), app_commands.Choice(name="qurantine", value="qurantine")]
@@ -257,6 +262,7 @@ class Anti_Nuke(commands.GroupCog, name="antinuke", description="Manage the anti
     
     @role_command.command(name="lock", description="Disable role updates on users profile")
     @app_commands.default_permissions(administrator=True)
+    @app_commands.check(is_me)
     async def role_lock(self, interaction: Interaction, togggle: bool):
         config = await self.bot.antinuke.find(interaction.guild.id)
         config['role']['lock'] = togggle
@@ -266,6 +272,7 @@ class Anti_Nuke(commands.GroupCog, name="antinuke", description="Manage the anti
 
     @channel_command.command(name="whitelist", description="Mange the antinuke channel config")
     @app_commands.default_permissions(administrator=True)
+    @app_commands.check(is_me)
     @app_commands.choices(option=[app_commands.Choice(name="create", value="create"), app_commands.Choice(name="delete", value="delete"), app_commands.Choice(name="edit", value="edit")])
     async def channel_create(self, interaction: Interaction, option: app_commands.Choice[str],traget: Union[discord.Member, discord.Role]):
         config = await self.bot.antinuke.find(interaction.guild.id)
@@ -294,6 +301,7 @@ class Anti_Nuke(commands.GroupCog, name="antinuke", description="Manage the anti
         self.bot.master_config = config
 
     @channel_command.command(name="punishment", description="Mange the panishment of the antinuke channel config")
+    @app_commands.check(is_me)
     @app_commands.default_permissions(administrator=True)
     @app_commands.choices(
         option=[app_commands.Choice(name="create", value="create"), app_commands.Choice(name="delete", value="delete"), app_commands.Choice(name="edit", value="edit")],
@@ -309,6 +317,7 @@ class Anti_Nuke(commands.GroupCog, name="antinuke", description="Manage the anti
         self.bot.master_config = config
     
     @app_commands.command(name="owner", description="add/remove the owner from the antinuke config")
+    @app_commands.check(is_me)
     @app_commands.default_permissions(administrator=True)
     @app_commands.describe(traget="The user to add/remove from the owner list")
     async def anitnuke_owner(self, interaction: Interaction, traget: discord.Member):
@@ -338,6 +347,7 @@ class Anti_Nuke(commands.GroupCog, name="antinuke", description="Manage the anti
         self.bot.master_config = config
     
     @settings.command(name="show", description="Show the antinuke config")
+    @app_commands.check(is_me)
     @app_commands.default_permissions(administrator=True)
     async def show(self, interaction: Interaction, option: Literal['Roles', 'Channel', 'Lockdown', 'Owners']):
         guild_data = await self.bot.antinuke.find(interaction.guild.id)
@@ -369,6 +379,18 @@ class Anti_Nuke(commands.GroupCog, name="antinuke", description="Manage the anti
             embed.add_field(name="Channels", value="\n".join([f"<#{i}>" for i in guild_data['lockdown']['channels']]) if len(guild_data['lockdown']['channels']) > 0 else "None")
 
             await interaction.response.send_message(embed=embed, ephemeral=False)
+    
+    @app_commands.command(name="log-channel", description="Set the log channel for the antinuke")
+    @app_commands.check(is_me)
+    @app_commands.default_permissions(administrator=True)
+    async def log_channel(self, interaction: Interaction, channel: discord.TextChannel):
+        config = await self.bot.antinuke.find(interaction.guild.id)
+        if config is None:
+            return await interaction.response.send_message(embed=discord.Embed(description="<:dynoerror:1000349098240647188> | No antinuke config found", color=discord.Color.red()), ephemeral=False)      
+        config['log_channel'] = channel.id
+        await self.bot.antinuke.update(config)
+        self.bot.master_config = config
+        await interaction.response.send_message(embed=discord.Embed(description=f"<:dynosuccess:1000349098240647188> | Set the log channel to {channel.mention}", color=discord.Color.green()), ephemeral=False)
 
 class Antinuke_Events(commands.Cog):
     def __init__(self, bot):
@@ -379,7 +401,7 @@ class Antinuke_Events(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         await self.bot.wait_until_ready()
-        self.bot.master_config = await self.bot.antinuke.find(1048627964696350760)
+        self.bot.master_config = await self.bot.antinuke.find(785839283847954433)
         self.bot.qurantine = Document(self.bot.db, "qurantine")
         print(self.bot.master_config)
         #self.role_lock_system = self.bot.master_config['role']['lock']
@@ -389,7 +411,8 @@ class Antinuke_Events(commands.Cog):
         now = datetime.datetime.now()
         if punishment == "ban":
             try:
-                await user.send(f"You have been banned from {guild.name} for {reason}")
+                pass
+                #await user.send(f"You have been banned from {guild.name} for {reason}")
             except:
                 pass
             await guild.ban(user, reason=reason)
@@ -405,7 +428,8 @@ class Antinuke_Events(commands.Cog):
             await log_channel.send(embed=embed)
         elif punishment == "timeout":
             try:
-                await user.send(f"You have been timed out from {guild.name} for {reason}")
+                pass
+                #await user.send(f"You have been timed out from {guild.name} for {reason}")
             except:
                 pass
             await user.edit(timed_out_until=discord.utils.utcnow() + datetime.timedelta(seconds=5))
@@ -413,7 +437,8 @@ class Antinuke_Events(commands.Cog):
             await log_channel.send(embed=embed)
         elif punishment == "qurantine":
             try:
-                await user.send(f"You have been quarantined from {guild.name} for {reason}")
+                pass
+                #await user.send(f"You have been quarantined from {guild.name} for {reason}")
             except:
                 pass
             roles = [role for role in user.roles if role.managed]
@@ -563,5 +588,5 @@ class Antinuke_Events(commands.Cog):
                     await self.do_punishment(guild, before, "qurantine", reason="Unauthorized role staff addition", log_channel=guild.get_channel(config['log_channel']))
 
 async def setup(bot):
-    await bot.add_cog(Anti_Nuke(bot))
-    await bot.add_cog(Antinuke_Events(bot))
+    await bot.add_cog(Anti_Nuke(bot), guilds=[discord.Object(785839283847954433)])
+    await bot.add_cog(Antinuke_Events(bot), guilds=[discord.Object(785839283847954433)])
