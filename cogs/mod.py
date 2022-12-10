@@ -392,7 +392,7 @@ class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
         embed = discord.Embed(description=f"Error | {error}",color=discord.Color.red())
         await interaction.response.send_message(embed=embed,ephemeral=True)
     
-    @app_commands.command(name="quarantin", description="Quarantine a user")
+    @app_commands.command(name="quarantine", description="Quarantine a user")
     @app_commands.describe(member="User to quarantine", reason="Reason for quarantine")
     @app_commands.checks.has_permissions(ban_members=True)
     async def quarantine(self, interaction: discord.Interaction, member: discord.Member, reason: str):
@@ -415,12 +415,12 @@ class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
         embed = discord.Embed(description=f"{member.mention} has been warned\n**Reason**: {reason}", color=0x2f3136)
         await interaction.channel.send(embed=embed)
         await interaction.edit_original_response(embed=embed, content=None)
-        await self.send_modlog(interaction.user.mention, member, reason, "Quarantine")
+        await self.send_modlog(target=member, reason=reason, action="Unquarantine", moderator=interaction.user)
 
-    @app_commands.command(name="unquarantin", description="Unquarantine a user")
+    @app_commands.command(name="unquarantine", description="Unquarantine a user")
     @app_commands.describe(member="User to unquarantine")
     @app_commands.checks.has_permissions(administrator=True)
-    async def unquarantine(self, interaction: discord.Interaction, member: discord.Member):
+    async def unquarantine(self, interaction: discord.Interaction, member: discord.Member, reason: str):
         data = await self.bot.qurantine.find(member.id)
         if not data: return await interaction.response.send_message("This user isn't quarantined", ephemeral=True)
 
@@ -437,7 +437,7 @@ class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
         embed = discord.Embed(description=f"{member.mention} has been unquarantined", color=0x2f3136)
         await interaction.channel.send(embed=embed)
         await interaction.edit_original_response(embed=embed, content=None)
-        await self.send_modlog(interaction.user.mention, member, "None", "Unquarantine")
+        await self.send_modlog(target=member, reason=reason, action="Unquarantine", moderator=interaction.user)
 
         
 async def setup(bot):

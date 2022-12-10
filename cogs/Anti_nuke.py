@@ -398,7 +398,7 @@ class Anti_Nuke(commands.GroupCog, name="antinuke", description="Manage the anti
     async def set_quarantine(self, interaction: Interaction):
         start = datetime.datetime.now()
         await interaction.response.send_message(embed=discord.Embed(description="<a:Do_not_disturb:1038074377306132531> | Starting up the quarantine role setup", color=discord.Color.red()), ephemeral=False)
-        qurentine_role = discord.utils.get(interaction.guild.roles, name="Quarantine")
+        qurentine_role = discord.utils.get(interaction.guild.roles, name="Quarantined")
         if qurentine_role: await qurentine_role.delete()
         qurentine_role = await interaction.guild.create_role(name="Quarantine", reason="Quarantine role for antinuke")
         await qurentine_role.edit(permissions=discord.Permissions.none())
