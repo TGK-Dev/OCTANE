@@ -62,7 +62,7 @@ class Bot(commands.Bot):
         bot.eco_api = eco_client(bot.eco_toekn)
         
         for file in os.listdir('./cogs'):
-            if file.endswith('.py') and not file.startswith("_")and not file.startswith("dankremider"):
+            if file.endswith('.py') and not file.startswith("_"):
                 await bot.load_extension(f'cogs.{file[:-3]}')
 
 bot = Bot()
