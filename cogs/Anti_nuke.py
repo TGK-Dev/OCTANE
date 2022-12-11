@@ -436,8 +436,7 @@ class Antinuke_Events(commands.Cog):
         now = datetime.datetime.now()
         if punishment == "ban":
             try:
-                pass
-                #await user.send(f"You have been banned from {guild.name} for {reason}")
+                await user.send(f"You have been banned from {guild.name} for {reason}")
             except:
                 pass
             await guild.ban(user, reason=reason)

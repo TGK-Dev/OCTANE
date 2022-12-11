@@ -283,7 +283,7 @@ class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
         warn_data = {"user":member.id, "reason":reason, "mod":interaction.user.id, 'time': datetime.datetime.now(), "guild":interaction.guild.id}
         await self.bot.warns.insert(warn_data)
         embed = discord.Embed(description=f"{member.mention} has been warned\n**Reason**: {reason}", color=0x2f3136)
-        await interaction.channel.send(embed=embed, ephemeral=False)
+        await interaction.channel.send(embed=embed)
         await interaction.response.send_message("User has been warned Successfully", ephemeral=True)
 
         await self.send_modlog(member, interaction.user, reason, "Warn", color=discord.Color.orange())
