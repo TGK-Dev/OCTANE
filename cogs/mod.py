@@ -399,7 +399,7 @@ class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
         data = await self.bot.qurantine.find(member.id)
         if data: return await interaction.response.send_message("This user is already quarantined", ephemeral=True)
 
-        quran = discord.utils.get(interaction.guild.roles, name="Quarantine")
+        quran = discord.utils.get(interaction.guild.roles, name="Quarantined")
         if not quran: return await interaction.response.send_message("The role `Quarantine` doesn't exist ping owner fast", ephemeral=True)
         await interaction.response.send_message("Quarantining user...", ephemeral=True)
         data = {"_id": member.id, "roles": [role.id for role in member.roles], "guild": interaction.guild.id, 'reason': reason}
@@ -424,7 +424,7 @@ class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
         data = await self.bot.qurantine.find(member.id)
         if not data: return await interaction.response.send_message("This user isn't quarantined", ephemeral=True)
 
-        quran = discord.utils.get(interaction.guild.roles, name="Quarantine")
+        quran = discord.utils.get(interaction.guild.roles, name="Quarantined")
         if not quran: return await interaction.response.send_message("The role `Quarantine` doesn't exist ping owner fast", ephemeral=True)
         await interaction.response.send_message("Unquarantining user...", ephemeral=True)
         roles = [interaction.guild.get_role(role) for role in data['roles']]
