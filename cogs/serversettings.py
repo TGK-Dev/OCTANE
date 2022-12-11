@@ -224,12 +224,12 @@ class JoinGateBackEnd(commands.Cog):
                 embed.set_footer(text=f"User ID: {member.id}")
                 embed.timestamp = datetime.datetime.utcnow()
 
-                logchannel = member.guild.get_channel(data["joingate"]["logchannel"])
+                #logchannel = member.guild.get_channel(data["joingate"]["logchannel"])
                 try:
                     await member.edit(nick=new_nick, reason="joingate decancer")
                 except:
                     return
-                if logchannel: await logchannel.send(embed=embed)
+                #if logchannel: await logchannel.send(embed=embed)
 
     
     @commands.Cog.listener()
