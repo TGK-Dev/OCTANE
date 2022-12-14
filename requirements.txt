@@ -4,7 +4,7 @@ async-timeout==4.0.2
 attrs==22.1.0
 cffi==1.15.1
 charset-normalizer==2.1.1
-discord-ext-menus==1.0.0a32+g8686b5d
+discord-ext-menus @ git+https://github.com/Rapptz/discord-ext-menus
 discord.py==2.1.0
 discord.py-paginator==1.5.0
 DiscordUtils==1.2.8
