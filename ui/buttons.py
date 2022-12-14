@@ -1,7 +1,5 @@
 from discord import Interaction
 from discord.ext import commands
-from utils.functions import Make_Verify_Code
-from captcha.image import ImageCaptcha
 from io import BytesIO
 import os
 import random
@@ -9,21 +7,6 @@ import discord
 import asyncio
 import datetime
 
-class verify(discord.ui.View):
-    def __init__(self, bot):
-        super().__init__(timeout=None)
-        self.bot =  bot
-        self.guild = self.bot.get_guild(785839283847954433)
-        self.role = discord.utils.get(self.guild.roles, id=953006119436030054)
-    
-    @discord.ui.button(label="Verify", style=discord.ButtonStyle.gray, custom_id="verify", emoji="<:verify_TGK:966187540774269008>")
-    async def verify(self, interaction: discord.Interaction, button: discord.ui.Button):
-        if self.role in interaction.user.roles:
-            await interaction.response.send_message(f"you have been verified, check <#944670176115294228> and <#944670050252648468>", ephemeral=True)
-            await asyncio.sleep(2)
-            await interaction.user.remove_roles(self.role)
-        else:
-            await interaction.response.send_message("You are already verified, create ticket from <#785901543349551104>", ephemeral=True)
 class Start_Gn(discord.ui.View):
     def __init__(self, bot, interaction, number):
         self.bot = bot
