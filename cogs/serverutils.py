@@ -175,8 +175,8 @@ class Payout(commands.GroupCog, name="payout"):
 	# 		await message.channel.send(f"{winner.mention}, you prize has been queued for payout. Please wait for the payout to be processed. \n> If not paid within the deadline claim from <#785901543349551104>.")            
 	
 	@app_commands.command(name="set", description="Set dank related payouts")
-	@app_commands.describe(event="event name", message_id="winner message id", winners="winner of the event", price="what did they win?")
-	async def payout_set(self, interaction: Interaction, event: str, message_id: str, winners: app_commands.Transform[discord.Member, MultipleMember], price: str):
+	@app_commands.describe(event="event name", message_id="winner message id", winners="winner of the event", prize="what did they win?")
+	async def payout_set(self, interaction: Interaction, event: str, message_id: str, winners: app_commands.Transform[discord.Member, MultipleMember], prize: str):
 		loading_embed = discord.Embed(description=f"<a:loading:998834454292344842> | Setting up the payout for total of `{len(winners)}` winners!")
 		finished_embed = discord.Embed(description=f"")
 		await interaction.response.send_message(embed=loading_embed, ephemeral=True)
@@ -194,7 +194,7 @@ class Payout(commands.GroupCog, name="payout"):
 				embed = discord.Embed(title="Payout Queued", color=discord.Color.random(), timestamp=datetime.datetime.now())
 				embed.add_field(name="Event", value=f"**<:nat_reply_cont:1011501118163013634> {event}**")
 				embed.add_field(name="Winner", value=f"**<:nat_reply_cont:1011501118163013634> {winner.mention} ({winner.name}#{winner.discriminator})**")
-				embed.add_field(name="prize", value=f"**<:nat_reply_cont:1011501118163013634> {price}**")
+				embed.add_field(name="prize", value=f"**<:nat_reply_cont:1011501118163013634> {prize}**")
 				embed.add_field(name="Channel", value=f"**<:nat_reply_cont:1011501118163013634> {winner_message.channel.mention}**")
 				embed.add_field(name="Message Link", value=f"**<:nat_reply_cont:1011501118163013634> [Click Here]({winner_message.jump_url})**")
 				embed.add_field(name="Set By", value=f"**<:nat_reply_cont:1011501118163013634> {interaction.user.mention}**")
@@ -209,7 +209,7 @@ class Payout(commands.GroupCog, name="payout"):
 					'guild': interaction.guild.id,
 					'event': event,
 					'winner': winner.id,
-					'prize': price,
+					'prize': prize,
 					'set_by': interaction.user.id,
 					'winner_message_id': winner_message.id,
 				}
