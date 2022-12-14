@@ -199,7 +199,7 @@ class Payout(commands.GroupCog, name="payout"):
 		embed.add_field(name="Payout Status", value="**<:nat_reply_cont:1011501118163013634> Pending**")
 
 		embed.color = discord.Color.random()
-		embed.set_footer(text=f"Message ID: {mesasge.id}", icon_url=interaction.guild.icon.url)
+		embed.set_footer(text=f"Message ID: {message.id}", icon_url=interaction.guild.icon.url)
 		embed.timestamp = datetime.datetime.now()
 		
 		payout_channel = self.bot.get_channel(1031982594826457098)
