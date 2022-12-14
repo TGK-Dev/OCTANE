@@ -142,37 +142,38 @@ class Payout(commands.GroupCog, name="payout"):
 		self.bot.emoji_server = await self.bot.fetch_guild(991711295139233834)
 		print(f"{self.__class__.__name__} Cog has been loaded.")
 	
-	# @commands.Cog.listener()
-	# async def on_message(self, message: discord.Message):
-	# 	if message.guild is None or message.guild.id != 785839283847954433: return
-	# 	if not message.author.bot: return
-	# 	if message.author.id != 693167035068317736: return
-	# 	if message.channel.id not in auto_payout.keys(): return
-	# 	if len(message.embeds) == 0: return
+	@commands.Cog.listener()
+	async def on_message(self, message: discord.Message):
+		if message.guild is None or message.guild.id != 785839283847954433: return
+		if not message.author.bot: return
+		if message.author.id != 693167035068317736: return
+		if message.channel.id not in auto_payout.keys(): return
+		if len(message.embeds) == 0: return
 
-	# 	embed = message.embeds[0]
-	# 	if embed.title == "<:Crwn2:872850260756664350> **__WINNER!__**" and len(message.mentions) == 1:
-	# 		winner = message.mentions[0]
-	# 		prize = auto_payout[message.channel.id]['prize']
-	# 		event = auto_payout[message.channel.id]['event']
+		embed = message.embeds[0]
+		if embed.title == "<:Crwn2:872850260756664350> **__WINNER!__**" and len(message.mentions) == 1:
+			winner = message.mentions[0]
+			prize = auto_payout[message.channel.id]['prize']
+			event = auto_payout[message.channel.id]['event']
 
-	# 		data = {'_id': message.id, 'channel' : message.channel.id, 'guild' : message.guild.id,'event': event,'winner': winner.id,'prize': prize,'set_by': "Automatic Payout System", 'log_channel_id': None}
+			
 
-	# 		embed = discord.Embed(title="Payout Queued")
-	# 		embed.add_field(name="Event", value=f"**<:nat_reply_cont:1011501118163013634> {event}**")
-	# 		embed.add_field(name="Winner", value=f"**<:nat_reply_cont:1011501118163013634> {winner.mention}**")
-	# 		embed.add_field(name="Prize", value=f"**<:nat_reply_cont:1011501118163013634> {prize}**")
-	# 		embed.add_field(name="Channel", value=f"**<:nat_reply_cont:1011501118163013634> {message.channel.mention}**")
-	# 		embed.add_field(name="Message Link", value=f"**<:nat_reply_cont:1011501118163013634> [Click Here]({message.jump_url})**")
-	# 		embed.add_field(name="Set By", value=f"**<:nat_reply_cont:1011501118163013634> AutoMatic Payout System**")
-	# 		embed.add_field(name="Payout Status", value="**<:nat_reply_cont:1011501118163013634> Pending**")
-	# 		embed.color = discord.Color.random()
+			embed = discord.Embed(title="Payout Queued")
+			embed.add_field(name="Event", value=f"**<:nat_reply_cont:1011501118163013634> {event}**")
+			embed.add_field(name="Winner", value=f"**<:nat_reply_cont:1011501118163013634> {winner.mention} {winner.name}#{winner.discriminator}**")
+			embed.add_field(name="Prize", value=f"**<:nat_reply_cont:1011501118163013634> {prize}**")
+			embed.add_field(name="Channel", value=f"**<:nat_reply_cont:1011501118163013634> {message.channel.mention}**")
+			embed.add_field(name="Message Link", value=f"**<:nat_reply_cont:1011501118163013634> [Click Here]({message.jump_url})**")
+			embed.add_field(name="Set By", value=f"**<:nat_reply_cont:1011501118163013634> AutoMatic Payout System**")
+			embed.add_field(name="Payout Status", value="**<:nat_reply_cont:1011501118163013634> Pending**")
+			embed.set_footer(text=f"Message ID: {message.id}", icon_url=message.guild.icon.url)
+			embed.color = discord.Color.random()
 
-	# 		payout_channel = self.bot.get_channel(1031982594826457098)
-	# 		msg = await payout_channel.send(embed=embed, content=f"{winner.mention}, you will be paid out in the next `24hrs`! \n> If not paid within the deadline claim from <#785901543349551104>.", view=Payout_Buttton())
-	# 		data['log_channel_id'] = msg.id
-	# 		await self.bot.payout.insert(data)
-	# 		await message.channel.send(f"{winner.mention}, you prize has been queued for payout. Please wait for the payout to be processed. \n> If not paid within the deadline claim from <#785901543349551104>.")            
+			payout_channel = self.bot.get_channel(1031982594826457098)
+			msg = await payout_channel.send(embed=embed, content=f"{winner.mention}, you will be paid out in the next `24hrs`! \n> If not paid within the deadline claim from <#785901543349551104>.", view=Payout_Buttton())
+			data = {'_id': msg.id, 'channel' : message.channel.id, 'guild' : message.guild.id,'event': event,'winner': winner.id,'prize': prize,'set_by': "Automatic Payout System", 'winner_message_id': message.id}
+			await self.bot.payout.insert(data)
+			await message.channel.send(f"{winner.mention}, you prize has been queued for payout. Please wait for the payout to be processed. \n> If not paid within the deadline claim from <#785901543349551104>.")            
 	
 	@app_commands.command(name="set", description="Set dank related payouts")
 	@app_commands.describe(event="event name", message_id="winner message id", winners="winner of the event", prize="what did they win?")
