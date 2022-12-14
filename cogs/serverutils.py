@@ -188,7 +188,7 @@ class Payout(commands.GroupCog, name="payout"):
 		data = await self.bot.payout.find(message.id)
 		if data: return await interaction.edit_original_response(content="Payout already set for this event")
 		data = {'_id': message.id, 'channel' : channel.id, 'guild' : interaction.guild.id,'event': event,'winner': winner.id,'prize': prize,'set_by': interaction.user.id, 'log_channel_id': None}
-
+ 
 		embed = discord.Embed(title="Payout Queued")
 		embed.add_field(name="Event", value=f"**<:nat_reply_cont:1011501118163013634> {event}**")
 		embed.add_field(name="Winner", value=f"**<:nat_reply_cont:1011501118163013634> {winner.mention}**")
