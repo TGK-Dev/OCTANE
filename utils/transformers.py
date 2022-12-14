@@ -26,3 +26,9 @@ class MutipleRole(app_commands.Transformer):
         roles = [await commands.RoleConverter().convert(interaction, role) for role in value]
         return roles
 
+class MultipleMember(app_commands.Transformer):
+    async def transform(self, interaction: Interaction, value: str,):
+        value = value.split(" ")
+        value = [value.replace("<", "").replace(">", "").replace("@", "").replace("!", "") for value in value]
+        members = [interaction.guild.get_member(int(member)) for member in value if member is not None]
+        return members

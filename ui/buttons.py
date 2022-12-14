@@ -108,48 +108,38 @@ class Payout_Buttton(discord.ui.View):
     
     @discord.ui.button(label="Payout", style=discord.ButtonStyle.green, custom_id="payout")
     async def payout(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.send_message("Marking payout", ephemeral=True)
-        print(interaction.message.id)
-        data = await interaction.client.payout.find_by_custom({"log_channel_id": interaction.message.id})
-        if data is None:
-            await interaction.response.send_message("No data found", ephemeral=True)
-        else:
-            embed = interaction.message.embeds[0]
-            embed.remove_field(len(embed.fields)-1)
-            embed.add_field(name="Payout Status", value="**<:nat_reply_cont:1011501118163013634> Done**")
-            embed.title = "Successfull Payment!"
-            embed.set_footer(text="Completed At")
-            embed.add_field(name="Santioned By", value=f"**<:nat_reply_cont:1011501118163013634> {interaction.user.mention}**")
-            embed.timestamp = datetime.datetime.now()
-            button.disabled = True
-            button.label = "Paid Successfully!"
+        loadin_embed = discord.Embed(description="<a:loading:998834454292344842> | Makring payout...", color=discord.Color.blue())
+        await interaction.response.send_message(embed=loadin_embed, ephemeral=True)
 
-            guild = interaction.guild
-            # gk = self.bot.get_guild(785839283847954433)
-            paidemoji = interaction.client.get_emoji(1035061256073248849)
-            if paidemoji is None:
-                paidemoji = await guild.fetch_emoji(1035061256073248849)
-                if paidemoji is None:
-                    paidemoji = "✅"
+        data = await interaction.client.payout.find(interaction.message.id)
+        if not data: await interaction.edit_original_response(embed=discord.Embed(description="<:dynoError:1000351802702692442> | Payout not found in Database", color=discord.Color.red()))
 
-            channel = guild.get_channel(int(data["channel"]))
+        embed = interaction.message.embeds[0]
+        embed.remove_field(len(embed.fields)-1)
+        embed.add_field(name="Payout Status", value="**<:nat_reply_cont:1011501118163013634> Done**")
+        embed.title = "Successfull Payment!"
+        embed.color = discord.Color.green()
+        embed.add_field(name="Santioned By", value=f"**<:nat_reply_cont:1011501118163013634> {interaction.user.mention}**")
+        button.disabled = True
+        button.label = "Payout Successfully!"
+        
+        success_embed = discord.Embed(description="<:octane_yes:1019957051721535618> | Payout Marked Successfully!", color=discord.Color.green())
+        await interaction.edit_original_response(embed=success_embed, view=None)
+        await interaction.message.edit(view=self, embed=embed, content=None)
+        await interaction.client.payout.delete(data['_id'])
+        
+        is_more_payout_pending = await interaction.client.payout.find_many_by_custom({'winner_message_id': data['winner_message_id']})
+        if len(is_more_payout_pending) <= 0:
+            loading_emoji = await interaction.client.emoji_server.fetch_emoji(998834454292344842)
+            paid_emoji = await interaction.client.emoji_server.fetch_emoji(1052528036043558942)
+            winner_channel = interaction.client.get_channel(data['channel'])
             try:
-                message = await channel.fetch_message(data["_id"])
-                await message.add_reaction(paidemoji)
-            
-                await interaction.message.edit(embed=embed, content="", view=self)
-                view = discord.ui.View()
-                view.add_item(discord.ui.Button(label=f'Winner Message', url=f"{message.jump_url}"))
-                view.add_item(discord.ui.Button(label=f'Payout Queue Message', url=f"{interaction.message.jump_url}"))
-                await interaction.edit_original_response(content=f"` - ` Successfully completed payout!", view= view)
-                await interaction.client.payout.delete(data["_id"])
-            except discord.NotFound:
-                await interaction.message.edit(embed=embed, content="Couldn't find winners message", view=self)
-                view = discord.ui.View()
-                view.add_item(discord.ui.Button(label=f'Payout Queue Message', url=f"{interaction.message.jump_url}"))
-                await interaction.edit_original_response(content=f"` - ` Successfully completed payout!", view= view)
-                await interaction.client.payout.delete(data["_id"])
-    
+                winner_message = await winner_channel.fetch_message(data['winner_message_id'])
+                await winner_message.remove_reaction(loading_emoji, interaction.client.user)
+                await winner_message.add_reaction(paid_emoji)
+            except Exception as e:
+                pass                
+
     async def on_error(self, interaction: Interaction, error: Exception, item: discord.ui.Item):
         try:
             await interaction.response.send_message(f"Error: {error}", ephemeral=True)

@@ -4,11 +4,11 @@ from discord.ext import commands, tasks
 from discord import Interaction
 from ui.poll import *
 from copy import deepcopy
-from dateutil.relativedelta import relativedelta
 from io import BytesIO
 from utils.db import Document
 from ui.buttons import Payout_Buttton
-import os
+from utils.transformers import MultipleMember
+import asyncio
 
 
 auto_payout = {
@@ -139,77 +139,96 @@ class Payout(commands.GroupCog, name="payout"):
 	@commands.Cog.listener()
 	async def on_ready(self):
 		self.bot.add_view(Payout_Buttton())
+		self.bot.emoji_server = await self.bot.fetch_guild(991711295139233834)
 		print(f"{self.__class__.__name__} Cog has been loaded.")
 	
-	@commands.Cog.listener()
-	async def on_message(self, message: discord.Message):
-		if message.guild is None or message.guild.id != 785839283847954433: return
-		if not message.author.bot: return
-		if message.author.id != 693167035068317736: return
-		if message.channel.id not in auto_payout.keys(): return
-		if len(message.embeds) == 0: return
+	# @commands.Cog.listener()
+	# async def on_message(self, message: discord.Message):
+	# 	if message.guild is None or message.guild.id != 785839283847954433: return
+	# 	if not message.author.bot: return
+	# 	if message.author.id != 693167035068317736: return
+	# 	if message.channel.id not in auto_payout.keys(): return
+	# 	if len(message.embeds) == 0: return
 
-		embed = message.embeds[0]
-		if embed.title == "<:Crwn2:872850260756664350> **__WINNER!__**" and len(message.mentions) == 1:
-			winner = message.mentions[0]
-			prize = auto_payout[message.channel.id]['prize']
-			event = auto_payout[message.channel.id]['event']
+	# 	embed = message.embeds[0]
+	# 	if embed.title == "<:Crwn2:872850260756664350> **__WINNER!__**" and len(message.mentions) == 1:
+	# 		winner = message.mentions[0]
+	# 		prize = auto_payout[message.channel.id]['prize']
+	# 		event = auto_payout[message.channel.id]['event']
 
-			data = {'_id': message.id, 'channel' : message.channel.id, 'guild' : message.guild.id,'event': event,'winner': winner.id,'prize': prize,'set_by': "Automatic Payout System", 'log_channel_id': None}
+	# 		data = {'_id': message.id, 'channel' : message.channel.id, 'guild' : message.guild.id,'event': event,'winner': winner.id,'prize': prize,'set_by': "Automatic Payout System", 'log_channel_id': None}
 
-			embed = discord.Embed(title="Payout Queued")
-			embed.add_field(name="Event", value=f"**<:nat_reply_cont:1011501118163013634> {event}**")
-			embed.add_field(name="Winner", value=f"**<:nat_reply_cont:1011501118163013634> {winner.mention}**")
-			embed.add_field(name="Prize", value=f"**<:nat_reply_cont:1011501118163013634> {prize}**")
-			embed.add_field(name="Channel", value=f"**<:nat_reply_cont:1011501118163013634> {message.channel.mention}**")
-			embed.add_field(name="Message Link", value=f"**<:nat_reply_cont:1011501118163013634> [Click Here]({message.jump_url})**")
-			embed.add_field(name="Set By", value=f"**<:nat_reply_cont:1011501118163013634> AutoMatic Payout System**")
-			embed.add_field(name="Payout Status", value="**<:nat_reply_cont:1011501118163013634> Pending**")
-			embed.color = discord.Color.random()
+	# 		embed = discord.Embed(title="Payout Queued")
+	# 		embed.add_field(name="Event", value=f"**<:nat_reply_cont:1011501118163013634> {event}**")
+	# 		embed.add_field(name="Winner", value=f"**<:nat_reply_cont:1011501118163013634> {winner.mention}**")
+	# 		embed.add_field(name="Prize", value=f"**<:nat_reply_cont:1011501118163013634> {prize}**")
+	# 		embed.add_field(name="Channel", value=f"**<:nat_reply_cont:1011501118163013634> {message.channel.mention}**")
+	# 		embed.add_field(name="Message Link", value=f"**<:nat_reply_cont:1011501118163013634> [Click Here]({message.jump_url})**")
+	# 		embed.add_field(name="Set By", value=f"**<:nat_reply_cont:1011501118163013634> AutoMatic Payout System**")
+	# 		embed.add_field(name="Payout Status", value="**<:nat_reply_cont:1011501118163013634> Pending**")
+	# 		embed.color = discord.Color.random()
 
-			payout_channel = self.bot.get_channel(1031982594826457098)
-			msg = await payout_channel.send(embed=embed, content=f"{winner.mention}, you will be paid out in the next `24hrs`! \n> If not paid within the deadline claim from <#785901543349551104>.", view=Payout_Buttton())
-			data['log_channel_id'] = msg.id
-			await self.bot.payout.insert(data)
-			await message.channel.send(f"{winner.mention}, you prize has been queued for payout. Please wait for the payout to be processed. \n> If not paid within the deadline claim from <#785901543349551104>.")            
+	# 		payout_channel = self.bot.get_channel(1031982594826457098)
+	# 		msg = await payout_channel.send(embed=embed, content=f"{winner.mention}, you will be paid out in the next `24hrs`! \n> If not paid within the deadline claim from <#785901543349551104>.", view=Payout_Buttton())
+	# 		data['log_channel_id'] = msg.id
+	# 		await self.bot.payout.insert(data)
+	# 		await message.channel.send(f"{winner.mention}, you prize has been queued for payout. Please wait for the payout to be processed. \n> If not paid within the deadline claim from <#785901543349551104>.")            
 	
 	@app_commands.command(name="set", description="Set dank related payouts")
-	@app_commands.describe(event="event name", message_id="winner message id", winner="winner of the event", prize="what did they win?")
-	async def set(self, interaction: Interaction, event: str, message_id: str, winner: discord.Member, prize: str):
-		await interaction.response.send_message("Setting payout...", ephemeral=True)
-
-		channel = interaction.channel
+	@app_commands.describe(event="event name", message_id="winner message id", winners="winner of the event", price="what did they win?")
+	async def payout_set(self, interaction: Interaction, event: str, message_id: str, winners: app_commands.Transform[discord.Member, MultipleMember], price: str):
+		loading_embed = discord.Embed(description=f"<a:loading:998834454292344842> | Setting up the payout for total of `{len(winners)}` winners!")
+		finished_embed = discord.Embed(description=f"")
+		await interaction.response.send_message(embed=loading_embed, ephemeral=True)
+		loading_emoji = await self.bot.emoji_server.fetch_emoji(998834454292344842)
 
 		try:
-			message = await interaction.channel.fetch_message(int(message_id))
+			winner_message = await interaction.channel.fetch_message(int(message_id))
+			await winner_message.add_reaction(loading_emoji)	
 		except discord.NotFound:
-			return await interaction.edit_original_response(content=f"Invalid Message ID provided! \n > Message ID should be from the same channel as the one in which you are using the command!")
-		
-		data = await self.bot.payout.find(message.id)
-		if data: return await interaction.edit_original_response(content="Payout already set for this event")
-		data = {'_id': message.id, 'channel' : channel.id, 'guild' : interaction.guild.id,'event': event,'winner': winner.id,'prize': prize,'set_by': interaction.user.id, 'log_channel_id': None}
- 
-		embed = discord.Embed(title="Payout Queued")
-		embed.add_field(name="Event", value=f"**<:nat_reply_cont:1011501118163013634> {event}**")
-		embed.add_field(name="Winner", value=f"**<:nat_reply_cont:1011501118163013634> {winner.mention}**")
-		embed.add_field(name="prize", value=f"**<:nat_reply_cont:1011501118163013634> {prize}**")
-		embed.add_field(name="Channel", value=f"**<:nat_reply_cont:1011501118163013634> {message.channel.mention}**")
-		embed.add_field(name="Message Link", value=f"**<:nat_reply_cont:1011501118163013634> [Click Here]({message.jump_url})**")
-		embed.add_field(name="Set By", value=f"**<:nat_reply_cont:1011501118163013634> {interaction.user.mention}**")
-		embed.add_field(name="Payout Status", value="**<:nat_reply_cont:1011501118163013634> Pending**")
-
-		embed.color = discord.Color.random()
-		embed.set_footer(text=f"Message ID: {message_id}", icon_url=interaction.guild.icon.url)
-		embed.timestamp = datetime.datetime.now()
-		
+			return await interaction.edit_original_response(embed=discord.Embed(description=f"<:dynoError:1000351802702692442> | Message not found! Please make sure the message is in the same channel as the command!"))
 		payout_channel = self.bot.get_channel(1031982594826457098)
-		msg = await payout_channel.send(embed=embed, content=f"{winner.mention}, you will be paid out in the next `24hrs`! \n> If not paid within the deadline claim from <#785901543349551104>.", view=Payout_Buttton())
-		data['log_channel_id'] = msg.id
-		await self.bot.payout.insert(data)
-		
-		view = discord.ui.View()
-		view.add_item(discord.ui.Button(label=f'Go to Payout-Queue', url=f"{msg.jump_url}"))
-		await interaction.edit_original_response(content="` - ` Payout is queued successfully!", view=view)
+
+		for winner in winners:
+			if isinstance(winner, discord.Member):
+				embed = discord.Embed(title="Payout Queued", color=discord.Color.random(), timestamp=datetime.datetime.now())
+				embed.add_field(name="Event", value=f"**<:nat_reply_cont:1011501118163013634> {event}**")
+				embed.add_field(name="Winner", value=f"**<:nat_reply_cont:1011501118163013634> {winner.mention} ({winner.name}#{winner.discriminator})**")
+				embed.add_field(name="prize", value=f"**<:nat_reply_cont:1011501118163013634> {price}**")
+				embed.add_field(name="Channel", value=f"**<:nat_reply_cont:1011501118163013634> {winner_message.channel.mention}**")
+				embed.add_field(name="Message Link", value=f"**<:nat_reply_cont:1011501118163013634> [Click Here]({winner_message.jump_url})**")
+				embed.add_field(name="Set By", value=f"**<:nat_reply_cont:1011501118163013634> {interaction.user.mention}**")
+				embed.add_field(name="Payout Status", value="**<:nat_reply_cont:1011501118163013634> Pending**")
+				embed.set_footer(text=f"Message ID: {winner_message.id}", icon_url=interaction.guild.icon.url)
+
+				msg = await payout_channel.send(embed=embed, content=f"{winner.mention}, you will be paid out in the next `24hrs`! \n> If not paid within the deadline claim from <#785901543349551104>.", view=Payout_Buttton())
+				frist_payout = msg 
+				data = {
+					'_id': msg.id,
+					'channel': winner_message.channel.id,
+					'guild': interaction.guild.id,
+					'event': event,
+					'winner': winner.id,
+					'prize': price,
+					'set_by': interaction.user.id,
+					'winner_message_id': winner_message.id,
+				}
+				try:
+					await self.bot.payout.insert(data)
+					loading_embed.description += f"\n <:octane_yes:1019957051721535618> | Payout Successfully queued for {winner.mention} ({winner.name}#{winner.discriminator})"
+					finished_embed.description += f"\n <:octane_yes:1019957051721535618> | Payout Successfully queued for {winner.mention} ({winner.name}#{winner.discriminator})"
+				except:
+					loading_embed.description += f"\n <:dynoError:1000351802702692442> | Failed to queue payout for {winner.mention} ({winner.name}#{winner.discriminator})"
+					finished_embed.description += f"\n <:dynoError:1000351802702692442> | Failed to queue payout for {winner.mention} ({winner.name}#{winner.discriminator})"
+
+				await interaction.edit_original_response(embed=loading_embed)
+				await asyncio.sleep(1)
+			
+
+		link_view = discord.ui.View()
+		link_view.add_item(discord.ui.Button(label="Go to Payout-Queue", url=frist_payout.jump_url))
+		finished_embed.description += f"\n**<:nat_reply_cont:1011501118163013634> Successfully queued {len(winners)}**"
+		await interaction.edit_original_response(embed=finished_embed, view=link_view)
 
 async def setup(bot):
 	await bot.add_cog(Payout(bot), guild=discord.Object(785839283847954433))

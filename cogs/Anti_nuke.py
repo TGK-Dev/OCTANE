@@ -494,7 +494,7 @@ class Antinuke_Events(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_role_create(self, role: discord.Role):
-
+        await self.bot.wait_until_ready()
         if role.guild.id != self.bot.master_config['_id']: return
         config = await self.bot.antinuke.find(role.guild.id)
         guild: discord.Guild = role.guild
@@ -510,6 +510,7 @@ class Antinuke_Events(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_role_delete(self, role: discord.Role):
+        await self.bot.wait_until_ready()
         if role.guild.id != self.bot.master_config['_id']: return
         config = await self.bot.antinuke.find(role.guild.id)
         guild: discord.Guild = role.guild
@@ -525,6 +526,7 @@ class Antinuke_Events(commands.Cog):
     
     @commands.Cog.listener()
     async def on_guild_role_update(self, before: discord.Role, after: discord.Role):
+        await self.bot.wait_until_ready()
         if before.guild.id != self.bot.master_config['_id']: return
         config = await self.bot.antinuke.find(before.guild.id)
         guild: discord.Guild = before.guild
@@ -541,6 +543,7 @@ class Antinuke_Events(commands.Cog):
     
     @commands.Cog.listener()
     async def on_guild_channel_create(self, channel: discord.abc.GuildChannel):
+        await self.bot.wait_until_ready()
         if channel.guild.id != self.bot.master_config['_id']: return
         config = await self.bot.antinuke.find(channel.guild.id)
         guild: discord.Guild = channel.guild
@@ -557,6 +560,7 @@ class Antinuke_Events(commands.Cog):
     
     @commands.Cog.listener()
     async def on_guild_channel_delete(self, channel: discord.abc.GuildChannel):
+        await self.bot.wait_until_ready()
         if channel.guild.id != self.bot.master_config['_id']: return
         config = await self.bot.antinuke.find(channel.guild.id)
         guild: discord.Guild = channel.guild
@@ -572,6 +576,7 @@ class Antinuke_Events(commands.Cog):
         
     @commands.Cog.listener()
     async def on_guild_channel_update(self, before: discord.abc.GuildChannel, after: discord.abc.GuildChannel):
+        await self.bot.wait_until_ready()
         if before.guild.id != self.bot.master_config['_id']: return
         config = await self.bot.antinuke.find(before.guild.id)
         guild: discord.Guild = before.guild
@@ -589,6 +594,7 @@ class Antinuke_Events(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_update(self, before: discord.Member, after: discord.Member):
+        await self.bot.wait_until_ready()
         if before.guild.id != self.bot.master_config['_id']: return
         config = await self.bot.antinuke.find(before.guild.id)
         guild: discord.Guild = before.guild
