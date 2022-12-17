@@ -12,10 +12,11 @@ import asyncio
 
 
 auto_payout = {
-	1049233633371750400: {'prize': '6.9M', 'event': '69 Player Rumble'},
-	1049233702355468299: {'prize': '10M', 'event': '100 Player Rumble'}, 
-	1040975933772931172: {'prize': '5M', 'event': 'Daily Rumble'},
-	1042408506181025842: {'prize': '25M', 'event': 'Weekly Rumble'},
+	1049233574622146560: {'prize': '2 Mil', 'event': '40 Player Rumble'},
+	1049233633371750400: {'prize': '3 Mil', 'event': '69 Player Rumble'},
+	1049233702355468299: {'prize': '5 Mil', 'event': '100 Player Rumble'}, 
+	1040975933772931172: {'prize': '3 MIl', 'event': 'Daily Rumble'},
+	1042408506181025842: {'prize': '10 Mil', 'event': 'Weekly Rumble'},
 }	
 
 class Dump(commands.GroupCog, name="dump", description="dump data"):
