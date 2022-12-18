@@ -14,8 +14,10 @@ class serversettings(commands.GroupCog):
         self.bot = bot
         self.bot.joingate = Document(self.bot.db, "joingate")
         self.bot.joingate_cache = {}
+        self.bot.starboard = Document(self.bot.db, 'starboard')
     
     joingate = app_commands.Group(name="joingate", description="Commands to change joingate settings")
+    starboard = app_commands.Group(name="starboard", description="Commands to change starboard setting")
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -153,6 +155,56 @@ class serversettings(commands.GroupCog):
         embed.add_field(name="Log Channel", value=f"<#{data['joingate']['logchannel']}>")
         await interaction.response.send_message(embed=embed)
     
+    @starboard.command(name="show", description="Show the current starboard settings")
+    @app_commands.default_permissions(administrator=True)
+    async def starboard_show(self, interaction: discord.Interaction):
+        data = await self.bot.config.find(interaction.guild.id)
+        if data is None:
+            await interaction.response.send_message("Starboard is not enabled on this server")
+            return
+        embed = discord.Embed(color=discord.Color.green())
+        embed.add_field(name="Enabled", value=data["starboard"]["toggle"])
+        embed.add_field(name="Channel", value=f"<#{data['starboard']['channel']}>")
+        embed.add_field(name="Threshold", value=data["starboard"]["threshold"])
+        embed.add_field(name="selfstar", value=data["starboard"]["self_star"])
+        await interaction.response.send_message(embed=embed)
+    
+    @starboard.command(name="channel", description="Set the starboard channel")
+    @app_commands.default_permissions(administrator=True)
+    @app_commands.describe(channel="The channel to send starboard messages to")
+    async def starboard_channel(self, interaction: discord.Interaction, channel: discord.TextChannel):
+        data = await self.bot.config.find(interaction.guild.id)
+        if data is None:
+            await interaction.response.send_message("Starboard is not enabled on this server")
+            return
+        data["starboard"]["channel"] = channel.id
+        await self.bot.starboard.update(data)
+        await interaction.response.send_message(f"Starboard channel has been set to {channel.mention}")
+    
+    @starboard.command(name="threshold", description="Set the starboard threshold")
+    @app_commands.default_permissions(administrator=True)
+    @app_commands.describe(threshold="The amount of stars required to send a message to the starboard")
+    async def starboard_threshold(self, interaction: discord.Interaction, threshold: app_commands.Range[int, 1, 10]):
+        data = await self.bot.config.find(interaction.guild.id)
+        if data is None:
+            await interaction.response.send_message("Starboard is not enabled on this server")
+            return
+        data["starboard"]["threshold"] = threshold
+        await self.bot.starboard.update(data)
+        await interaction.response.send_message(f"Starboard threshold has been set to {threshold}")
+    
+    @starboard.command(name="selfstar", description="Toggle selfstar")
+    @app_commands.default_permissions(administrator=True)
+    @app_commands.describe(toggle="Whether or not to allow users to star their own messages")
+    async def starboard_selfstar(self, interaction: discord.Interaction, toggle: bool=False):
+        data = await self.bot.config.find(interaction.guild.id)
+        if data is None:
+            await interaction.response.send_message("Starboard is not enabled on this server")
+            return
+        data["starboard"]["self_star"] = toggle
+        await self.bot.starboard.update(data)
+        await interaction.response.send_message(f"Starboard selfstar has been set to {toggle}")
+
 class JoinGateBackEnd(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -262,6 +314,161 @@ class JoinGateBackEnd(commands.Cog):
             roles = [guild.get_role(role) for role in data["joingate"]["autorole"]]
             await member.edit(roles=roles, reason="joingate autorole")
 
+class Starboard_Backend(commands.Cog, name="Starboard", description="Starboard Module"):
+    def __init__(self, bot):
+        self.bot = bot
+    
+    @commands.Cog.listener()
+    async def on_ready(self):
+        print(f"{self.__class__.__name__} Cog has been loaded\n-----")
+    
+    @commands.Cog.listener()
+    async def on_raw_reaction_add(self, payload):
+        if not payload.guild_id:
+            return
+        if payload.guild_id != 785839283847954433:
+            return
+        if payload.emoji.name != "⭐":
+            return
+        if payload.message_id in self.bot.temp_star:
+            return        
+        config = await self.bot.config.find(payload.guild_id)
+        if not config:
+            return
+        if config['starboard']['toggle'] == False:
+            return
+        if payload.channel_id == config['starboard']['channel']:
+            return
+        try:
+            channel = self.bot.get_channel(payload.channel_id)
+            message = await channel.fetch_message(payload.message_id)
+        except discord.NotFound:
+            return
+        
+        reaction = []
+        for reactions in message.reactions:
+
+            if reactions.emoji == "⭐":
+                reaction = [user.id async for user in reactions.users()]
+                break
+        if len (reaction) == 0:
+            return
+
+        if config['starboard']['self_star'] == True:
+            pass
+        elif config['starboard']['self_star'] == False:
+            try:
+                del reaction[reaction.index(message.author.id)]
+            except ValueError:
+                pass
+
+        if len(reaction) > config['starboard']['threshold']:
+            data = {'_id': payload.message_id, 'channel': payload.channel_id, 'guild': payload.guild_id, 'author': message.author.id, 'message': message.content}
+            starboard_channel = self.bot.get_channel(config['starboard']['channel'])
+            if not starboard_channel:
+                return
+
+            already_starred = await self.bot.starboard.find(message.id)
+            if already_starred:
+                self.bot.temp_star.append(message.id)
+                try:
+                    starboard_message = await starboard_channel.fetch_message(already_starred['starboard_message'])
+                except discord.NotFound:
+                    await self.bot.starboard.delete(message.id)
+                
+                await starboard_message.edit(content=f"{message.channel.mention} | ⭐ {len(reaction)}")
+                self.bot.temp_star.remove(message.id)
+                return
+
+            try:
+                
+                self.bot.temp_star.append(message.id)
+                embed = discord.Embed()
+                embed.color = discord.Color.random()
+                if message.content:
+                    embed.description = message.content
+                embed.set_author(name=message.author.name, icon_url=message.author.avatar.url if message.author.avatar else message.author.default_avatar.url)
+                embed.set_footer(text=f"Message ID: {message.id}")
+                embed.timestamp = message.created_at
+                
+                if message.reference:
+                    reference = await message.channel.fetch_message(message.reference.message_id)
+                    if reference.content:
+                        embed.add_field(name="Reply", value=reference.content)
+                extra = []
+                if len(message.embeds) > 0:
+                    for membed in message.embeds:
+                        extra.append(membed)
+                
+                view = discord.ui.View()
+                view.add_item(discord.ui.Button(label="View Message", url=message.jump_url, style=discord.ButtonStyle.url))
+                extra.append(embed)
+
+                if message.attachments:
+                    iembed = discord.Embed()
+                    iembed.set_image(url=message.attachments[0].url)
+                    extra.append(iembed)
+                
+                starboard_message = await starboard_channel.send(content=f"{message.channel.mention} | ⭐ {len(reaction)}",embeds=extra, view=view)
+                data['starboard_message'] = starboard_message.id
+                await self.bot.starboard.insert(data)
+                self.bot.temp_star.remove(message.id)
+            except Exception as e:
+                print(e)
+        
+    @commands.Cog.listener()
+    async def on_raw_reaction_remove(self, payload):
+        if not payload.guild_id:
+            return
+        if payload.message_id in self.bot.temp_star:
+            return        
+        config = await self.bot.config.find(payload.guild_id)
+        if not config:
+            return
+        if config['starboard']['toggle'] == False:
+            return
+        if payload.channel_id == config['starboard']['channel']:
+            return
+        try:
+            channel = self.bot.get_channel(payload.channel_id)
+            message = await channel.fetch_message(payload.message_id)
+        except discord.NotFound:
+            return
+        
+        reaction = []
+        for reactions in message.reactions:
+            if reactions.emoji == "⭐":
+                reaction = [user.id async for user in reactions.users()]
+                break
+        if len (reaction) == 0:
+            return
+
+        if config['starboard']['self_star'] == True:
+            pass
+        elif config['starboard']['self_star'] == False:
+            try:
+                del reaction[reaction.index(message.author.id)]
+            except ValueError:
+                pass
+        
+        if len(reaction) >= config['starboard']['threshold']:
+            data = {'_id': payload.message_id, 'channel': payload.channel_id, 'guild': payload.guild_id, 'author': message.author.id, 'message': message.content}
+            starboard_channel = self.bot.get_channel(config['starboard']['channel'])
+            if not starboard_channel:
+                return
+
+            already_starred = await self.bot.starboard.find(message.id)
+            if already_starred:
+                self.bot.temp_star.append(message.id)
+                try:
+                    starboard_message = await starboard_channel.fetch_message(already_starred['starboard_message'])
+                except discord.NotFound:
+                    await self.bot.starboard.delete(message.id)
+                
+                await starboard_message.edit(content=f"{message.channel.mention} | ⭐ {len(reaction)}")
+                self.bot.temp_star.remove(message.id)   
+
 async def setup(bot):
     await bot.add_cog(serversettings(bot), guilds=[discord.Object(785839283847954433)])
     await bot.add_cog(JoinGateBackEnd(bot), guilds=[discord.Object(785839283847954433)])
+    await bot.add_cog(Starboard_Backend(bot), guilds=[discord.Object(785839283847954433)])

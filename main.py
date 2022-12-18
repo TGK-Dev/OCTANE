@@ -43,7 +43,6 @@ class Bot(commands.Bot):
         bot.bans = Document(bot.db, 'bans')
         bot.afk = Document(bot.db, 'afk')
         bot.mutes = Document(bot.db, 'mutes')
-        bot.starboard = Document(bot.db, 'starboard')
         bot.tickets = Document(bot.db, 'tickets')
         bot.warns = Document(bot.db, 'warns')
         bot.perms = Document(bot.db, 'perms')
