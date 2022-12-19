@@ -10,7 +10,7 @@ class Events(commands.Cog):
         self.bot = bot
         self.update_task = self.check_update_task.start()
         self.vote_remider_task = self.check_remiders.start()
-        # self.bot.tree.on_error = self.on_app_command_error
+        self.bot.tree.on_error = self.on_app_command_error
     
     def cog_unload(self):
         self.check_remiders.cancel()
