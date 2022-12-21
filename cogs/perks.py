@@ -543,6 +543,7 @@ class Custom(commands.GroupCog):
         await self.bot.autoreact.update(data)
         embed = discord.Embed(description="<:dynosuccess:1000349098240647188> | Set auto react emoji to {emoji}".format(emoji=emoji), color=discord.Color.green())
         await interaction.response.send_message(embed=embed)
+        self.bot.ar_cache[data['_id'] = data
 
 
 async def setup(bot):
