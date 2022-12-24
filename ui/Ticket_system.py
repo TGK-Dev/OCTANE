@@ -129,28 +129,32 @@ class Ticket_Control_Panel(discord.ui.View):
         if data is None:
             return await interaction.response.send_message("This channel is not a ticket channel.", ephemeral=True)
 
-        embed = discord.Embed(description="<a:loading:998834454292344842> | Saving ticket...", color=discord.Color.blurple())
+        embed = discord.Embed(description="<a:loading:998834454292344842> | Saving ticket...", color=discord.Color.yellow())
         await interaction.response.send_message(embed=embed, ephemeral=False)
 
-        transcript = await chat_exporter.export(interaction.channel, limit=None,tz_info="Asia/Kolkata")
-        if transcript is None:
-            return await interaction.edit_original_response("Failed to save ticket.")
-        
-        transcript_file = discord.File(io.BytesIO(transcript.encode()),filename=f"transcript-{interaction.channel.name}.html")
         transcript_log_channel = self.bot.get_channel(ticket_data["transcripts"])
-
-        if transcript_log_channel:
-            link_msg = await transcript_log_channel.send(content=f"{interaction.channel.name}",file=transcript_file)
-            link_button = discord.ui.View()
-            url = f"https://codebeautify.org/htmlviewer?url={link_msg.attachments[0].url}"
-            link_button.add_item(discord.ui.Button(label='View Transcript', url=url))
-            await link_msg.edit(view=link_button)
-
-        embed.description = "<:dynosuccess:1000349098240647188> | Ticket saved!\n<a:loading:998834454292344842> | Deleting ticket in 10 seconds send fs to cancel."
-        embed.color = discord.Color.green()
-        await interaction.edit_original_response(embed=embed)
+        mesaages = [message async for message in interaction.channel.history(limit=None)]
+        if transcript_log_channel:            
+            transcript_file = await chat_exporter.raw_export(
+                interaction.channel,
+                messages=mesaages,
+                tz_info="Asia/Kolkata",
+                guild=interaction.guild,
+                bot=self.bot,
+                fancy_times=True,
+                support_dev=False
+            )
+            transcript_file = discord.File(io.BytesIO(transcript_file.encode()), filename=f"{interaction.channel.name}.html")
+            embed.description = f"<:dynosuccess:1000349098240647188> | Ticket saved!\n<a:loading:998834454292344842> | Deleting ticket <t:{round((datetime.datetime.now()+ datetime.timedelta(seconds=15)).timestamp())}:R>"
+            embed.color = discord.Color.green()
+            await interaction.edit_original_response(embed=embed)
+            link_msg  = await transcript_log_channel.send(file=transcript_file)
+            link_ivew = discord.ui.View()
+            link_ivew.add_item(discord.ui.Button(label="Open transcript", style=discord.ButtonStyle.link, url=f"https://codebeautify.org/htmlviewer?url={link_msg.attachments[0].url}"))
+            await link_msg.edit(view=link_ivew)
+        
         try:
-            stop_m = await self.bot.wait_for("message", check=lambda m: m.author == interaction.user and m.content.lower() == "fs" and m.channel.id == interaction.channel.id, timeout=10)
+            await self.bot.wait_for("message", check=lambda m: m.author == interaction.user and m.content.lower() == "fs" and m.channel.id == interaction.channel.id, timeout=10)
             msg = await interaction.original_response()
             await msg.add_reaction("<:dynoError:1000351802702692442>")
             embed.description = "<:dynoError:1000351802702692442> | Cancelled."
@@ -159,7 +163,7 @@ class Ticket_Control_Panel(discord.ui.View):
             return
         except asyncio.TimeoutError:
             user_in_channel = {}
-            async for message in interaction.channel.history(limit=None):
+            for message in mesaages:
                 if message.author.id in user_in_channel.keys():
                     user_in_channel[message.author.id] += 1
                 else:
@@ -174,6 +178,14 @@ class Ticket_Control_Panel(discord.ui.View):
 
             log_message.embeds[0].add_field(name="Users in Ticket", value=users, inline=False)
             await log_message.edit(embed=log_message.embeds[0])
+            ticket_owner = interaction.guild.get_member(data['user'])
+            embed = discord.Embed(description="Your ticket has been successfully deleted by the support team.\nuse the below button to check the transcript of the ticket.", color=discord.Color.green())
+            embed.timestamp = datetime.datetime.utcnow()
+            try:
+                await ticket_owner.send(embed=embed, view=link_ivew)
+            except:
+                pass
+
             await interaction.channel.delete()
             log_embed = discord.Embed(title="Ticket deleted", description=f"{interaction.channel.name} Ticket deleted by {interaction.user.mention}")
             log_embed.timestamp = datetime.datetime.utcnow()
@@ -182,6 +194,7 @@ class Ticket_Control_Panel(discord.ui.View):
                 await log_channel.send(embed=log_embed)
 
             await self.bot.tickets.delete(interaction.channel.id)
+
 class Ticket_Control(discord.ui.View):
     def __init__(self, data: dict):
         super().__init__(timeout=None)
