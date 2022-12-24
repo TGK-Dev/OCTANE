@@ -120,21 +120,20 @@ class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
         await self.send_modlog(member, guild.me, f"Automatic mute expired made by {moderator.mention} ,<t:{round(data['UnMuteAt'].timestamp())}:R>", "Unmute", color=discord.Color.green())
         await self.bot.mutes.delete(member.id)
 
-    @commands.hybrid_command(name="slowmode", aliases=["sm"], description="Set slowmode for a channel", usage="<time>")
+    @app_commands.command(name="slowmode", description="Set slowmode for the channel")
     @app_commands.describe(time="Slowmod Time")
-    async def slowmode(self, ctx, time: TimeConverter=None):
-        if time is None:
-            await ctx.channel.edit(slowmode_delay=None)
-            embed = discord.Embed(description=f"<:allow:819194696874197004> | Removed slowmode from {ctx.channel.mention}",
-                                  color=0x2f3136)
-            return await ctx.send(embed=embed)
+    async def slowmode(self, interaction: discord.Interaction, time: app_commands.Transform[str, TimeConverter]=None):
+        if time < 0:
+            await interaction.channel.edit(slowmode_delay=0)
+            await interaction.response.send_message("Slowmode has been disabled", ephemeral=True)
+            await interaction.channel.send(embed=discord.Embed(description=f"<:octane_yes:1019957051721535618> | Slow mode has been disabled by in {interaction.channel.mention}", color=discord.Color.green()))
         elif time > 21600:
-            await ctx.send("Slowmode can't be more than 6 hours",ephemeral=True)
+            await interaction.response.send_message("Slowmode can't be more than 6 hours", ephemeral=True)
         else:
-            await ctx.channel.edit(slowmode_delay=time)
-            embed = discord.Embed(description=f"<:allow:819194696874197004> | Set slowmode to {format_timespan(time)}s in {ctx.channel.mention}",
-                                  color=0x2f3136)
-            return await ctx.send(embed=embed)
+            await interaction.channel.edit(slowmode_delay=time)
+            await interaction.response.send_message(f"Slowmode has been set to {format_timespan(time)} seconds", ephemeral=True)
+            await interaction.channel.send(embed=discord.Embed(description=f"<:octane_yes:1019957051721535618> | Slow mode has been set to {format_timespan(time)} to {interaction.channel.mention}", color=discord.Color.green()))
+
 
     @app_commands.command(name="ban", description="Ban a user")
     @app_commands.describe(reason="Reason for ban", time="Duration of ban", member="User to ban")

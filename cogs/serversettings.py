@@ -9,7 +9,7 @@ import unicodedata
 import re
 import datetime
 
-class serversettings(commands.GroupCog):
+class serversettings(commands.GroupCog, name="config", description="Commands to change server settings"):
     def __init__(self, bot):
         self.bot = bot
         self.bot.joingate = Document(self.bot.db, "joingate")

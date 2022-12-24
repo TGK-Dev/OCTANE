@@ -428,7 +428,6 @@ class Antinuke_Events(commands.Cog):
         await self.bot.wait_until_ready()
         self.bot.master_config = await self.bot.antinuke.find(785839283847954433)
         self.bot.qurantine = Document(self.bot.db, "qurantine")
-        print(self.bot.master_config)
         #self.role_lock_system = self.bot.master_config['role']['lock']
         print(f'{self.__class__.__name__} Cog has been loaded\n-----')
     

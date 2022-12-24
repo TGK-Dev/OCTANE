@@ -7,6 +7,7 @@ from utils.paginator import Paginator
 class Help(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.bot.slash_commands = {}
     
     async def command_auto_complete(self, interaction: discord.Interaction, current: str) -> List[app_commands.Choice[str]]:
         commands = interaction.client.tree.get_commands(guild=interaction.guild)

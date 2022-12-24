@@ -39,7 +39,6 @@ class Events(commands.Cog):
         else:
             embed = discord.Embed(description="**Error:** {}".format(error), color=discord.Color.red())
             try:
-                
                 await interaction.response.send_message(embed=embed)
             except:
                 await interaction.edit_original_response(embed=embed)
