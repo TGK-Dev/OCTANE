@@ -244,7 +244,7 @@ class Events(commands.Cog):
                             prize = re.sub(r"<:.+?:\d+>", "", prize[0])
                             prize = prize.strip()
 
-                            log_embed = discord.Embed(title="Server Events Payout", description=f"")
+                            log_embed = discord.Embed(title="Server Events Payout", description=f"",color=discord.Color.random())
                             log_embed.description += f"**Winner**: {winner[0]}\n"
                             log_embed.description += f"**Prize**: {prize}\n"
                             log_embed.description += f"**Paid by**: {command_message.interaction.user.mention}\n"
