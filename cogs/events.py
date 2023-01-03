@@ -248,7 +248,6 @@ class Events(commands.Cog):
 							log_embed.description += f"**Winner**: {winner[0]}\n"
 							log_embed.description += f"**Prize**: {prize}\n"
 							log_embed.description += f"**Paid by**: {command_message.interaction.user.mention}\n"
-							log_embed.description += f"**Message**: [Jump to Message]({command_message.jump_url})\n"
 							link_view = discord.ui.View()
 							link_view.add_item(discord.ui.Button(label="Go to Payout Message", url=command_message.jump_url))
 							log_channel = self.bot.get_channel(1059700323624701972)
