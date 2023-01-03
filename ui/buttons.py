@@ -91,7 +91,7 @@ class Payout_Buttton(discord.ui.View):
     
     @discord.ui.button(label="Payout", style=discord.ButtonStyle.green, custom_id="payout")
     async def payout(self, interaction: discord.Interaction, button: discord.ui.Button):
-        loadin_embed = discord.Embed(description="<a:loading:998834454292344842> | Makring payout...", color=discord.Color.blue())
+        loadin_embed = discord.Embed(description="<a:loading:998834454292344842> | Marking payout...", color=discord.Color.blue())
         await interaction.response.send_message(embed=loadin_embed, ephemeral=True)
 
         data = await interaction.client.payout.find(interaction.message.id)
