@@ -3,6 +3,7 @@ import datetime
 import discord
 from copy import deepcopy
 import asyncio
+import re
 from discord import app_commands
 
 class Events(commands.Cog):
@@ -220,6 +221,41 @@ class Events(commands.Cog):
             self.bot.current_votes.pop(vote['_id'])
         except KeyError:
             pass
+    
+    @commands.Cog.listener()
+    async def on_message(self, message):
+        if not message.guild or message.guild.id != 785839283847954433:
+            return
+
+        if not message.author.bot:
+            return
+        
+        if message.author.id == 270904126974590976:
+            if message.embeds:
+                embed = message.embeds[0]
+                if embed.description:
+                    if embed.description.startswith("Successfully paid") and embed.description.endswith("from the server's pool!"):
+                        command_message = await message.channel.fetch_message(message.reference.message_id)
+                        if command_message.interaction.name == "serverevents payout":
+                            command_embed = command_message.embeds[0].to_dict()
+                            winner = re.findall(r"<@!?\d+>", command_embed['description'])
+                            prize = re.findall(r"\*\*(.*?)\*\*", command_embed['description'])
+                            #remove any emoji from the prize
+                            prize = re.sub(r"<:.+?:\d+>", "", prize[0])
+                            prize = prize.strip()
+
+                            log_embed = discord.Embed(title="Server Events Payout", description=f"")
+                            log_embed.description += f"**Winner**: {winner[0]}\n"
+                            log_embed.description += f"**Prize**: {prize}\n"
+                            log_embed.description += f"**Paid by**: {command_message.interaction.user.mention}\n"
+                            log_embed.description += f"**Message**: [Jump to Message]({command_message.jump_url})\n"
+                            
+                            log_channel = self.bot.get_channel(1059700323624701972)
+                            await log_channel.send(embed=log_embed)
+                        
+#example of embed 
+#type 1 {'color': 3092790, 'type': 'rich', 'description': "Are you sure you want to pay <@488614633670967307> **⏣ 1** from the server's pool?", 'title': 'Pending Confirmation'}
+                
 
 async def setup(bot):
     await bot.add_cog(Events(bot))
