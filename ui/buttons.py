@@ -105,9 +105,16 @@ class Payout_Buttton(discord.ui.View):
         embed.add_field(name="Santioned By", value=f"**<:nat_reply_cont:1011501118163013634> {interaction.user.mention}**")
         button.disabled = True
         button.label = "Payout Successfully!"
+
         
+        winner_channel = interaction.client.get_channel(data['channel'])
+        winner_message = await winner_channel.fetch_message(data['winner_message_id'])
+        
+        view = discord.ui.View()
+        view.add_item(discord.ui.Button(label=f'Winner Message', url=f"{winner_message.jump_url}"))
+        view.add_item(discord.ui.Button(label=f'Payout Queue Message', url=f"{interaction.message.jump_url}"))
         success_embed = discord.Embed(description="<:octane_yes:1019957051721535618> | Payout Marked Successfully!", color=discord.Color.green())
-        await interaction.edit_original_response(embed=success_embed, view=None)
+        await interaction.edit_original_response(embed=success_embed, view=view)
         await interaction.message.edit(view=self, embed=embed, content=None)
         await interaction.client.payout.delete(data['_id'])
         
