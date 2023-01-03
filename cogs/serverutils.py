@@ -204,7 +204,7 @@ class Payout(commands.GroupCog, name="payout"):
 				embed.set_footer(text=f"Message ID: {winner_message.id}", icon_url=interaction.guild.icon.url)
 
 				msg = await payout_channel.send(embed=embed, content=f"{winner.mention}, you will be paid out in the next `24hrs`! \n> If not paid within the deadline claim from <#785901543349551104>.", view=Payout_Buttton())
-				frist_payout = msg 
+				first_payout = msg 
 				data = {
 					'_id': msg.id,
 					'channel': winner_message.channel.id,
@@ -228,7 +228,7 @@ class Payout(commands.GroupCog, name="payout"):
 			
 
 		link_view = discord.ui.View()
-		link_view.add_item(discord.ui.Button(label="Go to Payout-Queue", url=frist_payout.jump_url))
+		link_view.add_item(discord.ui.Button(label="Go to Payout-Queue", url=first_payout.jump_url))
 		finished_embed.description += f"\n**<:nat_reply_cont:1011501118163013634> Successfully queued {len(winners)}**"
 		await interaction.edit_original_response(embed=finished_embed, view=link_view)
 
