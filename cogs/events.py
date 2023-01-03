@@ -239,10 +239,14 @@ class Events(commands.Cog):
 						if command_message.interaction.name == "serverevents payout":
 							command_embed = command_message.embeds[0].to_dict()
 							winner = re.findall(r"<@!?\d+>", command_embed['description'])
-							prize = re.findall(r"\*\*(.*?)\*\*", command_embed['description'])
+							prize = re.findall(r"\*\*(.*?)\*\*", command_embed['description'])[0]
+							emojis = list(set(re.findall(":\w*:\d*", prize)))
 							#remove any emoji from the prize
-							prize = re.sub(r"<:.+?:\d+>", "", prize[0])
-							prize = prize.strip()
+							for emoji in emojis :
+								prize = prize.replace(emoji,"",100)
+							prize = prize.replace("<>","",100)
+							prize = prize.replace("<a>","",100)
+							prize = prize.replace("  "," ",100)
 
 							log_embed = discord.Embed(title="Server Events Payout", description=f"",color=discord.Color.random())
 							log_embed.description += f"**Winner**: {winner[0]}\n"
