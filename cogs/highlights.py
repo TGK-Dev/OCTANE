@@ -153,7 +153,10 @@ class Highlight_backend(commands.Cog, name="Votes",description="Server Vote coun
                     channel_member_ids = [member.id for member in message.channel.members]
                     if data['_id'] not in channel_member_ids:
                         return
-                    self.bot.dispatch("hl_trigger", message, data, msg)
+
+                    
+                    if data['last_trigger'] is None or (datetime.datetime.now() - data['last_trigger']).total_seconds() > 600:
+                        self.bot.dispatch("hl_trigger", message, data, msg)
     
     async def autoreactions(self, message: discord.Message):
         if message.author.bot: return
@@ -183,8 +186,11 @@ class Highlight_backend(commands.Cog, name="Votes",description="Server Vote coun
     @commands.Cog.listener()
     async def on_ready(self):
         all_hl = await self.bot.hightlights.get_all()
-        for hl in all_hl: self.bot.hl_chache[hl['_id']] = hl
-        for ar in await self.bot.autoreact.get_all(): 
+        for hl in all_hl: 
+            hl['last_trigger'] = None
+            self.bot.hl_chache[hl['_id']] = hl
+        for ar in await self.bot.autoreact.get_all():
+            if ar['emoji'] is None: continue
             self.bot.ar_cache[ar['_id']] = ar
 
         print(f"{self.__class__.__name__} Cog has been loaded")
