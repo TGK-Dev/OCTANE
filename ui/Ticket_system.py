@@ -148,7 +148,7 @@ class Ticket_Control_Panel(discord.ui.View):
             embed.description = f"<:dynosuccess:1000349098240647188> | Ticket saved!\n<a:loading:998834454292344842> | Deleting ticket <t:{round((datetime.datetime.now()+ datetime.timedelta(seconds=15)).timestamp())}:R>"
             embed.color = discord.Color.green()
             await interaction.edit_original_response(embed=embed)
-            link_msg  = await transcript_log_channel.send(file=transcript_file)
+            link_msg  = await transcript_log_channel.send(content = f"**Channel Name:** {interaction.channel.name}\n**User:** <@{data['user']}> (`{data['user']}`)", file=transcript_file, allowed_mentions=discord.AllowedMentions(users=False, roles=False, everyone=False))
             link_ivew = discord.ui.View()
             link_ivew.add_item(discord.ui.Button(label="Open transcript", style=discord.ButtonStyle.link, url=f"https://codebeautify.org/htmlviewer?url={link_msg.attachments[0].url}"))
             await link_msg.edit(view=link_ivew)
