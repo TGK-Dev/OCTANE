@@ -174,7 +174,7 @@ class Payout(commands.GroupCog, name="payout"):
 			msg = await payout_channel.send(embed=embed, content=f"{winner.mention}, you will be paid out in the next `24hrs`! \n> If not paid within the deadline claim from <#785901543349551104>.", view=Payout_Buttton())
 			data = {'_id': msg.id, 'channel' : message.channel.id, 'guild' : message.guild.id,'event': event,'winner': winner.id,'prize': prize,'set_by': "Automatic Payout System", 'winner_message_id': message.id}
 			await self.bot.payout.insert(data)
-			await message.channel.send(f"{winner.mention}, you prize has been queued for payout. Please wait for the payout to be processed. \n> If not paid within the deadline claim from <#785901543349551104>.")            
+			await message.channel.send(f"{winner.mention}, you prize has been queued for payout. Please wait for the payout to be processed. \n> If not paid within the deadline claim from <#785901543349551104>." , allowed_mentions=discord.AllowedMentions(users=False, roles=False, everyone=False))            
 	
 	@app_commands.command(name="set", description="Set dank related payouts")
 	@app_commands.describe(event="event name", message_id="winner message id", winners="winner of the event", prize="what did they win?")
