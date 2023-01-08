@@ -24,7 +24,6 @@ class CorssChat(commands.GroupCog, name="crosschat", description="utils commands
                 except Exception as e:
                     pass
 
-
     @commands.Cog.listener()
     async def on_ready(self):
         print(f"{self.__class__.__name__} Cog has been loaded\n-----")
@@ -167,4 +166,4 @@ class CorssChat(commands.GroupCog, name="crosschat", description="utils commands
 
 
 async def setup(bot):
-    await bot.add_cog(CorssChat(bot), guilds=[discord.Object(811037093715116072), discord.Object(785839283847954433)])
+    await bot.add_cog(CorssChat(bot), guilds=[discord.Object(785839283847954433)])

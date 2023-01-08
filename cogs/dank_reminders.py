@@ -193,7 +193,7 @@ class DankReminder(commands.GroupCog, name="dankreminder", description="Manage y
                     "last_guild": message.guild.id,
                     "enabled": True,
                     "reminded": False,
-                    "next_reminder": datetime.datetime.now() + datetime.timedelta(minutes=1),
+                    "next_reminder": datetime.datetime.now() + datetime.timedelta(seconds=44),
                     "last_reminder": None
                 }
                 await self.update_data(self, user, data)

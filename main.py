@@ -24,7 +24,7 @@ formatter = logging.Formatter('[{asctime}] [{levelname:<8}] {name}: {message}', 
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
-main_guilds = [785839283847954433, 811037093715116072]
+main_guilds = [785839283847954433]
 
 class Bot(commands.Bot):
     def __init__(self):
@@ -61,7 +61,7 @@ class Bot(commands.Bot):
         bot.eco_api = eco_client(bot.eco_toekn)
         
         for file in os.listdir('./cogs'):
-            if file.endswith('.py') and not file.startswith("_"):
+            if file.endswith('.py') and not file.startswith("_") and not file.startswith("crosschat"):
                 await bot.load_extension(f'cogs.{file[:-3]}')
 
 bot = Bot()
@@ -120,7 +120,6 @@ async def on_ready():
         bot.active_booster[active_booster['_id']] = active_booster
     
     await bot.tree.sync(guild=discord.Object(main_guilds[0]))
-    await bot.tree.sync(guild=discord.Object(main_guilds[1]))
     await bot.tree.sync(guild=discord.Object(988761284956799038))
     await bot.tree.sync()
 
