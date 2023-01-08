@@ -365,7 +365,7 @@ class Custom(commands.GroupCog):
             await interaction.response.send_message(embed=embed, ephemeral=True)
             data['friends'].remove(member.id)
         else:
-            if len(member.roles) >= len(data['friend_limit']):
+            if len(member.roles)-1 == data['friend_limit']:
                 return await interaction.response.send_message("You can't add role to this member because they have reached the limit of {}".format(data['friend_limit']), ephemeral=True)
             await member.add_roles(role)
             embed = discord.Embed(description="Successfully added custom role {} to {}".format(role.mention, member.mention), color=discord.Color.green())
