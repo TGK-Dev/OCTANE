@@ -28,4 +28,4 @@ stringcase==1.2.0
 Unidecode==1.3.6
 yarl==1.8.2
 youtube-dl==2021.12.17
-chat-exporter==2.5.0
+chat-exporter==2.5.1
