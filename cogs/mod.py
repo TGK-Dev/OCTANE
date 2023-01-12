@@ -302,7 +302,7 @@ class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
         embed = discord.Embed(description=f"Are you sure you want to remove {member.mention}'s warning with ID `{warn_id}` and reason `{warn['reason']}`?", color=0x2f3136)
         view = Confirm(interaction.user, 60)
         await interaction.response.send_message(embed=embed, view=view)
-        view.message = await interaction.original_message()
+        view.message = await interaction.original_response()
         await view.wait()
         if view.value:
             await self.bot.warns.delete({'_id': warn_id})
@@ -336,7 +336,7 @@ class Mod(commands.Cog, name="Moderation",description = "Moderation commands"):
         embed = discord.Embed(description=f"Are you sure you want to clear {member.mention}'s {len(data)} warnings?", color=0x2f3136)
         view = Confirm(interaction.user, 60)
         await interaction.response.send_message(embed=embed, view=view)
-        view.message = await interaction.original_message()
+        view.message = await interaction.original_response()
         await view.wait()
 
         if view.value:
