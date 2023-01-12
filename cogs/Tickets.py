@@ -273,7 +273,7 @@ class Panel(commands.GroupCog, name="panel", description="Manage Ticket system p
         
         view = Panel_edit(interaction, data, name)
         await interaction.response.send_message(embed=embed, view=view)
-        view.message = await interaction.original_message()
+        view.message = await interaction.original_response()
 
     @app_commands.command(name="list", description="list all ticket panels")
     @app_commands.default_permissions(administrator=True)
