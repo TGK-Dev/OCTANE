@@ -263,11 +263,9 @@ class JoinGateBackEnd(commands.Cog):
         if fail: return
 
         if data["joingate"]["decancer"]:
-            print('doing decancer')
+            if member.name.startswith("カ"): return
             if self.is_cancerous(member.display_name):
-                print('is cancerous')
                 new_nick = await self.nick_maker(member.guild, member.display_name)
-                
                 embed = discord.Embed(color=discord.Color.green(), title="Decancer", description="")
                 embed.description += f"**Offender:** {member.mention}\n"
                 embed.description += f"**Action:** Nickname Decancer\n"
@@ -275,13 +273,10 @@ class JoinGateBackEnd(commands.Cog):
                 embed.description += f"**Moderator:** {self.bot.user.mention}\n"
                 embed.set_footer(text=f"User ID: {member.id}")
                 embed.timestamp = datetime.datetime.utcnow()
-
-                #logchannel = member.guild.get_channel(data["joingate"]["logchannel"])
                 try:
                     await member.edit(nick=new_nick, reason="joingate decancer")
                 except:
                     return
-                #if logchannel: await logchannel.send(embed=embed)
 
     
     @commands.Cog.listener()
@@ -311,8 +306,15 @@ class JoinGateBackEnd(commands.Cog):
             if logchannel: await logchannel.send(embed=embed)
             return True
         else:
-            roles = [guild.get_role(role) for role in data["joingate"]["autorole"]]
-            await member.edit(roles=roles, reason="joingate autorole")
+            member = guild.get_member(member.id)
+            if not member: return
+            member_roles = [role for role in member.roles]
+            for role in data['joingate']['autorole']:
+                role = member.guild.get_role(role)
+                if role not in member_roles:
+                    member_roles.append(role)
+            if len(member_roles) > member.roles:
+                await member.edit(roles=member_roles, reason="joingate autorole")
 
 class Starboard_Backend(commands.Cog, name="Starboard", description="Starboard Module"):
     def __init__(self, bot):

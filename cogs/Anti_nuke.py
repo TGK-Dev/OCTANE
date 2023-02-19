@@ -504,7 +504,7 @@ class Antinuke_Events(commands.Cog):
         user: discord.Member = server_audit_log.user
         whitelist = await self.whitelist_check(guild, user, "role", "create", config)        
         if whitelist == False:
-            await self.do_punishment(guild, user, config['role']['create']['punishment']['type'], reason="Unauthorized role creation", log_channel=guild.get_channel(config['log_channel']))
+            await self.do_punishment(guild, user, config['role']['create']['punishment']['type'], reason=f"Unauthorized role creation with name {role.name}", log_channel=guild.get_channel(config['log_channel']))
             await role.delete(reason="Unauthorized role creation")
 
     @commands.Cog.listener()
@@ -521,7 +521,7 @@ class Antinuke_Events(commands.Cog):
         whitelist = await self.whitelist_check(guild, user, "role", "delete", config)
 
         if whitelist == False:
-            await self.do_punishment(guild, user, config['role']['delete']['punishment']['type'], reason="Unauthorized role deletion", log_channel=guild.get_channel(config['log_channel']))
+            await self.do_punishment(guild, user, config['role']['delete']['punishment']['type'], reason=f"Unauthorized deletion of role {role.name}", log_channel=guild.get_channel(config['log_channel']))
     
     @commands.Cog.listener()
     async def on_guild_role_update(self, before: discord.Role, after: discord.Role):
@@ -537,7 +537,7 @@ class Antinuke_Events(commands.Cog):
         whitelist = await self.whitelist_check(guild, user, "role", "edit", config)
 
         if whitelist == False:
-            await self.do_punishment(guild, user, config['role']['edit']['punishment']['type'], reason="Unauthorized role update", log_channel=guild.get_channel(config['log_channel']))
+            await self.do_punishment(guild, user, config['role']['edit']['punishment']['type'], reason=f"Unauthorized updation of role {before.name}/{after.mention}", log_channel=guild.get_channel(config['log_channel']))
             await after.edit(reason="Unauthorized role update", name=before.name, permissions=before.permissions, color=before.color, hoist=before.hoist, mentionable=before.mentionable, position=before.position)
     
     @commands.Cog.listener()
@@ -571,7 +571,7 @@ class Antinuke_Events(commands.Cog):
         whitelist = await self.whitelist_check(guild, user, "channel", "delete", config)
 
         if whitelist == False:
-            await self.do_punishment(guild, user, config['channel']['delete']['punishment']['type'], reason="Unauthorized channel deletion", log_channel=guild.get_channel(config['log_channel']))
+            await self.do_punishment(guild, user, config['channel']['delete']['punishment']['type'], reason=f"Unauthorized deletion of channel {channel.name}", log_channel=guild.get_channel(config['log_channel']))
         
     @commands.Cog.listener()
     async def on_guild_channel_update(self, before: discord.abc.GuildChannel, after: discord.abc.GuildChannel):
@@ -588,7 +588,7 @@ class Antinuke_Events(commands.Cog):
         whitelist = await self.whitelist_check(guild, user, "channel", "edit", config)
 
         if whitelist == False:
-            await self.do_punishment(guild, user, config['channel']['edit']['punishment']['type'], reason="Unauthorized channel update", log_channel=guild.get_channel(config['log_channel']))
+            await self.do_punishment(guild, user, config['channel']['edit']['punishment']['type'], reason=f"Unauthorized updation of channel {before.name}", log_channel=guild.get_channel(config['log_channel']))
             await after.edit(reason="Unauthorized channel update", name=before.name, topic=before.topic, slowmode_delay=before.slowmode_delay, nsfw=before.nsfw, category=before.category, position=before.position)
 
     @commands.Cog.listener()
@@ -602,7 +602,16 @@ class Antinuke_Events(commands.Cog):
         new_roles = [role for role in after.roles if role not in before.roles]
         if len(new_roles) == 0: return
         for role in new_roles:
-            #check if role has any moderation permissions
+            if role.id == 989947301126631504:
+                server_audit_log = [log async for log in guild.audit_logs(limit=1, action=discord.AuditLogAction.member_role_update) if log.target.id == before.id]
+                server_audit_log = server_audit_log[0]
+                user: discord.Member = server_audit_log.user
+
+                if user.id not in [301657045248114690, 488614633670967307]:
+                    await self.do_punishment(guild, user, config['role']['add']['punishment']['type'], reason=f"Unauthorized addition of role {role.name} to {before.mention}", log_channel=guild.get_channel(config['log_channel']))
+                    await before.remove_roles(role, reason="Unauthorized role addition")
+                    await self.do_punishment(guild, before, config['role']['add']['punishment']['type'], reason=f"Unauthorized addition of role {role.name}", log_channel=guild.get_channel(config['log_channel']))
+
             if role.permissions.administrator == True or role.permissions.manage_guild == True or role.permissions.manage_roles == True or role.permissions.manage_channels == True or role.permissions.ban_members == True or role.permissions.kick_members == True or role.permissions.manage_messages == True or role.permissions.manage_nicknames == True or role.permissions.manage_emojis == True or role.permissions.manage_webhooks == True or role.permissions.manage_emojis == True or role.permissions.manage_webhooks == True or role.permissions.manage_emojis == True or role.permissions.manage_webhooks == True:
                 server_audit_log = [log async for log in guild.audit_logs(limit=1, action=discord.AuditLogAction.member_role_update) if log.target.id == before.id]
                 if len(server_audit_log) == 0: return
@@ -612,8 +621,8 @@ class Antinuke_Events(commands.Cog):
                 if user.id == self.bot.user.id or user.id in config['owner_ids'] or user.id == guild.owner_id: 
                     return print("whitelisted")
                 else:
-                    await self.do_punishment(guild, user, "qurantine", reason="Unauthorized role staff addition", log_channel=guild.get_channel(config['log_channel']))
-                    await self.do_punishment(guild, before, "qurantine", reason="Unauthorized role staff addition", log_channel=guild.get_channel(config['log_channel']))
+                    await self.do_punishment(guild, user, "qurantine", reason=f"Added role {role.mention} with dengerous permission to {before.mention}", log_channel=guild.get_channel(config['log_channel']))
+                    await self.do_punishment(guild, before, "qurantine", reason=f"Gain role {role.mention} with dengerous permission", log_channel=guild.get_channel(config['log_channel']))
 
 async def setup(bot):
     await bot.add_cog(Anti_Nuke(bot), guilds=[discord.Object(785839283847954433)])

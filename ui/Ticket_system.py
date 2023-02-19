@@ -348,7 +348,7 @@ class Panel_edit(discord.ui.View):
         self.message = message
         self.name = name
     
-    @discord.ui.button(label="Roles Settings", style=discord.ButtonStyle.gray, emoji="<:mention:991734732188553337>", custom_id="EDIT:PANEL:ROLES")
+    @discord.ui.button(label="Roles Settings", style=discord.ButtonStyle.gray, emoji="<:role_mention:1063755251632582656>", custom_id="EDIT:PANEL:ROLES")
     async def edit_panel_roles(self, interaction: discord.Interaction, button: discord.ui.Button):
         modal = Ticket_Panel_Roles(interaction,self.name, self.data)
         default = [str(role) for role in self.data['panels'][self.name]['support_role']]

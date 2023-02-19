@@ -29,18 +29,18 @@ class Perks(commands.GroupCog):
     
     perks_give = Group(name="give", description="Give a special to user")
 
-    async def send_log(self, perk, given_by: discord.Member,user: discord.Member,expires: str, action: str, friends: int, color: discord.Color):
-        embed = discord.Embed(title="Perks Update", description="", color=color)
-        embed.description += f"**Perk:** {perk}\n"
-        embed.description += f"**User:** {user.mention} ({user.id})\n"
-        embed.description += f"**Given By:** {given_by.mention} ({given_by.id})\n"
-        embed.description += f"**Expires:** {expires}\n"
-        if friends: embed.description += f"**Friends:** {friends}\n"
-        embed.description += f"**Action:** {action}\n"
-        embed.timestamp = datetime.datetime.now()
-        embed.set_footer(text=f"ID: {user.id}")
-        log_channel = self.bot.get_channel(1060215919747543111)
-        await log_channel.send(embed=embed)
+    # async def send_log(self, perk, given_by: discord.Member,user: discord.Member,expires: str, action: str, friends: int, color: discord.Color):
+    #     embed = discord.Embed(title="Perks Update", description="", color=color)
+    #     embed.description += f"**Perk:** {perk}\n"
+    #     embed.description += f"**User:** {user.mention} ({user.id})\n"
+    #     embed.description += f"**Given By:** {given_by.mention} ({given_by.id})\n"
+    #     embed.description += f"**Expires:** {expires}\n"
+    #     if friends: embed.description += f"**Friends:** {friends}\n"
+    #     embed.description += f"**Action:** {action}\n"
+    #     embed.timestamp = datetime.datetime.now()
+    #     embed.set_footer(text=f"ID: {user.id}")
+    #     log_channel = self.bot.get_channel(1060215919747543111)
+    #     await log_channel.send(embed=embed)
 
     @perks_give.command(name="role", description="Give user an custom role perk")
     @app_commands.describe(user="User to give perks", friend_limit="Limit of friends can user add", expire="Expire time of perks leave it empty for permanent")
@@ -61,11 +61,12 @@ class Perks(commands.GroupCog):
             data['friend_limit'] = friend_limit
             data['given_by'] = interaction.user.id
             await self.bot.crole.insert(data)
-            await interaction.channel.send(f"{user.mention} Now can create custom role by using </custom role create:1013452052401225839> ")
+            await interaction.channel.send(f"{user.mention} Now can create custom role by using </custom role create:1013452052401225839>")
+            await interaction.response.send_message(f"Succesfully given {user.mention} a custom role perks", ephemeral=True)
         else:
-            await interaction.channel.send(f"{user.mention} already have a custom role", ephemeral=True)
+            await interaction.response.send_message(f"{user.mention} already have a custom role", ephemeral=True)
         
-        await self.send_log("Custom Role", interaction.user, user, expire, "Given", friend_limit, discord.Color.green())
+        #await self.send_log("Custom Role", interaction.user, user, expire, "Given", friend_limit, discord.Color.green())
 
 
     @perks_give.command(name="channel", description="Give user an custom channel perk")
@@ -88,11 +89,12 @@ class Perks(commands.GroupCog):
             data['given_by'] = interaction.user.id
 
             await self.bot.cchannel.insert(data)
-            await interaction.response.send_message(f"{user.mention} Now can create custom channel by using </custom channel create:1013452052401225839> ")
+            await interaction.response.send_message(f"Succesfully given {user.mention} a custom channel perks")
+            await interaction.chanenl.send(f"{user.mention} Now can create custom channel by using </custom channel create:1013452052401225839> ")
         else:
             await interaction.response.send_message(f"{user.mention} already have a custom channel", ephemeral=True)
         
-        await self.send_log("Custom Channel", interaction.user, user, expire, "Given", friend_limit, discord.Color.green())
+        #await self.send_log("Custom Channel", interaction.user, user, expire, "Given", friend_limit, discord.Color.green())
     
         
     @perks_give.command(name="autoreact", description="Give user an custom autoreact perk")
@@ -202,7 +204,7 @@ class Perks(commands.GroupCog):
             except KeyError:
                 pass
         
-        await self.send_log(perk, interaction.user, user, None, f"Cleared {perk}", None, discord.Color.red())
+        #await self.send_log(perk, interaction.user, user, None, f"Cleared {perk}", None, discord.Color.red())
         
 class Custom(commands.GroupCog):
     def __init__(self, bot):
@@ -260,7 +262,7 @@ class Custom(commands.GroupCog):
         await self.bot.crole.update(data)
         await interaction.edit_original_response(embed=discord.Embed(description="<:Toggle_on:1029771260114243584> ! Successfully created role {}".format(new_role.mention), color=discord.Color.green()))
 
-        await self.send_log("Custom Role", interaction.user, interaction.user, None, "Created", None, discord.Color.green())
+        #await self.send_log("Custom Role", interaction.user, interaction.user, None, "Created", None, discord.Color.green())
     
     @channel.command(name="create", description="Create a custom channel")
     @app_commands.describe(name="name of channel")
@@ -283,7 +285,7 @@ class Custom(commands.GroupCog):
         await self.bot.cchannel.update(data)
         await interaction.edit_original_response(embed=discord.Embed(description="<:Toggle_on:1029771260114243584> ! Successfully created Channel {}".format(channel.mention), color=discord.Color.green()))
 
-        await self.send_log("Custom Channel", interaction.user, interaction.user, None, "Created", None, discord.Color.green())
+        #await self.send_log("Custom Channel", interaction.user, interaction.user, None, "Created", None, discord.Color.green())
 
     @role.command(name="edit", description="Edit a custom role")
     @app_commands.describe(name="name of role", color="hex code of color", icon="icon of role")
@@ -318,7 +320,7 @@ class Custom(commands.GroupCog):
         
         await interaction.edit_original_response(embed=discord.Embed(description="<:Toggle_on:1029771260114243584> ! Successfully edited role {}".format(role.mention), color=discord.Color.green()))
 
-        await self.send_log("Custom Role", interaction.user, interaction.user, None, "Edited", None, discord.Color.green())
+        #await self.send_log("Custom Role", interaction.user, interaction.user, None, "Edited", None, discord.Color.green())
 
     
     @channel.command(name="edit", description="Edit a custom channel")
@@ -339,7 +341,7 @@ class Custom(commands.GroupCog):
         await channel.edit(name=name, reason="Custom Channel Perk edited by {}".format(interaction.user))
         await interaction.edit_original_response(embed=discord.Embed(description="<:Toggle_on:1029771260114243584> ! Successfully edited channel {}".format(channel.mention), color=discord.Color.green()))
 
-        await self.send_log("Custom Channel", interaction.user, interaction.user, None, "Edited", None, discord.Color.green())
+        #await self.send_log("Custom Channel", interaction.user, interaction.user, None, "Edited", None, discord.Color.green())
 
     
     @role.command(name="friend", description="add/remove your custom role to a friend")
@@ -373,7 +375,7 @@ class Custom(commands.GroupCog):
             data['friends'].append(member.id)
         
         await self.bot.crole.upsert(data)
-        await self.send_log("Custom Role", interaction.user, member, None, "Friend list updated", None, discord.Color.green())
+        #await self.send_log("Custom Role", interaction.user, member, None, "Friend list updated", None, discord.Color.green())
     
     @role.command(name="info", description="info about your custom role")
     async def info(self, interaction: Interaction):
@@ -427,7 +429,7 @@ class Custom(commands.GroupCog):
             embed.add_field(name="New Friends", value=",".join([f"<@{member}>" for member in data['friends']]))
             await interaction.response.edit_message(embed=embed, view=None)
         
-        await self.send_log("Custom Role", interaction.user, None, None, "Fixed Friends", None, discord.Color.green())
+        #await self.send_log("Custom Role", interaction.user, None, None, "Fixed Friends", None, discord.Color.green())
 
     
     @channel.command(name="friend", description="add/remove your custom channel to a friend")
@@ -460,7 +462,7 @@ class Custom(commands.GroupCog):
             data['friends'].append(member.id)
         
         await self.bot.cchannel.upsert(data)
-        await self.send_log("Custom Channel", interaction.user, None, None, "Friend List Updated", member, discord.Color.green())
+        #await self.send_log("Custom Channel", interaction.user, None, None, "Friend List Updated", member, discord.Color.green())
     
     @channel.command(name="info", description="show info about your custom channel")
     async def info(self, interaction: Interaction):
@@ -514,7 +516,7 @@ class Custom(commands.GroupCog):
         await msg.delete(reason=reason)
         await interaction.response.send_message(embed=discord.Embed(description="Deleted message", color=discord.Color.green()), ephemeral=False)
 
-        await self.send_log("Custom Channel", interaction.user, None, None, "Message Deleted", msg, discord.Color.green())
+        #await self.send_log("Custom Channel", interaction.user, None, None, "Message Deleted", msg, discord.Color.green())
 
     @autoreact.command(name="set", description="set a message to auto react")
     @app_commands.describe(emoji="emoji to react with must be from this server")
@@ -543,7 +545,7 @@ class Custom(commands.GroupCog):
         await interaction.response.send_message(embed=embed)
         self.bot.ar_cache[data['_id']] = data
     
-        await self.send_log("Auto React", interaction.user, None, None, "Emoji Set", emoji, discord.Color.green())
+        #await self.send_log("Auto React", interaction.user, None, None, "Emoji Set", emoji, discord.Color.green())
 
 async def setup(bot):
     await bot.add_cog(Perks(bot), guilds=[discord.Object(785839283847954433)])
