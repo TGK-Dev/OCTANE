@@ -359,20 +359,20 @@ class Panel_edit(discord.ui.View):
 
         await interaction.response.send_modal(modal)
     
-    @discord.ui.button(label="Info Settings", style=discord.ButtonStyle.gray, emoji="<:IconInsights:751160378800472186>", custom_id="EDIT:PANEL:INFO")
+    @discord.ui.button(label="Info Settings", style=discord.ButtonStyle.gray, emoji="<:settings:991733871118917683>", custom_id="EDIT:PANEL:INFO")
     async def edit_panel_info(self, interaction: discord.Interaction, button: discord.ui.Button):
         modal = Ticket_Panel_Info(interaction, self.name,self.data)
         modal.add_item(discord.ui.TextInput(label="Description", style=discord.TextStyle.paragraph, custom_id="PANEL:INFO:DESCRIPTION", default=self.data['panels'][self.name]['description'] if self.data['panels'][self.name]['description'] is not None else None, placeholder="Please state the description of the panel."))
         await interaction.response.send_modal(modal)
     
-    @discord.ui.button(label="Questions Settings", style=discord.ButtonStyle.gray, emoji="<:StageIconRequests:1005075865564106812>", custom_id="EDIT:PANEL:QUESTIONS")
+    @discord.ui.button(label="Questions Settings", style=discord.ButtonStyle.gray, emoji="<:settings:991733871118917683>", custom_id="EDIT:PANEL:QUESTIONS")
     async def edit_panel_questions(self, interaction: discord.Interaction, button: discord.ui.Button):
         modal = Ticket_Panel_Questions(interaction, self.data, self.name)
         modal.add_item(discord.ui.TextInput(label="Questions", style=discord.TextStyle.paragraph, custom_id="PANEL:QUESTIONS:QUESTIONS", default=self.data['panels'][self.name]['modal']['question'] if self.data['panels'][self.name]['modal']['question'] is not None else None, placeholder="Please state the questions you want to ask the user, seperated by a comma."))
         modal.add_item(discord.ui.TextInput(label="Answers type", style=discord.TextStyle.short, custom_id="PANEL:QUESTIONS:ANSWERS", placeholder="select from [short, paragraph]", default=self.data['panels'][self.name]['modal']['type']))
         await interaction.response.send_modal(modal)        
 
-    @discord.ui.button(label="Other Settings", style=discord.ButtonStyle.gray, emoji="<:ServerVerifiedSchoolHub:1005081309598711849>", custom_id="EDIT:PANEL:SETTINGS")
+    @discord.ui.button(label="Other Settings", style=discord.ButtonStyle.gray, emoji="<:settings:991733871118917683>", custom_id="EDIT:PANEL:SETTINGS")
     async def edit_panel_settings(self, interaction: discord.Interaction, button: discord.ui.Button):
         modal = Ticket_Panel_edit_Other(interaction, self.name, self.data)
         modal.add_item(discord.ui.TextInput(label="Emoji", style=discord.TextStyle.paragraph, custom_id="PANEL:SETTINGS:NAME", default=self.data['panels'][self.name]['emoji'] if self.data['panels'][self.name]['emoji'] is not None else None, placeholder="Please state the emoji you want to use for the panel."))
